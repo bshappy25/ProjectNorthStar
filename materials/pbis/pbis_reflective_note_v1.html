@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BSChapp PBIS Reflective Note v1</title>
 
+  <!-- PRINTESSA_BW compliant: black text, white background, no images -->
   <style>
     @page { size: Letter; margin: 0.75in; }
     html, body { background:#fff; color:#000; }
@@ -53,11 +54,17 @@
     }
     .small{ font-size: 11.8pt; }
 
-    .lines{ margin-top: 10px; }
+    .two-col{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .lines{ margin-top: 8px; }
     .line{
       border-bottom: 1.5px solid #000;
-      height: 0.5in;
-      margin: 0.16in 0;
+      height: 0.48in;
+      margin: 0.14in 0;
     }
 
     .choices label{
@@ -73,10 +80,18 @@
       margin-right: 10px;
     }
 
-    .two-col{
+    .rating{
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 12pt;
+    }
+    .pill{
+      border: 1.5px solid #000;
+      padding: 8px 8px;
+      text-align: center;
+      min-height: 42px;
     }
 
     .footer{
@@ -89,7 +104,7 @@
     .tag{
       border: 1.5px solid #000;
       padding: 8px 10px;
-      min-height: 44px;
+      min-height: 52px;
     }
 
     .no-print{ margin-top: 12px; font-size: 11.5pt; }
@@ -100,7 +115,7 @@
 <body>
   <div class="sheet">
 
-    <!-- ===== HEADER / STUDENT ID ===== -->
+    <!-- ===== HEADER ===== -->
     <div class="header">
       <div class="title">PBIS Reflective Note</div>
       <div class="meta">
@@ -110,61 +125,90 @@
       </div>
     </div>
 
-    <!-- ===== WHAT HAPPENED (NEUTRAL) ===== -->
+    <!-- ===== QUICK FACTS (neutral, non-punitive) ===== -->
     <div class="block">
-      <h2>1) What happened? (neutral)</h2>
-      <p class="small">Write what happened using facts. No blaming. No insults.</p>
+      <h2>1) What happened? (facts only)</h2>
+      <p class="small">Write what happened using facts. No blaming. Keep it short.</p>
       <div class="lines">
         <div class="line"></div>
         <div class="line"></div>
       </div>
     </div>
 
-    <!-- ===== IMPACT ===== -->
+    <!-- ===== PBIS 5 PARAMETERS ===== -->
     <div class="block">
-      <h2>2) What was the impact?</h2>
-      <div class="two-col">
-        <div>
-          <p class="small"><span class="label">On me:</span></p>
-          <div class="lines">
-            <div class="line"></div>
-          </div>
+      <h2>2) PBIS Check-In (5 Parameters)</h2>
+      <p class="small">For each one, check how you did <strong>today</strong>.</p>
+
+      <!-- Engage in Safety -->
+      <div style="margin-top:10px;">
+        <div class="label">A) Engage in Safety</div>
+        <div class="choices">
+          <label><span class="box"></span> I did it</label>
+          <label><span class="box"></span> I did it sometimes</label>
+          <label><span class="box"></span> Not yet</label>
         </div>
-        <div>
-          <p class="small"><span class="label">On others / learning:</span></p>
-          <div class="lines">
-            <div class="line"></div>
-          </div>
+      </div>
+
+      <!-- Learn to Earn -->
+      <div style="margin-top:10px;">
+        <div class="label">B) Learn to Earn</div>
+        <div class="choices">
+          <label><span class="box"></span> I did it</label>
+          <label><span class="box"></span> I did it sometimes</label>
+          <label><span class="box"></span> Not yet</label>
+        </div>
+      </div>
+
+      <!-- Do the Right Thing -->
+      <div style="margin-top:10px;">
+        <div class="label">C) Do the Right Thing</div>
+        <div class="choices">
+          <label><span class="box"></span> I did it</label>
+          <label><span class="box"></span> I did it sometimes</label>
+          <label><span class="box"></span> Not yet</label>
+        </div>
+      </div>
+
+      <!-- Placeholder -->
+      <div style="margin-top:10px;">
+        <div class="label">D) __________________________ (placeholder)</div>
+        <div class="choices">
+          <label><span class="box"></span> I did it</label>
+          <label><span class="box"></span> I did it sometimes</label>
+          <label><span class="box"></span> Not yet</label>
+        </div>
+      </div>
+
+      <!-- My Goal Point -->
+      <div style="margin-top:10px;">
+        <div class="label">E) My Goal Point (pick ONE)</div>
+        <div class="choices">
+          <label><span class="box"></span> Safety</label>
+          <label><span class="box"></span> Learning</label>
+          <label><span class="box"></span> Respect / Right Thing</label>
+          <label><span class="box"></span> Placeholder Goal</label>
         </div>
       </div>
     </div>
 
-    <!-- ===== SKILL / STRATEGY ===== -->
+    <!-- ===== NEXT TIME PLAN ===== -->
     <div class="block">
-      <h2>3) What could I try next time?</h2>
-      <p class="small">Choose one skill and write a plan.</p>
-
-      <div class="choices" aria-label="skills">
-        <label><span class="box"></span> Ask for help / break</label>
-        <label><span class="box"></span> Use calm words</label>
-        <label><span class="box"></span> Follow directions the first time</label>
-        <label><span class="box"></span> Keep hands and objects safe</label>
-        <label><span class="box"></span> Stay in my space</label>
-        <label><span class="box"></span> Other: __________________________</label>
-      </div>
-
-      <p class="small"><span class="label">My plan:</span> “Next time I will…”</p>
+      <h2>3) My plan (Next time I will…)</h2>
+      <p class="small">Write one action you will try. Keep it realistic.</p>
       <div class="lines">
         <div class="line"></div>
         <div class="line"></div>
       </div>
+
+      <p class="small"><span class="label">Help I can use:</span> ☐ break ☐ breathing ☐ ask for help ☐ calm words ☐ move seats ☐ other: __________</p>
     </div>
 
-    <!-- ===== REPAIR ===== -->
+    <!-- ===== REPAIR / RESTART ===== -->
     <div class="block">
-      <h2>4) How can I repair / restart?</h2>
+      <h2>4) Repair / Restart</h2>
       <p class="small">Pick one way to restart and move forward.</p>
-      <div class="choices" aria-label="repair">
+      <div class="choices">
         <label><span class="box"></span> Apologize (words or written)</label>
         <label><span class="box"></span> Fix the mess / return materials</label>
         <label><span class="box"></span> Re-do the task</label>
@@ -185,7 +229,7 @@
     </div>
 
     <div class="no-print">
-      <span class="label">Teacher note:</span> PRINTESSA_BW compliant. Reflection is skill-based, not punitive.
+      <span class="label">Teacher note:</span> PRINTESSA_BW compliant. Skill-based reflection. No tracking. Teacher-owned.
     </div>
 
   </div>
