@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BSChapp Worksheet v1</title>
+
+  <!-- PRINTESSA_BW compliant: black text, white background, no images -->
+  <style>
+    @page { size: Letter; margin: 0.75in; }
+    html, body { background:#fff; color:#000; }
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+      font-size: 13pt;
+      line-height: 1.45;
+      margin: 0;
+      padding: 0;
+    }
+    .sheet{ max-width: 7.0in; margin: 0 auto; }
+
+    .header{
+      border: 2px solid #000;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    .title{
+      font-size: 18pt;
+      font-weight: 900;
+      margin: 0 0 8px 0;
+    }
+    .meta{
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      font-size: 12pt;
+    }
+    .field{
+      border: 1.5px solid #000;
+      padding: 8px 10px;
+      min-height: 44px;
+    }
+    .label{ font-weight: 900; }
+
+    .tagrow{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 12pt;
+    }
+
+    .block{
+      border: 2px solid #000;
+      padding: 12px;
+      margin: 12px 0;
+      break-inside: avoid;
+    }
+    .block h2{
+      font-size: 15pt;
+      margin: 0 0 8px 0;
+      font-weight: 900;
+    }
+    .small{ font-size: 11.8pt; }
+
+    ul{ margin: 6px 0 0 18px; }
+    li{ margin: 4px 0; }
+
+    .lines{ margin-top: 10px; }
+    .line{
+      border-bottom: 1.5px solid #000;
+      height: 0.55in;
+      margin: 0.18in 0;
+    }
+
+    .choices label{
+      display: block;
+      margin: 6px 0;
+    }
+    .box{
+      display: inline-block;
+      width: 0.22in;
+      height: 0.22in;
+      border: 2px solid #000;
+      vertical-align: -3px;
+      margin-right: 10px;
+    }
+
+    .two-col{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .wordbank{
+      border: 1.5px solid #000;
+      padding: 10px;
+      margin-top: 8px;
+    }
+
+    .modelbox{
+      border: 2px solid #000;
+      height: 2.2in;
+      margin-top: 10px;
+    }
+
+    .no-print{ margin-top: 12px; font-size: 11.5pt; }
+    @media print{ .no-print{ display:none !important; } }
+  </style>
+</head>
+
+<body>
+  <div class="sheet">
+
+    <!-- ===== REQUIRED STUDENT ID BLOCK ===== -->
+    <div class="header">
+      <div class="title">Worksheet</div>
+      <div class="meta">
+        <div class="field"><span class="label">Student Name:</span> __________________________</div>
+        <div class="field"><span class="label">Date:</span> ____________</div>
+        <div class="field"><span class="label">Class / Period:</span> ____________</div>
+      </div>
+
+      <div class="tagrow">
+        <div class="field"><span class="label">Topic:</span> __________________________</div>
+        <div class="field"><span class="label">Standard Tags:</span> __________________________</div>
+      </div>
+    </div>
+
+    <!-- ===== DO NOW ===== -->
+    <div class="block">
+      <h2>Do Now (3–5 min)</h2>
+      <p><span class="label">Prompt:</span> Write one idea you already know about today’s topic.</p>
+      <div class="lines">
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+    </div>
+
+    <!-- ===== VOCAB ===== -->
+    <div class="block">
+      <h2>Vocabulary</h2>
+      <div class="two-col">
+        <div>
+          <p class="small"><span class="label">Term:</span> ____________________</p>
+          <p class="small"><span class="label">Meaning:</span> __________________________________</p>
+          <p class="small"><span class="label">Term:</span> ____________________</p>
+          <p class="small"><span class="label">Meaning:</span> __________________________________</p>
+        </div>
+        <div>
+          <p class="small"><span class="label">Term:</span> ____________________</p>
+          <p class="small"><span class="label">Meaning:</span> __________________________________</p>
+          <p class="small"><span class="label">Term:</span> ____________________</p>
+          <p class="small"><span class="label">Meaning:</span> __________________________________</p>
+        </div>
+      </div>
+
+      <div class="wordbank">
+        <span class="label">Word Bank (optional):</span>
+        __________________, __________________, __________________, __________________
+      </div>
+    </div>
+
+    <!-- ===== DIRECTIONS ===== -->
+    <div class="block">
+      <h2>Directions</h2>
+      <ol>
+        <li>Read each question carefully.</li>
+        <li>Use evidence or examples when you can.</li>
+        <li>Show your thinking.</li>
+      </ol>
+    </div>
+
+    <!-- ===== SECTION TYPE 1: SHORT ANSWER ===== -->
+    <div class="block">
+      <h2>Section A — Short Answer</h2>
+      <p><span class="label">A1.</span> Explain the main idea from today’s lesson in your own words.</p>
+      <div class="lines">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+
+      <p class="small"><span class="label">Sentence frame (optional):</span> The main idea is __________ because __________.</p>
+    </div>
+
+    <!-- ===== SECTION TYPE 2: MULTIPLE CHOICE ===== -->
+    <div class="block">
+      <h2>Section B — Multiple Choice</h2>
+      <p><span class="label">B1.</span> Which statement is best supported by evidence?</p>
+      <div class="choices">
+        <label><span class="box"></span> A. ________________________________</label>
+        <label><span class="box"></span> B. ________________________________</label>
+        <label><span class="box"></span> C. ________________________________</label>
+        <label><span class="box"></span> D. ________________________________</label>
+      </div>
+
+      <p class="small"><span class="label">Why?</span> Write one sentence explaining your choice.</p>
+      <div class="lines">
+        <div class="line"></div>
+      </div>
+    </div>
+
+    <!-- ===== SECTION TYPE 3: MODEL DRAW ===== -->
+    <div class="block">
+      <h2>Section C — Model / Diagram</h2>
+      <p>Draw a model or diagram that shows the idea. Add labels.</p>
+      <div class="modelbox"></div>
+      <p class="small" style="margin-top:10px;"><span class="label">Label:</span> ____________________________________________</p>
+    </div>
+
+    <!-- ===== EXIT TICKET (embedded) ===== -->
+    <div class="block">
+      <h2>Exit Ticket</h2>
+      <p><span class="label">Prompt:</span> What is one thing you understand better now?</p>
+      <div class="lines">
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+    </div>
+
+    <div class="no-print">
+      <span class="label">Teacher note:</span> This is a PRINTESSA_BW-compliant template.
+      Later, generators will populate sections based on worksheet.schema.json.
+    </div>
+
+  </div>
+</body>
+</html>
