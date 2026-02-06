@@ -1,1 +1,47 @@
+{
+  "artifact_type": "exit_ticket",
+  "version": "1.0",
+  "description": "Print-first exit ticket for quick evidence of student understanding. Teacher-owned. Admin-blind by default.",
 
+  "required_fields": {
+    "title": {
+      "type": "string",
+      "max_length": 100
+    },
+    "grade_level": {
+      "type": "string",
+      "allowed_values": ["5", "6", "7", "8", "MS"]
+    },
+    "standard_tags": {
+      "type": "array",
+      "items": "string",
+      "example": ["MS-ESS1-1", "MS-ESS2-4"]
+    },
+    "prompt": {
+      "type": "string",
+      "max_length": 500
+    },
+    "response_type": {
+      "type": "string",
+      "allowed_values": ["short_answer", "multiple_choice", "draw_model", "cer_claim"]
+    }
+  },
+
+  "print_profile": {
+    "default": "printessa_bw",
+    "options": ["printessa_bw", "printessa_large_font", "printessa_d75"]
+  },
+
+  "privacy_rules": {
+    "teacher_owned": true,
+    "admin_access": "explicit_only",
+    "analytics_allowed": false,
+    "evaluation_use": false
+  },
+
+  "fail_safe": {
+    "clock_it_code": "Clock-It-1234",
+    "trigger_condition": "unauthorized_monitoring_or_evaluation",
+    "action": "terminate_session"
+  }
+}
