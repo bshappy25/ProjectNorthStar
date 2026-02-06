@@ -1,0 +1,116 @@
+{
+  "artifact_type": "worksheet",
+  "version": "1.0",
+  "description": "Print-first student worksheet for NGSS learning activities. Built for reuse, chunking, and evidence collection. Teacher-owned. Admin-blind by default.",
+
+  "required_fields": {
+    "title": { "type": "string", "max_length": 120 },
+
+    "grade_level": {
+      "type": "string",
+      "allowed_values": ["5", "6", "7", "8", "MS"]
+    },
+
+    "topic": { "type": "string", "max_length": 80 },
+    "unit": { "type": "string", "max_length": 80 },
+
+    "standard_tags": {
+      "type": "array",
+      "items": "string",
+      "example": ["MS-ESS2-4", "MS-ESS1-2"]
+    },
+
+    "do_now": {
+      "type": "object",
+      "fields": {
+        "prompt": { "type": "string", "max_length": 300 },
+        "response_lines": { "type": "integer", "min": 1, "max": 6 }
+      }
+    },
+
+    "vocabulary": {
+      "type": "array",
+      "items": {
+        "term": "string",
+        "student_friendly_definition": "string"
+      },
+      "max_items": 10
+    },
+
+    "directions": {
+      "type": "array",
+      "items": "string",
+      "min_items": 1,
+      "max_items": 8
+    },
+
+    "sections": {
+      "type": "array",
+      "min_items": 1,
+      "max_items": 8,
+      "items": {
+        "section_title": "string",
+        "section_type": "string",
+        "allowed_section_types": [
+          "short_answer",
+          "multiple_choice",
+          "match",
+          "data_table",
+          "graph_prompt",
+          "model_draw",
+          "cer_frame",
+          "fill_in_blank",
+          "sorting"
+        ],
+        "items": "array",
+        "notes": "string"
+      }
+    },
+
+    "supports": {
+      "type": "object",
+      "fields": {
+        "sentence_frames": { "type": "array", "items": "string", "max_items": 6 },
+        "word_bank": { "type": "array", "items": "string", "max_items": 20 },
+        "visual_cues_allowed": { "type": "boolean" }
+      }
+    },
+
+    "exit_ticket": {
+      "type": "object",
+      "fields": {
+        "prompt": { "type": "string", "max_length": 500 },
+        "response_type": {
+          "type": "string",
+          "allowed_values": ["short_answer", "multiple_choice", "draw_model", "cer_claim"]
+        }
+      }
+    },
+
+    "answer_key": {
+      "type": "object",
+      "fields": {
+        "included": { "type": "boolean" },
+        "format": { "type": "string", "allowed_values": ["separate_page", "separate_file", "none"] }
+      }
+    }
+  },
+
+  "print_profile": {
+    "default": "printessa_bw",
+    "options": ["printessa_bw", "printessa_large_font", "printessa_d75"]
+  },
+
+  "privacy_rules": {
+    "teacher_owned": true,
+    "admin_access": "explicit_only",
+    "analytics_allowed": false,
+    "evaluation_use": false
+  },
+
+  "fail_safe": {
+    "clock_it_code": "Clock-It-1234",
+    "trigger_condition": "unauthorized_monitoring_or_evaluation",
+    "action": "terminate_session"
+  }
+}
