@@ -1,30 +1,33 @@
 """
-BSChapp — v1 Streamlit App
+BSChapp — v1 Streamlit App (Mobile-safe)
 Teacher-first. Print-first. Admin-blind.
 
-v1 additions:
-- Optional signature
-- Signature rendered top-right on all generated documents
-- Mobile-safe downloads (works better in Safari + in-app browsers)
-- No storage, no tracking, no identity enforcement
+- Optional signature (top-right)
+- Mobile download buttons (works in Safari + in-app browsers)
+- Template path auto-resolve (materials/ OR materials/materials/)
+- Offline editor download button (if offline_editor.html exists)
+- No AI. No analytics. No accounts.
 """
 
 import os
+from pathlib import Path
 from datetime import date
 import streamlit as st
 
+
 # =====================
-# CONFIG
+# PATHS
 # =====================
-TEMPLATES = {
+REPO_ROOT = Path(__file__).resolve().parents[1]  # project root
+OUTPUT_DIR = REPO_ROOT / "generated_artifacts"
+
+TEMPLATES_RAW = {
     "Exit Ticket": "materials/exit_tickets/exit_ticket_v1.html",
     "Worksheet": "materials/worksheets/worksheet_v1.html",
     "Lesson Plan": "materials/lesson_plans/lesson_plan_v1.html",
     "PBIS Reflective Note": "materials/pbis/pbis_reflective_note_v1.html",
     "Photo Evidence": "materials/evidence/photo_evidence_v1.html",
 }
-
-OUTPUT_DIR = "generated_artifacts"
 
 SIGNATURE_HTML = """
 <div style="
@@ -40,51 +43,86 @@ SIGNATURE_HTML = """
 </div>
 """
 
+
 # =====================
 # HELPERS
 # =====================
-def ensure_dir(path: str) -> None:
-    if not os.path.exists(path):
-        os.makedirs(path)
+def ensure_dir(dirpath: Path) -> None:
+    dirpath.mkdir(parents=True, exist_ok=True)
 
-def load_template(path: str) -> str:
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
+def resolve_template_path(rel_path: str) -> Path:
+    """
+    Supports both:
+      materials/...
+      materials/materials/...
+    """
+    p1 = REPO_ROOT / rel_path
+    if p1.exists():
+        return p1
 
-def save_output(content: str, out_path: str) -> None:
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(content)
+    # auto-try double materials
+    if rel_path.startswith("materials/"):
+        p2 = REPO_ROOT / ("materials/" + rel_path)
+        if p2.exists():
+            return p2
 
-def inject_signature(html: str, signature: str) -> str:
-    if not signature:
-        return html
-    signature_block = SIGNATURE_HTML.format(signature=signature)
-    return html.replace("<body>", f"<body>\n{signature_block}", 1)
+    return p1  # return primary for error messaging
+
+def load_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+def save_text(path: Path, content: str) -> None:
+    path.write_text(content, encoding="utf-8")
 
 def populate_safe_fields(html: str, title: str = "", standards: str = "") -> str:
-    # Safe, minimal fill: first two blank slots only
+    # Safe, minimal fill: first two occurrences only
     html = html.replace("__________________________", title or "__________________________", 1)
     html = html.replace("__________________________", standards or "__________________________", 1)
     return html
 
-def generate_files(selected, title: str, standards: str, signature: str):
-    today = date.today().isoformat()
+def inject_signature(html: str, signature: str) -> str:
+    if not signature:
+        return html
+    sig = SIGNATURE_HTML.format(signature=signature)
+    return html.replace("<body>", f"<body>\n{sig}", 1)
+
+def generate_files(selected_names, title: str, standards: str, signature: str):
     ensure_dir(OUTPUT_DIR)
+    today = date.today().isoformat()
     outputs = []
 
-    for name in selected:
-        template_path = TEMPLATES[name]
-        html = load_template(template_path)
+    for display_name in selected_names:
+        rel = TEMPLATES_RAW[display_name]
+        template_path = resolve_template_path(rel)
+
+        if not template_path.exists():
+            raise FileNotFoundError(
+                f"Missing template: {rel}\nTried: {template_path}"
+            )
+
+        html = load_text(template_path)
         html = populate_safe_fields(html, title, standards)
         html = inject_signature(html, signature)
 
-        filename = f"{name.replace(' ', '_').lower()}_{today}.html"
-        out_path = os.path.join(OUTPUT_DIR, filename)
-        save_output(html, out_path)
-
+        filename = f"{display_name.replace(' ', '_').lower()}_{today}.html"
+        out_path = OUTPUT_DIR / filename
+        save_text(out_path, html)
         outputs.append(out_path)
 
     return outputs
+
+def find_offline_editor() -> Path | None:
+    # Try a few common locations
+    candidates = [
+        REPO_ROOT / "offline_editor.html",
+        REPO_ROOT / "materials" / "offline_editor.html",
+        REPO_ROOT / "python_hubs" / "offline_editor.html",
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return None
+
 
 # =====================
 # STREAMLIT UI
@@ -105,74 +143,73 @@ st.markdown(
 
 st.divider()
 
+# ---------- OFFLINE MODE ----------
+st.markdown("### Offline Mode (NYC subway-safe)")
+st.caption("Download once. Use with no service. Then come back online to sign + download.")
+
+offline_path = find_offline_editor()
+if offline_path:
+    st.download_button(
+        label="Download Offline Editor (HTML)",
+        data=load_text(offline_path),
+        file_name="offline_editor.html",
+        mime="text/html",
+        use_container_width=True
+    )
+else:
+    st.info("Offline editor not found yet. Add `offline_editor.html` at the repo root to enable this button.")
+
+st.divider()
+
 # ---------- INPUTS ----------
 lesson_title = st.text_input("Lesson / Topic Title (optional)")
 standard_tags = st.text_input("Standard Tags (optional)")
-
-signature = st.text_input(
-    "Signature (optional)",
-    placeholder="Your name, initials, or leave blank"
-)
+signature = st.text_input("Signature (optional)", placeholder="Your name, initials, or leave blank")
 st.caption("Signature appears top-right on all generated documents (cosmetic only).")
 
 st.divider()
 
-# ---------- MATERIAL SELECT ----------
+# ---------- SELECT ----------
 st.markdown("### Select materials to generate")
 st.caption("Most teachers generate all of these daily.")
-
-selected_templates = st.multiselect(
-    "",
-    list(TEMPLATES.keys()),
-    default=list(TEMPLATES.keys())
-)
+selected_templates = st.multiselect("", list(TEMPLATES_RAW.keys()), default=list(TEMPLATES_RAW.keys()))
 
 st.divider()
 
 # ---------- GENERATE ----------
 if st.button("Generate Materials"):
-    if not selected_templates:
-        st.warning("Select at least one material.")
-    else:
-        outputs = generate_files(
-            selected_templates,
-            lesson_title.strip(),
-            standard_tags.strip(),
-            signature.strip()
-        )
+    try:
+        if not selected_templates:
+            st.warning("Select at least one material.")
+        else:
+            outputs = generate_files(
+                selected_templates,
+                lesson_title.strip(),
+                standard_tags.strip(),
+                signature.strip()
+            )
 
-        st.success("Materials generated!")
+            st.success("Materials generated!")
 
-        # Mobile/in-app browser advice
-        st.warning(
-            "If you opened this inside Facebook/Messenger: tap ••• and choose **Open in Safari/Chrome** for best printing."
-        )
+            st.warning(
+                "If you opened this inside Facebook/Messenger: tap ••• → **Open in Safari/Chrome** for best printing."
+            )
 
-        st.markdown("### Download your files (mobile-safe)")
-        for path in outputs:
-            filename = os.path.basename(path)
-
-            # Show just the filename (cleaner than server path)
-            st.code(filename, language="text")
-
-            # Download button = best behavior on iPhone + in-app browsers
-            with open(path, "r", encoding="utf-8") as f:
+            st.markdown("### Download your files (mobile-safe)")
+            for p in outputs:
+                st.code(p.name, language="text")
                 st.download_button(
-                    label=f"Download {filename}",
-                    data=f.read(),
-                    file_name=filename,
+                    label=f"Download {p.name}",
+                    data=load_text(p),
+                    file_name=p.name,
                     mime="text/html",
                     use_container_width=True
                 )
 
-        st.info(
-            "After downloading, open the HTML file → Share → Print (Letter). "
-            "Signature is cosmetic only and not stored."
-        )
+            st.info("After downloading: open the HTML → Share → Print (Letter).")
+    except Exception as e:
+        st.error("Generation failed.")
+        st.exception(e)
 
 st.divider()
-
-st.caption(
-    "BSChapp v1 • Teacher-First • Print-First • Admin-Blind\n"
-    "No AI • No analytics • No accounts"
-)
+st.caption("BSChapp v1 • Teacher-First • Print-First • Admin-Blind • No AI • No analytics • No accounts")
