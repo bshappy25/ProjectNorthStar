@@ -78,7 +78,9 @@ st.divider()
 lesson_title = st.text_input("Lesson / Topic Title (optional)")
 standard_tags = st.text_input("Standard Tags (optional)")
 
-st.markdown("### Select materials to generate:")
+st.markdown("### Select materials to generate")
+st.caption("Most teachers generate all of these daily.")
+
 selected_templates = st.multiselect(
     "",
     list(TEMPLATES.keys()),
