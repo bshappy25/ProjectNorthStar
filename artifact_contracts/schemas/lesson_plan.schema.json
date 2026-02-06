@@ -1,0 +1,120 @@
+{
+  "artifact_type": "lesson_plan",
+  "version": "1.0",
+  "description": "Teacher-first NGSS-aligned lesson plan. Built for speed, reuse, and print-ready documentation. Teacher-owned. Admin-blind by default.",
+
+  "required_fields": {
+    "title": { "type": "string", "max_length": 120 },
+
+    "grade_level": {
+      "type": "string",
+      "allowed_values": ["5", "6", "7", "8", "MS"]
+    },
+
+    "unit": { "type": "string", "max_length": 80 },
+    "lesson_number": { "type": "string", "max_length": 20 },
+
+    "time_minutes": { "type": "integer", "min": 10, "max": 180 },
+
+    "standard_tags": {
+      "type": "array",
+      "items": "string",
+      "example": ["MS-ESS2-4", "MS-ETS1-2"]
+    },
+
+    "objective_teacher": { "type": "string", "max_length": 240 },
+    "objective_student": { "type": "string", "max_length": 200 },
+
+    "do_now": { "type": "string", "max_length": 500 },
+
+    "materials": {
+      "type": "array",
+      "items": "string",
+      "max_items": 25
+    },
+
+    "vocabulary": {
+      "type": "array",
+      "items": "string",
+      "max_items": 12
+    },
+
+    "procedure": {
+      "type": "array",
+      "items": {
+        "step": "string",
+        "minutes": "integer",
+        "teacher_moves": "string",
+        "student_actions": "string"
+      },
+      "min_items": 3,
+      "max_items": 20
+    },
+
+    "checks_for_understanding": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "prompt": "string",
+        "evidence_collected": "string"
+      },
+      "min_items": 1,
+      "max_items": 6
+    },
+
+    "differentiation": {
+      "type": "object",
+      "fields": {
+        "supports": { "type": "array", "items": "string", "max_items": 12 },
+        "accommodations": { "type": "array", "items": "string", "max_items": 12 },
+        "extensions": { "type": "array", "items": "string", "max_items": 8 }
+      }
+    },
+
+    "exit_ticket": {
+      "type": "object",
+      "fields": {
+        "prompt": { "type": "string", "max_length": 500 },
+        "response_type": {
+          "type": "string",
+          "allowed_values": ["short_answer", "multiple_choice", "draw_model", "cer_claim"]
+        }
+      }
+    },
+
+    "evidence_artifacts": {
+      "type": "array",
+      "items": "string",
+      "example": ["Exit Ticket", "CER paragraph", "Model drawing", "Data table", "Small-group checklist"],
+      "min_items": 1,
+      "max_items": 8
+    },
+
+    "teacher_reflection": {
+      "type": "object",
+      "fields": {
+        "what_worked": { "type": "string", "max_length": 500 },
+        "what_to_adjust": { "type": "string", "max_length": 500 },
+        "notes_next_time": { "type": "string", "max_length": 500 }
+      }
+    }
+  },
+
+  "print_profile": {
+    "default": "printessa_bw",
+    "options": ["printessa_bw", "printessa_large_font", "printessa_d75"]
+  },
+
+  "privacy_rules": {
+    "teacher_owned": true,
+    "admin_access": "explicit_only",
+    "analytics_allowed": false,
+    "evaluation_use": false
+  },
+
+  "fail_safe": {
+    "clock_it_code": "Clock-It-1234",
+    "trigger_condition": "unauthorized_monitoring_or_evaluation",
+    "action": "terminate_session"
+  }
+}
