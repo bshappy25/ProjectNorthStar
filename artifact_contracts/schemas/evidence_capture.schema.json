@@ -1,0 +1,75 @@
+{
+  "artifact_type": "evidence_capture",
+  "version": "1.0",
+  "description": "Teacher-first evidence capture container for student work. Print-first, attach-photo-friendly, admin-blind by default.",
+
+  "required_fields": {
+    "title": { "type": "string", "max_length": 120 },
+
+    "student_name": { "type": "string", "max_length": 80 },
+    "date": { "type": "string", "format": "YYYY-MM-DD" },
+    "class_period": { "type": "string", "max_length": 20 },
+
+    "artifact_kind": {
+      "type": "string",
+      "allowed_values": [
+        "worksheet",
+        "exit_ticket",
+        "lab",
+        "model",
+        "cer",
+        "project",
+        "assessment",
+        "photo_evidence",
+        "observation_note"
+      ]
+    },
+
+    "standard_tags": {
+      "type": "array",
+      "items": "string",
+      "example": ["MS-ESS2-4"],
+      "max_items": 6
+    },
+
+    "objective_student": { "type": "string", "max_length": 200 },
+
+    "evidence_summary_teacher": { "type": "string", "max_length": 500 },
+
+    "photo_attachment": {
+      "type": "object",
+      "fields": {
+        "included": { "type": "boolean" },
+        "source": { "type": "string", "allowed_values": ["iphone_photo", "jpeg", "png", "none"] },
+        "notes": { "type": "string", "max_length": 200 }
+      }
+    },
+
+    "quick_rubric": {
+      "type": "object",
+      "fields": {
+        "used": { "type": "boolean" },
+        "levels": { "type": "array", "items": "string", "max_items": 4 },
+        "selected_level": { "type": "integer", "min": 0, "max": 3 }
+      }
+    }
+  },
+
+  "print_profile": {
+    "default": "printessa_bw",
+    "options": ["printessa_bw", "printessa_large_font", "printessa_d75"]
+  },
+
+  "privacy_rules": {
+    "teacher_owned": true,
+    "admin_access": "explicit_only",
+    "analytics_allowed": false,
+    "evaluation_use": false
+  },
+
+  "fail_safe": {
+    "clock_it_code": "Clock-It-1234",
+    "trigger_condition": "evidence_used_to_score_or_monitor_teachers",
+    "action": "terminate_session"
+  }
+}
