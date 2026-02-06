@@ -1,14 +1,20 @@
 """
-BSChapp — Phase 1 Streamlit UI
-Teacher-first demo.
-No AI. No analytics. No admin logic.
+BSChapp — v1 Streamlit App
+Teacher-first. Print-first. Admin-blind.
+
+v1 additions:
+- Optional signature
+- Signature rendered top-right on all generated documents
+- No storage, no tracking, no identity enforcement
 """
 
 import os
 from datetime import date
 import streamlit as st
 
-# ===== CONFIG =====
+# =====================
+# CONFIG
+# =====================
 TEMPLATES = {
     "Exit Ticket": "materials/exit_tickets/exit_ticket_v1.html",
     "Worksheet": "materials/worksheets/worksheet_v1.html",
@@ -19,7 +25,22 @@ TEMPLATES = {
 
 OUTPUT_DIR = "generated_artifacts"
 
-# ===== HELPERS =====
+SIGNATURE_HTML = """
+<div style="
+  position:fixed;
+  top:0.5in;
+  right:0.6in;
+  font-size:11.5pt;
+  font-weight:700;
+  color:#2F5BEA;
+">
+  ✍️ {signature}
+</div>
+"""
+
+# =====================
+# HELPERS
+# =====================
 def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
@@ -32,13 +53,18 @@ def save_output(content, out_path):
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(content)
 
-def populate_safe_fields(content, title="", standards=""):
-    # Only touch the first two placeholder lines (safe fields)
-    content = content.replace("__________________________", title or "__________________________", 1)
-    content = content.replace("__________________________", standards or "__________________________", 1)
-    return content
+def inject_signature(html, signature):
+    if not signature:
+        return html
+    signature_block = SIGNATURE_HTML.format(signature=signature)
+    return html.replace("<body>", f"<body>\n{signature_block}", 1)
 
-def generate_files(selected, title, standards):
+def populate_safe_fields(html, title="", standards=""):
+    html = html.replace("__________________________", title or "__________________________", 1)
+    html = html.replace("__________________________", standards or "__________________________", 1)
+    return html
+
+def generate_files(selected, title, standards, signature):
     today = date.today().isoformat()
     ensure_dir(OUTPUT_DIR)
     outputs = []
@@ -46,7 +72,8 @@ def generate_files(selected, title, standards):
     for name in selected:
         template_path = TEMPLATES[name]
         html = load_template(template_path)
-        html = populate_safe_fields(html, title=title, standards=standards)
+        html = populate_safe_fields(html, title, standards)
+        html = inject_signature(html, signature)
 
         filename = f"{name.replace(' ', '_').lower()}_{today}.html"
         out_path = os.path.join(OUTPUT_DIR, filename)
@@ -55,14 +82,16 @@ def generate_files(selected, title, standards):
 
     return outputs
 
-# ===== STREAMLIT UI =====
+# =====================
+# STREAMLIT UI
+# =====================
 st.set_page_config(
-    page_title="BSChapp — Teacher Material Generator",
+    page_title="BSChapp v1",
     layout="centered"
 )
 
 st.title("🧩 BSChapp")
-st.subheader("Teacher-First Material Generator (Phase 1)")
+st.subheader("Teacher-First Material Generator")
 
 st.markdown(
     """
@@ -75,9 +104,20 @@ st.markdown(
 
 st.divider()
 
+# ---------- INPUTS ----------
 lesson_title = st.text_input("Lesson / Topic Title (optional)")
 standard_tags = st.text_input("Standard Tags (optional)")
 
+signature = st.text_input(
+    "Signature (optional)",
+    placeholder="Your name, initials, or leave blank"
+)
+
+st.caption("Signature appears top-right on all generated documents.")
+
+st.divider()
+
+# ---------- MATERIAL SELECT ----------
 st.markdown("### Select materials to generate")
 st.caption("Most teachers generate all of these daily.")
 
@@ -89,6 +129,7 @@ selected_templates = st.multiselect(
 
 st.divider()
 
+# ---------- GENERATE ----------
 if st.button("Generate Materials"):
     if not selected_templates:
         st.warning("Select at least one material.")
@@ -96,7 +137,8 @@ if st.button("Generate Materials"):
         outputs = generate_files(
             selected_templates,
             lesson_title.strip(),
-            standard_tags.strip()
+            standard_tags.strip(),
+            signature.strip()
         )
 
         st.success("Materials generated!")
@@ -105,13 +147,13 @@ if st.button("Generate Materials"):
             st.code(path, language="text")
 
         st.info(
-            "Open a file → Print (Letter, B/W). "
-            "These are safe, Phase-1 demo outputs."
+            "Open a file → Print (Letter, B/W).\n"
+            "Signature is cosmetic only and not stored."
         )
 
 st.divider()
 
 st.caption(
-    "BSChapp • Teacher-First • Print-First • Admin-Blind by Default\n"
-    "Phase 1 demo — no AI, no analytics, no storage."
+    "BSChapp v1 • Teacher-First • Print-First • Admin-Blind\n"
+    "No AI • No analytics • No accounts"
 )
