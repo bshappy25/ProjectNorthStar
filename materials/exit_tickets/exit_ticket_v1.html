@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BSChapp Exit Ticket v1</title>
+
+  <!-- PRINTESSA_BW compliant: black text, white background, no images -->
+  <style>
+    /* ===== PRINTESSA_BW — embedded minimal rules (safe if CSS file not loaded) ===== */
+    @page { size: Letter; margin: 0.75in; }
+    html, body { background:#fff; color:#000; }
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+      font-size: 13.5pt;
+      line-height: 1.4;
+      margin: 0;
+      padding: 0;
+    }
+    .sheet{
+      max-width: 7.0in; /* fits within 0.75" margins on Letter */
+      margin: 0 auto;
+    }
+    .header{
+      border: 2px solid #000;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+    }
+    .title{
+      font-size: 18pt;
+      font-weight: 800;
+      margin: 0 0 8px 0;
+      letter-spacing: 0.02em;
+    }
+    .meta{
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      font-size: 12.5pt;
+    }
+    .meta .field{
+      border: 1.5px solid #000;
+      padding: 8px 10px;
+      min-height: 44px;
+    }
+    .meta .label{
+      font-weight: 700;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .block{
+      border: 2px solid #000;
+      padding: 12px;
+      margin: 12px 0;
+    }
+    .block h2{
+      font-size: 15.5pt;
+      margin: 0 0 8px 0;
+      font-weight: 800;
+    }
+    .small{
+      font-size: 12.5pt;
+    }
+    .prompt{
+      margin: 0 0 10px 0;
+    }
+    .lines{
+      border-top: 1.5px solid #000;
+      margin-top: 10px;
+      padding-top: 10px;
+    }
+    .line{
+      border-bottom: 1.5px solid #000;
+      height: 0.55in;
+      margin: 0.18in 0;
+    }
+
+    .two-col{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .choices label{
+      display: block;
+      margin: 6px 0;
+    }
+    .box{
+      display: inline-block;
+      width: 0.22in;
+      height: 0.22in;
+      border: 2px solid #000;
+      vertical-align: -3px;
+      margin-right: 10px;
+    }
+
+    .footer{
+      margin-top: 10px;
+      font-size: 11.5pt;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .tag{
+      border: 1.5px solid #000;
+      padding: 6px 8px;
+      white-space: nowrap;
+    }
+
+    /* print */
+    @media print{
+      .no-print{ display:none !important; }
+      a{ color:#000; text-decoration:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sheet">
+
+    <!-- ===== Student ID Block (REQUIRED by PRINTESSA_BW) ===== -->
+    <div class="header">
+      <div class="title">Exit Ticket</div>
+      <div class="meta">
+        <div class="field"><span class="label">Student Name:</span> __________________________</div>
+        <div class="field"><span class="label">Date:</span> ____________</div>
+        <div class="field"><span class="label">Class / Period:</span> ____________</div>
+      </div>
+    </div>
+
+    <!-- ===== Teacher-facing tags (optional, still print-safe) ===== -->
+    <div class="footer">
+      <div class="tag"><strong>Standard Tags:</strong> ____________________</div>
+      <div class="tag"><strong>Topic:</strong> ____________________</div>
+      <div class="tag"><strong>Version:</strong> ET-v1</div>
+    </div>
+
+    <!-- ===== Prompt Block ===== -->
+    <div class="block">
+      <h2>1) Today’s Question</h2>
+      <p class="prompt">
+        <strong>Prompt:</strong>
+        <!-- Replace this sentence with your generated prompt -->
+        Explain one key idea you learned today using evidence or an example.
+      </p>
+
+      <div class="lines" aria-label="response-lines">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+
+      <p class="small"><strong>Sentence starter (optional):</strong> One important idea is __________ because __________.</p>
+    </div>
+
+    <!-- ===== Quick Check Options (print-only, no tracking) ===== -->
+    <div class="block">
+      <h2>2) Quick Check</h2>
+
+      <div class="two-col">
+        <div class="choices" aria-label="confidence">
+          <p class="prompt"><strong>How confident do you feel?</strong></p>
+          <label><span class="box"></span> Very confident</label>
+          <label><span class="box"></span> Kind of confident</label>
+          <label><span class="box"></span> Not yet</label>
+        </div>
+
+        <div class="choices" aria-label="support-needed">
+          <p class="prompt"><strong>What would help next?</strong></p>
+          <label><span class="box"></span> A worked example</label>
+          <label><span class="box"></span> More practice</label>
+          <label><span class="box"></span> Small group help</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Optional: Draw Model area ===== -->
+    <div class="block">
+      <h2>3) Optional Model / Diagram</h2>
+      <p class="small">Draw a quick model or diagram that shows the idea.</p>
+      <div style="border:2px solid #000; height: 2.2in; margin-top: 10px;"></div>
+      <p class="small" style="margin-top:10px;"><strong>Label:</strong> ____________________________________________</p>
+    </div>
+
+    <!-- ===== Non-print helper text ===== -->
+    <div class="no-print" style="margin-top:16px; font-size:12pt;">
+      <strong>Teacher note:</strong> This file is PRINTESSA_BW compliant (B/W, Letter, 0.75" margins).
+      Replace “Prompt” and “Standard Tags” as needed.
+    </div>
+
+  </div>
+</body>
+</html>
