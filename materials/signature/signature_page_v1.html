@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BSChapp Signature Page v1</title>
+
+  <!-- Phase Bridge: BSCL Blue (single color allowed) -->
+  <style>
+    @page { size: Letter; margin: 0.9in; }
+
+    :root{
+      --bscl-blue:#2F5BEA;
+    }
+
+    html, body{
+      background:#ffffff;
+      color:#000000;
+    }
+
+    body{
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+      font-size:14pt;
+      line-height:1.5;
+      margin:0;
+      padding:0;
+    }
+
+    .sheet{
+      max-width:7in;
+      margin:0 auto;
+      border:3px solid var(--bscl-blue);
+      border-radius:20px;
+      padding:32px 28px;
+    }
+
+    .header{
+      text-align:center;
+      margin-bottom:28px;
+    }
+
+    .title{
+      font-size:22pt;
+      font-weight:900;
+      color:var(--bscl-blue);
+      margin-bottom:6px;
+    }
+
+    .subtitle{
+      font-size:14.5pt;
+      font-weight:500;
+    }
+
+    .block{
+      margin:26px 0;
+    }
+
+    .label{
+      font-weight:800;
+      margin-bottom:6px;
+      display:block;
+    }
+
+    .input{
+      border:2px solid var(--bscl-blue);
+      border-radius:14px;
+      padding:14px 16px;
+      font-size:14pt;
+      min-height:48px;
+    }
+
+    .signature-box{
+      margin-top:10px;
+      border:3px dashed var(--bscl-blue);
+      border-radius:18px;
+      height:2.2in;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-weight:700;
+      color:#444;
+    }
+
+    .buttons{
+      margin-top:34px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+    }
+
+    .btn-primary{
+      background:var(--bscl-blue);
+      color:#fff;
+      font-size:16pt;
+      font-weight:800;
+      padding:14px 28px;
+      border-radius:22px;
+      border:none;
+      width:100%;
+      max-width:320px;
+      text-align:center;
+    }
+
+    .btn-secondary{
+      background:#9aa0a6;
+      color:#fff;
+      font-size:14.5pt;
+      font-weight:700;
+      padding:12px 26px;
+      border-radius:22px;
+      border:none;
+      width:100%;
+      max-width:260px;
+      text-align:center;
+    }
+
+    .footer{
+      margin-top:36px;
+      font-size:11.5pt;
+      text-align:center;
+      color:#555;
+    }
+
+    .no-print{
+      margin-top:18px;
+      font-size:11pt;
+      text-align:center;
+      color:#666;
+    }
+
+    @media print{
+      .no-print{ display:none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sheet">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+      <div class="title">✍️ Sign Your Masterpiece</div>
+      <div class="subtitle">Add a signature (optional)</div>
+    </div>
+
+    <!-- ===== NAME ===== -->
+    <div class="block">
+      <span class="label">Your name (optional)</span>
+      <div class="input">Your signature…</div>
+    </div>
+
+    <!-- ===== SIGNATURE AREA ===== -->
+    <div class="block">
+      <span class="label">Signature</span>
+      <div class="signature-box">
+        Sign here (typed, drawn, or left blank)
+      </div>
+    </div>
+
+    <!-- ===== BUTTONS ===== -->
+    <div class="buttons">
+      <div class="btn-primary">Add Signature &amp; Save</div>
+      <div class="btn-secondary">Skip &amp; Save</div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <div class="footer">
+      This signature marks completion of a teacher-owned artifact.<br/>
+      No data is collected. No tracking. No evaluation.
+    </div>
+
+    <div class="no-print">
+      Phase bridge page — intentionally blue to mark transition to Phase 2.
+    </div>
+
+  </div>
+</body>
+</html>
