@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BSChapp PBIS Reflective Note v1</title>
+
+  <style>
+    @page { size: Letter; margin: 0.75in; }
+    html, body { background:#fff; color:#000; }
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+      font-size: 13pt;
+      line-height: 1.45;
+      margin: 0;
+      padding: 0;
+    }
+    .sheet{ max-width: 7.0in; margin: 0 auto; }
+
+    .header{
+      border: 2px solid #000;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    .title{
+      font-size: 18pt;
+      font-weight: 900;
+      margin: 0 0 8px 0;
+    }
+    .meta{
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      font-size: 12pt;
+    }
+    .field{
+      border: 1.5px solid #000;
+      padding: 8px 10px;
+      min-height: 44px;
+    }
+    .label{ font-weight: 900; }
+
+    .block{
+      border: 2px solid #000;
+      padding: 12px;
+      margin: 12px 0;
+      break-inside: avoid;
+    }
+    .block h2{
+      font-size: 15pt;
+      margin: 0 0 8px 0;
+      font-weight: 900;
+    }
+    .small{ font-size: 11.8pt; }
+
+    .lines{ margin-top: 10px; }
+    .line{
+      border-bottom: 1.5px solid #000;
+      height: 0.5in;
+      margin: 0.16in 0;
+    }
+
+    .choices label{
+      display: block;
+      margin: 6px 0;
+    }
+    .box{
+      display: inline-block;
+      width: 0.22in;
+      height: 0.22in;
+      border: 2px solid #000;
+      vertical-align: -3px;
+      margin-right: 10px;
+    }
+
+    .two-col{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .footer{
+      margin-top: 10px;
+      font-size: 11.8pt;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .tag{
+      border: 1.5px solid #000;
+      padding: 8px 10px;
+      min-height: 44px;
+    }
+
+    .no-print{ margin-top: 12px; font-size: 11.5pt; }
+    @media print{ .no-print{ display:none !important; } }
+  </style>
+</head>
+
+<body>
+  <div class="sheet">
+
+    <!-- ===== HEADER / STUDENT ID ===== -->
+    <div class="header">
+      <div class="title">PBIS Reflective Note</div>
+      <div class="meta">
+        <div class="field"><span class="label">Student Name:</span> __________________________</div>
+        <div class="field"><span class="label">Date:</span> ____________</div>
+        <div class="field"><span class="label">Class / Period:</span> ____________</div>
+      </div>
+    </div>
+
+    <!-- ===== WHAT HAPPENED (NEUTRAL) ===== -->
+    <div class="block">
+      <h2>1) What happened? (neutral)</h2>
+      <p class="small">Write what happened using facts. No blaming. No insults.</p>
+      <div class="lines">
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+    </div>
+
+    <!-- ===== IMPACT ===== -->
+    <div class="block">
+      <h2>2) What was the impact?</h2>
+      <div class="two-col">
+        <div>
+          <p class="small"><span class="label">On me:</span></p>
+          <div class="lines">
+            <div class="line"></div>
+          </div>
+        </div>
+        <div>
+          <p class="small"><span class="label">On others / learning:</span></p>
+          <div class="lines">
+            <div class="line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SKILL / STRATEGY ===== -->
+    <div class="block">
+      <h2>3) What could I try next time?</h2>
+      <p class="small">Choose one skill and write a plan.</p>
+
+      <div class="choices" aria-label="skills">
+        <label><span class="box"></span> Ask for help / break</label>
+        <label><span class="box"></span> Use calm words</label>
+        <label><span class="box"></span> Follow directions the first time</label>
+        <label><span class="box"></span> Keep hands and objects safe</label>
+        <label><span class="box"></span> Stay in my space</label>
+        <label><span class="box"></span> Other: __________________________</label>
+      </div>
+
+      <p class="small"><span class="label">My plan:</span> “Next time I will…”</p>
+      <div class="lines">
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+    </div>
+
+    <!-- ===== REPAIR ===== -->
+    <div class="block">
+      <h2>4) How can I repair / restart?</h2>
+      <p class="small">Pick one way to restart and move forward.</p>
+      <div class="choices" aria-label="repair">
+        <label><span class="box"></span> Apologize (words or written)</label>
+        <label><span class="box"></span> Fix the mess / return materials</label>
+        <label><span class="box"></span> Re-do the task</label>
+        <label><span class="box"></span> Take a reset and rejoin</label>
+      </div>
+    </div>
+
+    <!-- ===== TEACHER NOTE + REINFORCEMENT ===== -->
+    <div class="footer">
+      <div class="tag">
+        <span class="label">Teacher Note (brief):</span><br/>
+        _____________________________________________
+      </div>
+      <div class="tag">
+        <span class="label">Reinforcement / Next Step:</span><br/>
+        ☐ Praise ☐ Points ☐ Reset plan ☐ Check-in ☐ None
+      </div>
+    </div>
+
+    <div class="no-print">
+      <span class="label">Teacher note:</span> PRINTESSA_BW compliant. Reflection is skill-based, not punitive.
+    </div>
+
+  </div>
+</body>
+</html>
