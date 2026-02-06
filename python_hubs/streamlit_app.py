@@ -5,6 +5,7 @@ Teacher-first. Print-first. Admin-blind.
 v1 additions:
 - Optional signature
 - Signature rendered top-right on all generated documents
+- Mobile-safe downloads (works better in Safari + in-app browsers)
 - No storage, no tracking, no identity enforcement
 """
 
@@ -33,6 +34,7 @@ SIGNATURE_HTML = """
   font-size:11.5pt;
   font-weight:700;
   color:#2F5BEA;
+  z-index:9999;
 ">
   ✍️ {signature}
 </div>
@@ -41,30 +43,31 @@ SIGNATURE_HTML = """
 # =====================
 # HELPERS
 # =====================
-def ensure_dir(path):
+def ensure_dir(path: str) -> None:
     if not os.path.exists(path):
         os.makedirs(path)
 
-def load_template(path):
+def load_template(path: str) -> str:
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
-def save_output(content, out_path):
+def save_output(content: str, out_path: str) -> None:
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(content)
 
-def inject_signature(html, signature):
+def inject_signature(html: str, signature: str) -> str:
     if not signature:
         return html
     signature_block = SIGNATURE_HTML.format(signature=signature)
     return html.replace("<body>", f"<body>\n{signature_block}", 1)
 
-def populate_safe_fields(html, title="", standards=""):
+def populate_safe_fields(html: str, title: str = "", standards: str = "") -> str:
+    # Safe, minimal fill: first two blank slots only
     html = html.replace("__________________________", title or "__________________________", 1)
     html = html.replace("__________________________", standards or "__________________________", 1)
     return html
 
-def generate_files(selected, title, standards, signature):
+def generate_files(selected, title: str, standards: str, signature: str):
     today = date.today().isoformat()
     ensure_dir(OUTPUT_DIR)
     outputs = []
@@ -78,6 +81,7 @@ def generate_files(selected, title, standards, signature):
         filename = f"{name.replace(' ', '_').lower()}_{today}.html"
         out_path = os.path.join(OUTPUT_DIR, filename)
         save_output(html, out_path)
+
         outputs.append(out_path)
 
     return outputs
@@ -85,10 +89,7 @@ def generate_files(selected, title, standards, signature):
 # =====================
 # STREAMLIT UI
 # =====================
-st.set_page_config(
-    page_title="BSChapp v1",
-    layout="centered"
-)
+st.set_page_config(page_title="BSChapp v1", layout="centered")
 
 st.title("🧩 BSChapp")
 st.subheader("Teacher-First Material Generator")
@@ -96,9 +97,9 @@ st.subheader("Teacher-First Material Generator")
 st.markdown(
     """
 **What this does**
-- Generates print-ready classroom materials
-- No accounts, no tracking, no admin access
-- Files are teacher-owned and ready to print
+- Generates print-ready classroom materials  
+- No accounts, no tracking, no admin access  
+- Files are teacher-owned and ready to print  
 """
 )
 
@@ -112,8 +113,7 @@ signature = st.text_input(
     "Signature (optional)",
     placeholder="Your name, initials, or leave blank"
 )
-
-st.caption("Signature appears top-right on all generated documents.")
+st.caption("Signature appears top-right on all generated documents (cosmetic only).")
 
 st.divider()
 
@@ -142,12 +142,31 @@ if st.button("Generate Materials"):
         )
 
         st.success("Materials generated!")
-        st.markdown("**Files created:**")
+
+        # Mobile/in-app browser advice
+        st.warning(
+            "If you opened this inside Facebook/Messenger: tap ••• and choose **Open in Safari/Chrome** for best printing."
+        )
+
+        st.markdown("### Download your files (mobile-safe)")
         for path in outputs:
-            st.code(path, language="text")
+            filename = os.path.basename(path)
+
+            # Show just the filename (cleaner than server path)
+            st.code(filename, language="text")
+
+            # Download button = best behavior on iPhone + in-app browsers
+            with open(path, "r", encoding="utf-8") as f:
+                st.download_button(
+                    label=f"Download {filename}",
+                    data=f.read(),
+                    file_name=filename,
+                    mime="text/html",
+                    use_container_width=True
+                )
 
         st.info(
-            "Open a file → Print (Letter, B/W).\n"
+            "After downloading, open the HTML file → Share → Print (Letter). "
             "Signature is cosmetic only and not stored."
         )
 
