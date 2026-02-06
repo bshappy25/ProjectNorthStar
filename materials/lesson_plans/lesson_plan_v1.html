@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BSChapp Lesson Plan v1</title>
+
+  <!-- PRINTESSA_BW compliant: black text, white background, no images -->
+  <style>
+    @page { size: Letter; margin: 0.75in; }
+    html, body { background:#fff; color:#000; }
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+      font-size: 12.5pt;
+      line-height: 1.4;
+      margin: 0;
+      padding: 0;
+    }
+    .sheet{ max-width: 7.0in; margin: 0 auto; }
+
+    .top{
+      border: 2px solid #000;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    h1{
+      font-size: 17pt;
+      margin: 0 0 8px 0;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+    }
+    .meta{
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      font-size: 12pt;
+    }
+    .field{
+      border: 1.5px solid #000;
+      padding: 8px 10px;
+      min-height: 44px;
+    }
+    .label{ font-weight: 800; }
+
+    .row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .block{
+      border: 2px solid #000;
+      padding: 12px;
+      margin: 12px 0;
+      break-inside: avoid;
+    }
+    .block h2{
+      font-size: 14.5pt;
+      margin: 0 0 8px 0;
+      font-weight: 900;
+    }
+    .small{ font-size: 11.5pt; }
+    ul{ margin: 6px 0 0 18px; }
+    li{ margin: 4px 0; }
+
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 12pt;
+    }
+    th, td{
+      border: 1.5px solid #000;
+      padding: 8px 8px;
+      vertical-align: top;
+    }
+    th{ font-weight: 900; text-align: left; }
+
+    .muted{ font-size: 11.5pt; }
+
+    .no-print{ margin-top: 14px; font-size: 11.5pt; }
+    @media print{ .no-print{ display:none !important; } }
+  </style>
+</head>
+
+<body>
+  <div class="sheet">
+
+    <!-- ===== HEADER / META ===== -->
+    <div class="top">
+      <h1>Lesson Plan</h1>
+      <div class="meta">
+        <div class="field"><span class="label">Title:</span> __________________________</div>
+        <div class="field"><span class="label">Grade:</span> ____ <span class="label">Time:</span> ____ min</div>
+        <div class="field"><span class="label">Date:</span> ____________</div>
+      </div>
+      <div class="meta" style="margin-top:10px;">
+        <div class="field"><span class="label">Unit:</span> __________________________</div>
+        <div class="field"><span class="label">Lesson #:</span> ____________</div>
+        <div class="field"><span class="label">Standard Tags:</span> __________________</div>
+      </div>
+    </div>
+
+    <!-- ===== OBJECTIVES ===== -->
+    <div class="row">
+      <div class="block">
+        <h2>Teacher Objective</h2>
+        <p>______________________________________________________________</p>
+        <p>______________________________________________________________</p>
+      </div>
+      <div class="block">
+        <h2>Student Objective</h2>
+        <p>“I can…” _________________________________________________</p>
+        <p>______________________________________________________________</p>
+      </div>
+    </div>
+
+    <!-- ===== DO NOW / VOCAB ===== -->
+    <div class="row">
+      <div class="block">
+        <h2>Do Now (3–5 min)</h2>
+        <p>______________________________________________________________</p>
+        <p>______________________________________________________________</p>
+      </div>
+      <div class="block">
+        <h2>Vocabulary</h2>
+        <ul>
+          <li>________________________</li>
+          <li>________________________</li>
+          <li>________________________</li>
+          <li>________________________</li>
+        </ul>
+        <p class="small"><span class="label">Sentence frame (optional):</span> __________ because __________.</p>
+      </div>
+    </div>
+
+    <!-- ===== MATERIALS ===== -->
+    <div class="block">
+      <h2>Materials</h2>
+      <ul>
+        <li>________________________</li>
+        <li>________________________</li>
+        <li>________________________</li>
+        <li>________________________</li>
+      </ul>
+    </div>
+
+    <!-- ===== PROCEDURE ===== -->
+    <div class="block">
+      <h2>Procedure (Chunked)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:14%;">Minutes</th>
+            <th style="width:43%;">Teacher Moves</th>
+            <th style="width:43%;">Student Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>__</td>
+            <td>________________________________________________________</td>
+            <td>________________________________________________________</td>
+          </tr>
+          <tr>
+            <td>__</td>
+            <td>________________________________________________________</td>
+            <td>________________________________________________________</td>
+          </tr>
+          <tr>
+            <td>__</td>
+            <td>________________________________________________________</td>
+            <td>________________________________________________________</td>
+          </tr>
+          <tr>
+            <td>__</td>
+            <td>________________________________________________________</td>
+            <td>________________________________________________________</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted"><span class="label">Note:</span> Keep tasks chunked. One action per step.</p>
+    </div>
+
+    <!-- ===== CFU ===== -->
+    <div class="block">
+      <h2>Checks for Understanding (CFU)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:18%;">Type</th>
+            <th style="width:42%;">Prompt</th>
+            <th style="width:40%;">Evidence Collected</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Oral / Written</td>
+            <td>________________________________________________________</td>
+            <td>________________________________________________________</td>
+          </tr>
+          <tr>
+            <td>Quick Check</td>
+            <td>________________________________________________________</td>
+            <td>________________________________________________________</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== DIFFERENTIATION ===== -->
+    <div class="row">
+      <div class="block">
+        <h2>Supports</h2>
+        <ul>
+          <li>Chunk directions</li>
+          <li>Visual model / example</li>
+          <li>Sentence frames</li>
+          <li>Small group support</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h2>Extensions</h2>
+        <ul>
+          <li>Explain with evidence</li>
+          <li>Apply to a new scenario</li>
+          <li>Create a model and label it</li>
+          <li>Compare two systems</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===== EXIT TICKET + EVIDENCE ===== -->
+    <div class="block">
+      <h2>Exit Ticket</h2>
+      <p><span class="label">Prompt:</span> _________________________________________________</p>
+      <p><span class="label">Response type:</span> ☐ short answer ☐ multiple choice ☐ draw model ☐ CER claim</p>
+    </div>
+
+    <div class="block">
+      <h2>Evidence Artifacts (What you will keep)</h2>
+      <ul>
+        <li>☐ Exit Ticket</li>
+        <li>☐ Student model / diagram</li>
+        <li>☐ CER paragraph</li>
+        <li>☐ Data table / graph</li>
+        <li>☐ Small-group checklist</li>
+      </ul>
+    </div>
+
+    <!-- ===== REFLECTION ===== -->
+    <div class="block">
+      <h2>Teacher Reflection (After)</h2>
+      <p><span class="label">What worked:</span></p>
+      <p>______________________________________________________________</p>
+      <p><span class="label">What to adjust:</span></p>
+      <p>______________________________________________________________</p>
+      <p><span class="label">Notes next time:</span></p>
+      <p>______________________________________________________________</p>
+    </div>
+
+    <div class="no-print">
+      <span class="label">Teacher note:</span> This is a PRINTESSA_BW-compliant template.
+      Replace blanks with generated values later (Phase 1–2).
+    </div>
+
+  </div>
+</body>
+</html>
