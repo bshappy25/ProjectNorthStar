@@ -1,0 +1,83 @@
+{
+  "artifact_type": "pbis_form",
+  "version": "1.0",
+  "description": "Teacher-first PBIS documentation and reinforcement form. Built for speed, clarity, and protection against misuse. Teacher-owned. Admin-blind by default.",
+
+  "required_fields": {
+    "form_type": {
+      "type": "string",
+      "allowed_values": [
+        "positive_referral",
+        "point_sheet",
+        "reflection",
+        "check_in_check_out",
+        "quick_note"
+      ]
+    },
+
+    "student_name": {
+      "type": "string",
+      "max_length": 80
+    },
+
+    "date": {
+      "type": "string",
+      "format": "YYYY-MM-DD"
+    },
+
+    "class_period": {
+      "type": "string",
+      "max_length": 20
+    },
+
+    "behavior_focus": {
+      "type": "array",
+      "items": "string",
+      "example": ["Respect", "Responsibility", "Safety"],
+      "max_items": 3
+    },
+
+    "teacher_note": {
+      "type": "string",
+      "max_length": 500
+    },
+
+    "student_reflection": {
+      "type": "object",
+      "fields": {
+        "prompt": { "type": "string", "max_length": 300 },
+        "response_lines": { "type": "integer", "min": 1, "max": 8 }
+      }
+    },
+
+    "reinforcement": {
+      "type": "object",
+      "fields": {
+        "type": {
+          "type": "string",
+          "allowed_values": ["verbal_praise", "points", "reward", "note_home", "none"]
+        },
+        "value": { "type": "integer", "min": 0, "max": 10 }
+      }
+    }
+  },
+
+  "print_profile": {
+    "default": "printessa_bw",
+    "options": ["printessa_bw", "printessa_large_font", "printessa_d75"]
+  },
+
+  "privacy_rules": {
+    "teacher_owned": true,
+    "admin_access": "explicit_only",
+    "analytics_allowed": false,
+    "evaluation_use": false,
+    "disciplinary_use": false
+  },
+
+  "fail_safe": {
+    "clock_it_code": "Clock-It-1234",
+    "trigger_condition": "pbis_used_for_surveillance_or_discipline",
+    "action": "terminate_session"
+  }
+}
