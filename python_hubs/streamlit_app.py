@@ -342,6 +342,7 @@ TEXT = SCI_TEXT if is_science else NEUTRAL_TEXT
 MUTED = SCI_MUTED if is_science else NEUTRAL_MUTED
 ACCENT = SCI_ACCENT if is_science else NEUTRAL_ACCENT
 
+
 st.markdown(f"""
 <style>
 :root {{
@@ -404,44 +405,6 @@ button {{
 button[kind="primary"] {{
   border: 2px solid var(--accent) !important;
 }}
-</style>
-""", unsafe_allow_html=True)
-
-
-
-div[data-testid="stAppViewContainer"] {{
-  background: var(--bg);
-  color: var(--text);
-}}
-
-h1, h2, h3, p, label, div {{ color: var(--text); }}
-
-.small-muted {{
-  color: var(--muted);
-  font-size: 0.95rem;
-}}
-
-.card {{
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 14px 14px;
-}}
-
-.badge {{
-  display:inline-block;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  background: rgba(255,255,255,0.04);
-}}
-
-.badge-accent {{
-  border-color: var(--accent);
-}}
-
 </style>
 """, unsafe_allow_html=True)
 
