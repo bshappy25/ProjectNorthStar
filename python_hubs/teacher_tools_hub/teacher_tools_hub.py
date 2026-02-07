@@ -359,6 +359,9 @@ with st.sidebar:
 # MAIN WINDOW
 # =====================
 
+import html
+import streamlit.components.v1 as components
+
 if st.session_state["current_tool"]:
     tool_name = st.session_state["current_tool"]
 
@@ -373,16 +376,13 @@ if st.session_state["current_tool"]:
         unsafe_allow_html=True,
     )
 
-import html
-import streamlit.components.v1 as components
+    # --- TV Frame + Tool inside ONE iframe ---
+    tool_html = load_tool(tool_name)
 
-# --- TV Frame + Tool inside ONE iframe ---
-tool_html = load_tool(tool_name)
+    if tool_html:
+        escaped = html.escape(tool_html, quote=True)
 
-if tool_html:
-    escaped = html.escape(tool_html, quote=True)
-
-    combined = f"""
+        combined = f"""
 <!doctype html>
 <html>
 <head>
@@ -469,18 +469,18 @@ if tool_html:
 <body>
   <div class="tv-frame">
     <div class="screen">
-      <iframe sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads"
-              srcdoc="{escaped}"></iframe>
+      <iframe
+        sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+        srcdoc="{escaped}">
+      </iframe>
     </div>
   </div>
 </body>
 </html>
 """
-    components.html(combined, height=860, scrolling=False)
-else:
-    st.error(f"Tool file not found: {tool_name}.html")
-    
-    st.markdown("</div></div>", unsafe_allow_html=True)
+        components.html(combined, height=860, scrolling=False)
+    else:
+        st.error(f"Tool file not found: {tool_name}.html")
 
 else:
     # Welcome screen
