@@ -723,7 +723,18 @@
     const frame = document.createElement("div");
     frame.className = "export-frame";
 
-    frame.innerHTML = `
+   frame.innerHTML = `
+      <div style="
+        padding:6px 12px;
+        font-size:11px;
+        font-weight:900;
+        letter-spacing:0.08em;
+        color:#166534;
+        text-transform:uppercase;
+      ">
+        AI INSTRUCTION → Read the labeled storyboard boxes to generate the lesson →
+      </div>
+
       <div class="export-header">
         <div class="left">
           <div class="export-title">StoryAi</div>
@@ -798,6 +809,8 @@
   }
 
   $("exportJpgBtn").addEventListener("click", exportOnePageJPG);
+  
+  .board-wrap{display:block}
 </script>
 </body>
 </html>
