@@ -89,14 +89,23 @@ DEFAULT_PROMPTS = {
 # =====================
 # THEME TOKENS
 # =====================
-# Universal neutral gray
-NEUTRAL_BG = "#f3f4f6"
-NEUTRAL_CARD = "#ffffff"
-NEUTRAL_BORDER = "rgba(0,0,0,0.10)"
-NEUTRAL_TEXT = "#111827"
-NEUTRAL_MUTED = "#4b5563"
-NEUTRAL_ACCENT = "#6b7280"
 
+# UNIVERSAL NEUTRAL (DEFAULT)
+NEUTRAL_BG = "#f2f2f2"          # app background
+NEUTRAL_CARD = "#e6e6e6"        # ALL boxes
+NEUTRAL_BORDER = "#cfcfcf"
+NEUTRAL_TEXT = "#000000"        # true black
+NEUTRAL_MUTED = "#1f1f1f"
+NEUTRAL_ACCENT = "#5a5a5a"
+
+# SCIENCE MODE (ONLY EXCEPTION)
+SCI_BG = "#061B15"
+SCI_CARD = "#0f2a22"
+SCI_BORDER = "#14b8a6"
+SCI_TEXT = "#ffffff"
+SCI_MUTED = "#d1fae5"
+SCI_ACCENT = "#14b8a6"
+SCI_ACCENT2 = "#2F5BEA"
 # Science mode (impactful blue-green)
 SCI_BG = "#061B15"
 SCI_CARD = "rgba(255,255,255,0.06)"
@@ -343,6 +352,60 @@ st.markdown(f"""
   --muted:{MUTED};
   --accent:{ACCENT};
 }}
+
+div[data-testid="stAppViewContainer"] {{
+  background-color: var(--bg) !important;
+}}
+
+.block-container {{
+  padding-top: 1.2rem;
+}}
+
+h1, h2, h3, h4, h5, h6,
+p, span, label, div {{
+  color: var(--text) !important;
+}}
+
+input, textarea, select {{
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}}
+
+.card {{
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 14px;
+  padding: 14px;
+}}
+
+.small-muted {{
+  color: var(--muted) !important;
+  font-size: 0.95rem;
+}}
+
+.badge {{
+  display:inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-weight: 900;
+  background-color: var(--card);
+}}
+
+.badge-accent {{
+  border-color: var(--accent);
+}}
+
+button {{
+  color: var(--text) !important;
+}}
+
+button[kind="primary"] {{
+  border: 2px solid var(--accent) !important;
+}}
+</style>
+""", unsafe_allow_html=True)
 
 div[data-testid="stAppViewContainer"] {{
   background: var(--bg);
