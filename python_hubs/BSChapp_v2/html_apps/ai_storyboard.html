@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Storyboard (V2) — Tap-to-Drop + 1-Page JPG Export</title>
+
+<style>
+  :root{
+    --bg:#f3f4f6;
+    --card:#ffffff;
+    --border:#d1d5db;
+    --text:#111827;
+    --muted:#6b7280;
+    --accent:#2563eb;
+    --good:#16a34a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  header{
+    padding:14px 16px;
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:50;
+  }
+  header .row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+  .title{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  h1{
+    font-size:16px;
+    margin:0;
+    font-weight:900;
+    letter-spacing:0.02em;
+  }
+  .pill{
+    font-size:12px;
+    font-weight:800;
+    color:var(--muted);
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:999px;
+    padding:6px 10px;
+  }
+
+  .btn{
+    border:1px solid var(--border);
+    background:var(--card);
+    padding:10px 12px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:800;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn.primary{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:white;
+  }
+  .btn:active{transform:translateY(1px)}
+
+  /* Layout: sidebar | dotted line | images/board */
+  main{
+    max-width:1240px;
+    margin:0 auto;
+    padding:16px;
+    display:grid;
+    grid-template-columns: 380px 18px 1fr;
+    gap:14px;
+    align-items:start;
+  }
+  @media (max-width: 980px){
+    main{grid-template-columns:1fr}
+    .divider{display:none}
+  }
+
+  .panel{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:14px;
+    box-shadow:0 1px 0 rgba(0,0,0,0.04);
+  }
+  .panel h2{
+    margin:0 0 10px 0;
+    font-size:12px;
+    font-weight:950;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.10em;
+  }
+
+  .divider{
+    height:100%;
+    min-height:600px;
+    border-left: 3px dotted var(--border);
+    border-radius:10px;
+    opacity:0.8;
+  }
+
+  label{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin:10px 0 6px;
+    font-weight:800;
+  }
+  input[type="text"], textarea, select{
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 10px;
+    font-size:14px;
+    outline:none;
+    background:white;
+  }
+  textarea{min-height:90px; resize:vertical}
+  .muted{color:var(--muted); font-size:12px; line-height:1.35}
+
+  /* Image library */
+  .library{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .thumb{
+    width:96px;
+    height:74px;
+    border:2px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
+    background:#fff;
+    cursor:pointer;
+    position:relative;
+  }
+  .thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .thumb .tag{
+    position:absolute;
+    left:6px;
+    bottom:6px;
+    background:rgba(17,24,39,0.75);
+    color:white;
+    font-size:10px;
+    padding:2px 7px;
+    border-radius:999px;
+    font-weight:950;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+  .thumb.selected{
+    border-color: var(--good);
+    box-shadow: 0 0 0 3px rgba(22,163,74,0.18);
+  }
+
+  /* Board */
+  .board{
+    display:grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-auto-rows: 170px;
+    gap:12px;
+  }
+  @media (max-width: 980px){
+    .board{grid-template-columns:1fr; grid-auto-rows:210px}
+  }
+  .cell{
+    background:var(--card);
+    border:2px dashed var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px;
+    text-align:center;
+    user-select:none;
+  }
+  .cell .label{
+    position:absolute;
+    top:10px;
+    left:12px;
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:950;
+  }
+  .cell .hint{
+    color:var(--muted);
+    font-weight:850;
+    font-size:13px;
+    padding:0 10px;
+  }
+  .cell img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  /* Per-cell clear X */
+  .cell .xclear{
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:28px;
+    height:28px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,0.92);
+    cursor:pointer;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    font-weight:1000;
+    color:#111827;
+    line-height:1;
+  }
+  .cell.filled .xclear{display:flex}
+
+  /* “Armed” placement: wand cursor on cells */
+  .armed .cell{
+    cursor: url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36">\
+<text x="3" y="24" font-size="22">🪄</text>\
+</svg>') 0 26, copy;
+  }
+  .armed .cell:hover{
+    border-color: var(--good);
+    box-shadow: 0 0 0 2px rgba(22,163,74,0.18) inset;
+  }
+
+  /* ---------- EXPORT FRAME (ONE PAGE JPG) ---------- */
+  .export-frame{
+    width: 1400px;
+    height: 900px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* S2: AI strip = white on black */
+  .export-instruction{
+    padding:8px 12px;
+    background:#000000;
+    color:#ffffff;
+    font-size:12px;
+    font-weight:1000;
+    letter-spacing:0.10em;
+    text-transform:uppercase;
+    line-height:1.2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .export-header{
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .export-header .left{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .export-title{
+    font-weight:1000;
+    letter-spacing:0.10em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:#111827;
+  }
+  .export-chip{
+    font-size:12px;
+    font-weight:900;
+    border:1px solid #e5e7eb;
+    border-radius:999px;
+    padding:6px 10px;
+    color:#111827;
+    background:#fff;
+  }
+
+  .export-body{
+    display:grid;
+    grid-template-columns: 420px 1fr;
+    height: calc(100% - 50px);
+  }
+  .export-text{
+    border-right: 3px dotted #d1d5db;
+    padding: 12px 12px;
+  }
+  .export-text .trow{
+    margin-bottom:10px;
+  }
+  .export-text .tlabel{
+    font-size:11px;
+    font-weight:1000;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#6b7280;
+    margin-bottom:6px;
+  }
+  .export-text .tbox{
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:10px 10px;
+    min-height:62px;
+    font-size:13px;
+    font-weight:800;
+    color:#111827;
+    line-height:1.25;
+    white-space:pre-wrap;
+    overflow:hidden;
+  }
+
+  .export-board{
+    padding: 12px 12px;
+  }
+  .export-board .board{
+    grid-auto-rows: 150px;
+    gap: 10px;
+  }
+  .export-board .cell{
+    border: 2px solid #e5e7eb;
+    padding:0;
+  }
+  .export-board .cell .hint{display:none !important;}
+  .export-board .cell .xclear{display:none !important;}
+
+  .board-wrap{display:block;}
+
+  .sig-stamp{
+    position:absolute;
+    left: 12px;
+    bottom: 10px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .sig-badge{
+    border:2px solid var(--good);
+    color:#166534;
+    border-radius:999px;
+    padding:5px 10px;
+    font-weight:1000;
+    letter-spacing:0.10em;
+    text-transform:uppercase;
+    font-size:11px;
+    background:#ffffff;
+  }
+  .sig-line{
+    font-size:12px;
+    font-weight:950;
+    color:#0f172a;
+    opacity:0.92;
+  }
+</style>
+
+<!-- html2canvas for ONE PAGE JPG export -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+
+<body>
+<header>
+  <div class="row">
+    <div class="title">
+      <h1>AI Storyboard (V2) — Tap image → Tap box → Export 1-Page JPG</h1>
+      <span class="pill" id="armedPill">No image selected</span>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <button class="btn" id="clearAllBtn" title="Clear everything"><span style="font-size:16px;">✕</span> Clear</button>
+      <button class="btn primary" id="exportJpgBtn" title="Export ONE PAGE JPG"><span style="font-size:16px;">🖼️</span> Export JPG</button>
+    </div>
+  </div>
+</header>
+
+<main id="appRoot">
+  <!-- LEFT: text input sidebar -->
+  <section class="panel" id="leftPanel">
+    <h2>Text Input Sidebar</h2>
+
+    <label>Teacher Name</label>
+    <input id="teacherName" type="text" placeholder="e.g., Ms. Rivera" />
+
+    <label>Date</label>
+    <input id="dateStr" type="text" placeholder="YYYY-MM-DD (auto)" />
+
+    <label>Subject Mode</label>
+    <select id="modeSel">
+      <option value="science">Science</option>
+      <option value="math">Math</option>
+      <option value="ss">Social Studies</option>
+      <option value="english">English</option>
+      <option value="other">Other</option>
+    </select>
+
+    <label>Standard / Goal</label>
+    <input id="standard" type="text" placeholder="e.g., MS-ESS2-1" />
+
+    <label>Objective (one sentence)</label>
+    <input id="objective" type="text" placeholder="Students will..." />
+
+    <label>Procedure (short)</label>
+    <textarea id="procedure" placeholder="Keep it short. Export will trim extra."></textarea>
+
+    <label>Notes (short)</label>
+    <textarea id="notes" placeholder="Keep it short. Export will trim extra."></textarea>
+  </section>
+
+  <!-- dotted vertical line -->
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- RIGHT: image library + board -->
+  <section class="panel" id="rightPanel">
+    <h2>Images</h2>
+    <div class="muted">
+      Tap an image (arms 🪄), then tap a box to place it. Tap the image again to unselect.
+    </div>
+
+    <label>Upload Images (PNG/JPG)</label>
+    <input id="imgUpload" type="file" accept="image/*" multiple />
+    <div class="library" id="library"></div>
+
+    <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;" />
+
+    <h2>Storyboard</h2>
+
+    <div class="board" id="board">
+      <div class="cell" data-cell="anchor" style="grid-column: 1 / span 1; grid-row: 1 / span 2;">
+        <div class="label" data-label="anchor">Anchor Phenomenon</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap image, then tap here</div>
+      </div>
+
+      <div class="cell" data-cell="box1">
+        <div class="label" data-label="box1">Box 1</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box2">
+        <div class="label" data-label="box2">Box 2</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box3">
+        <div class="label" data-label="box3">Box 3</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box4">
+        <div class="label" data-label="box4">Box 4</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box5">
+        <div class="label" data-label="box5">Box 5</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box6">
+        <div class="label" data-label="box6">Box 6</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box7">
+        <div class="label" data-label="box7">Box 7</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap image, then tap here</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Hidden host for export-only layout -->
+<div id="exportHost" style="position:fixed; left:-99999px; top:0; z-index:-1;"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function todayISO(){
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  $("dateStr").value = todayISO();
+
+  // Titles by mode
+  const TITLES = {
+    science: {
+      anchor: "Anchor Phenomenon",
+      box1: "Model / Diagram",
+      box2: "Central Investigation",
+      box3: "Human Element / Diagram",
+      box4: "Design Element",
+      box5: "Misconception",
+      box6: "Extra Dimension 1",
+      box7: "Extra Dimension 2"
+    },
+    math: {
+      anchor: "Anchor Problem / Context",
+      box1: "Model / Representation",
+      box2: "Central Investigation",
+      box3: "Human Element / Real-World Link",
+      box4: "Design Element (Strategy / Tool)",
+      box5: "Misconception (Common Error)",
+      box6: "Extra Dimension 1 (Extension)",
+      box7: "Extra Dimension 2 (Challenge)"
+    },
+    ss: {
+      anchor: "Anchor Event / Primary Source",
+      box1: "Model / Diagram (Timeline / Map)",
+      box2: "Central Investigation (Inquiry)",
+      box3: "Human Element (Perspective / Voices)",
+      box4: "Design Element (Cause-Effect / Systems)",
+      box5: "Misconception (Bias / Overgeneralization)",
+      box6: "Extra Dimension 1 (Compare / Connect)",
+      box7: "Extra Dimension 2 (Civic Action / Debate)"
+    },
+    english: {
+      anchor: "Anchor Text / Excerpt",
+      box1: "Model / Diagram (Structure / Plot Map)",
+      box2: "Central Investigation (Close Reading)",
+      box3: "Human Element (Character / Voice)",
+      box4: "Design Element (Craft Move / Technique)",
+      box5: "Misconception (Common Misread)",
+      box6: "Extra Dimension 1 (Extension)",
+      box7: "Extra Dimension 2 (Creative Response)"
+    },
+    other: {
+      anchor: "Anchor",
+      box1: "Box 1",
+      box2: "Box 2",
+      box3: "Box 3",
+      box4: "Box 4",
+      box5: "Box 5",
+      box6: "Box 6",
+      box7: "Box 7"
+    }
+  };
+
+  function applyTitles(mode){
+    const map = TITLES[mode] || TITLES.other;
+    document.querySelectorAll("[data-label]").forEach(el => {
+      const key = el.getAttribute("data-label");
+      if (map[key]) el.textContent = map[key];
+    });
+  }
+  applyTitles($("modeSel").value);
+  $("modeSel").addEventListener("change", () => applyTitles($("modeSel").value));
+
+  // Image library + selection
+  const imageLibrary = []; // {id, name, dataUrl}
+  let selectedImageId = null;
+
+  function setArmedPill(){
+    const pill = $("armedPill");
+    if (!selectedImageId){
+      pill.textContent = "No image selected";
+      document.body.classList.remove("armed");
+      return;
+    }
+    const item = imageLibrary.find(x => x.id === selectedImageId);
+    pill.textContent = item ? `Selected: ${item.name}` : "Selected image";
+    document.body.classList.add("armed");
+  }
+
+  function fileToDataURL(file){
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  $("imgUpload").addEventListener("change", async (e) => {
+    const files = Array.from(e.target.files || []);
+    for (const f of files){
+      const dataUrl = await fileToDataURL(f);
+      const item = { id: crypto.randomUUID(), name: f.name, dataUrl };
+      imageLibrary.push(item);
+      addThumb(item);
+    }
+    e.target.value = "";
+  });
+
+  function addThumb(item){
+    const wrap = document.createElement("div");
+    wrap.className = "thumb";
+    wrap.dataset.imgId = item.id;
+
+    const img = document.createElement("img");
+    img.src = item.dataUrl;
+
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = "Tap";
+
+    wrap.appendChild(img);
+    wrap.appendChild(tag);
+
+    wrap.addEventListener("click", () => {
+      if (selectedImageId === item.id){
+        selectedImageId = null;
+      } else {
+        selectedImageId = item.id;
+      }
+      document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
+      if (selectedImageId) wrap.classList.add("selected");
+      setArmedPill();
+    });
+
+    $("library").appendChild(wrap);
+  }
+
+  // Storyboard state
+  const storyboard = {}; // cellKey -> {name, dataUrl}
+
+  function renderCell(cell, dataUrl){
+    const label = cell.querySelector(".label");
+    const x = cell.querySelector(".xclear");
+    cell.innerHTML = "";
+    cell.appendChild(label);
+    cell.appendChild(x);
+
+    const img = document.createElement("img");
+    img.src = dataUrl;
+    cell.appendChild(img);
+    cell.classList.add("filled");
+  }
+
+  function resetCell(cell){
+    const label = cell.querySelector(".label");
+    const x = cell.querySelector(".xclear");
+    cell.innerHTML = "";
+    cell.appendChild(label);
+    cell.appendChild(x);
+
+    const hint = document.createElement("div");
+    hint.className = "hint";
+    hint.textContent = "Tap image, then tap here";
+    cell.appendChild(hint);
+    cell.classList.remove("filled");
+  }
+
+  document.querySelectorAll(".cell").forEach(cell => {
+    const key = cell.dataset.cell;
+
+    cell.addEventListener("click", (ev) => {
+      if (ev.target && ev.target.classList && ev.target.classList.contains("xclear")) return;
+      if (!selectedImageId) return;
+      const item = imageLibrary.find(x => x.id === selectedImageId);
+      if (!item) return;
+
+      storyboard[key] = { name: item.name, dataUrl: item.dataUrl };
+      renderCell(cell, item.dataUrl);
+    });
+
+    const xbtn = cell.querySelector(".xclear");
+    xbtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      delete storyboard[key];
+      resetCell(cell);
+    });
+  });
+
+  $("clearAllBtn").addEventListener("click", () => {
+    Object.keys(storyboard).forEach(k => delete storyboard[k]);
+    document.querySelectorAll(".cell").forEach(resetCell);
+    selectedImageId = null;
+    document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
+    setArmedPill();
+  });
+
+  setArmedPill();
+
+  // --------- ONE-PAGE EXPORT (JPG) ---------
+  function clampText(s, maxChars){
+    s = (s || "").trim();
+    if (!s) return "—";
+    if (s.length <= maxChars) return s;
+    return s.slice(0, maxChars - 1) + "…";
+  }
+
+  function makeExportFrame(){
+    const teacher = ($("teacherName").value || "User").trim();
+    const date = ($("dateStr").value || todayISO()).trim();
+    const mode = ($("modeSel").value || "science").trim();
+
+    const standard = clampText($("standard").value, 70);
+    const objective = clampText($("objective").value, 150);
+    const procedure = clampText($("procedure").value, 420);
+    const notes = clampText($("notes").value, 280);
+
+    const boardClone = document.getElementById("board").cloneNode(true);
+    boardClone.querySelectorAll(".xclear").forEach(x => x.remove());
+    boardClone.querySelectorAll(".hint").forEach(h => h.remove());
+
+    const frame = document.createElement("div");
+    frame.className = "export-frame";
+
+    frame.innerHTML = `
+      <div class="export-instruction">
+        AI INSTRUCTION → Read the labeled storyboard boxes to generate the lesson →
+      </div>
+
+      <div class="export-header">
+        <div class="left">
+          <div class="export-title">StoryAi</div>
+          <div class="export-chip">${mode.toUpperCase()}</div>
+        </div>
+        <div class="left" style="justify-content:flex-end">
+          <div class="export-chip">${teacher}</div>
+          <div class="export-chip">${date}</div>
+        </div>
+      </div>
+
+      <div class="export-body">
+        <div class="export-text">
+          <div class="trow">
+            <div class="tlabel">Standard</div>
+            <div class="tbox">${standard}</div>
+          </div>
+          <div class="trow">
+            <div class="tlabel">Objective</div>
+            <div class="tbox">${objective}</div>
+          </div>
+          <div class="trow">
+            <div class="tlabel">Procedure</div>
+            <div class="tbox">${procedure}</div>
+          </div>
+          <div class="trow">
+            <div class="tlabel">Notes</div>
+            <div class="tbox">${notes}</div>
+          </div>
+        </div>
+
+        <div class="export-board">
+          <div class="board-wrap"></div>
+        </div>
+      </div>
+
+      <div class="sig-stamp">
+        <div class="sig-badge">🪄 SIGNED</div>
+        <div class="sig-line">${teacher} • ${date}</div>
+      </div>
+    `;
+
+    frame.querySelector(".export-board .board-wrap").appendChild(boardClone);
+    return frame;
+  }
+
+  async function exportOnePageJPG(){
+    const host = document.getElementById("exportHost");
+    host.innerHTML = "";
+    const frame = makeExportFrame();
+    host.appendChild(frame);
+
+    // S1: Sharpen output
+    const canvas = await html2canvas(frame, {
+      backgroundColor: "#ffffff",
+      scale: 3,                 // sharper than 2
+      useCORS: true,
+      imageTimeout: 15000,
+      removeContainer: true
+    });
+
+    const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g, "_");
+    const date = ($("dateStr").value || todayISO()).trim();
+    const filename = `StoryAi_${teacher}_${date}.jpg`;
+
+    const jpgData = canvas.toDataURL("image/jpeg", 0.95);
+    const a = document.createElement("a");
+    a.href = jpgData;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    host.innerHTML = "";
+  }
+
+  $("exportJpgBtn").addEventListener("click", exportOnePageJPG);
+</script>
+</body>
+</html>
