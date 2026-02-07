@@ -385,7 +385,7 @@ input, textarea, select {{
 }}
 
 .badge {{
-  display:inline-block;
+  display: inline-block;
   padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
@@ -406,6 +406,8 @@ button[kind="primary"] {{
 }}
 </style>
 """, unsafe_allow_html=True)
+
+
 
 div[data-testid="stAppViewContainer"] {{
   background: var(--bg);
