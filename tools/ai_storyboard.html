@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Storyboard (V1)</title>
+<style>
+  :root{
+    --bg:#f3f4f6;
+    --card:#ffffff;
+    --border:#d1d5db;
+    --text:#111827;
+    --muted:#6b7280;
+    --accent:#2563eb;
+    --good:#16a34a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    padding:16px;
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  header .row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  h1{
+    font-size:18px;
+    margin:0;
+    font-weight:800;
+    letter-spacing:0.02em;
+  }
+  .btn{
+    border:1px solid var(--border);
+    background:var(--card);
+    padding:10px 12px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:700;
+  }
+  .btn.primary{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:white;
+  }
+  .btn:active{transform:translateY(1px)}
+  main{
+    max-width:1200px;
+    margin:0 auto;
+    padding:16px;
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap:16px;
+  }
+  @media (max-width: 980px){
+    main{grid-template-columns:1fr}
+  }
+  .panel{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:14px;
+    box-shadow:0 1px 0 rgba(0,0,0,0.04);
+  }
+  .panel h2{
+    margin:0 0 10px 0;
+    font-size:14px;
+    font-weight:900;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin:10px 0 6px;
+    font-weight:700;
+  }
+  input[type="text"], textarea, select{
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 10px;
+    font-size:14px;
+    outline:none;
+    background:white;
+  }
+  textarea{min-height:90px; resize:vertical}
+  .muted{color:var(--muted); font-size:12px; line-height:1.35}
+  .library{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .thumb{
+    width:88px;
+    height:66px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+    background:#fff;
+    cursor:grab;
+    position:relative;
+  }
+  .thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .thumb .tag{
+    position:absolute;
+    left:6px;
+    bottom:6px;
+    background:rgba(17,24,39,0.75);
+    color:white;
+    font-size:10px;
+    padding:2px 6px;
+    border-radius:999px;
+    font-weight:800;
+  }
+
+  /* Storyboard grid */
+  .board{
+    display:grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-auto-rows: 180px;
+    gap:12px;
+  }
+  @media (max-width: 980px){
+    .board{grid-template-columns:1fr; grid-auto-rows:200px}
+  }
+  .cell{
+    background:var(--card);
+    border:1px dashed var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px;
+    text-align:center;
+  }
+  .cell strong{
+    position:absolute;
+    top:10px;
+    left:12px;
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+  }
+  .cell .hint{
+    color:var(--muted);
+    font-weight:700;
+    font-size:13px;
+    padding:0 10px;
+  }
+  .cell img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  /* Green wand cursor behavior */
+  .drop-ready{
+    border-color: var(--good);
+    box-shadow: 0 0 0 2px rgba(22,163,74,0.2) inset;
+    cursor: url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">\
+<text x="3" y="22" font-size="20">🪄</text>\
+</svg>') 0 24, copy;
+  }
+</style>
+</head>
+
+<body>
+<header>
+  <div class="row">
+    <h1>AI Storyboard (V1) — Drag images into boxes → Export one AI file</h1>
+    <button class="btn" id="clearBtn" title="Clear storyboard boxes">Clear</button>
+    <button class="btn primary" id="exportBtn" title="Export StoryAi file">Export StoryAi File</button>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT: teacher inputs + image library -->
+  <section class="panel">
+    <h2>Teacher Inputs</h2>
+
+    <label>Teacher Name</label>
+    <input id="teacherName" type="text" placeholder="e.g., Ms. Rivera" />
+
+    <label>Date</label>
+    <input id="dateStr" type="text" placeholder="YYYY-MM-DD (auto)" />
+
+    <label>Mode</label>
+    <select id="modeSel">
+      <option value="science">Science</option>
+      <option value="ela">ELA</option>
+      <option value="math">Math</option>
+      <option value="social_studies">Social Studies</option>
+      <option value="other">Other</option>
+    </select>
+
+    <label>Standard / Goal</label>
+    <input id="standard" type="text" placeholder="e.g., MS-ESS2-1" />
+
+    <label>Objective (one sentence)</label>
+    <input id="objective" type="text" placeholder="Students will..." />
+
+    <label>Procedure (short)</label>
+    <textarea id="procedure" placeholder="1) Hook... 2) Model... 3) Check for understanding..."></textarea>
+
+    <label>Accommodations / Notes</label>
+    <textarea id="notes" placeholder="IEP supports, visuals, sentence starters, etc."></textarea>
+
+    <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;" />
+
+    <h2>Image Library</h2>
+    <div class="muted">
+      Upload images here, then drag them into storyboard boxes.
+      Tip: Add one “Anchor Phenomenon” image and a few supporting images.
+    </div>
+
+    <label>Upload Images (PNG/JPG)</label>
+    <input id="imgUpload" type="file" accept="image/*" multiple />
+
+    <div class="library" id="library"></div>
+
+    <div class="muted" style="margin-top:10px">
+      PDF attachment: V1 keeps it simple (manual copy/paste of text).  
+      V2 can add “Upload PDF → extract text” (requires server or PDF.js + parsing).
+    </div>
+  </section>
+
+  <!-- RIGHT: storyboard -->
+  <section class="panel">
+    <h2>Storyboard Grid</h2>
+    <div class="muted" style="margin-bottom:10px">
+      Drag an image onto any box. The green wand appears when you’re in the drop zone.
+    </div>
+
+    <div class="board" id="board">
+      <div class="cell" data-cell="anchor" style="grid-column: 1 / span 1; grid-row: 1 / span 2;">
+        <strong>Anchor Phenomenon</strong>
+        <div class="hint">Drop your big anchor image here</div>
+      </div>
+      <div class="cell" data-cell="box1"><strong>Box 1</strong><div class="hint">Drop image</div></div>
+      <div class="cell" data-cell="box2"><strong>Box 2</strong><div class="hint">Drop image</div></div>
+      <div class="cell" data-cell="box3"><strong>Box 3</strong><div class="hint">Drop image</div></div>
+      <div class="cell" data-cell="box4"><strong>Box 4</strong><div class="hint">Drop image</div></div>
+      <div class="cell" data-cell="box5"><strong>Box 5</strong><div class="hint">Drop image</div></div>
+      <div class="cell" data-cell="box6"><strong>Box 6</strong><div class="hint">Drop image</div></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  // ---------- Utilities ----------
+  const $ = (id) => document.getElementById(id);
+
+  function todayISO(){
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  // ---------- State ----------
+  const imageLibrary = []; // {id, name, dataUrl}
+  const storyboard = {};   // cellKey -> {name, dataUrl}
+
+  // ---------- Init ----------
+  $("dateStr").value = todayISO();
+
+  // ---------- Image upload ----------
+  $("imgUpload").addEventListener("change", async (e) => {
+    const files = Array.from(e.target.files || []);
+    for (const f of files){
+      const dataUrl = await fileToDataURL(f);
+      const item = { id: crypto.randomUUID(), name: f.name, dataUrl };
+      imageLibrary.push(item);
+      addThumb(item);
+    }
+    e.target.value = "";
+  });
+
+  function fileToDataURL(file){
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  function addThumb(item){
+    const wrap = document.createElement("div");
+    wrap.className = "thumb";
+    wrap.draggable = true;
+    wrap.dataset.imgId = item.id;
+
+    const img = document.createElement("img");
+    img.src = item.dataUrl;
+
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = "DRAG";
+
+    wrap.appendChild(img);
+    wrap.appendChild(tag);
+
+    wrap.addEventListener("dragstart", (ev) => {
+      ev.dataTransfer.setData("text/plain", item.id);
+      ev.dataTransfer.effectAllowed = "copy";
+    });
+
+    $("library").appendChild(wrap);
+  }
+
+  // ---------- Drop zones ----------
+  const cells = Array.from(document.querySelectorAll(".cell"));
+
+  cells.forEach(cell => {
+    cell.addEventListener("dragenter", (ev) => {
+      ev.preventDefault();
+      cell.classList.add("drop-ready");
+    });
+    cell.addEventListener("dragover", (ev) => {
+      ev.preventDefault();
+      ev.dataTransfer.dropEffect = "copy";
+      cell.classList.add("drop-ready");
+    });
+    cell.addEventListener("dragleave", () => {
+      cell.classList.remove("drop-ready");
+    });
+    cell.addEventListener("drop", (ev) => {
+      ev.preventDefault();
+      cell.classList.remove("drop-ready");
+
+      const imgId = ev.dataTransfer.getData("text/plain");
+      const item = imageLibrary.find(x => x.id === imgId);
+      if (!item) return;
+
+      const key = cell.dataset.cell;
+      storyboard[key] = { name: item.name, dataUrl: item.dataUrl };
+      renderCellImage(cell, item.dataUrl);
+    });
+  });
+
+  function renderCellImage(cell, dataUrl){
+    cell.innerHTML = `<strong>${cell.dataset.cell === "anchor" ? "Anchor Phenomenon" : cell.querySelector("strong")?.textContent || ""}</strong>`;
+    const img = document.createElement("img");
+    img.src = dataUrl;
+    cell.appendChild(img);
+  }
+
+  // ---------- Clear ----------
+  $("clearBtn").addEventListener("click", () => {
+    for (const k of Object.keys(storyboard)) delete storyboard[k];
+    // reset UI
+    document.querySelectorAll(".cell").forEach(cell => {
+      const label = cell.dataset.cell === "anchor" ? "Anchor Phenomenon" : (cell.querySelector("strong")?.textContent || "Box");
+      cell.innerHTML = `<strong>${label}</strong><div class="hint">${cell.dataset.cell === "anchor" ? "Drop your big anchor image here" : "Drop image"}</div>`;
+    });
+  });
+
+  // ---------- Export ----------
+  $("exportBtn").addEventListener("click", () => {
+    const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g,"_");
+    const date = ($("dateStr").value || todayISO()).trim();
+    const payload = {
+      schema: "storyai_v1",
+      created_at: new Date().toISOString(),
+      teacher_name: $("teacherName").value || "",
+      date: date,
+      mode: $("modeSel").value,
+      standard: $("standard").value || "",
+      objective: $("objective").value || "",
+      procedure: $("procedure").value || "",
+      notes: $("notes").value || "",
+      storyboard_cells: storyboard
+      // NOTE: storyboard_cells includes base64 images via dataUrl
+    };
+
+    const filename = `StoryAi_${teacher}_${date}.json`;
+    downloadJSON(payload, filename);
+  });
+
+  function downloadJSON(obj, filename){
+    const blob = new Blob([JSON.stringify(obj, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>
