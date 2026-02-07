@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AI Storyboard (V2) — Tap-to-Drop + PDF Export</title>
+<title>AI Storyboard (V2) — Tap-to-Drop + 1-Page JPG Export</title>
 
 <style>
   :root{
@@ -178,12 +178,6 @@
   }
 
   /* Board */
-  .board-wrap{
-    display:grid;
-    grid-template-rows: auto auto;
-    gap:14px;
-  }
-
   .board{
     display:grid;
     grid-template-columns: 2fr 1fr 1fr;
@@ -261,40 +255,136 @@
     box-shadow: 0 0 0 2px rgba(22,163,74,0.18) inset;
   }
 
-  /* Print / PDF */
-  .print-note{
+  /* ---------- EXPORT FRAME (ONE PAGE JPG) ---------- */
+  .export-frame{
+    width: 1400px;
+    height: 900px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+  .export-header{
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .export-header .left{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .export-title{
+    font-weight:1000;
+    letter-spacing:0.10em;
+    text-transform:uppercase;
     font-size:12px;
-    color:var(--muted);
-    margin-top:10px;
+    color:#111827;
   }
-  @media print{
-    header{display:none !important;}
-    body{background:white !important;}
-    main{
-      max-width:none;
-      margin:0;
-      padding:0;
-      grid-template-columns: 340px 18px 1fr;
-      gap:12px;
-    }
-    .panel{box-shadow:none !important;}
-    .thumb, #imgUpload, .print-hide {display:none !important;}
-    .divider{border-left: 3px dotted #999 !important;}
-    .cell .xclear{display:none !important;}
+  .export-chip{
+    font-size:12px;
+    font-weight:900;
+    border:1px solid #e5e7eb;
+    border-radius:999px;
+    padding:6px 10px;
+    color:#111827;
+    background:#fff;
   }
+
+  .export-body{
+    display:grid;
+    grid-template-columns: 420px 1fr;
+    height: calc(100% - 50px);
+  }
+  .export-text{
+    border-right: 3px dotted #d1d5db;
+    padding: 12px 12px;
+  }
+  .export-text .trow{
+    margin-bottom:10px;
+  }
+  .export-text .tlabel{
+    font-size:11px;
+    font-weight:1000;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#6b7280;
+    margin-bottom:6px;
+  }
+  .export-text .tbox{
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:10px 10px;
+    min-height:62px;
+    font-size:13px;
+    font-weight:800;
+    color:#111827;
+    line-height:1.25;
+    white-space:pre-wrap;
+    overflow:hidden;
+  }
+
+  .export-board{
+    padding: 12px 12px;
+  }
+  .export-board .board{
+    grid-auto-rows: 150px;
+    gap: 10px;
+  }
+  .export-board .cell{
+    border: 2px solid #e5e7eb;  /* solid, clean */
+    padding:0;
+  }
+  .export-board .cell .hint{display:none !important;}
+  .export-board .cell .xclear{display:none !important;}
+
+  .sig-stamp{
+    position:absolute;
+    left: 12px;
+    bottom: 10px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .sig-badge{
+    border:2px solid var(--good);
+    color:#166534;
+    border-radius:999px;
+    padding:5px 10px;
+    font-weight:1000;
+    letter-spacing:0.10em;
+    text-transform:uppercase;
+    font-size:11px;
+    background:#ffffff;
+  }
+  .sig-line{
+    font-size:12px;
+    font-weight:950;
+    color:#0f172a;
+    opacity:0.92;
+  }
+
 </style>
+
+<!-- html2canvas for ONE PAGE JPG export -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 
 <body>
 <header>
   <div class="row">
     <div class="title">
-      <h1>AI Storyboard (V2) — Tap image → Tap box → Export PDF</h1>
+      <h1>AI Storyboard (V2) — Tap image → Tap box → Export 1-Page JPG</h1>
       <span class="pill" id="armedPill">No image selected</span>
     </div>
     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
       <button class="btn" id="clearAllBtn" title="Clear everything"><span style="font-size:16px;">✕</span> Clear</button>
-      <button class="btn primary" id="exportPdfBtn" title="Export as PDF"><span style="font-size:16px;">🖨️</span> Export PDF</button>
+      <button class="btn primary" id="exportJpgBtn" title="Export ONE PAGE JPG"><span style="font-size:16px;">🖼️</span> Export JPG</button>
     </div>
   </div>
 </header>
@@ -325,16 +415,11 @@
     <label>Objective (one sentence)</label>
     <input id="objective" type="text" placeholder="Students will..." />
 
-    <label>Key Steps / Procedure (short)</label>
-    <textarea id="procedure" placeholder="1) Hook 2) Model 3) Investigation 4) Check for understanding..."></textarea>
+    <label>Procedure (short)</label>
+    <textarea id="procedure" placeholder="Keep it short. Export will trim extra."></textarea>
 
-    <label>Accommodations / Notes</label>
-    <textarea id="notes" placeholder="IEP supports, visuals, sentence starters, etc."></textarea>
-
-    <div class="print-note">
-      <strong>PDF Export tip:</strong> Click <strong>Export PDF</strong> → choose <strong>Save as PDF</strong>.
-      Rename the file to: <code>StoryAi_User_YYYY-MM-DD.pdf</code>
-    </div>
+    <label>Notes (short)</label>
+    <textarea id="notes" placeholder="Keep it short. Export will trim extra."></textarea>
   </section>
 
   <!-- dotted vertical line -->
@@ -344,68 +429,65 @@
   <section class="panel" id="rightPanel">
     <h2>Images</h2>
     <div class="muted">
-      No drag and drop. Just <strong>tap an image</strong> (it arms 🪄), then <strong>tap a box</strong> to place it.
-      Tap the same image again to unselect.
+      Tap an image (arms 🪄), then tap a box to place it. Tap the image again to unselect.
     </div>
 
-    <div class="print-hide">
-      <label>Upload Images (PNG/JPG)</label>
-      <input id="imgUpload" type="file" accept="image/*" multiple />
-      <div class="library" id="library"></div>
-    </div>
+    <label>Upload Images (PNG/JPG)</label>
+    <input id="imgUpload" type="file" accept="image/*" multiple />
+    <div class="library" id="library"></div>
 
     <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;" />
 
     <h2>Storyboard</h2>
-    <div class="muted" style="margin-bottom:10px">
-      Science labels are locked to your spec. Mode switch updates the box titles for Math / SS / English.
-    </div>
 
     <div class="board" id="board">
       <div class="cell" data-cell="anchor" style="grid-column: 1 / span 1; grid-row: 1 / span 2;">
         <div class="label" data-label="anchor">Anchor Phenomenon</div>
         <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
-        <div class="hint">Tap an image, then tap here</div>
+        <div class="hint">Tap image, then tap here</div>
       </div>
 
       <div class="cell" data-cell="box1">
         <div class="label" data-label="box1">Box 1</div>
         <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
-        <div class="hint">Tap an image, then tap here</div>
+        <div class="hint">Tap image, then tap here</div>
       </div>
       <div class="cell" data-cell="box2">
         <div class="label" data-label="box2">Box 2</div>
         <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
-        <div class="hint">Tap an image, then tap here</div>
+        <div class="hint">Tap image, then tap here</div>
       </div>
       <div class="cell" data-cell="box3">
         <div class="label" data-label="box3">Box 3</div>
         <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
-        <div class="hint">Tap an image, then tap here</div>
+        <div class="hint">Tap image, then tap here</div>
       </div>
       <div class="cell" data-cell="box4">
         <div class="label" data-label="box4">Box 4</div>
         <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
-        <div class="hint">Tap an image, then tap here</div>
+        <div class="hint">Tap image, then tap here</div>
       </div>
       <div class="cell" data-cell="box5">
         <div class="label" data-label="box5">Box 5</div>
         <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
-        <div class="hint">Tap an image, then tap here</div>
+        <div class="hint">Tap image, then tap here</div>
       </div>
       <div class="cell" data-cell="box6">
         <div class="label" data-label="box6">Box 6</div>
         <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
-        <div class="hint">Tap an image, then tap here</div>
+        <div class="hint">Tap image, then tap here</div>
       </div>
       <div class="cell" data-cell="box7">
         <div class="label" data-label="box7">Box 7</div>
         <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
-        <div class="hint">Tap an image, then tap here</div>
+        <div class="hint">Tap image, then tap here</div>
       </div>
     </div>
   </section>
 </main>
+
+<!-- Hidden host for export-only layout -->
+<div id="exportHost" style="position:fixed; left:-99999px; top:0; z-index:-1;"></div>
 
 <script>
   const $ = (id) => document.getElementById(id);
@@ -481,10 +563,7 @@
     });
   }
   applyTitles($("modeSel").value);
-
-  $("modeSel").addEventListener("change", () => {
-    applyTitles($("modeSel").value);
-  });
+  $("modeSel").addEventListener("change", () => applyTitles($("modeSel").value));
 
   // Image library + selection
   const imageLibrary = []; // {id, name, dataUrl}
@@ -538,31 +617,25 @@
     wrap.appendChild(tag);
 
     wrap.addEventListener("click", () => {
-      // toggle selection
       if (selectedImageId === item.id){
         selectedImageId = null;
       } else {
         selectedImageId = item.id;
       }
-      // update UI
       document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
-      if (selectedImageId){
-        wrap.classList.add("selected");
-      }
+      if (selectedImageId) wrap.classList.add("selected");
       setArmedPill();
     });
 
     $("library").appendChild(wrap);
   }
 
-  // Storyboard cell placement (tap-to-drop)
+  // Storyboard state
   const storyboard = {}; // cellKey -> {name, dataUrl}
 
   function renderCell(cell, dataUrl){
-    // Keep label + xclear, replace hint with image
     const label = cell.querySelector(".label");
     const x = cell.querySelector(".xclear");
-
     cell.innerHTML = "";
     cell.appendChild(label);
     cell.appendChild(x);
@@ -570,12 +643,10 @@
     const img = document.createElement("img");
     img.src = dataUrl;
     cell.appendChild(img);
-
     cell.classList.add("filled");
   }
 
   function resetCell(cell){
-    // restore hint
     const label = cell.querySelector(".label");
     const x = cell.querySelector(".xclear");
     cell.innerHTML = "";
@@ -584,20 +655,16 @@
 
     const hint = document.createElement("div");
     hint.className = "hint";
-    hint.textContent = "Tap an image, then tap here";
+    hint.textContent = "Tap image, then tap here";
     cell.appendChild(hint);
-
     cell.classList.remove("filled");
   }
 
   document.querySelectorAll(".cell").forEach(cell => {
     const key = cell.dataset.cell;
 
-    // tap cell to place
     cell.addEventListener("click", (ev) => {
-      // if they clicked the X button, ignore here
       if (ev.target && ev.target.classList && ev.target.classList.contains("xclear")) return;
-
       if (!selectedImageId) return;
       const item = imageLibrary.find(x => x.id === selectedImageId);
       if (!item) return;
@@ -606,7 +673,6 @@
       renderCell(cell, item.dataUrl);
     });
 
-    // per-cell clear X
     const xbtn = cell.querySelector(".xclear");
     xbtn.addEventListener("click", (ev) => {
       ev.stopPropagation();
@@ -615,13 +681,9 @@
     });
   });
 
-  // Global clear X
   $("clearAllBtn").addEventListener("click", () => {
-    // clear storyboard data
     Object.keys(storyboard).forEach(k => delete storyboard[k]);
-    // reset all cells
     document.querySelectorAll(".cell").forEach(resetCell);
-    // unselect image
     selectedImageId = null;
     document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
     setArmedPill();
@@ -629,14 +691,108 @@
 
   setArmedPill();
 
-  // Export PDF (boomer-proof): print dialog -> Save as PDF
-  $("exportPdfBtn").addEventListener("click", () => {
-    // Suggest filename via document title (some browsers use it)
-    const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g,"_");
+  // --------- ONE-PAGE EXPORT (JPG) ---------
+  function clampText(s, maxChars){
+    s = (s || "").trim();
+    if (!s) return "—";
+    if (s.length <= maxChars) return s;
+    return s.slice(0, maxChars - 1) + "…";
+  }
+
+  function makeExportFrame(){
+    const teacher = ($("teacherName").value || "User").trim();
     const date = ($("dateStr").value || todayISO()).trim();
-    document.title = `StoryAi_${teacher}_${date}`;
-    window.print();
-  });
+    const mode = ($("modeSel").value || "science").trim();
+
+    // Keep export tight: remove "excess blocks/words" by trimming hard.
+    const standard = clampText($("standard").value, 70);
+    const objective = clampText($("objective").value, 150);
+    const procedure = clampText($("procedure").value, 420);
+    const notes = clampText($("notes").value, 280);
+
+    // Clone board so placed images render
+    const boardClone = document.getElementById("board").cloneNode(true);
+    boardClone.querySelectorAll(".xclear").forEach(x => x.remove());
+    boardClone.querySelectorAll(".hint").forEach(h => h.remove());
+
+    const frame = document.createElement("div");
+    frame.className = "export-frame";
+
+    frame.innerHTML = `
+      <div class="export-header">
+        <div class="left">
+          <div class="export-title">StoryAi</div>
+          <div class="export-chip">${mode.toUpperCase()}</div>
+        </div>
+        <div class="left" style="justify-content:flex-end">
+          <div class="export-chip">${teacher}</div>
+          <div class="export-chip">${date}</div>
+        </div>
+      </div>
+
+      <div class="export-body">
+        <div class="export-text">
+          <div class="trow">
+            <div class="tlabel">Standard</div>
+            <div class="tbox">${standard}</div>
+          </div>
+          <div class="trow">
+            <div class="tlabel">Objective</div>
+            <div class="tbox">${objective}</div>
+          </div>
+          <div class="trow">
+            <div class="tlabel">Procedure</div>
+            <div class="tbox">${procedure}</div>
+          </div>
+          <div class="trow">
+            <div class="tlabel">Notes</div>
+            <div class="tbox">${notes}</div>
+          </div>
+        </div>
+
+        <div class="export-board">
+          <div class="board-wrap"></div>
+        </div>
+      </div>
+
+      <div class="sig-stamp">
+        <div class="sig-badge">🪄 SIGNED</div>
+        <div class="sig-line">${teacher} • ${date}</div>
+      </div>
+    `;
+
+    frame.querySelector(".export-board .board-wrap").appendChild(boardClone);
+    return frame;
+  }
+
+  async function exportOnePageJPG(){
+    const host = document.getElementById("exportHost");
+    host.innerHTML = "";
+    const frame = makeExportFrame();
+    host.appendChild(frame);
+
+    const canvas = await html2canvas(frame, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+      useCORS: true
+    });
+
+    const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g, "_");
+    const date = ($("dateStr").value || todayISO()).trim();
+    const filename = `StoryAi_${teacher}_${date}.jpg`;
+
+    const jpgData = canvas.toDataURL("image/jpeg", 0.92);
+    const a = document.createElement("a");
+    a.href = jpgData;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    host.innerHTML = "";
+  }
+
+  $("exportJpgBtn").addEventListener("click", exportOnePageJPG);
 </script>
 </body>
 </html>
