@@ -18,28 +18,34 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial;background:var(
 .small{flex:0 0 auto;border:2px solid #000;background:#fff;border-radius:12px;padding:10px 12px;font-weight:900;cursor:pointer;min-width:140px}
 .small.primary{background:#000;color:#fff}
 input,textarea{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px}
-textarea{resize:none;height:64px}
+textarea{resize:none;height:58px}
 .h{margin:0;font-weight:900}
 .m{margin:0;color:var(--muted);font-weight:700}
 .canvas{flex:1;min-height:0;border:2px solid #000;border-radius:12px;overflow:hidden;background:#fff;position:relative}
 canvas{width:100%;height:100%;display:block}
 
+/* PBIS checks (B/W) */
+label{font-weight:900}
+.checks{border:2px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:8px;background:#fff}
+.check{display:flex;align-items:center;gap:10px;font-weight:800}
+.check input{width:20px;height:20px;accent-color:#000}
+
 /* JPEG preview area */
 .jpeg{display:none;border:2px solid var(--line);border-radius:12px;padding:10px;background:#fff}
 .jpeg img{width:100%;height:auto;display:block}
 
-/* whirly woo */
+/* whirly woo (ONLY for Preview JPEG) */
 .whirl{
   display:none;
   position:absolute; inset:0;
-  background:rgba(255,255,255,0.72);
+  background:rgba(255,255,255,0.55); /* more transparent */
   backdrop-filter: blur(2px);
   display:grid; place-items:center;
 }
 .whirl .dot{
-  width:44px;height:44px;border-radius:999px;
-  border:5px solid #ddd; border-top-color:#000;
-  animation: spin .75s linear infinite;
+  width:40px;height:40px;border-radius:999px;
+  border:5px solid #e0e0e0; border-top-color:#000;
+  animation: spin .65s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -72,6 +78,15 @@ canvas{width:100%;height:100%;display:block}
         </div>
       </div>
 
+      <label>PBIS Checks (5)</label>
+      <div class="checks">
+        <div class="check"><input type="checkbox" id="c1"><span>ENGAGE in SAFTEY</span></div>
+        <div class="check"><input type="checkbox" id="c2"><span>LEARN TO EARN</span></div>
+        <div class="check"><input type="checkbox" id="c3"><span>ALWAYS RESPECTFUL</span></div>
+        <div class="check"><input type="checkbox" id="c4"><span>DO THE RIGHT THING</span></div>
+        <div class="check"><input type="checkbox" id="c5"><span>MY GOAL POINT</span></div>
+      </div>
+
       <p class="m">CHECK IN</p><textarea id="a1" placeholder="Today I will…"></textarea>
       <p class="m">REFLECT</p><textarea id="b1" placeholder="What happened?"></textarea>
       <p class="m">GOAL</p><textarea id="g1" placeholder="My goal point is…"></textarea>
@@ -100,10 +115,13 @@ canvas{width:100%;height:100%;display:block}
 const $=(s,el=document)=>el.querySelector(s);
 const S={check:false,reflect:false,goal:false};
 const btns={check:$("#tCheck"),reflect:$("#tReflect"),goal:$("#tGoal")};
-const f={name:$("#name"),group:$("#group"),a1:$("#a1"),b1:$("#b1"),g1:$("#g1")};
+const f={
+  name:$("#name"), group:$("#group"),
+  c1:$("#c1"), c2:$("#c2"), c3:$("#c3"), c4:$("#c4"), c5:$("#c5"),
+  a1:$("#a1"), b1:$("#b1"), g1:$("#g1")
+};
 
 const cv=$("#cv"), ctx=cv.getContext("2d",{alpha:false});
-
 function showWhirl(on){ $("#whirl").style.display = on ? "grid" : "none"; }
 
 function toggle(k){
@@ -134,41 +152,33 @@ function wrapByPixels(text, maxWidth){
   let line=words[0];
   for(let i=1;i<words.length;i++){
     const test=line+" "+words[i];
-    if(ctx.measureText(test).width<=maxWidth){
-      line=test;
-    }else{
-      lines.push(line);
-      line=words[i];
-    }
+    if(ctx.measureText(test).width<=maxWidth){ line=test; }
+    else{ lines.push(line); line=words[i]; }
   }
   lines.push(line);
   return lines;
 }
-
-/* draws one paragraph block with wrapping + returns new y */
 function drawWrappedParagraph(label, body, x, y, maxWidth, lineH, maxLines){
-  // label
-  ctx.font="900 12px system-ui";
-  ctx.fillStyle="#000";
-  ctx.fillText(label, x, y);
-  y += Math.floor(lineH * 1.15);
-
-  // body
-  ctx.font="700 12px system-ui";
-  ctx.fillStyle="#000";
-  const lines = wrapByPixels(body||"", maxWidth).filter(l=>l!==undefined);
-  const take = lines.slice(0, maxLines);
-  for(const ln of take){
-    ctx.fillText(ln, x, y);
-    y += lineH;
-  }
+  ctx.font="900 12px system-ui"; ctx.fillStyle="#000";
+  ctx.fillText(label, x, y); y += Math.floor(lineH * 1.15);
+  ctx.font="700 12px system-ui"; ctx.fillStyle="#000";
+  const lines = wrapByPixels(body||"", maxWidth).slice(0, maxLines);
+  for(const ln of lines){ ctx.fillText(ln, x, y); y += lineH; }
   return y + Math.floor(lineH * 0.6);
+}
+function checksSelected(){
+  const names=[];
+  if(f.c1.checked) names.push("ENGAGE in SAFTEY");
+  if(f.c2.checked) names.push("LEARN TO EARN");
+  if(f.c3.checked) names.push("ALWAYS RESPECTFUL");
+  if(f.c4.checked) names.push("DO THE RIGHT THING");
+  if(f.c5.checked) names.push("MY GOAL POINT");
+  return names;
 }
 
 function draw(){
   const w=cv.clientWidth, h=cv.clientHeight;
-  const pad=12;
-  const rightPad=12;
+  const pad=12, rightPad=12;
   const maxTextW = (w - pad - rightPad);
   const lineH=16;
 
@@ -182,65 +192,68 @@ function draw(){
   ctx.font="700 12px system-ui";
   ctx.fillText("W.L.E.A.D. • B/W Spine", pad, 42);
 
-  // meta (wrap-safe)
-  ctx.fillStyle="#111";
-  ctx.font="900 14px system-ui";
-  const student = "Student: " + (f.name.value.trim()||"__________");
-  ctx.fillText(student, pad, 80);
+  // student/meta (wrap-safe)
+  ctx.fillStyle="#111"; ctx.font="900 14px system-ui";
+  ctx.fillText("Student: " + (f.name.value.trim()||"__________"), pad, 80);
 
   ctx.font="700 12px system-ui";
   const meta = "Group: " + (f.group.value.trim()||"—") + "   Date: " + new Date().toLocaleDateString();
-  // meta may wrap on narrow screens:
   const metaLines = wrapByPixels(meta, maxTextW);
   let metaY = 102;
-  for(const ln of metaLines.slice(0,2)){
-    ctx.fillText(ln, pad, metaY);
-    metaY += 16;
-  }
+  for(const ln of metaLines.slice(0,2)){ ctx.fillText(ln, pad, metaY); metaY += 16; }
 
   // divider
   ctx.strokeStyle="#cfcfcf"; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(pad, metaY+6); ctx.lineTo(w-pad, metaY+6); ctx.stroke();
 
-  // body area
-  let y = metaY + 30;
+  // checks line (wrapped)
+  const checked = checksSelected();
+  let y = metaY + 26;
 
-  // If nothing selected, show instruction
-  if(!S.check && !S.reflect && !S.goal){
-    ctx.fillStyle="#000";
-    ctx.font="900 13px system-ui";
-    const msg="Tap CHECK IN / REFLECT / GOAL to add sections.";
-    for(const ln of wrapByPixels(msg, maxTextW).slice(0,3)){
-      ctx.fillText(ln, pad, y); y += 18;
-    }
-  } else {
-    const maxLinesPerSection = 4; // safe; prevents running off bottom
+  ctx.fillStyle="#000";
+  ctx.font="900 12px system-ui";
+  ctx.fillText("PBIS CHECKS:", pad, y);
+  y += 18;
 
-    if(S.check){
-      y = drawWrappedParagraph("CHECK IN:", f.a1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
-    }
-    if(S.reflect){
-      y = drawWrappedParagraph("REFLECT:", f.b1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
-    }
-    if(S.goal){
-      y = drawWrappedParagraph("GOAL:", f.g1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
-    }
+  ctx.font="700 12px system-ui";
+  const checksText = checked.length ? checked.join(" • ") : "(none selected)";
+  for(const ln of wrapByPixels(checksText, maxTextW).slice(0,3)){
+    ctx.fillText(ln, pad, y);
+    y += 16;
   }
 
-  // status line for teacher UI
+  // divider under checks
+  y += 6;
+  ctx.strokeStyle="#cfcfcf"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w-pad, y); ctx.stroke();
+  y += 22;
+
+  // body
+  if(!S.check && !S.reflect && !S.goal){
+    ctx.fillStyle="#000"; ctx.font="900 13px system-ui";
+    const msg="Tap CHECK IN / REFLECT / GOAL to add sections.";
+    for(const ln of wrapByPixels(msg, maxTextW).slice(0,3)){ ctx.fillText(ln, pad, y); y += 18; }
+  } else {
+    const maxLinesPerSection = 4;
+    if(S.check)   y = drawWrappedParagraph("CHECK IN:", f.a1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
+    if(S.reflect) y = drawWrappedParagraph("REFLECT:", f.b1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
+    if(S.goal)    y = drawWrappedParagraph("GOAL:", f.g1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
+  }
+
   $("#status").textContent =
     ("Selected: " + (S.check?"CHECK IN ":"") + (S.reflect?"REFLECT ":"") + (S.goal?"GOAL":"")).trim()
     || "Tap an activity. Preview updates instantly.";
 }
 
 ["input","change"].forEach(evt=>{
-  Object.values(f).forEach(el=>el.addEventListener(evt, ()=>{ $("#jpegBox").style.display="none"; draw(); }));
+  Object.values(f).forEach(el=>{
+    el.addEventListener(evt, ()=>{ $("#jpegBox").style.display="none"; draw(); });
+  });
 });
 
 $("#preview").onclick=()=>{
   $("#jpegBox").style.display="none";
-  showWhirl(true);
-  // let the spinner render before heavy work
+  showWhirl(true); // ONLY here
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
       draw();
@@ -257,39 +270,34 @@ $("#preview").onclick=()=>{
 };
 
 $("#download").onclick=()=>{
-  showWhirl(true);
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      draw();
-      const base=(f.name.value.trim()||"pbis_ticket").replace(/\s+/g,"_");
-      const file=base+".jpg";
-      const done=()=>showWhirl(false);
+  // no whirly woo here (as requested)
+  draw();
+  const base=(f.name.value.trim()||"pbis_ticket").replace(/\s+/g,"_");
+  const file=base+".jpg";
 
-      if(cv.toBlob){
-        cv.toBlob(blob=>{
-          if(!blob){ done(); alert("Download failed."); return; }
-          const url=URL.createObjectURL(blob);
-          const a=document.createElement("a");
-          a.href=url; a.download=file;
-          document.body.appendChild(a); a.click(); a.remove();
-          setTimeout(()=>URL.revokeObjectURL(url),800);
-          done();
-        },"image/jpeg",0.92);
-      }else{
-        try{
-          const a=document.createElement("a");
-          a.href=cv.toDataURL("image/jpeg",0.92);
-          a.download=file;
-          document.body.appendChild(a); a.click(); a.remove();
-        }catch(e){ alert("Download failed."); }
-        done();
-      }
-    });
-  });
+  if(cv.toBlob){
+    cv.toBlob(blob=>{
+      if(!blob){ alert("Download failed."); return; }
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url; a.download=file;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),800);
+    },"image/jpeg",0.92);
+  }else{
+    try{
+      const a=document.createElement("a");
+      a.href=cv.toDataURL("image/jpeg",0.92);
+      a.download=file;
+      document.body.appendChild(a); a.click(); a.remove();
+    }catch(e){ alert("Download failed."); }
+  }
 };
 
 $("#clear").onclick=()=>{
-  f.name.value=""; f.group.value=""; f.a1.value=""; f.b1.value=""; f.g1.value="";
+  f.name.value=""; f.group.value="";
+  f.c1.checked=f.c2.checked=f.c3.checked=f.c4.checked=f.c5.checked=false;
+  f.a1.value=""; f.b1.value=""; f.g1.value="";
   S.check=S.reflect=S.goal=false;
   Object.values(btns).forEach(b=>b.classList.remove("on"));
   $("#jpegBox").style.display="none";
