@@ -89,12 +89,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 # =====================
-
 # THEME SELECTION
-
 # =====================
 
-is_science = st.session_state[“theme_mode”] == “science”
+is_science = st.session_state["theme_mode"] == "science"
 
 BG = SCI_BG if is_science else NEUTRAL_BG
 CARD = SCI_CARD if is_science else NEUTRAL_CARD
@@ -102,14 +100,13 @@ BORDER = SCI_BORDER if is_science else NEUTRAL_BORDER
 TEXT = SCI_TEXT if is_science else NEUTRAL_TEXT
 MUTED = SCI_MUTED if is_science else NEUTRAL_MUTED
 
-# =====================
 
+# =====================
 # GLASSY UI + TV OVERLAY
-
 # =====================
 
-st.markdown(f”””
-
+st.markdown(
+    f"""
 <style>
 :root {{
   --bg: {BG};
@@ -148,7 +145,7 @@ input, textarea, select {{
 }}
 
 textarea {{
-  font-family: 'Courier New', monospace !important;
+  font-family: "Courier New", monospace !important;
   font-size: 13px !important;
 }}
 
@@ -197,14 +194,14 @@ button[kind="primary"] {{
   background: rgba(0,0,0,0.05);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 
+  box-shadow:
     0 0 40px rgba(20,184,166,0.2),
     inset 0 0 60px rgba(20,184,166,0.05);
 }}
 
 /* Scan line effect */
 .tv-frame::before {{
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -229,7 +226,7 @@ button[kind="primary"] {{
 
 /* Glow effect */
 .tv-frame::after {{
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
@@ -258,8 +255,9 @@ button[kind="primary"] {{
   z-index: 3;
 }}
 </style>
-
-“””, unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # =====================
 
