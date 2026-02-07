@@ -2,6 +2,8 @@ import io
 from datetime import date
 import streamlit as st
 
+from .app import main
+
 # ============================================================
 
 # BSChapp v2 — GLASSY UI + PROJECT NORTH STAR INTEGRATION
