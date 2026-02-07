@@ -2,7 +2,17 @@ import io
 from datetime import date
 import streamlit as st
 
-# Try PDF engine (ReportLab). If missing on Streamlit Cloud, we fallback to HTML.
+# ============================================================
+# BSChapp v1 — FREEZE BUILD
+# - Universal neutral gray by default (Science is NOT default)
+# - Science Mode = impactful blue-green UI + NGSS + 5E emblems
+# - Palm ID: 🌴 tap 3x → unlock admin code box (code: "Bshapp")
+# - Boomer-proof rails + simple editor + PDF download (HTML fallback)
+# ============================================================
+
+# -----------------------------
+# PDF engine (ReportLab)
+# -----------------------------
 REPORTLAB_OK = True
 try:
     from reportlab.pdfgen import canvas
@@ -12,12 +22,12 @@ except Exception:
     REPORTLAB_OK = False
 
 # =====================
-# RIGID RAILS (Boomer-proof)
+# RIGID RAILS
 # =====================
 GRADE_BANDS = ["HS", "MS", "5", "4", "3", "2", "1", "K"]
 
-# Light neutral UI for all subjects; Science gets "Science Mode" UI.
-SUBJECTS = ["Science", "Math", "ELA"]  # keep rigid
+# Science is NOT default. Default = "Select…" which keeps neutral UI.
+SUBJECTS = ["Select…", "Science", "Math", "ELA"]
 
 SCIENCE_BRANCHES = [
     "Earth & Space Science",
@@ -51,10 +61,10 @@ SCIENCE_UNITS = {
     ]
 }
 
-# Minimal generic units (placeholders) for non-science subjects for v1
 GENERIC_UNITS = {
     "Math": ["Unit A", "Unit B", "Unit C"],
     "ELA": ["Unit A", "Unit B", "Unit C"],
+    "Select…": ["Unit A"],
 }
 
 # =====================
@@ -76,27 +86,37 @@ DEFAULT_PROMPTS = {
     "Photo Evidence": "Artifact Type:\n\nEvidence Summary (Teacher):\n\nStudent Objective:\n\nNotes:"
 }
 
-# UI colors
-NEUTRAL_BG = "#f3f4f6"      # light neutral gray
-NEUTRAL_CARD = "#ffffff"    # white cards
+# =====================
+# THEME TOKENS
+# =====================
+# Universal neutral gray
+NEUTRAL_BG = "#f3f4f6"
+NEUTRAL_CARD = "#ffffff"
 NEUTRAL_BORDER = "rgba(0,0,0,0.10)"
 NEUTRAL_TEXT = "#111827"
 NEUTRAL_MUTED = "#4b5563"
+NEUTRAL_ACCENT = "#6b7280"
 
-SCI_BG = "#061B15"          # deep teal-black
+# Science mode (impactful blue-green)
+SCI_BG = "#061B15"
 SCI_CARD = "rgba(255,255,255,0.06)"
 SCI_BORDER = "rgba(120,255,220,0.24)"
 SCI_TEXT = "rgba(255,255,255,0.92)"
-SCI_MUTED = "rgba(255,255,255,0.72)"
-SCI_BLUE = "#2F5BEA"        # signature bridge blue
-SCI_GREEN = "#14B8A6"       # blue-green accent
-SCI_GREEN_2 = "#22C55E"     # secondary green accent
+SCI_MUTED = "rgba(255,255,255,0.74)"
+SCI_ACCENT = "#14B8A6"      # blue-green
+SCI_ACCENT2 = "#2F5BEA"     # bridge blue (also used for signature)
 
-# Emblems (text-only for reliability)
+# Emblems (text-only = reliable)
 NGSS_EMBLEM = "NGSS"
 FIVE_E_EMBLEM = "5E"
 
+# Admin code (Palm ID unlock)
+ADMIN_CODE = "Bshapp"
 
+
+# =====================
+# HELPERS
+# =====================
 def wrap_lines(text: str, max_chars: int = 95):
     out = []
     for para in (text or "").split("\n"):
@@ -133,11 +153,10 @@ def build_pdf_bytes(
     c.setFont("Helvetica-Bold", 18)
     c.drawString(x0, y, artifact)
 
-    # Emblems (only for science)
+    # Science emblems top-right
     if subject == "Science":
-        badge_text = f"[{NGSS_EMBLEM}]  [{FIVE_E_EMBLEM}]"
         c.setFont("Helvetica-Bold", 11)
-        c.drawRightString(w - margin, y + 2, badge_text)
+        c.drawRightString(w - margin, y + 2, f"[{NGSS_EMBLEM}]  [{FIVE_E_EMBLEM}]")
 
     y -= 0.32 * inch
 
@@ -166,21 +185,17 @@ def build_pdf_bytes(
 
     # Lesson / Topic
     if lesson_title:
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(x0, y, "Lesson/Topic:")
-        c.setFont("Helvetica", 12)
-        c.drawString(x0 + 1.2 * inch, y, lesson_title)
+        c.setFont("Helvetica-Bold", 12); c.drawString(x0, y, "Lesson/Topic:")
+        c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, lesson_title)
         y -= 0.22 * inch
 
     # Standards
     if standard_tags:
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(x0, y, "Standards:")
-        c.setFont("Helvetica", 12)
-        c.drawString(x0 + 1.2 * inch, y, standard_tags)
+        c.setFont("Helvetica-Bold", 12); c.drawString(x0, y, "Standards:")
+        c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, standard_tags)
         y -= 0.22 * inch
 
-    # Signature top-right (blue bridge)
+    # Signature top-right (bridge blue)
     if signature:
         c.setFillColorRGB(0.184, 0.357, 0.918)
         c.setFont("Helvetica-Bold", 11.5)
@@ -204,7 +219,7 @@ def build_pdf_bytes(
             c.showPage()
             y = h - margin
 
-            # repeat emblems (science) + signature on new page
+            # repeat emblems + signature on new pages
             if subject == "Science":
                 c.setFont("Helvetica-Bold", 11)
                 c.drawRightString(w - margin, y + 2, f"[{NGSS_EMBLEM}]  [{FIVE_E_EMBLEM}]")
@@ -243,7 +258,6 @@ def build_html(
     branch,
     unit
 ) -> str:
-    # HTML fallback: download then Print → Save as PDF
     title_line = f"<div style='font-size:20pt;font-weight:900'>{artifact}</div>"
     meta = f"<div style='margin-top:8px'>Date: {date.today().isoformat()}</div>"
 
@@ -258,7 +272,7 @@ def build_html(
     stags = f"<div><b>Standards:</b> {standard_tags}</div>" if standard_tags else ""
 
     sig = (
-        f"<div style='position:fixed;top:24px;right:28px;color:{SCI_BLUE};font-weight:800'>✍️ {signature}</div>"
+        f"<div style='position:fixed;top:24px;right:28px;color:{SCI_ACCENT2};font-weight:800'>✍️ {signature}</div>"
         if signature else ""
     )
 
@@ -292,15 +306,24 @@ hr {{ border:none; border-top:2px solid #000; margin: 14px 0; }}
 </body></html>"""
 
 
-# ================= UI =================
+# =====================
+# SESSION STATE DEFAULTS
+# =====================
+if "subject_mode" not in st.session_state:
+    st.session_state["subject_mode"] = "Select…"   # NOT science by default
+if "palm_taps" not in st.session_state:
+    st.session_state["palm_taps"] = 0
+if "admin_unlocked" not in st.session_state:
+    st.session_state["admin_unlocked"] = False
+if "show_admin_box" not in st.session_state:
+    st.session_state["show_admin_box"] = False
+
+# =====================
+# STREAMLIT UI
+# =====================
 st.set_page_config(page_title="BSChapp v1", layout="centered")
 
-# First: collect subject quickly so we can theme the page
-# We'll create a lightweight "pre-select" subject in session_state.
-if "subject_mode" not in st.session_state:
-    st.session_state["subject_mode"] = "Science"  # default to science for now (you can change)
-
-# Theme tokens based on subject
+# Determine theme based on subject selection
 is_science = (st.session_state["subject_mode"] == "Science")
 
 BG = SCI_BG if is_science else NEUTRAL_BG
@@ -308,10 +331,8 @@ CARD = SCI_CARD if is_science else NEUTRAL_CARD
 BORDER = SCI_BORDER if is_science else NEUTRAL_BORDER
 TEXT = SCI_TEXT if is_science else NEUTRAL_TEXT
 MUTED = SCI_MUTED if is_science else NEUTRAL_MUTED
-ACCENT = SCI_GREEN if is_science else "#6b7280"
-ACCENT2 = SCI_GREEN_2 if is_science else "#9ca3af"
+ACCENT = SCI_ACCENT if is_science else NEUTRAL_ACCENT
 
-# Global CSS: neutral gray vs science blue-green
 st.markdown(f"""
 <style>
 :root {{
@@ -321,7 +342,6 @@ st.markdown(f"""
   --text:{TEXT};
   --muted:{MUTED};
   --accent:{ACCENT};
-  --accent2:{ACCENT2};
 }}
 
 div[data-testid="stAppViewContainer"] {{
@@ -329,13 +349,7 @@ div[data-testid="stAppViewContainer"] {{
   color: var(--text);
 }}
 
-.block-container {{
-  padding-top: 1.2rem;
-}}
-
-h1, h2, h3, p, label, div {{
-  color: var(--text);
-}}
+h1, h2, h3, p, label, div {{ color: var(--text); }}
 
 .small-muted {{
   color: var(--muted);
@@ -350,11 +364,11 @@ h1, h2, h3, p, label, div {{
 }}
 
 .badge {{
-  display: inline-block;
+  display:inline-block;
   padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 0.02em;
   background: rgba(255,255,255,0.04);
 }}
@@ -363,24 +377,43 @@ h1, h2, h3, p, label, div {{
   border-color: var(--accent);
 }}
 
-button[kind="primary"] {{
-  border: 2px solid var(--accent) !important;
-}}
-
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🧩 BSChapp v1")
+# Header row with Palm ID on the right
+left, right = st.columns([0.88, 0.12], vertical_alignment="center")
+with left:
+    st.title("🧩 BSChapp v1")
+    st.caption("Default: universal neutral gray • Science: blue-green Science Mode")
+with right:
+    # Palm ID: tap 3x to show admin code box
+    if st.button("🌴", help="Palm ID (tap 3x)"):
+        st.session_state["palm_taps"] += 1
+        if st.session_state["palm_taps"] >= 3:
+            st.session_state["show_admin_box"] = True
 
-st.caption("Boomer-proof: select rails → edit → preview → download → tap to print")
-
-# SUBJECT MODE selector (drives UI theme)
-st.markdown("### Subject Mode")
-subject_mode = st.selectbox("Select subject (required)", SUBJECTS, index=0, key="subject_mode")
+# Admin gate
+if st.session_state["show_admin_box"] and not st.session_state["admin_unlocked"]:
+    st.markdown("<div class='card'><b>Palm ID:</b> enter admin code</div>", unsafe_allow_html=True)
+    code_try = st.text_input("Admin Code", type="password", placeholder="Enter code…")
+    if st.button("Unlock Admin"):
+        if code_try == ADMIN_CODE:
+            st.session_state["admin_unlocked"] = True
+            st.success("Admin override unlocked.")
+        else:
+            st.error("Incorrect code.")
+elif st.session_state["admin_unlocked"]:
+    st.markdown("<div class='card'><b>Admin Override:</b> unlocked</div>", unsafe_allow_html=True)
 
 st.divider()
 
-# REQUIRED rails
+# Subject drives theme (Science not default)
+st.markdown("### Subject Mode (required)")
+subject_mode = st.selectbox("Select subject", SUBJECTS, index=SUBJECTS.index(st.session_state["subject_mode"]), key="subject_mode")
+
+st.divider()
+
+# Required rails
 st.markdown("### Required selections (rigid)")
 grade_band = st.selectbox("Grade Band (required)", GRADE_BANDS, index=0)
 
@@ -391,20 +424,27 @@ if subject_mode == "Science":
     science_branch = st.selectbox("Science Branch (required)", SCIENCE_BRANCHES, index=0)
     unit = st.selectbox("Unit (required)", SCIENCE_UNITS[science_branch], index=0)
 else:
-    unit = st.selectbox("Unit (required)", GENERIC_UNITS.get(subject_mode, ["Unit A"]), index=0)
+    unit_list = GENERIC_UNITS.get(subject_mode, ["Unit A"])
+    unit = st.selectbox("Unit (required)", unit_list, index=0)
 
-# Emblems shown only in science mode
+# Science emblems (auto)
 if subject_mode == "Science":
-    st.markdown(f"<div class='card'><span class='badge badge-accent'>[{NGSS_EMBLEM}]</span> <span class='badge badge-accent'>[{FIVE_E_EMBLEM}]</span> <span class='small-muted' style='margin-left:10px;'>Science Mode active (blue-green UI)</span></div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='card'><span class='badge badge-accent'>[{NGSS_EMBLEM}]</span> "
+        f"<span class='badge badge-accent'>[{FIVE_E_EMBLEM}]</span> "
+        f"<span class='small-muted' style='margin-left:10px;'>Science Mode active</span></div>",
+        unsafe_allow_html=True
+    )
 else:
-    st.markdown("<div class='card'><span class='small-muted'>Neutral mode active (light gray UI)</span></div>", unsafe_allow_html=True)
+    st.markdown("<div class='card'><span class='small-muted'>Neutral mode active</span></div>", unsafe_allow_html=True)
 
 # Optional headers
 lesson_title = st.text_input("Lesson / Topic Title (optional)")
-standard_tags = st.text_input("Standard Tags (optional) — comma separated")
+standard_tags = st.text_input("Standards (optional) — comma separated")
 signature = st.text_input("Signature (optional)", placeholder="Initials / name (cosmetic only)")
 
 st.divider()
+
 artifact = st.selectbox("Choose a document", ARTIFACTS)
 
 st.markdown("### Edit content")
@@ -416,6 +456,7 @@ with st.expander("Claude Window (placeholder — coming soon)"):
 
 st.divider()
 
+# Preview
 st.markdown("### Preview")
 st.write(f"**{artifact}**")
 st.write(f"**Grade Band:** {grade_band}  |  **Subject:** {subject_mode}")
@@ -432,49 +473,53 @@ st.write(body)
 
 st.divider()
 
-today = date.today().isoformat()
-
-if REPORTLAB_OK:
-    pdf_bytes = build_pdf_bytes(
-        artifact=artifact,
-        lesson_title=lesson_title.strip(),
-        standard_tags=standard_tags.strip(),
-        signature=signature.strip(),
-        body_text=body,
-        grade_band=grade_band,
-        subject=subject_mode,
-        branch=science_branch,
-        unit=unit
-    )
-    filename = f"{artifact.replace(' ', '_').lower()}_{today}.pdf"
-    st.download_button(
-        "Download PDF (tap to print)",
-        data=pdf_bytes,
-        file_name=filename,
-        mime="application/pdf",
-        use_container_width=True
-    )
+# Block download until subject selected (boomer rail)
+if subject_mode == "Select…":
+    st.warning("Select a subject to enable download.")
 else:
-    st.warning("PDF engine not installed yet. Add `reportlab` to requirements.txt to enable PDF downloads.")
-    html = build_html(
-        artifact=artifact,
-        lesson_title=lesson_title.strip(),
-        standard_tags=standard_tags.strip(),
-        signature=signature.strip(),
-        body_text=body,
-        grade_band=grade_band,
-        subject=subject_mode,
-        branch=science_branch,
-        unit=unit
-    )
-    filename = f"{artifact.replace(' ', '_').lower()}_{today}.html"
-    st.download_button(
-        "Download HTML (then Print → Save as PDF)",
-        data=html,
-        file_name=filename,
-        mime="text/html",
-        use_container_width=True
-    )
-    st.info("iPhone: after download → open HTML → Share → Print → pinch-out → Save/Share PDF.")
+    today = date.today().isoformat()
 
-st.caption("BSChapp v1 • Teacher-owned • No tracking • Admin-blind by default")
+    if REPORTLAB_OK:
+        pdf_bytes = build_pdf_bytes(
+            artifact=artifact,
+            lesson_title=lesson_title.strip(),
+            standard_tags=standard_tags.strip(),
+            signature=signature.strip(),
+            body_text=body,
+            grade_band=grade_band,
+            subject=subject_mode,
+            branch=science_branch,
+            unit=unit
+        )
+        filename = f"{artifact.replace(' ', '_').lower()}_{today}.pdf"
+        st.download_button(
+            "Download PDF (tap to print)",
+            data=pdf_bytes,
+            file_name=filename,
+            mime="application/pdf",
+            use_container_width=True
+        )
+    else:
+        st.warning("PDF engine not installed yet. Add `reportlab` to requirements.txt to enable PDF downloads.")
+        html = build_html(
+            artifact=artifact,
+            lesson_title=lesson_title.strip(),
+            standard_tags=standard_tags.strip(),
+            signature=signature.strip(),
+            body_text=body,
+            grade_band=grade_band,
+            subject=subject_mode,
+            branch=science_branch,
+            unit=unit
+        )
+        filename = f"{artifact.replace(' ', '_').lower()}_{today}.html"
+        st.download_button(
+            "Download HTML (then Print → Save as PDF)",
+            data=html,
+            file_name=filename,
+            mime="text/html",
+            use_container_width=True
+        )
+        st.info("iPhone: after download → open HTML → Share → Print → pinch-out → Save/Share PDF.")
+
+st.caption("BSChapp v1 • Teacher-owned • No tracking • Admin-blind by default • FREEZE")
