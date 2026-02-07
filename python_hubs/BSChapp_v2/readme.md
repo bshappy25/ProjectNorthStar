@@ -1,0 +1,3 @@
+# BSChapp v2 - Setup Guide
+...
+(all the documentation text)
