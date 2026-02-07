@@ -79,18 +79,15 @@ def load_tool(name):
     return ""
 
 # =====================
-
 # PAGE CONFIG
-
 # =====================
 
 st.set_page_config(
-page_title=“Teacher Tools Hub”,
-page_icon=“📺”,
-layout=“wide”,
-initial_sidebar_state=“expanded”
+    page_title="Teacher Tools Hub",
+    page_icon="📺",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
-
 # =====================
 
 # THEME SELECTION
