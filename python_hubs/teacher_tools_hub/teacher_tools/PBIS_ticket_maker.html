@@ -15,27 +15,44 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial;background:var(
 .row.wrap{flex-wrap:wrap;height:auto;padding:0;justify-content:flex-start}
 .btn{flex:1;min-width:0;border:2px solid #000;background:#fff;color:#000;border-radius:12px;padding:12px;font-weight:900;cursor:pointer}
 .btn.on{background:#000;color:#fff}
-.small{flex:0 0 auto;border:2px solid #000;background:#fff;border-radius:12px;padding:10px 12px;font-weight:900;cursor:pointer}
+.small{flex:0 0 auto;border:2px solid #000;background:#fff;border-radius:12px;padding:10px 12px;font-weight:900;cursor:pointer;min-width:140px}
 .small.primary{background:#000;color:#fff}
-.small.danger{border-color:#000;background:#fff;color:#000}
 input,textarea{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px}
 textarea{resize:none;height:64px}
 .h{margin:0;font-weight:900}
 .m{margin:0;color:var(--muted);font-weight:700}
-.canvas{flex:1;min-height:0;border:2px solid #000;border-radius:12px;overflow:hidden;background:#fff}
+.canvas{flex:1;min-height:0;border:2px solid #000;border-radius:12px;overflow:hidden;background:#fff;position:relative}
 canvas{width:100%;height:100%;display:block}
+
+/* JPEG preview area */
 .jpeg{display:none;border:2px solid var(--line);border-radius:12px;padding:10px;background:#fff}
 .jpeg img{width:100%;height:auto;display:block}
+
+/* whirly woo */
+.whirl{
+  display:none;
+  position:absolute; inset:0;
+  background:rgba(255,255,255,0.72);
+  backdrop-filter: blur(2px);
+  display:grid; place-items:center;
+}
+.whirl .dot{
+  width:44px;height:44px;border-radius:999px;
+  border:5px solid #ddd; border-top-color:#000;
+  animation: spin .75s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 .foot{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 </style></head><body>
 <div class="top"><div class="badge">PB</div><div>
   <div style="font-weight:900;letter-spacing:.08em">PBIS TICKET MAKER</div>
-  <div style="font-weight:700;opacity:.85;font-size:.92rem">B/W Spine • No Scroll • Embed Safe</div>
+  <div style="font-weight:700;opacity:.85;font-size:.92rem">B/W Spine • No Scroll • Wrapped Text</div>
 </div></div>
 
 <div class="wrap"><div class="card">
   <div class="grid">
-    <div class="col" id="left">
+    <div class="col">
       <p class="h" id="status">Tap an activity. Preview updates instantly.</p>
 
       <div class="row wrap" role="group" aria-label="Activities">
@@ -62,15 +79,19 @@ canvas{width:100%;height:100%;display:block}
       <div class="foot">
         <button class="small" id="preview" type="button">Preview JPEG</button>
         <button class="small primary" id="download" type="button">Download JPEG</button>
-        <button class="small danger" id="clear" type="button">Clean Up</button>
+        <button class="small" id="clear" type="button">Clean Up</button>
       </div>
-      <p class="m" id="note">If Sites blocks downloads, use Preview → long-press image → Save.</p>
+      <p class="m" id="note">If an embed blocks download: use Preview → long-press image → Save.</p>
     </div>
 
-    <div class="col" id="right">
+    <div class="col">
       <p class="h">Preview</p>
       <div class="jpeg" id="jpegBox"><img id="jpegImg" alt="JPEG Preview"/></div>
-      <div class="canvas"><canvas id="cv"></canvas></div>
+
+      <div class="canvas" id="canvasWrap">
+        <div class="whirl" id="whirl"><div class="dot" aria-label="Loading"></div></div>
+        <canvas id="cv"></canvas>
+      </div>
     </div>
   </div>
 </div></div>
@@ -80,80 +101,133 @@ const $=(s,el=document)=>el.querySelector(s);
 const S={check:false,reflect:false,goal:false};
 const btns={check:$("#tCheck"),reflect:$("#tReflect"),goal:$("#tGoal")};
 const f={name:$("#name"),group:$("#group"),a1:$("#a1"),b1:$("#b1"),g1:$("#g1")};
+
 const cv=$("#cv"), ctx=cv.getContext("2d",{alpha:false});
 
-function toggle(k){ S[k]=!S[k]; btns[k].classList.toggle("on",S[k]); $("#jpegBox").style.display="none"; draw(); }
-btns.check.onclick=()=>toggle("check"); btns.reflect.onclick=()=>toggle("reflect"); btns.goal.onclick=()=>toggle("goal");
+function showWhirl(on){ $("#whirl").style.display = on ? "grid" : "none"; }
+
+function toggle(k){
+  S[k]=!S[k];
+  btns[k].classList.toggle("on",S[k]);
+  $("#jpegBox").style.display="none";
+  draw();
+}
+btns.check.onclick=()=>toggle("check");
+btns.reflect.onclick=()=>toggle("reflect");
+btns.goal.onclick=()=>toggle("goal");
 
 function fit(){
   const box=cv.parentElement.getBoundingClientRect();
   const dpr=Math.max(1,window.devicePixelRatio||1);
-  cv.width=Math.floor(box.width*dpr); cv.height=Math.floor(box.height*dpr);
+  cv.width=Math.floor(box.width*dpr);
+  cv.height=Math.floor(box.height*dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
   draw();
 }
 window.addEventListener("resize",fit);
 
-function lines(t,max=62){
-  const w=(t||"").replace(/\r/g,"").split(/\s+/).filter(Boolean);
-  let out=[], line="";
-  for(const word of w){
-    const test=line?line+" "+word:word;
-    if(test.length>max){ if(line) out.push(line); line=word; } else line=test;
+/* === PIXEL-PERFECT WRAP === */
+function wrapByPixels(text, maxWidth){
+  const words=(text||"").replace(/\r/g,"").split(/\s+/).filter(Boolean);
+  if(!words.length) return [""];
+  const lines=[];
+  let line=words[0];
+  for(let i=1;i<words.length;i++){
+    const test=line+" "+words[i];
+    if(ctx.measureText(test).width<=maxWidth){
+      line=test;
+    }else{
+      lines.push(line);
+      line=words[i];
+    }
   }
-  if(line) out.push(line);
-  return out;
+  lines.push(line);
+  return lines;
+}
+
+/* draws one paragraph block with wrapping + returns new y */
+function drawWrappedParagraph(label, body, x, y, maxWidth, lineH, maxLines){
+  // label
+  ctx.font="900 12px system-ui";
+  ctx.fillStyle="#000";
+  ctx.fillText(label, x, y);
+  y += Math.floor(lineH * 1.15);
+
+  // body
+  ctx.font="700 12px system-ui";
+  ctx.fillStyle="#000";
+  const lines = wrapByPixels(body||"", maxWidth).filter(l=>l!==undefined);
+  const take = lines.slice(0, maxLines);
+  for(const ln of take){
+    ctx.fillText(ln, x, y);
+    y += lineH;
+  }
+  return y + Math.floor(lineH * 0.6);
 }
 
 function draw(){
   const w=cv.clientWidth, h=cv.clientHeight;
+  const pad=12;
+  const rightPad=12;
+  const maxTextW = (w - pad - rightPad);
+  const lineH=16;
+
   ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h);
 
   // header
   ctx.fillStyle="#000"; ctx.fillRect(0,0,w,54);
-  ctx.fillStyle="#fff"; ctx.font="900 14px system-ui"; ctx.textAlign="left";
-  ctx.fillText("PBIS TICKET", 12, 22);
+  ctx.fillStyle="#fff"; ctx.textAlign="left";
+  ctx.font="900 14px system-ui";
+  ctx.fillText("PBIS TICKET", pad, 22);
   ctx.font="700 12px system-ui";
-  ctx.fillText("W.L.E.A.D. • B/W Spine", 12, 42);
+  ctx.fillText("W.L.E.A.D. • B/W Spine", pad, 42);
 
-  // meta
-  ctx.fillStyle="#111"; ctx.font="900 13px system-ui";
-  ctx.fillText("Student: " + (f.name.value.trim()||"__________"), 12, 78);
+  // meta (wrap-safe)
+  ctx.fillStyle="#111";
+  ctx.font="900 14px system-ui";
+  const student = "Student: " + (f.name.value.trim()||"__________");
+  ctx.fillText(student, pad, 80);
+
   ctx.font="700 12px system-ui";
-  ctx.fillText("Group: " + (f.group.value.trim()||"—") + "   Date: " + new Date().toLocaleDateString(), 12, 98);
+  const meta = "Group: " + (f.group.value.trim()||"—") + "   Date: " + new Date().toLocaleDateString();
+  // meta may wrap on narrow screens:
+  const metaLines = wrapByPixels(meta, maxTextW);
+  let metaY = 102;
+  for(const ln of metaLines.slice(0,2)){
+    ctx.fillText(ln, pad, metaY);
+    metaY += 16;
+  }
 
   // divider
   ctx.strokeStyle="#cfcfcf"; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(12,112); ctx.lineTo(w-12,112); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad, metaY+6); ctx.lineTo(w-pad, metaY+6); ctx.stroke();
 
-  // body
-  let y=134;
-  ctx.fillStyle="#000"; ctx.font="900 12px system-ui";
+  // body area
+  let y = metaY + 30;
 
-  if(S.check){
-    ctx.fillText("CHECK IN:", 12, y); y+=18;
-    ctx.font="700 12px system-ui";
-    for(const ln of lines(f.a1.value,62).slice(0,3)){ ctx.fillText(ln, 12, y); y+=16; }
-    y+=10; ctx.font="900 12px system-ui";
-  }
-  if(S.reflect){
-    ctx.fillText("REFLECT:", 12, y); y+=18;
-    ctx.font="700 12px system-ui";
-    for(const ln of lines(f.b1.value,62).slice(0,3)){ ctx.fillText(ln, 12, y); y+=16; }
-    y+=10; ctx.font="900 12px system-ui";
-  }
-  if(S.goal){
-    ctx.fillText("GOAL:", 12, y); y+=18;
-    ctx.font="700 12px system-ui";
-    for(const ln of lines(f.g1.value,62).slice(0,3)){ ctx.fillText(ln, 12, y); y+=16; }
-    y+=10; ctx.font="900 12px system-ui";
-  }
-
+  // If nothing selected, show instruction
   if(!S.check && !S.reflect && !S.goal){
-    ctx.fillStyle="#111"; ctx.font="900 13px system-ui";
-    ctx.fillText("Tap CHECK IN / REFLECT / GOAL to add sections.", 12, y);
+    ctx.fillStyle="#000";
+    ctx.font="900 13px system-ui";
+    const msg="Tap CHECK IN / REFLECT / GOAL to add sections.";
+    for(const ln of wrapByPixels(msg, maxTextW).slice(0,3)){
+      ctx.fillText(ln, pad, y); y += 18;
+    }
+  } else {
+    const maxLinesPerSection = 4; // safe; prevents running off bottom
+
+    if(S.check){
+      y = drawWrappedParagraph("CHECK IN:", f.a1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
+    }
+    if(S.reflect){
+      y = drawWrappedParagraph("REFLECT:", f.b1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
+    }
+    if(S.goal){
+      y = drawWrappedParagraph("GOAL:", f.g1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
+    }
   }
 
+  // status line for teacher UI
   $("#status").textContent =
     ("Selected: " + (S.check?"CHECK IN ":"") + (S.reflect?"REFLECT ":"") + (S.goal?"GOAL":"")).trim()
     || "Tap an activity. Preview updates instantly.";
@@ -164,32 +238,54 @@ function draw(){
 });
 
 $("#preview").onclick=()=>{
-  draw();
-  try{
-    $("#jpegImg").src = cv.toDataURL("image/jpeg",0.92);
-    $("#jpegBox").style.display="block";
-  }catch(e){ alert("Preview failed."); }
+  $("#jpegBox").style.display="none";
+  showWhirl(true);
+  // let the spinner render before heavy work
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      draw();
+      try{
+        $("#jpegImg").src = cv.toDataURL("image/jpeg",0.92);
+        $("#jpegBox").style.display="block";
+      }catch(e){
+        alert("Preview failed.");
+      }finally{
+        showWhirl(false);
+      }
+    });
+  });
 };
 
 $("#download").onclick=()=>{
-  draw();
-  const base=(f.name.value.trim()||"pbis_ticket").replace(/\s+/g,"_");
-  const file=base+".jpg";
-  if(cv.toBlob){
-    cv.toBlob(blob=>{
-      if(!blob){ alert("Download failed."); return; }
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a");
-      a.href=url; a.download=file;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),800);
-    },"image/jpeg",0.92);
-  }else{
-    const a=document.createElement("a");
-    a.href=cv.toDataURL("image/jpeg",0.92);
-    a.download=file;
-    document.body.appendChild(a); a.click(); a.remove();
-  }
+  showWhirl(true);
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      draw();
+      const base=(f.name.value.trim()||"pbis_ticket").replace(/\s+/g,"_");
+      const file=base+".jpg";
+      const done=()=>showWhirl(false);
+
+      if(cv.toBlob){
+        cv.toBlob(blob=>{
+          if(!blob){ done(); alert("Download failed."); return; }
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement("a");
+          a.href=url; a.download=file;
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(()=>URL.revokeObjectURL(url),800);
+          done();
+        },"image/jpeg",0.92);
+      }else{
+        try{
+          const a=document.createElement("a");
+          a.href=cv.toDataURL("image/jpeg",0.92);
+          a.download=file;
+          document.body.appendChild(a); a.click(); a.remove();
+        }catch(e){ alert("Download failed."); }
+        done();
+      }
+    });
+  });
 };
 
 $("#clear").onclick=()=>{
