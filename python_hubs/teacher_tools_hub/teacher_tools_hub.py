@@ -260,16 +260,13 @@ button[kind="primary"] {{
 )
 
 # =====================
-
 # TICKER
-
 # =====================
 
 st.markdown(
-“<div class='ticker'>TEACHER TOOLS HUB • We are L.E.A.D. • Futuristic Interface 📺</div>”,
-unsafe_allow_html=True
+    "<div class='ticker'>TEACHER TOOLS HUB • We are L.E.A.D. • Futuristic Interface 📺</div>",
+    unsafe_allow_html=True,
 )
-
 # =====================
 
 # SIDEBAR
