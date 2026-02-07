@@ -21,6 +21,8 @@
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     background:var(--bg);
     color:var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   header{
@@ -256,8 +258,6 @@
   }
 
   /* ---------- EXPORT FRAME (ONE PAGE JPG) ---------- */
-  
-  
   .export-frame{
     width: 1400px;
     height: 900px;
@@ -267,9 +267,22 @@
     overflow: hidden;
     position: relative;
   }
-  
- 
-  
+
+  /* S2: AI strip = white on black */
+  .export-instruction{
+    padding:8px 12px;
+    background:#000000;
+    color:#ffffff;
+    font-size:12px;
+    font-weight:1000;
+    letter-spacing:0.10em;
+    text-transform:uppercase;
+    line-height:1.2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
   .export-header{
     padding: 12px 14px;
     border-bottom: 1px solid #e5e7eb;
@@ -342,11 +355,13 @@
     gap: 10px;
   }
   .export-board .cell{
-    border: 2px solid #e5e7eb;  /* solid, clean */
+    border: 2px solid #e5e7eb;
     padding:0;
   }
   .export-board .cell .hint{display:none !important;}
   .export-board .cell .xclear{display:none !important;}
+
+  .board-wrap{display:block;}
 
   .sig-stamp{
     position:absolute;
@@ -373,7 +388,6 @@
     color:#0f172a;
     opacity:0.92;
   }
-
 </style>
 
 <!-- html2canvas for ONE PAGE JPG export -->
@@ -709,13 +723,11 @@
     const date = ($("dateStr").value || todayISO()).trim();
     const mode = ($("modeSel").value || "science").trim();
 
-    // Keep export tight: remove "excess blocks/words" by trimming hard.
     const standard = clampText($("standard").value, 70);
     const objective = clampText($("objective").value, 150);
     const procedure = clampText($("procedure").value, 420);
     const notes = clampText($("notes").value, 280);
 
-    // Clone board so placed images render
     const boardClone = document.getElementById("board").cloneNode(true);
     boardClone.querySelectorAll(".xclear").forEach(x => x.remove());
     boardClone.querySelectorAll(".hint").forEach(h => h.remove());
@@ -723,15 +735,8 @@
     const frame = document.createElement("div");
     frame.className = "export-frame";
 
-   frame.innerHTML = `
-      <div style="
-        padding:6px 12px;
-        font-size:11px;
-        font-weight:900;
-        letter-spacing:0.08em;
-        color:#166534;
-        text-transform:uppercase;
-      ">
+    frame.innerHTML = `
+      <div class="export-instruction">
         AI INSTRUCTION → Read the labeled storyboard boxes to generate the lesson →
       </div>
 
@@ -787,17 +792,20 @@
     const frame = makeExportFrame();
     host.appendChild(frame);
 
+    // S1: Sharpen output
     const canvas = await html2canvas(frame, {
       backgroundColor: "#ffffff",
-      scale: 2,
-      useCORS: true
+      scale: 3,                 // sharper than 2
+      useCORS: true,
+      imageTimeout: 15000,
+      removeContainer: true
     });
 
     const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g, "_");
     const date = ($("dateStr").value || todayISO()).trim();
     const filename = `StoryAi_${teacher}_${date}.jpg`;
 
-    const jpgData = canvas.toDataURL("image/jpeg", 0.92);
+    const jpgData = canvas.toDataURL("image/jpeg", 0.95);
     const a = document.createElement("a");
     a.href = jpgData;
     a.download = filename;
@@ -809,8 +817,6 @@
   }
 
   $("exportJpgBtn").addEventListener("click", exportOnePageJPG);
-  
-  .board-wrap{display:block}
 </script>
 </body>
 </html>
