@@ -373,18 +373,113 @@ if st.session_state["current_tool"]:
         unsafe_allow_html=True,
     )
 
-    # TV Frame start
-    st.markdown("<div class='tv-frame'><div class='tv-screen'>", unsafe_allow_html=True)
+import html
+import streamlit.components.v1 as components
 
-    # Load and display tool
-    tool_html = load_tool(tool_name)
-    if tool_html:
-        # Use Streamlit's built-in HTML component safely
-        st.components.v1.html(tool_html, height=800, scrolling=True)
-    else:
-        st.error(f"Tool file not found: {tool_name}.html")
+# --- TV Frame + Tool inside ONE iframe ---
+tool_html = load_tool(tool_name)
 
-    # TV Frame end
+if tool_html:
+    escaped = html.escape(tool_html, quote=True)
+
+    combined = f"""
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  :root {{
+    --border: {BORDER};
+  }}
+
+  body {{
+    margin: 0;
+    background: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  }}
+
+  .tv-frame {{
+    position: relative;
+    width: 100%;
+    height: 820px;
+    border: 3px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.05);
+    box-shadow:
+      0 0 40px rgba(20,184,166,0.2),
+      inset 0 0 60px rgba(20,184,166,0.05);
+  }}
+
+  .tv-frame::before {{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.03) 2px,
+      rgba(255,255,255,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 2;
+    animation: scanlines 8s linear infinite;
+  }}
+
+  @keyframes scanlines {{
+    0% {{ transform: translateY(0); }}
+    100% {{ transform: translateY(4px); }}
+  }}
+
+  .tv-frame::after {{
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(20,184,166,0.12) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 1;
+    animation: glow 4s ease-in-out infinite alternate;
+  }}
+
+  @keyframes glow {{
+    0% {{ opacity: 0.25; }}
+    100% {{ opacity: 0.65; }}
+  }}
+
+  .screen {{
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+  }}
+
+  iframe {{
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: white;
+  }}
+</style>
+</head>
+<body>
+  <div class="tv-frame">
+    <div class="screen">
+      <iframe sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+              srcdoc="{escaped}"></iframe>
+    </div>
+  </div>
+</body>
+</html>
+"""
+    components.html(combined, height=860, scrolling=False)
+else:
+    st.error(f"Tool file not found: {tool_name}.html")
+    
     st.markdown("</div></div>", unsafe_allow_html=True)
 
 else:
