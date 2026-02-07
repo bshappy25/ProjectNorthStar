@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AI Storyboard (V1)</title>
+<title>AI Storyboard (V2) — Tap-to-Drop + PDF Export</title>
+
 <style>
   :root{
     --bg:#f3f4f6;
@@ -21,33 +22,54 @@
     background:var(--bg);
     color:var(--text);
   }
+
   header{
-    padding:16px;
+    padding:14px 16px;
     background:var(--card);
     border-bottom:1px solid var(--border);
     position:sticky;
     top:0;
-    z-index:10;
+    z-index:50;
   }
   header .row{
     display:flex;
-    gap:12px;
+    gap:10px;
     align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+  .title{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
     flex-wrap:wrap;
   }
   h1{
-    font-size:18px;
+    font-size:16px;
     margin:0;
-    font-weight:800;
+    font-weight:900;
     letter-spacing:0.02em;
   }
+  .pill{
+    font-size:12px;
+    font-weight:800;
+    color:var(--muted);
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:999px;
+    padding:6px 10px;
+  }
+
   .btn{
     border:1px solid var(--border);
     background:var(--card);
     padding:10px 12px;
     border-radius:12px;
     cursor:pointer;
-    font-weight:700;
+    font-weight:800;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
   }
   .btn.primary{
     background:var(--accent);
@@ -55,38 +77,52 @@
     color:white;
   }
   .btn:active{transform:translateY(1px)}
+
+  /* Layout: sidebar | dotted line | images/board */
   main{
-    max-width:1200px;
+    max-width:1240px;
     margin:0 auto;
     padding:16px;
     display:grid;
-    grid-template-columns: 360px 1fr;
-    gap:16px;
+    grid-template-columns: 380px 18px 1fr;
+    gap:14px;
+    align-items:start;
   }
   @media (max-width: 980px){
     main{grid-template-columns:1fr}
+    .divider{display:none}
   }
+
   .panel{
     background:var(--card);
     border:1px solid var(--border);
-    border-radius:16px;
+    border-radius:18px;
     padding:14px;
     box-shadow:0 1px 0 rgba(0,0,0,0.04);
   }
   .panel h2{
     margin:0 0 10px 0;
-    font-size:14px;
-    font-weight:900;
+    font-size:12px;
+    font-weight:950;
     color:var(--muted);
     text-transform:uppercase;
-    letter-spacing:0.08em;
+    letter-spacing:0.10em;
   }
+
+  .divider{
+    height:100%;
+    min-height:600px;
+    border-left: 3px dotted var(--border);
+    border-radius:10px;
+    opacity:0.8;
+  }
+
   label{
     display:block;
     font-size:12px;
     color:var(--muted);
     margin:10px 0 6px;
-    font-weight:700;
+    font-weight:800;
   }
   input[type="text"], textarea, select{
     width:100%;
@@ -99,6 +135,8 @@
   }
   textarea{min-height:90px; resize:vertical}
   .muted{color:var(--muted); font-size:12px; line-height:1.35}
+
+  /* Image library */
   .library{
     display:flex;
     gap:10px;
@@ -106,13 +144,13 @@
     margin-top:10px;
   }
   .thumb{
-    width:88px;
-    height:66px;
-    border:1px solid var(--border);
-    border-radius:12px;
+    width:96px;
+    height:74px;
+    border:2px solid var(--border);
+    border-radius:14px;
     overflow:hidden;
     background:#fff;
-    cursor:grab;
+    cursor:pointer;
     position:relative;
   }
   .thumb img{
@@ -128,24 +166,36 @@
     background:rgba(17,24,39,0.75);
     color:white;
     font-size:10px;
-    padding:2px 6px;
+    padding:2px 7px;
     border-radius:999px;
-    font-weight:800;
+    font-weight:950;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+  .thumb.selected{
+    border-color: var(--good);
+    box-shadow: 0 0 0 3px rgba(22,163,74,0.18);
   }
 
-  /* Storyboard grid */
+  /* Board */
+  .board-wrap{
+    display:grid;
+    grid-template-rows: auto auto;
+    gap:14px;
+  }
+
   .board{
     display:grid;
     grid-template-columns: 2fr 1fr 1fr;
-    grid-auto-rows: 180px;
+    grid-auto-rows: 170px;
     gap:12px;
   }
   @media (max-width: 980px){
-    .board{grid-template-columns:1fr; grid-auto-rows:200px}
+    .board{grid-template-columns:1fr; grid-auto-rows:210px}
   }
   .cell{
     background:var(--card);
-    border:1px dashed var(--border);
+    border:2px dashed var(--border);
     border-radius:18px;
     overflow:hidden;
     position:relative;
@@ -154,19 +204,21 @@
     justify-content:center;
     padding:10px;
     text-align:center;
+    user-select:none;
   }
-  .cell strong{
+  .cell .label{
     position:absolute;
     top:10px;
     left:12px;
     font-size:12px;
     color:var(--muted);
-    letter-spacing:0.06em;
+    letter-spacing:0.08em;
     text-transform:uppercase;
+    font-weight:950;
   }
   .cell .hint{
     color:var(--muted);
-    font-weight:700;
+    font-weight:850;
     font-size:13px;
     padding:0 10px;
   }
@@ -177,14 +229,58 @@
     display:block;
   }
 
-  /* Green wand cursor behavior */
-  .drop-ready{
-    border-color: var(--good);
-    box-shadow: 0 0 0 2px rgba(22,163,74,0.2) inset;
+  /* Per-cell clear X */
+  .cell .xclear{
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:28px;
+    height:28px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,0.92);
+    cursor:pointer;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    font-weight:1000;
+    color:#111827;
+    line-height:1;
+  }
+  .cell.filled .xclear{display:flex}
+
+  /* “Armed” placement: wand cursor on cells */
+  .armed .cell{
     cursor: url('data:image/svg+xml;utf8,\
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">\
-<text x="3" y="22" font-size="20">🪄</text>\
-</svg>') 0 24, copy;
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36">\
+<text x="3" y="24" font-size="22">🪄</text>\
+</svg>') 0 26, copy;
+  }
+  .armed .cell:hover{
+    border-color: var(--good);
+    box-shadow: 0 0 0 2px rgba(22,163,74,0.18) inset;
+  }
+
+  /* Print / PDF */
+  .print-note{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:10px;
+  }
+  @media print{
+    header{display:none !important;}
+    body{background:white !important;}
+    main{
+      max-width:none;
+      margin:0;
+      padding:0;
+      grid-template-columns: 340px 18px 1fr;
+      gap:12px;
+    }
+    .panel{box-shadow:none !important;}
+    .thumb, #imgUpload, .print-hide {display:none !important;}
+    .divider{border-left: 3px dotted #999 !important;}
+    .cell .xclear{display:none !important;}
   }
 </style>
 </head>
@@ -192,16 +288,21 @@
 <body>
 <header>
   <div class="row">
-    <h1>AI Storyboard (V1) — Drag images into boxes → Export one AI file</h1>
-    <button class="btn" id="clearBtn" title="Clear storyboard boxes">Clear</button>
-    <button class="btn primary" id="exportBtn" title="Export StoryAi file">Export StoryAi File</button>
+    <div class="title">
+      <h1>AI Storyboard (V2) — Tap image → Tap box → Export PDF</h1>
+      <span class="pill" id="armedPill">No image selected</span>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <button class="btn" id="clearAllBtn" title="Clear everything"><span style="font-size:16px;">✕</span> Clear</button>
+      <button class="btn primary" id="exportPdfBtn" title="Export as PDF"><span style="font-size:16px;">🖨️</span> Export PDF</button>
+    </div>
   </div>
 </header>
 
-<main>
-  <!-- LEFT: teacher inputs + image library -->
-  <section class="panel">
-    <h2>Teacher Inputs</h2>
+<main id="appRoot">
+  <!-- LEFT: text input sidebar -->
+  <section class="panel" id="leftPanel">
+    <h2>Text Input Sidebar</h2>
 
     <label>Teacher Name</label>
     <input id="teacherName" type="text" placeholder="e.g., Ms. Rivera" />
@@ -209,12 +310,12 @@
     <label>Date</label>
     <input id="dateStr" type="text" placeholder="YYYY-MM-DD (auto)" />
 
-    <label>Mode</label>
+    <label>Subject Mode</label>
     <select id="modeSel">
       <option value="science">Science</option>
-      <option value="ela">ELA</option>
       <option value="math">Math</option>
-      <option value="social_studies">Social Studies</option>
+      <option value="ss">Social Studies</option>
+      <option value="english">English</option>
       <option value="other">Other</option>
     </select>
 
@@ -224,55 +325,89 @@
     <label>Objective (one sentence)</label>
     <input id="objective" type="text" placeholder="Students will..." />
 
-    <label>Procedure (short)</label>
-    <textarea id="procedure" placeholder="1) Hook... 2) Model... 3) Check for understanding..."></textarea>
+    <label>Key Steps / Procedure (short)</label>
+    <textarea id="procedure" placeholder="1) Hook 2) Model 3) Investigation 4) Check for understanding..."></textarea>
 
     <label>Accommodations / Notes</label>
     <textarea id="notes" placeholder="IEP supports, visuals, sentence starters, etc."></textarea>
 
-    <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;" />
-
-    <h2>Image Library</h2>
-    <div class="muted">
-      Upload images here, then drag them into storyboard boxes.
-      Tip: Add one “Anchor Phenomenon” image and a few supporting images.
-    </div>
-
-    <label>Upload Images (PNG/JPG)</label>
-    <input id="imgUpload" type="file" accept="image/*" multiple />
-
-    <div class="library" id="library"></div>
-
-    <div class="muted" style="margin-top:10px">
-      PDF attachment: V1 keeps it simple (manual copy/paste of text).  
-      V2 can add “Upload PDF → extract text” (requires server or PDF.js + parsing).
+    <div class="print-note">
+      <strong>PDF Export tip:</strong> Click <strong>Export PDF</strong> → choose <strong>Save as PDF</strong>.
+      Rename the file to: <code>StoryAi_User_YYYY-MM-DD.pdf</code>
     </div>
   </section>
 
-  <!-- RIGHT: storyboard -->
-  <section class="panel">
-    <h2>Storyboard Grid</h2>
+  <!-- dotted vertical line -->
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- RIGHT: image library + board -->
+  <section class="panel" id="rightPanel">
+    <h2>Images</h2>
+    <div class="muted">
+      No drag and drop. Just <strong>tap an image</strong> (it arms 🪄), then <strong>tap a box</strong> to place it.
+      Tap the same image again to unselect.
+    </div>
+
+    <div class="print-hide">
+      <label>Upload Images (PNG/JPG)</label>
+      <input id="imgUpload" type="file" accept="image/*" multiple />
+      <div class="library" id="library"></div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;" />
+
+    <h2>Storyboard</h2>
     <div class="muted" style="margin-bottom:10px">
-      Drag an image onto any box. The green wand appears when you’re in the drop zone.
+      Science labels are locked to your spec. Mode switch updates the box titles for Math / SS / English.
     </div>
 
     <div class="board" id="board">
       <div class="cell" data-cell="anchor" style="grid-column: 1 / span 1; grid-row: 1 / span 2;">
-        <strong>Anchor Phenomenon</strong>
-        <div class="hint">Drop your big anchor image here</div>
+        <div class="label" data-label="anchor">Anchor Phenomenon</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap an image, then tap here</div>
       </div>
-      <div class="cell" data-cell="box1"><strong>Box 1</strong><div class="hint">Drop image</div></div>
-      <div class="cell" data-cell="box2"><strong>Box 2</strong><div class="hint">Drop image</div></div>
-      <div class="cell" data-cell="box3"><strong>Box 3</strong><div class="hint">Drop image</div></div>
-      <div class="cell" data-cell="box4"><strong>Box 4</strong><div class="hint">Drop image</div></div>
-      <div class="cell" data-cell="box5"><strong>Box 5</strong><div class="hint">Drop image</div></div>
-      <div class="cell" data-cell="box6"><strong>Box 6</strong><div class="hint">Drop image</div></div>
+
+      <div class="cell" data-cell="box1">
+        <div class="label" data-label="box1">Box 1</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap an image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box2">
+        <div class="label" data-label="box2">Box 2</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap an image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box3">
+        <div class="label" data-label="box3">Box 3</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap an image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box4">
+        <div class="label" data-label="box4">Box 4</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap an image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box5">
+        <div class="label" data-label="box5">Box 5</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap an image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box6">
+        <div class="label" data-label="box6">Box 6</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap an image, then tap here</div>
+      </div>
+      <div class="cell" data-cell="box7">
+        <div class="label" data-label="box7">Box 7</div>
+        <button class="xclear" title="Clear this box" aria-label="Clear box">✕</button>
+        <div class="hint">Tap an image, then tap here</div>
+      </div>
     </div>
   </section>
 </main>
 
 <script>
-  // ---------- Utilities ----------
   const $ = (id) => document.getElementById(id);
 
   function todayISO(){
@@ -282,15 +417,100 @@
     const dd = String(d.getDate()).padStart(2,'0');
     return `${yyyy}-${mm}-${dd}`;
   }
-
-  // ---------- State ----------
-  const imageLibrary = []; // {id, name, dataUrl}
-  const storyboard = {};   // cellKey -> {name, dataUrl}
-
-  // ---------- Init ----------
   $("dateStr").value = todayISO();
 
-  // ---------- Image upload ----------
+  // Titles by mode
+  const TITLES = {
+    science: {
+      anchor: "Anchor Phenomenon",
+      box1: "Model / Diagram",
+      box2: "Central Investigation",
+      box3: "Human Element / Diagram",
+      box4: "Design Element",
+      box5: "Misconception",
+      box6: "Extra Dimension 1",
+      box7: "Extra Dimension 2"
+    },
+    math: {
+      anchor: "Anchor Problem / Context",
+      box1: "Model / Representation",
+      box2: "Central Investigation",
+      box3: "Human Element / Real-World Link",
+      box4: "Design Element (Strategy / Tool)",
+      box5: "Misconception (Common Error)",
+      box6: "Extra Dimension 1 (Extension)",
+      box7: "Extra Dimension 2 (Challenge)"
+    },
+    ss: {
+      anchor: "Anchor Event / Primary Source",
+      box1: "Model / Diagram (Timeline / Map)",
+      box2: "Central Investigation (Inquiry)",
+      box3: "Human Element (Perspective / Voices)",
+      box4: "Design Element (Cause-Effect / Systems)",
+      box5: "Misconception (Bias / Overgeneralization)",
+      box6: "Extra Dimension 1 (Compare / Connect)",
+      box7: "Extra Dimension 2 (Civic Action / Debate)"
+    },
+    english: {
+      anchor: "Anchor Text / Excerpt",
+      box1: "Model / Diagram (Structure / Plot Map)",
+      box2: "Central Investigation (Close Reading)",
+      box3: "Human Element (Character / Voice)",
+      box4: "Design Element (Craft Move / Technique)",
+      box5: "Misconception (Common Misread)",
+      box6: "Extra Dimension 1 (Extension)",
+      box7: "Extra Dimension 2 (Creative Response)"
+    },
+    other: {
+      anchor: "Anchor",
+      box1: "Box 1",
+      box2: "Box 2",
+      box3: "Box 3",
+      box4: "Box 4",
+      box5: "Box 5",
+      box6: "Box 6",
+      box7: "Box 7"
+    }
+  };
+
+  function applyTitles(mode){
+    const map = TITLES[mode] || TITLES.other;
+    document.querySelectorAll("[data-label]").forEach(el => {
+      const key = el.getAttribute("data-label");
+      if (map[key]) el.textContent = map[key];
+    });
+  }
+  applyTitles($("modeSel").value);
+
+  $("modeSel").addEventListener("change", () => {
+    applyTitles($("modeSel").value);
+  });
+
+  // Image library + selection
+  const imageLibrary = []; // {id, name, dataUrl}
+  let selectedImageId = null;
+
+  function setArmedPill(){
+    const pill = $("armedPill");
+    if (!selectedImageId){
+      pill.textContent = "No image selected";
+      document.body.classList.remove("armed");
+      return;
+    }
+    const item = imageLibrary.find(x => x.id === selectedImageId);
+    pill.textContent = item ? `Selected: ${item.name}` : "Selected image";
+    document.body.classList.add("armed");
+  }
+
+  function fileToDataURL(file){
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
   $("imgUpload").addEventListener("change", async (e) => {
     const files = Array.from(e.target.files || []);
     for (const f of files){
@@ -302,19 +522,9 @@
     e.target.value = "";
   });
 
-  function fileToDataURL(file){
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result);
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-  }
-
   function addThumb(item){
     const wrap = document.createElement("div");
     wrap.className = "thumb";
-    wrap.draggable = true;
     wrap.dataset.imgId = item.id;
 
     const img = document.createElement("img");
@@ -322,99 +532,111 @@
 
     const tag = document.createElement("div");
     tag.className = "tag";
-    tag.textContent = "DRAG";
+    tag.textContent = "Tap";
 
     wrap.appendChild(img);
     wrap.appendChild(tag);
 
-    wrap.addEventListener("dragstart", (ev) => {
-      ev.dataTransfer.setData("text/plain", item.id);
-      ev.dataTransfer.effectAllowed = "copy";
+    wrap.addEventListener("click", () => {
+      // toggle selection
+      if (selectedImageId === item.id){
+        selectedImageId = null;
+      } else {
+        selectedImageId = item.id;
+      }
+      // update UI
+      document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
+      if (selectedImageId){
+        wrap.classList.add("selected");
+      }
+      setArmedPill();
     });
 
     $("library").appendChild(wrap);
   }
 
-  // ---------- Drop zones ----------
-  const cells = Array.from(document.querySelectorAll(".cell"));
+  // Storyboard cell placement (tap-to-drop)
+  const storyboard = {}; // cellKey -> {name, dataUrl}
 
-  cells.forEach(cell => {
-    cell.addEventListener("dragenter", (ev) => {
-      ev.preventDefault();
-      cell.classList.add("drop-ready");
-    });
-    cell.addEventListener("dragover", (ev) => {
-      ev.preventDefault();
-      ev.dataTransfer.dropEffect = "copy";
-      cell.classList.add("drop-ready");
-    });
-    cell.addEventListener("dragleave", () => {
-      cell.classList.remove("drop-ready");
-    });
-    cell.addEventListener("drop", (ev) => {
-      ev.preventDefault();
-      cell.classList.remove("drop-ready");
+  function renderCell(cell, dataUrl){
+    // Keep label + xclear, replace hint with image
+    const label = cell.querySelector(".label");
+    const x = cell.querySelector(".xclear");
 
-      const imgId = ev.dataTransfer.getData("text/plain");
-      const item = imageLibrary.find(x => x.id === imgId);
-      if (!item) return;
+    cell.innerHTML = "";
+    cell.appendChild(label);
+    cell.appendChild(x);
 
-      const key = cell.dataset.cell;
-      storyboard[key] = { name: item.name, dataUrl: item.dataUrl };
-      renderCellImage(cell, item.dataUrl);
-    });
-  });
-
-  function renderCellImage(cell, dataUrl){
-    cell.innerHTML = `<strong>${cell.dataset.cell === "anchor" ? "Anchor Phenomenon" : cell.querySelector("strong")?.textContent || ""}</strong>`;
     const img = document.createElement("img");
     img.src = dataUrl;
     cell.appendChild(img);
+
+    cell.classList.add("filled");
   }
 
-  // ---------- Clear ----------
-  $("clearBtn").addEventListener("click", () => {
-    for (const k of Object.keys(storyboard)) delete storyboard[k];
-    // reset UI
-    document.querySelectorAll(".cell").forEach(cell => {
-      const label = cell.dataset.cell === "anchor" ? "Anchor Phenomenon" : (cell.querySelector("strong")?.textContent || "Box");
-      cell.innerHTML = `<strong>${label}</strong><div class="hint">${cell.dataset.cell === "anchor" ? "Drop your big anchor image here" : "Drop image"}</div>`;
+  function resetCell(cell){
+    // restore hint
+    const label = cell.querySelector(".label");
+    const x = cell.querySelector(".xclear");
+    cell.innerHTML = "";
+    cell.appendChild(label);
+    cell.appendChild(x);
+
+    const hint = document.createElement("div");
+    hint.className = "hint";
+    hint.textContent = "Tap an image, then tap here";
+    cell.appendChild(hint);
+
+    cell.classList.remove("filled");
+  }
+
+  document.querySelectorAll(".cell").forEach(cell => {
+    const key = cell.dataset.cell;
+
+    // tap cell to place
+    cell.addEventListener("click", (ev) => {
+      // if they clicked the X button, ignore here
+      if (ev.target && ev.target.classList && ev.target.classList.contains("xclear")) return;
+
+      if (!selectedImageId) return;
+      const item = imageLibrary.find(x => x.id === selectedImageId);
+      if (!item) return;
+
+      storyboard[key] = { name: item.name, dataUrl: item.dataUrl };
+      renderCell(cell, item.dataUrl);
+    });
+
+    // per-cell clear X
+    const xbtn = cell.querySelector(".xclear");
+    xbtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      delete storyboard[key];
+      resetCell(cell);
     });
   });
 
-  // ---------- Export ----------
-  $("exportBtn").addEventListener("click", () => {
-    const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g,"_");
-    const date = ($("dateStr").value || todayISO()).trim();
-    const payload = {
-      schema: "storyai_v1",
-      created_at: new Date().toISOString(),
-      teacher_name: $("teacherName").value || "",
-      date: date,
-      mode: $("modeSel").value,
-      standard: $("standard").value || "",
-      objective: $("objective").value || "",
-      procedure: $("procedure").value || "",
-      notes: $("notes").value || "",
-      storyboard_cells: storyboard
-      // NOTE: storyboard_cells includes base64 images via dataUrl
-    };
-
-    const filename = `StoryAi_${teacher}_${date}.json`;
-    downloadJSON(payload, filename);
+  // Global clear X
+  $("clearAllBtn").addEventListener("click", () => {
+    // clear storyboard data
+    Object.keys(storyboard).forEach(k => delete storyboard[k]);
+    // reset all cells
+    document.querySelectorAll(".cell").forEach(resetCell);
+    // unselect image
+    selectedImageId = null;
+    document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
+    setArmedPill();
   });
 
-  function downloadJSON(obj, filename){
-    const blob = new Blob([JSON.stringify(obj, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
+  setArmedPill();
+
+  // Export PDF (boomer-proof): print dialog -> Save as PDF
+  $("exportPdfBtn").addEventListener("click", () => {
+    // Suggest filename via document title (some browsers use it)
+    const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g,"_");
+    const date = ($("dateStr").value || todayISO()).trim();
+    document.title = `StoryAi_${teacher}_${date}`;
+    window.print();
+  });
 </script>
 </body>
 </html>
