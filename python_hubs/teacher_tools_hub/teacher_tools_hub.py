@@ -354,63 +354,69 @@ with st.sidebar:
     st.divider()
     st.caption("📺 Futuristic TV Interface")
     st.caption("Simple as Google Sites")
-# =====================
 
+# =====================
 # MAIN WINDOW
-
 # =====================
 
-if st.session_state[“current_tool”]:
-tool_name = st.session_state[“current_tool”]
+if st.session_state["current_tool"]:
+    tool_name = st.session_state["current_tool"]
 
-```
-# Header
-st.markdown(f"""
+    # Header
+    st.markdown(
+        f"""
 <div style='text-align:center; margin-bottom:20px;'>
-    <h1 style='font-size:2.5rem; margin:0;'>📺 {tool_name}</h1>
-    <p style='color:var(--muted); margin-top:5px;'>Viewing in Futuristic TV Mode</p>
+  <h1 style='font-size:2.5rem; margin:0;'>📺 {tool_name}</h1>
+  <p style='color:var(--muted); margin-top:5px;'>Viewing in Futuristic TV Mode</p>
 </div>
-""", unsafe_allow_html=True)
+""",
+        unsafe_allow_html=True,
+    )
 
-# TV Frame with tool
-st.markdown("<div class='tv-frame'><div class='tv-screen'>", unsafe_allow_html=True)
+    # TV Frame start
+    st.markdown("<div class='tv-frame'><div class='tv-screen'>", unsafe_allow_html=True)
 
-# Load and display tool
-tool_html = load_tool(tool_name)
-if tool_html:
-    st.components.v1.html(tool_html, height=800, scrolling=True)
+    # Load and display tool
+    tool_html = load_tool(tool_name)
+    if tool_html:
+        # Use Streamlit's built-in HTML component safely
+        st.components.v1.html(tool_html, height=800, scrolling=True)
+    else:
+        st.error(f"Tool file not found: {tool_name}.html")
+
+    # TV Frame end
+    st.markdown("</div></div>", unsafe_allow_html=True)
+
 else:
-    st.error(f"Tool file not found: {tool_name}.html")
-
-st.markdown("</div></div>", unsafe_allow_html=True)
-```
-
-else:
-# Welcome screen
-st.markdown(”””
+    # Welcome screen
+    st.markdown(
+        """
 <div style='text-align:center; padding:60px 20px;'>
-<h1 style='font-size:3.5rem; margin-bottom:20px;'>📺 Teacher Tools Hub</h1>
-<p style='font-size:1.3rem; color:var(--muted); margin-bottom:40px;'>
-Futuristic Interface for HTML Teaching Tools
-</p>
-<div style='background:var(--card); border:1px solid var(--border); border-radius:20px; 
-padding:40px; max-width:600px; margin:0 auto; backdrop-filter:blur(10px);'>
-<h3 style='margin-top:0;'>🚀 Getting Started</h3>
-<ol style='text-align:left; line-height:2;'>
-<li><strong>Click “➕ Add New Tool”</strong> in the sidebar</li>
-<li><strong>Paste your complete HTML code</strong></li>
-<li><strong>Click “💾 Save”</strong> to publish</li>
-<li><strong>View instantly</strong> in futuristic TV mode</li>
-</ol>
-<p style='margin-top:30px; color:var(--muted); font-size:0.95rem;'>
-✨ <strong>Simple as Google Sites</strong> • Copy → Paste → Publish → View<br>
-📺 <strong>Futuristic TV overlay</strong> • Scan lines + glow effects<br>
-🎨 <strong>Glassy UI</strong> • Matches BSChapp v2 aesthetic
-</p>
-</div>
-</div>
-“””, unsafe_allow_html=True)
+  <h1 style='font-size:3.5rem; margin-bottom:20px;'>📺 Teacher Tools Hub</h1>
+  <p style='font-size:1.3rem; color:var(--muted); margin-bottom:40px;'>
+    Futuristic Interface for HTML Teaching Tools
+  </p>
 
-# Bottom padding for ticker
+  <div style='background:var(--card); border:1px solid var(--border); border-radius:20px;
+              padding:40px; max-width:600px; margin:0 auto; backdrop-filter:blur(10px);'>
+    <h3 style='margin-top:0;'>🚀 Getting Started</h3>
+    <ol style='text-align:left; line-height:2;'>
+      <li><strong>Click "➕ Add New Tool"</strong> in the sidebar</li>
+      <li><strong>Paste your complete HTML code</strong></li>
+      <li><strong>Click "💾 Save"</strong> to publish</li>
+      <li><strong>View instantly</strong> in futuristic TV mode</li>
+    </ol>
 
-st.markdown(”<div style='height:60px'></div>”, unsafe_allow_html=True)
+    <p style='margin-top:30px; color:var(--muted); font-size:0.95rem;'>
+      ✨ <strong>Simple as Google Sites</strong> • Copy → Paste → Publish → View<br>
+      📺 <strong>Futuristic TV overlay</strong> • Scan lines + glow effects<br>
+      🎨 <strong>Glassy UI</strong> • Matches BSChapp v2 aesthetic
+    </p>
+  </div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+
+# Bottom padding for ticker (always)
+st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
