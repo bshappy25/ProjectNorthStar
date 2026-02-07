@@ -267,97 +267,93 @@ st.markdown(
     "<div class='ticker'>TEACHER TOOLS HUB • We are L.E.A.D. • Futuristic Interface 📺</div>",
     unsafe_allow_html=True,
 )
+
 # =====================
-
 # SIDEBAR
-
 # =====================
 
 with st.sidebar:
-st.title(“📺 Teacher Tools”)
-st.caption(“Futuristic Interface • HTML Tool Manager”)
+    st.title("📺 Teacher Tools")
+    st.caption("Futuristic Interface • HTML Tool Manager")
 
-```
-st.divider()
+    st.divider()
 
-# Theme toggle
-theme_choice = st.radio(
-    "Theme",
-    ["Neutral", "Science"],
-    index=0 if st.session_state["theme_mode"] == "neutral" else 1,
-    horizontal=True
-)
-if theme_choice.lower() != st.session_state["theme_mode"]:
-    st.session_state["theme_mode"] = theme_choice.lower()
-    st.rerun()
-
-st.divider()
-
-# Tool List
-st.subheader("📂 Your Tools")
-tools = list_tools()
-
-if not tools:
-    st.info("No tools yet. Add one below! 👇")
-else:
-    for tool in tools:
-        is_active = st.session_state["current_tool"] == tool
-        button_type = "primary" if is_active else "secondary"
-        
-        if st.button(
-            f"{'📺 ' if is_active else '📄 '}{tool}",
-            key=f"tool_{tool}",
-            use_container_width=True,
-            type=button_type
-        ):
-            st.session_state["current_tool"] = tool
-            st.rerun()
-
-st.divider()
-
-# Add New Tool Section
-with st.expander("➕ Add New Tool", expanded=False):
-    st.caption("Copy HTML code → Paste → Save → View")
-    
-    tool_name = st.text_input(
-        "Tool Name",
-        placeholder="e.g., Evidence Capture v1",
-        key="new_tool_name"
+    # Theme toggle
+    theme_choice = st.radio(
+        "Theme",
+        ["Neutral", "Science"],
+        index=0 if st.session_state["theme_mode"] == "neutral" else 1,
+        horizontal=True,
     )
-    
-    html_code = st.text_area(
-        "HTML Code",
-        placeholder="Paste your complete HTML code here...",
-        height=300,
-        key="html_input"
-    )
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        if st.button("🗑️ Clear", use_container_width=True):
-            st.session_state["html_input"] = ""
-            st.rerun()
-    
-    with col2:
-        if st.button("💾 Save", use_container_width=True, type="primary"):
-            if not tool_name:
-                st.error("Enter a tool name!")
-            elif not html_code.strip():
-                st.error("Paste HTML code!")
-            else:
-                # Save tool
-                save_tool(tool_name, html_code)
-                st.session_state["current_tool"] = tool_name
-                st.session_state["html_input"] = ""
-                st.success(f"✅ {tool_name} saved!")
+
+    if theme_choice.lower() != st.session_state["theme_mode"]:
+        st.session_state["theme_mode"] = theme_choice.lower()
+        st.rerun()
+
+    st.divider()
+
+    # Tool List
+    st.subheader("📂 Your Tools")
+    tools = list_tools()
+
+    if not tools:
+        st.info("No tools yet. Add one below! 👇")
+    else:
+        for tool in tools:
+            is_active = st.session_state["current_tool"] == tool
+            button_type = "primary" if is_active else "secondary"
+
+            if st.button(
+                f"{'📺 ' if is_active else '📄 '}{tool}",
+                key=f"tool_{tool}",
+                use_container_width=True,
+                type=button_type,
+            ):
+                st.session_state["current_tool"] = tool
                 st.rerun()
 
-st.divider()
-st.caption("📺 Futuristic TV Interface")
-st.caption("Simple as Google Sites")
-```
+    st.divider()
 
+    # Add New Tool Section
+    with st.expander("➕ Add New Tool", expanded=False):
+        st.caption("Copy HTML code → Paste → Save → View")
+
+        tool_name = st.text_input(
+            "Tool Name",
+            placeholder="e.g., Evidence Capture v1",
+            key="new_tool_name",
+        )
+
+        html_code = st.text_area(
+            "HTML Code",
+            placeholder="Paste your complete HTML code here...",
+            height=300,
+            key="html_input",
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if st.button("🗑️ Clear", use_container_width=True):
+                st.session_state["html_input"] = ""
+                st.rerun()
+
+        with col2:
+            if st.button("💾 Save", use_container_width=True, type="primary"):
+                if not tool_name:
+                    st.error("Enter a tool name!")
+                elif not html_code.strip():
+                    st.error("Paste HTML code!")
+                else:
+                    save_tool(tool_name, html_code)
+                    st.session_state["current_tool"] = tool_name
+                    st.session_state["html_input"] = ""
+                    st.success(f"✅ {tool_name} saved!")
+                    st.rerun()
+
+    st.divider()
+    st.caption("📺 Futuristic TV Interface")
+    st.caption("Simple as Google Sites")
 # =====================
 
 # MAIN WINDOW
