@@ -34,47 +34,49 @@ SCI_BORDER = "rgba(120,255,220,0.3)"
 SCI_TEXT = "rgba(255,255,255,0.92)"
 SCI_MUTED = "rgba(255,255,255,0.74)"
 SCI_ACCENT = "#14B8A6"
-# =====================
 
+# =====================
 # SESSION STATE
-
 # =====================
 
-if “theme_mode” not in st.session_state:
-st.session_state[“theme_mode”] = “neutral”
-if “current_tool” not in st.session_state:
-st.session_state[“current_tool”] = None
-if “html_input” not in st.session_state:
-st.session_state[“html_input”] = “”
+if "theme_mode" not in st.session_state:
+    st.session_state["theme_mode"] = "neutral"
+
+if "current_tool" not in st.session_state:
+    st.session_state["current_tool"] = None
+
+if "html_input" not in st.session_state:
+    st.session_state["html_input"] = ""
+
 
 # =====================
-
 # HELPERS
-
 # =====================
 
 def list_tools():
-“”“Get all .html files in teacher_tools/”””
-tools = []
-for f in Path(TOOLS_DIR).glob(”*.html”):
-tools.append(f.stem)
-return sorted(tools)
+    """Get all .html files in teacher_tools/"""
+    tools = []
+    for f in Path(TOOLS_DIR).glob("*.html"):
+        tools.append(f.stem)
+    return sorted(tools)
+
 
 def save_tool(name, html_code):
-“”“Save HTML code as .html file”””
-filename = f”{name}.html”
-filepath = Path(TOOLS_DIR) / filename
-with open(filepath, ‘w’, encoding=‘utf-8’) as f:
-f.write(html_code)
-return filepath
+    """Save HTML code as .html file"""
+    filename = f"{name}.html"
+    filepath = Path(TOOLS_DIR) / filename
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(html_code)
+    return filepath
+
 
 def load_tool(name):
-“”“Load HTML code from file”””
-filepath = Path(TOOLS_DIR) / f”{name}.html”
-if filepath.exists():
-with open(filepath, ‘r’, encoding=‘utf-8’) as f:
-return f.read()
-return “”
+    """Load HTML code from file"""
+    filepath = Path(TOOLS_DIR) / f"{name}.html"
+    if filepath.exists():
+        with open(filepath, "r", encoding="utf-8") as f:
+            return f.read()
+    return ""
 
 # =====================
 
