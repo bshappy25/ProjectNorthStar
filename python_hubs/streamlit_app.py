@@ -16,7 +16,8 @@ except Exception:
 # =====================
 GRADE_BANDS = ["HS", "MS", "5", "4", "3", "2", "1", "K"]
 
-SUBJECTS = ["Science"]  # rigid for now
+# Light neutral UI for all subjects; Science gets "Science Mode" UI.
+SUBJECTS = ["Science", "Math", "ELA"]  # keep rigid
 
 SCIENCE_BRANCHES = [
     "Earth & Space Science",
@@ -50,6 +51,12 @@ SCIENCE_UNITS = {
     ]
 }
 
+# Minimal generic units (placeholders) for non-science subjects for v1
+GENERIC_UNITS = {
+    "Math": ["Unit A", "Unit B", "Unit C"],
+    "ELA": ["Unit A", "Unit B", "Unit C"],
+}
+
 # =====================
 # ARTIFACTS
 # =====================
@@ -70,10 +77,22 @@ DEFAULT_PROMPTS = {
 }
 
 # UI colors
-BSCL_BLUE = "#2F5BEA"
-SCIENCE_GREEN = "#2E7D32"  # Science Mode accent
+NEUTRAL_BG = "#f3f4f6"      # light neutral gray
+NEUTRAL_CARD = "#ffffff"    # white cards
+NEUTRAL_BORDER = "rgba(0,0,0,0.10)"
+NEUTRAL_TEXT = "#111827"
+NEUTRAL_MUTED = "#4b5563"
 
-# Emblems (text-only, reliable)
+SCI_BG = "#061B15"          # deep teal-black
+SCI_CARD = "rgba(255,255,255,0.06)"
+SCI_BORDER = "rgba(120,255,220,0.24)"
+SCI_TEXT = "rgba(255,255,255,0.92)"
+SCI_MUTED = "rgba(255,255,255,0.72)"
+SCI_BLUE = "#2F5BEA"        # signature bridge blue
+SCI_GREEN = "#14B8A6"       # blue-green accent
+SCI_GREEN_2 = "#22C55E"     # secondary green accent
+
+# Emblems (text-only for reliability)
 NGSS_EMBLEM = "NGSS"
 FIVE_E_EMBLEM = "5E"
 
@@ -100,10 +119,9 @@ def build_pdf_bytes(
     body_text,
     grade_band,
     subject,
-    science_branch,
+    branch,
     unit
 ) -> bytes:
-    # Only call when REPORTLAB_OK is True
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=letter)
     w, h = letter
@@ -111,15 +129,15 @@ def build_pdf_bytes(
     x0 = margin
     y = h - margin
 
-    # Header title
+    # Title
     c.setFont("Helvetica-Bold", 18)
     c.drawString(x0, y, artifact)
 
-    # Emblems top-right (always for science mode)
-    # keep simple: text badges
-    badge_text = f"[{NGSS_EMBLEM}]  [{FIVE_E_EMBLEM}]"
-    c.setFont("Helvetica-Bold", 11)
-    c.drawRightString(w - margin, y + 2, badge_text)
+    # Emblems (only for science)
+    if subject == "Science":
+        badge_text = f"[{NGSS_EMBLEM}]  [{FIVE_E_EMBLEM}]"
+        c.setFont("Helvetica-Bold", 11)
+        c.drawRightString(w - margin, y + 2, badge_text)
 
     y -= 0.32 * inch
 
@@ -128,7 +146,7 @@ def build_pdf_bytes(
     c.drawString(x0, y, f"Date: {date.today().isoformat()}")
     y -= 0.22 * inch
 
-    # Rigid rails
+    # Rails
     c.setFont("Helvetica-Bold", 12); c.drawString(x0, y, "Grade Band:")
     c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, grade_band)
     y -= 0.22 * inch
@@ -137,16 +155,16 @@ def build_pdf_bytes(
     c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, subject)
     y -= 0.22 * inch
 
-    if science_branch:
+    if subject == "Science" and branch:
         c.setFont("Helvetica-Bold", 12); c.drawString(x0, y, "Branch:")
-        c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, science_branch)
+        c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, branch)
         y -= 0.22 * inch
 
     c.setFont("Helvetica-Bold", 12); c.drawString(x0, y, "Unit:")
     c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, unit)
     y -= 0.22 * inch
 
-    # Lesson/topic
+    # Lesson / Topic
     if lesson_title:
         c.setFont("Helvetica-Bold", 12)
         c.drawString(x0, y, "Lesson/Topic:")
@@ -186,9 +204,10 @@ def build_pdf_bytes(
             c.showPage()
             y = h - margin
 
-            # repeat emblems + signature on new page
-            c.setFont("Helvetica-Bold", 11)
-            c.drawRightString(w - margin, y + 2, badge_text)
+            # repeat emblems (science) + signature on new page
+            if subject == "Science":
+                c.setFont("Helvetica-Bold", 11)
+                c.drawRightString(w - margin, y + 2, f"[{NGSS_EMBLEM}]  [{FIVE_E_EMBLEM}]")
 
             if signature:
                 c.setFillColorRGB(0.184, 0.357, 0.918)
@@ -221,7 +240,7 @@ def build_html(
     body_text,
     grade_band,
     subject,
-    science_branch,
+    branch,
     unit
 ) -> str:
     # HTML fallback: download then Print → Save as PDF
@@ -231,7 +250,7 @@ def build_html(
     rails = f"""
     <div><b>Grade Band:</b> {grade_band}</div>
     <div><b>Subject:</b> {subject}</div>
-    <div><b>Branch:</b> {science_branch}</div>
+    {"<div><b>Branch:</b> " + branch + "</div>" if subject=="Science" and branch else ""}
     <div><b>Unit:</b> {unit}</div>
     """
 
@@ -239,11 +258,13 @@ def build_html(
     stags = f"<div><b>Standards:</b> {standard_tags}</div>" if standard_tags else ""
 
     sig = (
-        f"<div style='position:fixed;top:24px;right:28px;color:{BSCL_BLUE};font-weight:800'>✍️ {signature}</div>"
+        f"<div style='position:fixed;top:24px;right:28px;color:{SCI_BLUE};font-weight:800'>✍️ {signature}</div>"
         if signature else ""
     )
 
-    emblems = f"<div style='position:fixed;top:24px;left:28px;font-weight:900'>[{NGSS_EMBLEM}] [{FIVE_E_EMBLEM}]</div>"
+    emblems = ""
+    if subject == "Science":
+        emblems = f"<div style='position:fixed;top:24px;left:28px;font-weight:900'>[{NGSS_EMBLEM}] [{FIVE_E_EMBLEM}]</div>"
 
     body = (body_text or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     body = body.replace("\n", "<br/>")
@@ -274,38 +295,109 @@ hr {{ border:none; border-top:2px solid #000; margin: 14px 0; }}
 # ================= UI =================
 st.set_page_config(page_title="BSChapp v1", layout="centered")
 
-# Science Mode UI (green accent)
+# First: collect subject quickly so we can theme the page
+# We'll create a lightweight "pre-select" subject in session_state.
+if "subject_mode" not in st.session_state:
+    st.session_state["subject_mode"] = "Science"  # default to science for now (you can change)
+
+# Theme tokens based on subject
+is_science = (st.session_state["subject_mode"] == "Science")
+
+BG = SCI_BG if is_science else NEUTRAL_BG
+CARD = SCI_CARD if is_science else NEUTRAL_CARD
+BORDER = SCI_BORDER if is_science else NEUTRAL_BORDER
+TEXT = SCI_TEXT if is_science else NEUTRAL_TEXT
+MUTED = SCI_MUTED if is_science else NEUTRAL_MUTED
+ACCENT = SCI_GREEN if is_science else "#6b7280"
+ACCENT2 = SCI_GREEN_2 if is_science else "#9ca3af"
+
+# Global CSS: neutral gray vs science blue-green
 st.markdown(f"""
 <style>
-/* science mode accent */
+:root {{
+  --bg:{BG};
+  --card:{CARD};
+  --border:{BORDER};
+  --text:{TEXT};
+  --muted:{MUTED};
+  --accent:{ACCENT};
+  --accent2:{ACCENT2};
+}}
+
 div[data-testid="stAppViewContainer"] {{
-  background: #ffffff;
+  background: var(--bg);
+  color: var(--text);
 }}
-/* Make primary buttons green-ish (best-effort, Streamlit UI varies) */
+
+.block-container {{
+  padding-top: 1.2rem;
+}}
+
+h1, h2, h3, p, label, div {{
+  color: var(--text);
+}}
+
+.small-muted {{
+  color: var(--muted);
+  font-size: 0.95rem;
+}}
+
+.card {{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 14px;
+}}
+
+.badge {{
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: rgba(255,255,255,0.04);
+}}
+
+.badge-accent {{
+  border-color: var(--accent);
+}}
+
 button[kind="primary"] {{
-  border: 2px solid {SCIENCE_GREEN} !important;
+  border: 2px solid var(--accent) !important;
 }}
+
 </style>
 """, unsafe_allow_html=True)
 
 st.title("🧩 BSChapp v1")
+
 st.caption("Boomer-proof: select rails → edit → preview → download → tap to print")
 
-# REQUIRED rails
+# SUBJECT MODE selector (drives UI theme)
+st.markdown("### Subject Mode")
+subject_mode = st.selectbox("Select subject (required)", SUBJECTS, index=0, key="subject_mode")
+
 st.divider()
+
+# REQUIRED rails
 st.markdown("### Required selections (rigid)")
 grade_band = st.selectbox("Grade Band (required)", GRADE_BANDS, index=0)
-subject = st.selectbox("Subject (required)", SUBJECTS, index=0)
 
-science_branch = None
-unit = None
-if subject == "Science":
+science_branch = ""
+unit = ""
+
+if subject_mode == "Science":
     science_branch = st.selectbox("Science Branch (required)", SCIENCE_BRANCHES, index=0)
     unit = st.selectbox("Unit (required)", SCIENCE_UNITS[science_branch], index=0)
 else:
-    unit = st.selectbox("Unit (required)", ["General"], index=0)
+    unit = st.selectbox("Unit (required)", GENERIC_UNITS.get(subject_mode, ["Unit A"]), index=0)
 
-st.info(f"Science Mode: [{NGSS_EMBLEM}] + [{FIVE_E_EMBLEM}] enabled (auto).")
+# Emblems shown only in science mode
+if subject_mode == "Science":
+    st.markdown(f"<div class='card'><span class='badge badge-accent'>[{NGSS_EMBLEM}]</span> <span class='badge badge-accent'>[{FIVE_E_EMBLEM}]</span> <span class='small-muted' style='margin-left:10px;'>Science Mode active (blue-green UI)</span></div>", unsafe_allow_html=True)
+else:
+    st.markdown("<div class='card'><span class='small-muted'>Neutral mode active (light gray UI)</span></div>", unsafe_allow_html=True)
 
 # Optional headers
 lesson_title = st.text_input("Lesson / Topic Title (optional)")
@@ -326,9 +418,9 @@ st.divider()
 
 st.markdown("### Preview")
 st.write(f"**{artifact}**")
-st.write(f"**Grade Band:** {grade_band}  |  **Subject:** {subject}")
-if science_branch:
-    st.write(f"**Science Branch:** {science_branch}  |  **Unit:** {unit}")
+st.write(f"**Grade Band:** {grade_band}  |  **Subject:** {subject_mode}")
+if subject_mode == "Science":
+    st.write(f"**Branch:** {science_branch}  |  **Unit:** {unit}")
 else:
     st.write(f"**Unit:** {unit}")
 if lesson_title:
@@ -350,9 +442,9 @@ if REPORTLAB_OK:
         signature=signature.strip(),
         body_text=body,
         grade_band=grade_band,
-        subject=subject,
-        science_branch=science_branch or "",
-        unit=unit or ""
+        subject=subject_mode,
+        branch=science_branch,
+        unit=unit
     )
     filename = f"{artifact.replace(' ', '_').lower()}_{today}.pdf"
     st.download_button(
@@ -371,9 +463,9 @@ else:
         signature=signature.strip(),
         body_text=body,
         grade_band=grade_band,
-        subject=subject,
-        science_branch=science_branch or "",
-        unit=unit or ""
+        subject=subject_mode,
+        branch=science_branch,
+        unit=unit
     )
     filename = f"{artifact.replace(' ', '_').lower()}_{today}.html"
     st.download_button(
