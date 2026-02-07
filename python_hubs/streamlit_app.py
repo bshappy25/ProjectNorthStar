@@ -2,7 +2,7 @@
 # ============================================================
 # ProjectNorthStar — Streamlit Router (FROZEN)
 # Default: BSChapp v2
-# Optional: ?app=v1
+# Optional: ?app=v1 or ?app=portal
 # ============================================================
 
 import os
@@ -25,12 +25,13 @@ def load_module(name: str, path: str):
 def run_v2():
     v2_path = os.path.join(THIS_DIR, "BSChapp_v2", "BSChapp_v2.py")
     mod = load_module("bschapp_v2", v2_path)
-    mod.main()
-# Then add this function (around line 29):
+    # BSChapp v2 runs automatically when loaded
+
+
 def run_portal():
     portal_path = os.path.join(THIS_DIR, "BSChapp_v2", "pages", "AI_Storyboard_Portal.py")
     mod = load_module("ai_storyboard_portal", portal_path)
-    # Portal page will auto-run when imported
+    # Portal page runs automatically when loaded
 
 
 def run_v1():
@@ -39,17 +40,11 @@ def run_v1():
     mod.main()
 
 
-ROUTES = {"v1": run_v1, "v2": run_v2}
-# Add this to your ROUTES dict (around line 37):
 ROUTES = {
     "v1": run_v1, 
     "v2": run_v2,
-    "portal": run_portal  # ← ADD THIS
+    "portal": run_portal
 }
-
-
-# Update the query params to include portal:
-# ?app=portal
 
 key = st.query_params.get("app", DEFAULT_APP)
 if isinstance(key, list):
