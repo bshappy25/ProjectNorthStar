@@ -14,29 +14,26 @@ import os
 from pathlib import Path
 
 # =====================
-
 # CONFIG
-
 # =====================
 
-TOOLS_DIR = “teacher_tools”
+TOOLS_DIR = "teacher_tools"
 Path(TOOLS_DIR).mkdir(exist_ok=True)
 
 # Theme: Glassy UI (matches BSChapp v2)
 
-NEUTRAL_BG = “#f2f2f2”
-NEUTRAL_CARD = “rgba(230, 230, 230, 0.7)”
-NEUTRAL_BORDER = “rgba(207, 207, 207, 0.5)”
-NEUTRAL_TEXT = “#000000”
-NEUTRAL_MUTED = “#1f1f1f”
+NEUTRAL_BG = "#f2f2f2"
+NEUTRAL_CARD = "rgba(230, 230, 230, 0.7)"
+NEUTRAL_BORDER = "rgba(207, 207, 207, 0.5)"
+NEUTRAL_TEXT = "#000000"
+NEUTRAL_MUTED = "#1f1f1f"
 
-SCI_BG = “#061B15”
-SCI_CARD = “rgba(255,255,255,0.08)”
-SCI_BORDER = “rgba(120,255,220,0.3)”
-SCI_TEXT = “rgba(255,255,255,0.92)”
-SCI_MUTED = “rgba(255,255,255,0.74)”
-SCI_ACCENT = “#14B8A6”
-
+SCI_BG = "#061B15"
+SCI_CARD = "rgba(255,255,255,0.08)"
+SCI_BORDER = "rgba(120,255,220,0.3)"
+SCI_TEXT = "rgba(255,255,255,0.92)"
+SCI_MUTED = "rgba(255,255,255,0.74)"
+SCI_ACCENT = "#14B8A6"
 # =====================
 
 # SESSION STATE
