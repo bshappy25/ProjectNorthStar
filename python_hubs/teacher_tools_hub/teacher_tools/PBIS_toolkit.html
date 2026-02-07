@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>PBIS Ticket Maker — W.L.E.A.D. (JPEG Output)</title>
+  <style>
+    :root{
+      --bg:#f2f2f2;
+      --card:#ffffff;
+      --border:#d7d7d7;
+      --text:#111111;
+      --muted:#4a4a4a;
+
+      --blue:#0b2a5b;
+      --blue2:#123b7a;
+      --gold:#f2c94c;
+
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      overflow:hidden; /* SCROLL-FREE */
+    }
+
+    .app{height:100vh; display:flex; flex-direction:column;}
+
+    .top{
+      background:var(--card);
+      border-bottom:3px solid var(--blue);
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .badge{
+      width:44px;height:44px;
+      border-radius:999px;
+      border:3px solid var(--gold);
+      background:var(--blue);
+      display:grid;place-items:center;
+      color:#fff;
+      font-weight:900;
+      letter-spacing:0.04em;
+      user-select:none;
+    }
+    .title{flex:1; min-width:0;}
+    .title .h{
+      margin:0;
+      font-weight:1000;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      font-size:1.05rem;
+      color:var(--blue);
+    }
+    .title .s{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-weight:700;
+      font-size:0.95rem;
+    }
+    .pill{
+      background:var(--blue);
+      color:#fff;
+      border:2px solid var(--gold);
+      border-radius:999px;
+      padding:8px 12px;
+      font-weight:900;
+      font-size:0.9rem;
+      white-space:nowrap;
+      user-select:none;
+    }
+
+    .tabs{
+      background:var(--card);
+      border-bottom:1px solid var(--border);
+      padding:10px 10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+      flex:0 0 auto;
+    }
+    .tabbtn{
+      appearance:none;
+      border:2px solid var(--blue);
+      background:#fff;
+      color:var(--blue);
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:1000;
+      font-size:0.95rem;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tabbtn.active{
+      background:var(--blue);
+      color:#fff;
+      box-shadow:0 0 0 3px rgba(242,201,76,0.55) inset;
+    }
+    .tabbtn:focus{outline:3px solid rgba(242,201,76,0.65); outline-offset:2px;}
+
+    .stage{
+      flex:1 1 auto;
+      padding:12px;
+      display:flex;
+      justify-content:center;
+      align-items:stretch;
+      min-height:0;
+    }
+    .panel{
+      width:min(1180px, 100%);
+      background:var(--card);
+      border:2px solid var(--border);
+      border-radius:var(--radius);
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+
+    .panelhead{
+      border-bottom:2px solid var(--gold);
+      padding-bottom:10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      flex:0 0 auto;
+    }
+    .panelhead h2{
+      margin:0;
+      color:var(--blue);
+      font-weight:1000;
+      font-size:1.25rem;
+    }
+    .panelhead p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-weight:700;
+      line-height:1.25rem;
+    }
+    .status{
+      margin:0;
+      font-weight:1000;
+      color:var(--blue);
+      text-align:right;
+    }
+    .substatus{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-weight:800;
+      font-size:0.9rem;
+      text-align:right;
+    }
+
+    .content{
+      flex:1 1 auto;
+      min-height:0;
+      padding-top:12px;
+      display:flex;
+      gap:12px;
+    }
+
+    .left{
+      flex:1 1 520px;
+      min-width:320px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      background:#fff;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .right{
+      flex:1 1 520px;
+      min-width:320px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      background:#fff;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    label{
+      display:block;
+      font-weight:1000;
+      margin:8px 0 6px;
+    }
+    input[type="text"], select, textarea{
+      width:100%;
+      border:2px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:1rem;
+      outline:none;
+      background:#fff;
+      color:var(--text);
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color:var(--blue);
+      box-shadow:0 0 0 3px rgba(11,42,91,0.15);
+    }
+
+    textarea{
+      resize:none;
+      height:92px;
+      line-height:1.3rem;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      font-size:0.98rem;
+    }
+
+    .checks{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+      border:2px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
+    }
+    .check{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      color:var(--blue);
+    }
+    .check input{
+      width:22px;height:22px;
+      accent-color: var(--blue);
+    }
+
+    .btnrow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+    .btn{
+      appearance:none;
+      border:2px solid var(--blue);
+      background:var(--blue);
+      color:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:1000;
+      font-size:0.95rem;
+      cursor:pointer;
+      user-select:none;
+      min-width:160px;
+    }
+    .btn.secondary{background:#fff; color:var(--blue);}
+    .btn.gold{border-color:var(--gold); background:var(--gold); color:#111;}
+    .btn.danger{border-color:#b00020; background:#b00020; color:#fff;}
+    .btn:focus{outline:3px solid rgba(242,201,76,0.65); outline-offset:2px;}
+
+    /* Canvas preview (student JPEG source) */
+    .canvaswrap{
+      border:3px solid var(--blue);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+    }
+    canvas{
+      display:block;
+      width:100%;
+      height:420px; /* fixed, scroll-free */
+      background:#fff;
+    }
+
+    .jpegbox{
+      display:none;
+      border:2px dashed var(--border);
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
+    }
+    .jpegbox img{
+      max-width:100%;
+      height:auto;
+      display:block;
+      border-radius:10px;
+      border:1px solid var(--border);
+    }
+    .note{
+      color:var(--muted);
+      font-weight:700;
+      line-height:1.25rem;
+      margin:0;
+    }
+
+    .help{
+      margin-top:auto;
+      border-top:1px solid var(--border);
+      padding-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:space-between;
+      align-items:center;
+      color:var(--muted);
+      font-weight:800;
+      font-size:0.92rem;
+      flex:0 0 auto;
+    }
+    .smallpill{
+      padding:6px 10px;
+      border-radius:999px;
+      border:2px solid var(--gold);
+      background:#fff;
+      color:var(--blue);
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .tool{display:none;}
+    .tool.active{display:block;}
+
+    .toast{
+      position:fixed;
+      top:12px; left:50%;
+      transform:translateX(-50%);
+      background:var(--blue);
+      color:#fff;
+      border:3px solid var(--gold);
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:1000;
+      z-index:9999;
+      display:none;
+      max-width:92vw;
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="toast" id="toast"></div>
+
+  <div class="app">
+    <div class="top">
+      <div class="badge">W</div>
+      <div class="title">
+        <p class="h">PBIS Ticket Maker</p>
+        <p class="s">3 activities • 5 checks • generates a student JPEG</p>
+      </div>
+      <div class="pill">We are L.E.A.Ders • Teacher First</div>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+
+    <div class="stage">
+      <div class="panel">
+        <div class="panelhead">
+          <div>
+            <h2 id="toolTitle">Activity</h2>
+            <p id="toolHint">Fill the form → click “Build Ticket” → “Make JPEG”.</p>
+          </div>
+          <div>
+            <p class="status" id="statusLine">Ready</p>
+            <p class="substatus" id="subLine">No logins • saves on this device</p>
+          </div>
+        </div>
+
+        <div class="content">
+          <!-- LEFT: inputs -->
+          <div class="left">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <div style="flex:1 1 220px;">
+                <label>Student Name</label>
+                <input id="studentName" type="text" placeholder="Type name"/>
+              </div>
+              <div style="flex:1 1 220px;">
+                <label>Period / Group (optional)</label>
+                <input id="studentGroup" type="text" placeholder="e.g., Period 3"/>
+              </div>
+            </div>
+
+            <label>PBIS Checks (5)</label>
+            <div class="checks">
+              <div class="check"><input type="checkbox" id="c1"><span>ENGAGE in SAFTEY</span></div>
+              <div class="check"><input type="checkbox" id="c2"><span>LEARN TO EARN</span></div>
+              <div class="check"><input type="checkbox" id="c3"><span>ALWAYS RESPECTFUL</span></div>
+              <div class="check"><input type="checkbox" id="c4"><span>DO THE RIGHT THING</span></div>
+              <div class="check"><input type="checkbox" id="c5"><span>MY GOAL POINT</span></div>
+            </div>
+
+            <!-- TOOL A: Check-In -->
+            <div class="tool" id="t-checkin">
+              <label>Activity 1: Quick Check-In</label>
+              <textarea id="a1" placeholder="Today I will… (one sentence)"></textarea>
+              <label>Teacher Note (optional)</label>
+              <textarea id="a1b" placeholder="Optional note for student / family"></textarea>
+            </div>
+
+            <!-- TOOL B: Reflection / Reset -->
+            <div class="tool" id="t-reset">
+              <label>Activity 2: Reflection + Reset</label>
+              <textarea id="b1" placeholder="What happened? (facts)"></textarea>
+              <textarea id="b2" placeholder="Next time I will… (plan)"></textarea>
+            </div>
+
+            <!-- TOOL C: Goal Point -->
+            <div class="tool" id="t-goal">
+              <label>Activity 3: Goal Point</label>
+              <textarea id="g1" placeholder="My goal point is… (specific)"></textarea>
+              <textarea id="g2" placeholder="Steps I will take… (1–3 steps)"></textarea>
+            </div>
+
+            <div class="btnrow">
+              <button class="btn gold" id="build">Build Ticket</button>
+              <button class="btn" id="makeJpeg">Make JPEG</button>
+              <button class="btn secondary" id="save">Save</button>
+              <button class="btn danger" id="clear">Clear</button>
+            </div>
+
+            <p class="note" id="saveNote">
+              Tip: after “Make JPEG”, you can <b>save the image</b> (iPhone: long-press → Save Image).
+            </p>
+
+            <div class="help">
+              <div><b>Status:</b> <span id="lastSaved">—</span></div>
+              <div class="smallpill">Blue + Gold • Scroll-Free</div>
+            </div>
+          </div>
+
+          <!-- RIGHT: preview + jpeg output -->
+          <div class="right">
+            <h3 style="margin:0; color:var(--blue); font-weight:1000;">Student Ticket Preview</h3>
+            <div class="canvaswrap">
+              <canvas id="ticket"></canvas>
+            </div>
+
+            <div class="jpegbox" id="jpegBox">
+              <p class="note" style="margin:0 0 8px;">
+                JPEG Output (student-facing). iPhone: <b>long-press</b> → Save Image.
+              </p>
+              <img id="jpegImg" alt="Ticket JPEG"/>
+            </div>
+
+            <div class="help">
+              <div><b>Date:</b> <span id="today"></span></div>
+              <div class="smallpill">W.L.E.A.D.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help">
+          <div><b>Fail-proof:</b> big buttons • clear labels • no scrolling • local save</div>
+          <div class="smallpill">PBIS-Ready</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---------- helpers ----------
+  const $ = (s, el=document)=> el.querySelector(s);
+  const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
+  const store = {
+    get(k, fallback){
+      try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+      catch(e){ return fallback; }
+    },
+    set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  };
+  function toast(msg){
+    const t = $("#toast");
+    t.textContent = msg;
+    t.style.display = "block";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=> t.style.display="none", 1600);
+  }
+
+  // ---------- tabs ----------
+  const TOOLS = [
+    { id:"t-checkin", label:"✅ Check-In", title:"Activity 1 — Quick Check-In", hint:"Short commitment + optional note." },
+    { id:"t-reset",   label:"🔄 Reset",    title:"Activity 2 — Reflection + Reset", hint:"Facts → plan." },
+    { id:"t-goal",    label:"⭐ Goal",     title:"Activity 3 — Goal Point", hint:"Goal point + steps." },
+  ];
+  const tabs = $("#tabs");
+  TOOLS.forEach(t=>{
+    const b = document.createElement("button");
+    b.className = "tabbtn";
+    b.textContent = t.label;
+    b.dataset.id = t.id;
+    b.addEventListener("click", ()=> setActive(t.id));
+    tabs.appendChild(b);
+  });
+
+  function setHeader(toolId){
+    const t = TOOLS.find(x=>x.id===toolId);
+    $("#toolTitle").textContent = t ? t.title : "Activity";
+    $("#toolHint").textContent = t ? t.hint : "";
+  }
+
+  function setActive(toolId){
+    store.set("pbis_active_tab", toolId);
+    $$(".tabbtn").forEach(b=> b.classList.toggle("active", b.dataset.id===toolId));
+    $$(".tool").forEach(sec=> sec.classList.toggle("active", sec.id===toolId));
+    setHeader(toolId);
+    $("#statusLine").textContent = "Ready";
+    $("#subLine").textContent = "No logins • saves on this device";
+    $("#jpegBox").style.display = "none";
+  }
+
+  setActive(store.get("pbis_active_tab", "t-checkin"));
+
+  // ---------- date ----------
+  const d = new Date();
+  $("#today").textContent = d.toLocaleDateString();
+
+  // ---------- canvas setup ----------
+  const canvas = $("#ticket");
+  const ctx = canvas.getContext("2d", { alpha:false });
+
+  function fitCanvas(){
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawTicket(true); // blank-ish draw
+  }
+  window.addEventListener("resize", ()=>fitCanvas());
+  setTimeout(fitCanvas, 50);
+
+  // ---------- form state ----------
+  const fields = {
+    name: $("#studentName"),
+    group: $("#studentGroup"),
+    c1: $("#c1"), c2: $("#c2"), c3: $("#c3"), c4: $("#c4"), c5: $("#c5"),
+    a1: $("#a1"), a1b: $("#a1b"),
+    b1: $("#b1"), b2: $("#b2"),
+    g1: $("#g1"), g2: $("#g2"),
+  };
+
+  function collect(){
+    const active = store.get("pbis_active_tab","t-checkin");
+    return {
+      active,
+      name: (fields.name.value||"").trim(),
+      group: (fields.group.value||"").trim(),
+      checks: {
+        c1: fields.c1.checked,
+        c2: fields.c2.checked,
+        c3: fields.c3.checked,
+        c4: fields.c4.checked,
+        c5: fields.c5.checked,
+      },
+      a1: fields.a1.value||"",
+      a1b: fields.a1b.value||"",
+      b1: fields.b1.value||"",
+      b2: fields.b2.value||"",
+      g1: fields.g1.value||"",
+      g2: fields.g2.value||"",
+    };
+  }
+
+  function save(){
+    store.set("pbis_form", collect());
+    const stamp = new Date().toLocaleString();
+    store.set("pbis_saved_at", stamp);
+    $("#lastSaved").textContent = stamp;
+    toast("Saved ✓");
+  }
+
+  function restore(){
+    const v = store.get("pbis_form", null);
+    if(!v) return;
+
+    if(v.active) setActive(v.active);
+    fields.name.value = v.name || "";
+    fields.group.value = v.group || "";
+    if(v.checks){
+      fields.c1.checked = !!v.checks.c1;
+      fields.c2.checked = !!v.checks.c2;
+      fields.c3.checked = !!v.checks.c3;
+      fields.c4.checked = !!v.checks.c4;
+      fields.c5.checked = !!v.checks.c5;
+    }
+    fields.a1.value = v.a1 || "";
+    fields.a1b.value = v.a1b || "";
+    fields.b1.value = v.b1 || "";
+    fields.b2.value = v.b2 || "";
+    fields.g1.value = v.g1 || "";
+    fields.g2.value = v.g2 || "";
+
+    const stamp = store.get("pbis_saved_at","—");
+    $("#lastSaved").textContent = stamp;
+  }
+  restore();
+
+  // autosave on input (gentle)
+  Object.values(fields).forEach(el=>{
+    el.addEventListener("input", ()=>{ store.set("pbis_form", collect()); });
+    el.addEventListener("change", ()=>{ store.set("pbis_form", collect()); });
+  });
+
+  // ---------- drawing ----------
+  function wrapText(text, maxChars){
+    const words = (text||"").replace(/\r/g,"").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = "";
+    for(const w of words){
+      const test = line ? (line + " " + w) : w;
+      if(test.length > maxChars){
+        if(line) lines.push(line);
+        line = w;
+      }else{
+        line = test;
+      }
+    }
+    if(line) lines.push(line);
+    return lines;
+  }
+
+  function checkLabel(k){
+    if(k==="c1") return "ENGAGE in SAFTEY";
+    if(k==="c2") return "LEARN TO EARN";
+    if(k==="c3") return "ALWAYS RESPECTFUL";
+    if(k==="c4") return "DO THE RIGHT THING";
+    if(k==="c5") return "MY GOAL POINT";
+    return k;
+  }
+
+  function drawTicket(isBlank=false){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    const v = collect();
+
+    // background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0,0,w,h);
+
+    // top bar
+    ctx.fillStyle = "#0b2a5b";
+    ctx.fillRect(0,0,w,64);
+
+    // gold accent line
+    ctx.fillStyle = "#f2c94c";
+    ctx.fillRect(0,62,w,6);
+
+    // badge circle
+    const cx=28, cy=32, r=22;
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle = "#f2c94c";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx,cy,r-5,0,Math.PI*2);
+    ctx.fillStyle = "#0b2a5b";
+    ctx.fill();
+    ctx.fillStyle="#ffffff";
+    ctx.font="900 16px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText("W", cx, cy);
+
+    // title
+    ctx.textAlign="left";
+    ctx.textBaseline="alphabetic";
+    ctx.fillStyle="#ffffff";
+    ctx.font="900 16px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("PBIS TICKET • W.L.E.A.D.", 62, 30);
+    ctx.font="800 12px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillStyle="rgba(255,255,255,0.9)";
+    ctx.fillText("We are L.E.A.Ders • Teacher First", 62, 50);
+
+    // meta box
+    ctx.fillStyle="#123b7a";
+    ctx.fillRect(w-250, 10, 240, 44);
+    ctx.fillStyle="#ffffff";
+    ctx.font="900 12px system-ui, -apple-system, Segoe UI, Arial";
+    const dateStr = new Date().toLocaleDateString();
+    ctx.fillText("Date: " + dateStr, w-238, 28);
+    ctx.fillText("Group: " + (v.group || "—"), w-238, 46);
+
+    // Name line
+    ctx.fillStyle="#111";
+    ctx.font="900 16px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("Student: " + (v.name || "________________"), 16, 96);
+
+    // Activity title
+    const active = v.active;
+    let activityTitle = "Activity";
+    if(active==="t-checkin") activityTitle = "ACTIVITY 1 — QUICK CHECK-IN";
+    if(active==="t-reset")   activityTitle = "ACTIVITY 2 — REFLECTION + RESET";
+    if(active==="t-goal")    activityTitle = "ACTIVITY 3 — GOAL POINT";
+
+    ctx.fillStyle="#0b2a5b";
+    ctx.font="1000 14px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText(activityTitle, 16, 126);
+
+    // Checks box
+    const boxX=16, boxY=140, boxW=w-32, boxH=118;
+    ctx.strokeStyle="#d7d7d7";
+    ctx.lineWidth=2;
+    ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+    ctx.fillStyle="#0b2a5b";
+    ctx.font="900 12px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("PBIS CHECKS (5):", boxX+10, boxY+22);
+
+    const checks = v.checks;
+    const items = ["c1","c2","c3","c4","c5"];
+    ctx.font="900 12px system-ui, -apple-system, Segoe UI, Arial";
+    let x=boxX+10, y=boxY+44;
+    const colGap = Math.floor((boxW-20)/2);
+    items.forEach((k, idx)=>{
+      const isOn = !!checks[k];
+      const col = (idx<3) ? 0 : 1;
+      const row = (idx<3) ? idx : (idx-3);
+      const px = x + col*colGap;
+      const py = y + row*24;
+
+      // checkbox
+      ctx.strokeStyle="#0b2a5b";
+      ctx.lineWidth=2;
+      ctx.strokeRect(px, py-12, 16, 16);
+      if(isOn){
+        ctx.fillStyle="#f2c94c";
+        ctx.fillRect(px+3, py-9, 10, 10);
+      }
+
+      ctx.fillStyle="#0b2a5b";
+      ctx.fillText(checkLabel(k), px+24, py+2);
+    });
+
+    // Body box
+    const bodyX=16, bodyY=270, bodyW=w-32, bodyH=h-270-40;
+    ctx.strokeStyle="#d7d7d7";
+    ctx.lineWidth=2;
+    ctx.strokeRect(bodyX, bodyY, bodyW, bodyH);
+
+    // Body content
+    ctx.fillStyle="#111";
+    ctx.font="900 12px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("STUDENT RESPONSE:", bodyX+10, bodyY+22);
+
+    ctx.font="800 13px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillStyle="#111";
+
+    let lines = [];
+    if(active==="t-checkin"){
+      lines.push("Today I will:");
+      lines = lines.concat(wrapText(v.a1 || (isBlank ? "" : "______________________________"), 52).slice(0,4));
+      lines.push("");
+      lines.push("Teacher note (optional):");
+      lines = lines.concat(wrapText(v.a1b || "", 52).slice(0,4));
+    }
+    if(active==="t-reset"){
+      lines.push("What happened (facts):");
+      lines = lines.concat(wrapText(v.b1 || "", 52).slice(0,4));
+      lines.push("");
+      lines.push("Next time I will (plan):");
+      lines = lines.concat(wrapText(v.b2 || "", 52).slice(0,4));
+    }
+    if(active==="t-goal"){
+      lines.push("My goal point is:");
+      lines = lines.concat(wrapText(v.g1 || "", 52).slice(0,4));
+      lines.push("");
+      lines.push("Steps I will take:");
+      lines = lines.concat(wrapText(v.g2 || "", 52).slice(0,4));
+    }
+
+    // draw lines with safe bounds
+    let ty = bodyY+46;
+    const maxY = bodyY + bodyH - 14;
+    for(const ln of lines){
+      if(ty > maxY) break;
+      ctx.fillText(ln, bodyX+10, ty);
+      ty += 18;
+    }
+
+    // footer
+    ctx.fillStyle="#0b2a5b";
+    ctx.font="900 11px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("W.L.E.A.D. • PBIS • Teacher-owned • Print-first", 16, h-14);
+    ctx.textAlign="right";
+    ctx.fillStyle="#123b7a";
+    ctx.fillText("Student copy (JPEG ready)", w-16, h-14);
+    ctx.textAlign="left";
+  }
+
+  // ---------- buttons ----------
+  $("#build").addEventListener("click", ()=>{
+    drawTicket(false);
+    $("#jpegBox").style.display = "none";
+    $("#statusLine").textContent = "Built ✓";
+    $("#subLine").textContent = "Preview updated";
+    toast("Ticket built ✓");
+  });
+
+  $("#makeJpeg").addEventListener("click", ()=>{
+    // Ensure latest draw
+    drawTicket(false);
+
+    // Convert to JPEG
+    try{
+      const url = canvas.toDataURL("image/jpeg", 0.92);
+      $("#jpegImg").src = url;
+      $("#jpegBox").style.display = "block";
+      $("#statusLine").textContent = "JPEG Ready ✓";
+      $("#subLine").textContent = "Long-press image to save";
+      toast("JPEG ready ✓");
+    }catch(e){
+      toast("JPEG failed (browser blocked)");
+    }
+  });
+
+  $("#save").addEventListener("click", save);
+
+  $("#clear").addEventListener("click", ()=>{
+    fields.name.value = "";
+    fields.group.value = "";
+    fields.c1.checked = fields.c2.checked = fields.c3.checked = fields.c4.checked = fields.c5.checked = false;
+
+    fields.a1.value = ""; fields.a1b.value = "";
+    fields.b1.value = ""; fields.b2.value = "";
+    fields.g1.value = ""; fields.g2.value = "";
+
+    store.set("pbis_form", collect());
+    $("#jpegBox").style.display = "none";
+    drawTicket(true);
+    $("#statusLine").textContent = "Cleared";
+    $("#subLine").textContent = "Ready";
+    toast("Cleared");
+  });
+
+  // initial draw
+  setTimeout(()=> drawTicket(true), 60);
+</script>
+</body>
+</html>
