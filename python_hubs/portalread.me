@@ -1,0 +1,325 @@
+# 🌟 PROJECT NORTH STAR - UNIVERSAL HTML PORTAL
+
+A clean, production-ready system for embedding HTML applications into Streamlit.
+
+-----
+
+## 📦 Features
+
+- **IFrame-based embedding** - Persistent state across page changes
+- **Static file serving** - No external hosting needed
+- **URL parameter passing** - Send data from Streamlit → HTML
+- **Configurable app registry** - Easy to add new apps
+- **Session management** - Track current app state
+- **Zero dependencies** - Uses only Streamlit core
+
+-----
+
+## 🚀 Quick Start
+
+### 1. File Structure
+
+```
+your_streamlit_project/
+├── html_portal.py          # The portal system
+├── html_apps/              # Your HTML applications
+│   ├── estrellas_table.html
+│   ├── make_life_spicy.html
+│   └── lover_boy.html
+└── requirements.txt
+```
+
+### 2. Basic Usage
+
+```python
+import streamlit as st
+from html_portal import HTMLPortal
+
+# Initialize portal
+portal = HTMLPortal()
+
+# Render app selector
+selected_app = portal.render_app_selector()
+
+# Embed selected app
+portal.embed_app(selected_app)
+```
+
+### 3. Run
+
+```bash
+streamlit run html_portal.py
+```
+
+-----
+
+## 🔧 Configuration
+
+### Adding New Apps
+
+Edit the `APPS` dictionary in `PortalConfig`:
+
+```python
+class PortalConfig:
+    APPS = {
+        "My New App": {
+            "file": "my_app.html",
+            "description": "Description of my app",
+            "height": 900
+        }
+    }
+```
+
+Or add dynamically:
+
+```python
+portal = HTMLPortal()
+portal.add_app(
+    name="Dynamic App",
+    filename="dynamic.html",
+    description="Added at runtime",
+    height=800
+)
+```
+
+### URL Parameters
+
+Pass data to HTML apps:
+
+```python
+params = {
+    "user": "john_doe",
+    "session": "abc123",
+    "theme": "dark"
+}
+
+portal.embed_app("My App", params=params)
+```
+
+HTML app receives: `my_app.html?user=john_doe&session=abc123&theme=dark`
+
+-----
+
+## 📂 Static File Serving
+
+### Local Development
+
+Streamlit automatically serves files from your app directory:
+
+- Place HTML files in `html_apps/` folder
+- Access at: `http://localhost:8501/html_apps/your_file.html`
+
+### Streamlit Cloud Deployment
+
+1. Files in `html_apps/` are automatically deployed
+1. Update `BASE_URL` in config to match your deployment URL:
+
+```python
+class PortalConfig:
+    BASE_URL = "https://your-app.streamlit.app/html_apps/"
+```
+
+### External Hosting (Alternative)
+
+Host HTML files elsewhere and point to them:
+
+```python
+class PortalConfig:
+    BASE_URL = "https://your-github-pages.io/apps/"
+```
+
+-----
+
+## 🎨 Customization Examples
+
+### Grid Layout
+
+```python
+portal = HTMLPortal()
+
+# Show apps as grid instead of dropdown
+portal.render_app_grid(columns=3)
+
+# Embed current selection
+if st.session_state.current_app:
+    portal.embed_app(st.session_state.current_app)
+```
+
+### Custom Selector
+
+```python
+# Your own UI
+app_choice = st.radio("Choose:", portal.list_apps())
+
+# Embed with custom params
+portal.embed_app(
+    app_choice,
+    height=1000,
+    params={"mode": "advanced"}
+)
+```
+
+### Multi-Page App
+
+```python
+# pages/1_Games.py
+from html_portal import HTMLPortal
+
+portal = HTMLPortal()
+games = ["Estrella's Table", "Make Life Spicy", "Lover Boy"]
+
+selected = st.selectbox("Game", games)
+portal.embed_app(selected)
+
+# pages/2_Tools.py
+portal = HTMLPortal()
+portal.add_app("Image Editor", "editor.html")
+portal.embed_app("Image Editor")
+```
+
+-----
+
+## 🔗 Data Bridge (Advanced)
+
+### Streamlit → HTML
+
+Pass session data via URL parameters (shown above) or inject into iframe:
+
+```python
+user_data = st.session_state.get('user_profile', {})
+params = {
+    "username": user_data.get('name'),
+    "level": user_data.get('level')
+}
+portal.embed_app("My App", params=params)
+```
+
+### HTML → Streamlit
+
+HTML apps can send messages (requires custom component for full integration):
+
+```javascript
+// In your HTML app
+window.parent.postMessage({
+    type: 'achievement',
+    data: 'LEVEL_UP'
+}, '*');
+```
+
+For now, use URL redirects or external APIs to sync back to Streamlit.
+
+-----
+
+## 📋 API Reference
+
+### `HTMLPortal`
+
+**Methods:**
+
+- `__init__(config=None)` - Initialize portal with optional custom config
+- `embed_app(app_name, height=None, width=None, scrolling=True, params=None)` - Embed an app
+- `render_app_selector()` - Show dropdown selector
+- `render_app_grid(columns=3)` - Show grid of app cards
+- `add_app(name, filename, description="", height=900)` - Add app dynamically
+- `list_apps()` - Get list of available apps
+- `get_app_url(app_name, params=None)` - Get full URL for an app
+
+### `PortalConfig`
+
+**Properties:**
+
+- `STATIC_DIR` - Path to HTML files
+- `BASE_URL` - Base URL for serving files
+- `DEFAULT_HEIGHT` - Default iframe height
+- `APPS` - Registry of available apps
+
+-----
+
+## 🎯 Use Cases
+
+### Gaming Portal
+
+- Multiple HTML mini-games
+- Persistent game state
+- Unified authentication
+
+### Tool Suite
+
+- Image editors
+- Calculators
+- Visualizations
+- Interactive demos
+
+### Prototyping
+
+- Test HTML prototypes in Streamlit
+- Rapid iteration
+- Easy sharing
+
+### Education
+
+- Interactive lessons
+- Coding sandboxes
+- Quiz applications
+
+-----
+
+## 🛠️ Troubleshooting
+
+### Apps not loading?
+
+1. Check file paths are correct
+1. Verify `html_apps/` folder exists
+1. Check browser console for errors
+1. Try accessing HTML directly: `localhost:8501/html_apps/your_file.html`
+
+### Styling issues?
+
+- HTML apps use their own CSS (fully isolated)
+- Streamlit theme doesn’t affect embedded apps
+- Use responsive design in HTML for best results
+
+### State not persisting?
+
+- IFrame method preserves state during session
+- State resets on page reload (by design)
+- Use LocalStorage in HTML for longer persistence
+- Or implement custom state sync with Streamlit
+
+-----
+
+## 📝 Notes
+
+- **Security**: Be cautious with URL parameters containing sensitive data
+- **Performance**: Large HTML files may take time to load initially
+- **Mobile**: Ensure HTML apps are mobile-responsive
+- **CORS**: Not an issue when serving from same domain
+
+-----
+
+## 🚀 Next Steps
+
+1. **Add your HTML apps** to `html_apps/` folder
+1. **Register them** in `PortalConfig.APPS`
+1. **Customize the UI** as needed
+1. **Deploy to Streamlit Cloud**
+
+-----
+
+## 💡 Future Enhancements
+
+Potential additions for Project North Star:
+
+- Message passing between Streamlit and HTML
+- Shared authentication system
+- Analytics integration
+- App marketplace/discovery
+- Dynamic app loading from external sources
+- Theming system for consistent look
+- Performance monitoring
+
+-----
+
+**Built for Project North Star** 🌟
+
+Ready to embed any HTML application seamlessly into Streamlit.
