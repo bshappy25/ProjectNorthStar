@@ -123,3 +123,121 @@ See LICENSE file for details.
 
 **Status**: Phase 0 - Foundation Scaffold Only
 **Last Updated**: 2026-02-06
+
+
+⸻
+
+BSChapp — v2
+
+Structured Human Input → AI-Ready Output (Teacher-First)
+
+Overview
+
+BSChapp v2 builds directly on a frozen, working v1.
+The goal of v2 is not more automation, but better structure so both teachers and AI can work from the same clear skeleton.
+
+v1 proved the system works.
+v2 defines the contract.
+
+⸻
+
+Core Principle
+
+Teachers author meaning. Systems assist later.
+
+All BSChapp artifacts are:
+	•	Teacher-written
+	•	Print-first
+	•	Predictably structured
+	•	Free of analytics, tracking, or admin leverage
+
+AI is downstream, optional, and constrained.
+
+⸻
+
+Why the v1 Output Matters
+
+The current worksheet / exit ticket / lesson plan format is intentionally minimal.
+
+It includes:
+	•	Stable headers (grade band, subject, unit, date)
+	•	Clearly labeled instructional sections
+	•	Plain-language teacher voice
+	•	A visible authorship marker (signature)
+	•	No hidden logic
+
+This makes the files:
+	•	Immediately usable by teachers
+	•	Legible to substitutes
+	•	Machine-readable without prompt hacks
+
+⸻
+
+v2 Design Philosophy
+
+Rigid structure. Flexible content.
+	•	Fixed rails (grade band, subject, unit)
+	•	Free-text sections for teacher judgment
+	•	No inferred intent
+	•	No behavior scoring
+	•	No student data ingestion
+
+If it can’t be printed and handed out, it doesn’t belong.
+
+⸻
+
+How AI Will Interact (Future, Optional)
+
+In v2+, AI will:
+	•	Read completed BSChapp documents
+	•	Respect section boundaries
+	•	Generate suggestions only when explicitly requested
+	•	Never overwrite teacher text
+	•	Never run silently or automatically
+
+These documents act as contracts, not prompts.
+
+⸻
+
+Why This Works for Teachers
+	•	Looks like a normal worksheet
+	•	Prints cleanly in black & white
+	•	Editable digitally or by hand
+	•	No new workflow to learn
+	•	No accounts, logins, or dashboards
+
+Teachers already know how to use this.
+
+⸻
+
+Why This Works for AI
+	•	Clear semantic markers
+	•	Predictable labels
+	•	Low noise
+	•	No hidden state
+	•	Explicit authorship and intent
+
+AI doesn’t need creativity here — it needs clarity.
+
+⸻
+
+What v2 Will Add (Deliberately Limited)
+	•	AI reads existing BSChapp files
+	•	Optional suggestion panel (never auto-fill)
+	•	Science-only awareness (NGSS / 5E)
+	•	Version awareness (v1 artifacts remain valid)
+
+No analytics. No scoring. No surveillance.
+
+⸻
+
+Version Status
+	•	v1: Frozen, stable, production-ready
+	•	v2: Specification defined, implementation pending
+
+The principle remains unchanged:
+Teacher first. System second. Admin last.
+
+⸻
+
+End of document.
