@@ -26,6 +26,11 @@ def run_v2():
     v2_path = os.path.join(THIS_DIR, "BSChapp_v2", "BSChapp_v2.py")
     mod = load_module("bschapp_v2", v2_path)
     mod.main()
+# Then add this function (around line 29):
+def run_portal():
+    portal_path = os.path.join(THIS_DIR, "BSChapp_v2", "pages", "AI_Storyboard_Portal.py")
+    mod = load_module("ai_storyboard_portal", portal_path)
+    # Portal page will auto-run when imported
 
 
 def run_v1():
@@ -35,6 +40,16 @@ def run_v1():
 
 
 ROUTES = {"v1": run_v1, "v2": run_v2}
+# Add this to your ROUTES dict (around line 37):
+ROUTES = {
+    "v1": run_v1, 
+    "v2": run_v2,
+    "portal": run_portal  # ← ADD THIS
+}
+
+
+# Update the query params to include portal:
+# ?app=portal
 
 key = st.query_params.get("app", DEFAULT_APP)
 if isinstance(key, list):
