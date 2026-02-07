@@ -1,1 +1,278 @@
 v2 hub
+
+# BSChapp v2 - Setup Guide
+
+## We are L.E.A.D. • Project North Star Integration
+
+-----
+
+## 📦 File Structure
+
+```
+BSChapp_v2/
+├── BSChapp_v2.py                    # Main app (glassy UI)
+├── pages/
+│   └── AI_Storyboard_Portal.py      # Portal page for AI-Storyboard
+├── html_apps/
+│   └── ai_storyboard.html           # Your AI-Storyboard HTML app
+└── requirements.txt                 # Dependencies
+```
+
+-----
+
+## 🚀 Quick Start
+
+### 1. Install Dependencies
+
+Create `requirements.txt`:
+
+```
+streamlit
+reportlab
+```
+
+Install:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Add Your HTML App
+
+Place your `ai_storyboard.html` file in the `html_apps/` folder:
+
+```
+BSChapp_v2/
+└── html_apps/
+    └── ai_storyboard.html  ← Your app here
+```
+
+### 3. Run
+
+```bash
+streamlit run BSChapp_v2.py
+```
+
+-----
+
+## 🎨 Features
+
+### Main App (BSChapp_v2.py)
+
+✅ **Glassy UI** - Frosted glass effect on all elements  
+✅ **Theme switching** - Neutral gray (default) / Science blue-green  
+✅ **Ticker** - “BSCHAPP v2 - We are L.E.A.D.”  
+✅ **PDF generation** - ReportLab integration  
+✅ **Signature persistence** - Saved to session state  
+✅ **Palm ID admin** - 🌴 tap 3x to unlock
+
+### Portal Page (AI_Storyboard_Portal.py)
+
+✅ **Theme matching** - Inherits Science/Neutral mode  
+✅ **Glassy aesthetic** - Consistent with main app  
+✅ **User context** - Passes signature as username  
+✅ **IFrame embedding** - Seamless HTML integration  
+✅ **Responsive** - Mobile-friendly
+
+-----
+
+## 🔗 Data Flow
+
+```
+Main App (BSChapp_v2.py)
+    │
+    ├─ User sets signature: "Ms. Bryan"
+    │  └─ Saved to: st.session_state["signature"]
+    │
+    └─ Portal Page reads signature
+       └─ Passes to HTML app: ?username=Ms.+Bryan
+           └─ ai_storyboard.html receives username
+```
+
+**HTML app can access username:**
+
+```javascript
+// In ai_storyboard.html
+const urlParams = new URLSearchParams(window.location.search);
+const username = urlParams.get('username') || 'Teacher';
+```
+
+-----
+
+## 🎯 Customization
+
+### Adding More HTML Apps
+
+1. **Add HTML file to `html_apps/`**
+1. **Create new portal page:**
+
+```python
+# pages/My_New_Portal.py
+import streamlit as st
+
+app_url = "/html_apps/my_app.html"
+st.components.v1.iframe(src=app_url, height=1000)
+```
+
+1. **Navigate via sidebar** (Streamlit auto-detects pages)
+
+### Changing Theme
+
+Main app theme controlled by subject selection:
+
+- **“Select…” / “Math” / “ELA”** → Neutral gray
+- **“Science”** → Blue-green Science Mode
+
+Portal automatically inherits theme via session state.
+
+### Customizing Glassy Effect
+
+Adjust in CSS variables:
+
+```python
+CARD = "rgba(230, 230, 230, 0.7)"  # transparency
+# Change 0.7 to 0.5 for more transparency
+# Change to 0.9 for more solid
+```
+
+-----
+
+## 📱 Mobile Optimization
+
+Both main app and portal are mobile-responsive:
+
+- Glassy UI adapts to screen size
+- IFrame scrolls smoothly on touch devices
+- Ticker stays at bottom on all devices
+
+**iPhone tip:** For best experience, use Safari or Chrome in full-screen mode.
+
+-----
+
+## 🔧 Troubleshooting
+
+### HTML app not loading?
+
+1. **Check file path:**
+   
+   ```
+   html_apps/ai_storyboard.html  ← Must be exactly here
+   ```
+1. **Verify URL in browser:**
+   
+   ```
+   http://localhost:8501/html_apps/ai_storyboard.html
+   ```
+   
+   Should load directly (outside iframe)
+1. **Check browser console** for errors (F12)
+
+### Theme not switching?
+
+- Ensure `subject_mode` is in `st.session_state`
+- Portal page reads from main app session
+- Refresh portal page after changing subject
+
+### Signature not passing?
+
+- Set signature on **main page first**
+- Check session state: `st.session_state["signature"]`
+- Portal reads this value and passes to URL
+
+-----
+
+## 🌟 Project North Star Ready
+
+This architecture is designed for expansion:
+
+### Phase 2 Possibilities:
+
+- **Multiple HTML apps** - Add more portals
+- **Bidirectional data** - HTML → Streamlit messaging
+- **Shared authentication** - User profiles across apps
+- **Analytics tracking** - Monitor app usage
+- **Theme customization** - User-selectable palettes
+- **AI integration** - Claude in portal workflow
+
+-----
+
+## 📝 Technical Notes
+
+### Why IFrame?
+
+- **State persistence** - HTML app state survives page changes
+- **Isolation** - HTML CSS doesn’t affect Streamlit
+- **Security** - Sandboxed execution
+- **Flexibility** - Any HTML/JS/CSS works
+
+### Glassy UI Implementation
+
+Uses CSS `backdrop-filter: blur()` for frosted glass effect:
+
+- Works on modern browsers (Safari, Chrome, Edge)
+- Graceful degradation on older browsers
+- Hardware-accelerated rendering
+
+### Session State Sharing
+
+Streamlit multipage apps share session state:
+
+- Main app sets values
+- Portal pages read values
+- Works across navigation
+- Persists during session
+
+-----
+
+## 🚢 Deployment
+
+### Streamlit Cloud
+
+1. **Push to GitHub:**
+   
+   ```bash
+   git init
+   git add .
+   git commit -m "BSChapp v2"
+   git push
+   ```
+1. **Deploy on Streamlit Cloud:**
+- Connect GitHub repo
+- Set main file: `BSChapp_v2.py`
+- Add secrets if needed
+- Deploy!
+1. **Static files auto-served:**
+- `html_apps/` folder deploys with app
+- Accessible at: `your-app.streamlit.app/html_apps/`
+
+### Local Network (School/District)
+
+For offline/intranet deployment:
+
+```bash
+streamlit run BSChapp_v2.py --server.address 0.0.0.0
+```
+
+Access from any device on network: `http://[server-ip]:8501`
+
+-----
+
+## 🎓 L.E.A.D. Philosophy
+
+**L**earning  
+**E**ngagement  
+**A**ccessibility  
+**D**esign
+
+BSChapp v2 embodies these principles:
+
+- **Learning-first** - Tools support teaching, not replace it
+- **Engagement** - Beautiful, functional, joyful to use
+- **Accessibility** - Boomer-proof, mobile-ready, print-first
+- **Design** - Intentional aesthetics, glassy UI, Science Mode
+
+-----
+
+**Built for teachers, by teachers.** 🧩
+
+**We are L.E.A.D.** 🌟
