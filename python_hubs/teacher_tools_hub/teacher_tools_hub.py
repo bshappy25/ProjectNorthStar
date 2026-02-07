@@ -4,7 +4,8 @@ TEACHER TOOLS HUB
 Futuristic TV interface for HTML teaching tools
 
 - Glassy sidebar for tool management
-- Copy/paste HTML → instant publish
+
+# - Copy/paste HTML -> instant publish
 - Transparent screen overlay (TV effect)
 - We are L.E.A.D.
   “””
