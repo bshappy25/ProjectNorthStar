@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>W.L.E.A.D. Starter Tool Pack (Single File)</title>
+  <style>
+    :root{
+      --navy:#0b2a5b;
+      --navy2:#081f44;
+      --gold:#f2c94c;
+      --ink:#0b1220;
+      --card: rgba(255,255,255,0.10);
+      --card2: rgba(255,255,255,0.07);
+      --border: rgba(242,201,76,0.35);
+      --border2: rgba(255,255,255,0.18);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --shadow: 0 18px 60px rgba(0,0,0,0.35);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(242,201,76,0.18), transparent 60%),
+        radial-gradient(1200px 600px at 90% 20%, rgba(0,170,255,0.12), transparent 55%),
+        linear-gradient(145deg, var(--navy2), var(--navy));
+      overflow-x:hidden;
+    }
+
+    /* subtle scanlines */
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.03),
+        rgba(255,255,255,0.03) 2px,
+        transparent 2px,
+        transparent 6px
+      );
+      pointer-events:none;
+      opacity:0.35;
+      mix-blend-mode: overlay;
+    }
+
+    .wrap{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px 14px 90px;
+    }
+
+    .topbar{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      padding: 14px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+      border:1px solid var(--border2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .crest{
+      width:64px; height:64px;
+      border-radius: 999px;
+      border: 2px solid rgba(242,201,76,0.6);
+      background: rgba(255,255,255,0.05);
+      display:grid; place-items:center;
+      overflow:hidden;
+      flex: 0 0 auto;
+    }
+    .crest img{width:100%; height:100%; object-fit:cover}
+
+    .titleblock{flex:1; min-width: 0}
+    .title{
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .subtitle{
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.95rem;
+      line-height: 1.25rem;
+    }
+
+    .chiprow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+    }
+    .chip{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(242,201,76,0.5);
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.9);
+      font-weight: 800;
+      font-size: 0.85rem;
+      user-select:none;
+    }
+
+    .grid{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 940px){
+      .grid{grid-template-columns: 1fr}
+      .chiprow{justify-content:flex-start}
+    }
+
+    .panel{
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(255,255,255,0.11), rgba(255,255,255,0.05));
+      border:1px solid var(--border2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panelHead{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .panelHead .h{
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+    .panelBody{padding: 12px}
+
+    .btn{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      font-weight: 900;
+      text-align:left;
+      cursor:pointer;
+      transition: transform 0.06s ease, border-color 0.2s ease, background 0.2s ease;
+      user-select:none;
+    }
+    .btn:active{transform: scale(0.99)}
+    .btn:hover{border-color: rgba(242,201,76,0.55)}
+    .btn.active{
+      border-color: rgba(242,201,76,0.8);
+      background: linear-gradient(135deg, rgba(242,201,76,0.24), rgba(255,255,255,0.06));
+      box-shadow: 0 0 0 2px rgba(242,201,76,0.18) inset;
+    }
+    .btn small{display:block; color: var(--muted); margin-top:4px; font-weight:700}
+
+    .tool{
+      display:none;
+      min-height: 520px;
+    }
+    .tool.active{display:block}
+
+    .toolTitle{
+      font-size: 1.2rem;
+      font-weight: 1000;
+      letter-spacing: 0.02em;
+    }
+    .toolHint{
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.35rem;
+    }
+
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .spacer{height:10px}
+
+    .control{
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .pill{
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-weight: 900;
+      cursor:pointer;
+      user-select:none;
+    }
+    .pill:active{transform: scale(0.99)}
+    .pill.primary{
+      border-color: rgba(242,201,76,0.85);
+      background: linear-gradient(135deg, rgba(242,201,76,0.26), rgba(255,255,255,0.08));
+    }
+    .pill.danger{
+      border-color: rgba(255,90,120,0.55);
+      background: rgba(255,90,120,0.10);
+    }
+
+    input[type="text"], input[type="number"], textarea, select{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      outline:none;
+    }
+    textarea{min-height: 120px; resize: vertical}
+    label{font-weight:900; color: rgba(255,255,255,0.86); display:block; margin: 10px 0 6px}
+    .two{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 720px){ .two{grid-template-columns:1fr} }
+
+    .note{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px dashed rgba(242,201,76,0.55);
+      background: rgba(242,201,76,0.08);
+      color: rgba(255,255,255,0.90);
+      font-weight: 800;
+    }
+
+    /* Paint canvas */
+    .paintWrap{
+      border-radius: 18px;
+      border: 2px solid rgba(242,201,76,0.35);
+      overflow:hidden;
+      background: rgba(255,255,255,0.04);
+      box-shadow: 0 0 40px rgba(242,201,76,0.12);
+      touch-action: none;
+    }
+    canvas{display:block; width:100%; height:auto; background: #ffffff}
+
+    /* Ticker */
+    .ticker{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.26);
+      border-top: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      text-align:center;
+      font-weight:900;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.86);
+      z-index: 999;
+    }
+
+    .kpi{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .kpi .box{
+      flex:1;
+      min-width: 160px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      padding: 12px;
+    }
+    .kpi .box .v{font-size: 1.2rem; font-weight: 1000}
+    .kpi .box .t{color: var(--muted); font-weight: 800; margin-top: 4px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="crest" title="W.L.E.A.D.">
+        <!-- Embedded crest -->
+        <img alt="W.L.E.A.D. Crest" src="data:image/webp;base64,UklGRhL2AABXRUJQVlA4WAoAAAAcAAAA8wEA8wEAVlA4TJ/wAAAv88F8EI1A...REDACTED_FOR_DISPLAY..."/>
+      </div>
+      <div class="titleblock">
+        <div class="title">W.L.E.A.D. Starter Tool Package</div>
+        <div class="subtitle">5 micro-apps in one file • touch-friendly • saves locally • “We are L.E.A.Ders, Teacher First”</div>
+      </div>
+      <div class="chiprow">
+        <div class="chip">📺 Portal-Ready</div>
+        <div class="chip">🧊 Glassy</div>
+        <div class="chip">⚡ Fast</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left nav -->
+      <div class="panel">
+        <div class="panelHead">
+          <div class="h">Tools</div>
+          <div class="chip" style="border-color:rgba(242,201,76,0.45)">Starter Pack</div>
+        </div>
+        <div class="panelBody" id="nav"></div>
+        <div class="panelBody" style="padding-top:0">
+          <div class="note">Tip: Everything autosaves to <b>this device</b> (localStorage). No accounts.</div>
+        </div>
+      </div>
+
+      <!-- Main -->
+      <div class="panel">
+        <div class="panelHead">
+          <div class="h" id="activeLabel">Tool</div>
+          <div class="chip" style="border-color:rgba(242,201,76,0.45)">W.L.E.A.D.</div>
+        </div>
+        <div class="panelBody">
+
+          <!-- Tool 1: Three-Color Paint -->
+          <section class="tool" id="tool-paint">
+            <div class="toolTitle">🎨 Three-Color Touch Paint</div>
+            <div class="toolHint">Quick touch test + save/clear. Three colors only (navy, gold, white). Great for stylus checks and student “warm-up marks”.</div>
+
+            <div class="spacer"></div>
+
+            <div class="control">
+              <button class="pill primary" id="paintSave">💾 Save</button>
+              <button class="pill danger" id="paintClear">🗑️ Clear</button>
+              <button class="pill" data-color="#0b2a5b" id="cNavy">Navy</button>
+              <button class="pill" data-color="#f2c94c" id="cGold">Gold</button>
+              <button class="pill" data-color="#ffffff" id="cWhite">White</button>
+              <button class="pill" id="paintEraser">Eraser</button>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="paintWrap">
+              <canvas id="paintCanvas" width="1100" height="650" aria-label="Paint canvas"></canvas>
+            </div>
+
+            <div class="kpi">
+              <div class="box"><div class="v" id="paintStatus">Ready</div><div class="t">Status</div></div>
+              <div class="box"><div class="v" id="paintColorLabel">Navy</div><div class="t">Brush</div></div>
+              <div class="box"><div class="v" id="paintSavedAt">—</div><div class="t">Last Save</div></div>
+            </div>
+          </section>
+
+          <!-- Tool 2: Station Timer -->
+          <section class="tool" id="tool-timer">
+            <div class="toolTitle">⏱️ Station Timer (Big & Simple)</div>
+            <div class="toolHint">Set minutes, start/pause, and “Reset to default”. Designed for projecting or quick teacher taps.</div>
+
+            <div class="two">
+              <div>
+                <label>Minutes</label>
+                <input type="number" min="1" max="120" step="1" id="timerMinutes" />
+              </div>
+              <div>
+                <label>Quick Presets</label>
+                <select id="timerPreset">
+                  <option value="5">5 min</option>
+                  <option value="8">8 min</option>
+                  <option value="10" selected>10 min</option>
+                  <option value="12">12 min</option>
+                  <option value="15">15 min</option>
+                  <option value="20">20 min</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="control">
+              <button class="pill primary" id="timerStart">▶ Start</button>
+              <button class="pill" id="timerPause">⏸ Pause</button>
+              <button class="pill danger" id="timerReset">↺ Reset</button>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="panel" style="background:rgba(0,0,0,0.18); border-color:rgba(242,201,76,0.35)">
+              <div class="panelBody" style="text-align:center; padding: 26px 14px">
+                <div style="font-size:3.6rem; font-weight:1000; letter-spacing:0.06em" id="timerDisplay">10:00</div>
+                <div style="color:var(--muted); font-weight:900; margin-top:6px" id="timerSub">Preset ready</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tool 3: Exit Ticket Builder -->
+          <section class="tool" id="tool-exit">
+            <div class="toolTitle">🧾 Exit Ticket Builder</div>
+            <div class="toolHint">Type 1–3 prompts. Generates a clean printable block + copy button. (No AI, just fast structure.)</div>
+
+            <label>Lesson / Topic (optional)</label>
+            <input type="text" id="exitTopic" placeholder="e.g., Plate Boundaries" />
+
+            <div class="two">
+              <div>
+                <label>Prompt 1</label>
+                <input type="text" id="exitP1" placeholder="One key idea you learned today is..." />
+              </div>
+              <div>
+                <label>Prompt 2</label>
+                <input type="text" id="exitP2" placeholder="A question I still have is..." />
+              </div>
+            </div>
+
+            <label>Prompt 3 (optional)</label>
+            <input type="text" id="exitP3" placeholder="Rate your confidence (1–5) and explain..." />
+
+            <div class="spacer"></div>
+
+            <div class="control">
+              <button class="pill primary" id="exitBuild">✨ Build</button>
+              <button class="pill" id="exitCopy">📋 Copy</button>
+              <button class="pill danger" id="exitClear">🗑️ Clear</button>
+              <button class="pill" id="exitPrint">🖨️ Print</button>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="panel" style="background:rgba(255,255,255,0.06)">
+              <div class="panelBody">
+                <div id="exitPreview" style="white-space:pre-wrap; font-weight:800; line-height:1.5"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tool 4: Random Name Picker -->
+          <section class="tool" id="tool-picker">
+            <div class="toolTitle">🎲 Quick Name Picker</div>
+            <div class="toolHint">Paste a roster (one name per line). Tap “Pick” to randomize. Great for equity + cold call routines.</div>
+
+            <label>Roster (one per line)</label>
+            <textarea id="pickRoster" placeholder="Aaliyah&#10;Ben&#10;Carlos&#10;Dina"></textarea>
+
+            <div class="spacer"></div>
+
+            <div class="control">
+              <button class="pill primary" id="pickBtn">🎯 Pick</button>
+              <button class="pill" id="pickShuffle">🔀 Shuffle</button>
+              <button class="pill danger" id="pickClear">🗑️ Clear</button>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="panel" style="background:rgba(0,0,0,0.18); border-color:rgba(242,201,76,0.35)">
+              <div class="panelBody" style="text-align:center; padding: 26px 14px">
+                <div style="font-size:2.6rem; font-weight:1000" id="pickResult">—</div>
+                <div style="color:var(--muted); font-weight:900; margin-top:6px" id="pickMeta">Ready</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tool 5: L.E.A.D. Tally Counter -->
+          <section class="tool" id="tool-tally">
+            <div class="toolTitle">✅ L.E.A.D. Tally Counter</div>
+            <div class="toolHint">Big tap counters for quick classroom tracking. Reset anytime. Saves automatically.</div>
+
+            <div class="two">
+              <div class="panel" style="background:rgba(255,255,255,0.06)">
+                <div class="panelBody">
+                  <div style="font-weight:1000; font-size:1.05rem">🛡️ Safety</div>
+                  <div style="font-size:3rem; font-weight:1000" id="tSafety">0</div>
+                  <div class="control">
+                    <button class="pill primary" data-tally="safety" data-delta="1">+1</button>
+                    <button class="pill" data-tally="safety" data-delta="-1">-1</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel" style="background:rgba(255,255,255,0.06)">
+                <div class="panelBody">
+                  <div style="font-weight:1000; font-size:1.05rem">📚 Learning</div>
+                  <div style="font-size:3rem; font-weight:1000" id="tLearning">0</div>
+                  <div class="control">
+                    <button class="pill primary" data-tally="learning" data-delta="1">+1</button>
+                    <button class="pill" data-tally="learning" data-delta="-1">-1</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel" style="background:rgba(255,255,255,0.06)">
+                <div class="panelBody">
+                  <div style="font-weight:1000; font-size:1.05rem">🏅 Earn</div>
+                  <div style="font-size:3rem; font-weight:1000" id="tEarn">0</div>
+                  <div class="control">
+                    <button class="pill primary" data-tally="earn" data-delta="1">+1</button>
+                    <button class="pill" data-tally="earn" data-delta="-1">-1</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel" style="background:rgba(255,255,255,0.06)">
+                <div class="panelBody">
+                  <div style="font-weight:1000; font-size:1.05rem">⭐ Do Right Thing</div>
+                  <div style="font-size:3rem; font-weight:1000" id="tRight">0</div>
+                  <div class="control">
+                    <button class="pill primary" data-tally="right" data-delta="1">+1</button>
+                    <button class="pill" data-tally="right" data-delta="-1">-1</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="spacer"></div>
+            <div class="control">
+              <button class="pill danger" id="tallyReset">🧹 Reset All</button>
+              <button class="pill" id="tallyCopy">📋 Copy Summary</button>
+            </div>
+
+            <div class="note" id="tallyNote">Autosaved. Tap fast.</div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker">WE ARE L.E.A.Ders • Teacher First • Starter Tool Pack • Touch-Ready • Local Save</div>
+
+  <script>
+    /***********************************************************
+     * IMPORTANT:
+     * The crest image is embedded as base64.
+     * In this chat view, it may look “redacted” above.
+     * When you paste into your portal, keep the full base64 string.
+     ***********************************************************/
+  </script>
+
+  <script>
+    // ---------- tiny helpers ----------
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+    const store = {
+      get(k, fallback){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } },
+      set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+    };
+    const nowTime = () => new Date().toLocaleString();
+
+    // ---------- tool registry ----------
+    const tools = [
+      { id:"tool-paint",  name:"Three-Color Paint", icon:"🎨", desc:"Touch test + save/clear" },
+      { id:"tool-timer",  name:"Station Timer",     icon:"⏱️", desc:"Big timer + presets" },
+      { id:"tool-exit",   name:"Exit Ticket",       icon:"🧾", desc:"Build + copy + print" },
+      { id:"tool-picker", name:"Name Picker",       icon:"🎲", desc:"Paste roster → pick" },
+      { id:"tool-tally",  name:"L.E.A.D. Tally",    icon:"✅", desc:"Fast counters" },
+    ];
+
+    function setActive(toolId){
+      store.set("lead_active_tool", toolId);
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.tool === toolId));
+      $$(".tool").forEach(s => s.classList.toggle("active", s.id === toolId));
+      $("#activeLabel").textContent = tools.find(t=>t.id===toolId)?.name || "Tool";
+    }
+
+    // Build nav
+    const nav = $("#nav");
+    tools.forEach(t=>{
+      const btn = document.createElement("button");
+      btn.className = "btn";
+      btn.dataset.tool = t.id;
+      btn.innerHTML = `${t.icon} ${t.name}<small>${t.desc}</small>`;
+      btn.addEventListener("click", ()=> setActive(t.id));
+      nav.appendChild(btn);
+      nav.appendChild(document.createElement("div")).style.height="10px";
+    });
+
+    // restore active
+    setActive(store.get("lead_active_tool", "tool-paint"));
+
+    // =========================
+    // TOOL 1: PAINT
+    // =========================
+    const canvas = $("#paintCanvas");
+    const ctx = canvas.getContext("2d");
+    let painting = false;
+    let brushColor = "#0b2a5b";
+    let brushSize = 10;
+    let erasing = false;
+
+    function paintSetStatus(msg){ $("#paintStatus").textContent = msg; }
+    function paintSetBrushLabel(){
+      $("#paintColorLabel").textContent = erasing ? "Eraser" : (brushColor.toLowerCase()==="#ffffff" ? "White" : (brushColor.toLowerCase()==="#f2c94c" ? "Gold" : "Navy"));
+    }
+
+    function getPos(e){
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches ? e.touches[0] : null;
+      const clientX = touch ? touch.clientX : e.clientX;
+      const clientY = touch ? touch.clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function drawLine(from, to){
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = brushSize;
+      ctx.strokeStyle = erasing ? "#ffffff" : brushColor;
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+    }
+
+    // background white
+    function paintInit(){
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      // try load saved
+      const saved = store.get("lead_paint_png", null);
+      if(saved){
+        const img = new Image();
+        img.onload = ()=> ctx.drawImage(img, 0, 0);
+        img.src = saved;
+        $("#paintSavedAt").textContent = store.get("lead_paint_saved_at", "—");
+        paintSetStatus("Loaded saved drawing");
+      } else {
+        paintSetStatus("Ready");
+      }
+      paintSetBrushLabel();
+    }
+
+    let last = null;
+    function startPaint(e){
+      painting = true;
+      last = getPos(e);
+      paintSetStatus("Drawing…");
+      e.preventDefault();
+    }
+    function movePaint(e){
+      if(!painting) return;
+      const pos = getPos(e);
+      drawLine(last, pos);
+      last = pos;
+      e.preventDefault();
+    }
+    function endPaint(e){
+      painting = false;
+      last = null;
+      paintSetStatus("Ready");
+      e && e.preventDefault && e.preventDefault();
+    }
+
+    canvas.addEventListener("mousedown", startPaint);
+    canvas.addEventListener("mousemove", movePaint);
+    window.addEventListener("mouseup", endPaint);
+
+    canvas.addEventListener("touchstart", startPaint, {passive:false});
+    canvas.addEventListener("touchmove", movePaint, {passive:false});
+    canvas.addEventListener("touchend", endPaint, {passive:false});
+
+    // color buttons
+    $("#cNavy").addEventListener("click", ()=>{ brushColor="#0b2a5b"; erasing=false; paintSetBrushLabel(); });
+    $("#cGold").addEventListener("click", ()=>{ brushColor="#f2c94c"; erasing=false; paintSetBrushLabel(); });
+    $("#cWhite").addEventListener("click", ()=>{ brushColor="#ffffff"; erasing=false; paintSetBrushLabel(); });
+    $("#paintEraser").addEventListener("click", ()=>{ erasing=true; paintSetBrushLabel(); });
+
+    $("#paintClear").addEventListener("click", ()=>{
+      ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+      store.set("lead_paint_png", null);
+      store.set("lead_paint_saved_at", "—");
+      $("#paintSavedAt").textContent = "—";
+      paintSetStatus("Cleared");
+    });
+
+    $("#paintSave").addEventListener("click", ()=>{
+      const png = canvas.toDataURL("image/png");
+      store.set("lead_paint_png", png);
+      const t = nowTime();
+      store.set("lead_paint_saved_at", t);
+      $("#paintSavedAt").textContent = t;
+      paintSetStatus("Saved ✓");
+    });
+
+    paintInit();
+
+    // =========================
+    // TOOL 2: TIMER
+    // =========================
+    let timerInt = null;
+    let remaining = 10*60;
+
+    function formatTime(s){
+      const m = Math.floor(s/60);
+      const r = s%60;
+      return String(m).padStart(2,"0")+":"+String(r).padStart(2,"0");
+    }
+    function timerRender(){
+      $("#timerDisplay").textContent = formatTime(remaining);
+      store.set("lead_timer_remaining", remaining);
+    }
+    function timerSetFromMinutes(min){
+      remaining = Math.max(1, Math.min(120, min))*60;
+      $("#timerSub").textContent = "Preset ready";
+      timerRender();
+    }
+
+    const savedRemain = store.get("lead_timer_remaining", null);
+    if(typeof savedRemain === "number" && savedRemain > 0){
+      remaining = savedRemain;
+      $("#timerSub").textContent = "Restored";
+    }
+    timerRender();
+
+    $("#timerPreset").addEventListener("change", (e)=>{
+      const v = parseInt(e.target.value,10);
+      $("#timerMinutes").value = v;
+      timerSetFromMinutes(v);
+    });
+
+    $("#timerMinutes").value = store.get("lead_timer_minutes", 10);
+    timerSetFromMinutes(parseInt($("#timerMinutes").value,10) || 10);
+
+    $("#timerMinutes").addEventListener("change", (e)=>{
+      const v = parseInt(e.target.value,10) || 10;
+      store.set("lead_timer_minutes", v);
+      timerSetFromMinutes(v);
+    });
+
+    $("#timerStart").addEventListener("click", ()=>{
+      if(timerInt) return;
+      $("#timerSub").textContent = "Running…";
+      timerInt = setInterval(()=>{
+        remaining = Math.max(0, remaining-1);
+        timerRender();
+        if(remaining <= 0){
+          clearInterval(timerInt);
+          timerInt = null;
+          $("#timerSub").textContent = "Done ✓ Reset or set new minutes";
+          // subtle visual cue
+          $("#timerDisplay").style.textShadow = "0 0 18px rgba(242,201,76,0.75)";
+          setTimeout(()=> $("#timerDisplay").style.textShadow = "", 1800);
+        }
+      }, 1000);
+    });
+
+    $("#timerPause").addEventListener("click", ()=>{
+      if(timerInt){
+        clearInterval(timerInt);
+        timerInt = null;
+        $("#timerSub").textContent = "Paused";
+      }
+    });
+
+    $("#timerReset").addEventListener("click", ()=>{
+      if(timerInt){ clearInterval(timerInt); timerInt=null; }
+      $("#timerDisplay").style.textShadow = "";
+      const v = parseInt($("#timerMinutes").value,10) || 10;
+      timerSetFromMinutes(v);
+      $("#timerSub").textContent = "Reset";
+    });
+
+    // =========================
+    // TOOL 3: EXIT TICKET
+    // =========================
+    const exitKeys = ["exitTopic","exitP1","exitP2","exitP3"];
+    exitKeys.forEach(k=>{
+      const el = $("#"+k);
+      el.value = store.get("lead_"+k, "");
+      el.addEventListener("input", ()=> store.set("lead_"+k, el.value));
+    });
+
+    function buildExit(){
+      const topic = $("#exitTopic").value.trim();
+      const p1 = $("#exitP1").value.trim() || "One key idea you learned today is…";
+      const p2 = $("#exitP2").value.trim() || "A question I still have is…";
+      const p3 = $("#exitP3").value.trim();
+      const dateStr = new Date().toLocaleDateString();
+
+      let out = "";
+      out += "W.L.E.A.D. EXIT TICKET\n";
+      out += "Date: " + dateStr + "\n";
+      if(topic) out += "Topic: " + topic + "\n";
+      out += "\n1) " + p1 + "\n   ________________________________\n\n";
+      out += "2) " + p2 + "\n   ________________________________\n\n";
+      if(p3){
+        out += "3) " + p3 + "\n   ________________________________\n";
+      }
+
+      out += "\n— We are L.E.A.Ders • Teacher First —";
+      $("#exitPreview").textContent = out;
+      store.set("lead_exit_preview", out);
+    }
+
+    const savedPreview = store.get("lead_exit_preview", "");
+    if(savedPreview) $("#exitPreview").textContent = savedPreview;
+
+    $("#exitBuild").addEventListener("click", buildExit);
+
+    $("#exitCopy").addEventListener("click", async ()=>{
+      const txt = $("#exitPreview").textContent.trim();
+      if(!txt){ buildExit(); }
+      const t = $("#exitPreview").textContent.trim();
+      try{
+        await navigator.clipboard.writeText(t);
+        alert("Copied ✓");
+      }catch(e){
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = t;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        alert("Copied ✓");
+      }
+    });
+
+    $("#exitClear").addEventListener("click", ()=>{
+      exitKeys.forEach(k=>{ $("#"+k).value=""; store.set("lead_"+k,""); });
+      $("#exitPreview").textContent = "";
+      store.set("lead_exit_preview","");
+    });
+
+    $("#exitPrint").addEventListener("click", ()=>{
+      if(!$("#exitPreview").textContent.trim()) buildExit();
+      const html = `
+        <html><head><meta charset="utf-8"/>
+        <title>Exit Ticket</title>
+        <style>
+          body{font-family: Arial, sans-serif; padding: 24px;}
+          pre{white-space: pre-wrap; font-size: 13pt; line-height: 1.5;}
+        </style>
+        </head><body>
+          <pre>${escapeHtml($("#exitPreview").textContent)}</pre>
+        </body></html>`;
+      const w = window.open("", "_blank");
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+      w.focus();
+      w.print();
+    });
+
+    // =========================
+    // TOOL 4: NAME PICKER
+    // =========================
+    const rosterEl = $("#pickRoster");
+    rosterEl.value = store.get("lead_roster", "");
+    rosterEl.addEventListener("input", ()=> store.set("lead_roster", rosterEl.value));
+
+    function rosterList(){
+      return rosterEl.value
+        .split(/\r?\n/)
+        .map(s=>s.trim())
+        .filter(Boolean);
+    }
+
+    function setPickMeta(msg){ $("#pickMeta").textContent = msg; }
+
+    $("#pickBtn").addEventListener("click", ()=>{
+      const list = rosterList();
+      if(!list.length){ $("#pickResult").textContent="—"; setPickMeta("Paste a roster first"); return; }
+      const i = Math.floor(Math.random()*list.length);
+      const name = list[i];
+      $("#pickResult").textContent = name;
+      setPickMeta("Picked from " + list.length + " names");
+      store.set("lead_last_pick", name);
+    });
+
+    $("#pickShuffle").addEventListener("click", ()=>{
+      const list = rosterList();
+      if(!list.length) return;
+      for(let i=list.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [list[i],list[j]]=[list[j],list[i]];
+      }
+      rosterEl.value = list.join("\n");
+      store.set("lead_roster", rosterEl.value);
+      setPickMeta("Shuffled ✓");
+    });
+
+    $("#pickClear").addEventListener("click", ()=>{
+      rosterEl.value="";
+      store.set("lead_roster","");
+      $("#pickResult").textContent="—";
+      setPickMeta("Cleared");
+    });
+
+    const lastPick = store.get("lead_last_pick", "");
+    if(lastPick){ $("#pickResult").textContent = lastPick; setPickMeta("Restored last pick"); }
+
+    // =========================
+    // TOOL 5: TALLY
+    // =========================
+    const tally = store.get("lead_tally", {safety:0, learning:0, earn:0, right:0});
+    function tallyRender(){
+      $("#tSafety").textContent = tally.safety;
+      $("#tLearning").textContent = tally.learning;
+      $("#tEarn").textContent = tally.earn;
+      $("#tRight").textContent = tally.right;
+      store.set("lead_tally", tally);
+    }
+    tallyRender();
+
+    $$("[data-tally]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const k = btn.dataset.tally;
+        const d = parseInt(btn.dataset.delta,10) || 0;
+        tally[k] = Math.max(0, (tally[k]||0) + d);
+        tallyRender();
+        $("#tallyNote").textContent = "Saved ✓ " + nowTime();
+      });
+    });
+
+    $("#tallyReset").addEventListener("click", ()=>{
+      tally.safety = tally.learning = tally.earn = tally.right = 0;
+      tallyRender();
+      $("#tallyNote").textContent = "Reset ✓";
+    });
+
+    $("#tallyCopy").addEventListener("click", async ()=>{
+      const txt = `W.L.E.A.D. TALLY\nSafety: ${tally.safety}\nLearning: ${tally.learning}\nEarn: ${tally.earn}\nDo Right Thing: ${tally.right}\n(${nowTime()})`;
+      try{
+        await navigator.clipboard.writeText(txt);
+        $("#tallyNote").textContent = "Copied ✓";
+      }catch(e){
+        $("#tallyNote").textContent = "Copy blocked (browser)";
+      }
+    });
+
+    // ---------- utils ----------
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+  </script>
+
+  <!--
+    NOTE ABOUT THE CREST:
+    In the pasted version I’m giving you, the base64 string must be complete.
+    If you want, I can also give you a version that references a URL instead.
+  -->
+</body>
+</html>
