@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>PBIS Ticket Maker — W.L.E.A.D. (JPEG Output)</title>
+  <title>PBIS Ticket Maker — W.L.E.A.D. (JPEG)</title>
   <style>
     :root{
       --bg:#f2f2f2;
@@ -12,8 +12,8 @@
       --text:#111111;
       --muted:#4a4a4a;
 
-      --blue:#0b2a5b;
-      --blue2:#123b7a;
+      --navy:#0b2a5b;
+      --navy2:#123b7a;
       --gold:#f2c94c;
 
       --radius:14px;
@@ -25,179 +25,131 @@
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
       background:var(--bg);
       color:var(--text);
-      overflow:hidden; /* SCROLL-FREE */
+      overflow:hidden; /* NO SCROLL */
     }
 
-    .app{height:100vh; display:flex; flex-direction:column;}
-
-    .top{
-      background:var(--card);
-      border-bottom:3px solid var(--blue);
-      padding:12px 14px;
+    /* ===== WIDE SCREEN TOP BAR (S5 + S6) ===== */
+    .topbar{
+      position:relative;
+      background:var(--navy);
+      color:#fff;
+      border-bottom:4px solid var(--gold);
+      height:74px;
       display:flex;
       align-items:center;
+      padding:0 14px;
       gap:12px;
+      overflow:hidden;
     }
-    .badge{
+    .topbar::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(
+        90deg,
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.06) 25%,
+        rgba(255,255,255,0.00) 55%,
+        rgba(255,255,255,0.05) 85%,
+        rgba(255,255,255,0.00) 100%
+      );
+      pointer-events:none;
+      opacity:0.55; /* subtle shading */
+    }
+    .crest{
       width:44px;height:44px;
       border-radius:999px;
       border:3px solid var(--gold);
-      background:var(--blue);
+      background:rgba(255,255,255,0.12);
       display:grid;place-items:center;
-      color:#fff;
-      font-weight:900;
-      letter-spacing:0.04em;
+      font-weight:1000;
+      letter-spacing:0.06em;
       user-select:none;
+      z-index:1;
     }
-    .title{flex:1; min-width:0;}
-    .title .h{
+    .brand{
+      flex:1;
+      min-width:0;
+      z-index:1;
+    }
+    .brand .t{
       margin:0;
       font-weight:1000;
-      letter-spacing:0.08em;
+      letter-spacing:0.10em;
       text-transform:uppercase;
       font-size:1.05rem;
-      color:var(--blue);
-    }
-    .title .s{
-      margin:4px 0 0;
-      color:var(--muted);
-      font-weight:700;
-      font-size:0.95rem;
-    }
-    .pill{
-      background:var(--blue);
-      color:#fff;
-      border:2px solid var(--gold);
-      border-radius:999px;
-      padding:8px 12px;
-      font-weight:900;
-      font-size:0.9rem;
       white-space:nowrap;
-      user-select:none;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand .s{
+      margin:4px 0 0;
+      font-weight:800;
+      font-size:0.92rem;
+      opacity:0.92;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tiny{
+      z-index:1;
+      font-weight:900;
+      font-size:0.92rem;
+      opacity:0.95;
+      white-space:nowrap;
     }
 
-    .tabs{
-      background:var(--card);
-      border-bottom:1px solid var(--border);
-      padding:10px 10px;
+    .app{
+      height:100vh;
       display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:center;
-      flex:0 0 auto;
+      flex-direction:column;
     }
-    .tabbtn{
-      appearance:none;
-      border:2px solid var(--blue);
-      background:#fff;
-      color:var(--blue);
-      border-radius:999px;
-      padding:10px 14px;
-      font-weight:1000;
-      font-size:0.95rem;
-      cursor:pointer;
-      user-select:none;
-    }
-    .tabbtn.active{
-      background:var(--blue);
-      color:#fff;
-      box-shadow:0 0 0 3px rgba(242,201,76,0.55) inset;
-    }
-    .tabbtn:focus{outline:3px solid rgba(242,201,76,0.65); outline-offset:2px;}
 
+    /* ===== MAIN LAYOUT (NO SCROLL) ===== */
     .stage{
       flex:1 1 auto;
+      min-height:0;
       padding:12px;
       display:flex;
       justify-content:center;
       align-items:stretch;
-      min-height:0;
     }
     .panel{
-      width:min(1180px, 100%);
+      width:min(1220px, 100%);
       background:var(--card);
       border:2px solid var(--border);
       border-radius:var(--radius);
-      padding:14px;
+      padding:12px;
       display:flex;
       flex-direction:column;
       min-height:0;
     }
-
-    .panelhead{
-      border-bottom:2px solid var(--gold);
-      padding-bottom:10px;
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-      flex:0 0 auto;
-    }
-    .panelhead h2{
-      margin:0;
-      color:var(--blue);
-      font-weight:1000;
-      font-size:1.25rem;
-    }
-    .panelhead p{
-      margin:6px 0 0;
-      color:var(--muted);
-      font-weight:700;
-      line-height:1.25rem;
-    }
-    .status{
-      margin:0;
-      font-weight:1000;
-      color:var(--blue);
-      text-align:right;
-    }
-    .substatus{
-      margin:6px 0 0;
-      color:var(--muted);
-      font-weight:800;
-      font-size:0.9rem;
-      text-align:right;
-    }
-
-    .content{
-      flex:1 1 auto;
-      min-height:0;
-      padding-top:12px;
+    .row{
       display:flex;
       gap:12px;
+      min-height:0;
+      flex:1 1 auto;
     }
-
-    .left{
-      flex:1 1 520px;
-      min-width:320px;
+    .left, .right{
       border:1px solid var(--border);
       border-radius:12px;
-      padding:12px;
       background:#fff;
+      padding:12px;
       min-height:0;
       display:flex;
       flex-direction:column;
       gap:10px;
     }
-    .right{
-      flex:1 1 520px;
-      min-width:320px;
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px;
-      background:#fff;
-      min-height:0;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+    .left{ flex:1 1 520px; min-width:320px; }
+    .right{ flex:1 1 520px; min-width:320px; }
 
     label{
       display:block;
       font-weight:1000;
       margin:8px 0 6px;
+      color:var(--navy);
     }
-    input[type="text"], select, textarea{
+    input[type="text"], textarea{
       width:100%;
       border:2px solid var(--border);
       border-radius:12px;
@@ -207,19 +159,50 @@
       background:#fff;
       color:var(--text);
     }
-    input:focus, select:focus, textarea:focus{
-      border-color:var(--blue);
-      box-shadow:0 0 0 3px rgba(11,42,91,0.15);
+    input:focus, textarea:focus{
+      border-color:var(--navy2);
+      box-shadow:0 0 0 3px rgba(18,59,122,0.12);
     }
-
     textarea{
       resize:none;
-      height:92px;
+      height:86px;
       line-height:1.3rem;
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
       font-size:0.98rem;
     }
 
+    /* ===== SIMPLE 3 ACTIVITIES SELECT (S2) ===== */
+    .pickrow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+    }
+    .pick{
+      flex:1 1 160px;
+      min-width:160px;
+      border:2px solid var(--navy);
+      background:#fff;
+      color:var(--navy);
+      border-radius:12px;
+      padding:12px 12px;
+      font-weight:1000;
+      font-size:0.98rem;
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .pick.active{
+      background:var(--navy);
+      color:#fff;
+      box-shadow:0 0 0 3px rgba(242,201,76,0.55) inset;
+    }
+    .pick:focus{outline:3px solid rgba(242,201,76,0.65); outline-offset:2px;}
+
+    /* ===== PBIS CHECKS (kept) ===== */
     .checks{
       display:grid;
       grid-template-columns: 1fr;
@@ -234,40 +217,78 @@
       align-items:center;
       gap:10px;
       font-weight:900;
-      color:var(--blue);
+      color:var(--navy);
     }
-    .check input{
-      width:22px;height:22px;
-      accent-color: var(--blue);
-    }
+    .check input{ width:22px; height:22px; accent-color: var(--navy); }
 
-    .btnrow{
+    /* ===== BIG BLUE ARROW GENERATE (S4) ===== */
+    .genwrap{
+      margin-top:auto;
+      padding-top:10px;
+      border-top:1px solid var(--border);
       display:flex;
       gap:10px;
+      align-items:center;
       flex-wrap:wrap;
-      margin-top:6px;
+      justify-content:space-between;
+    }
+    .arrowbtn{
+      flex:1 1 320px;
+      min-width:260px;
+      appearance:none;
+      border:0;
+      border-radius:14px;
+      padding:14px 14px;
+      background:linear-gradient(180deg, var(--navy2), var(--navy));
+      color:#fff;
+      font-weight:1000;
+      font-size:1.05rem;
+      cursor:pointer;
+      user-select:none;
+      display:none; /* shown only when all 3 selected */
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      box-shadow:0 10px 24px rgba(11,42,91,0.22);
+    }
+    .arrowbtn .arrow{
+      width:44px;height:44px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.16);
+      border:2px solid rgba(242,201,76,0.95);
+      display:grid;place-items:center;
+      font-size:1.35rem;
+    }
+    .arrowbtn:focus{outline:3px solid rgba(242,201,76,0.65); outline-offset:3px;}
+
+    .minirow{
+      display:flex;
+      gap:10px;
+      flex:0 0 auto;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
     }
     .btn{
       appearance:none;
-      border:2px solid var(--blue);
-      background:var(--blue);
-      color:#fff;
+      border:2px solid var(--navy);
+      background:#fff;
+      color:var(--navy);
       border-radius:12px;
       padding:10px 12px;
       font-weight:1000;
       font-size:0.95rem;
       cursor:pointer;
       user-select:none;
-      min-width:160px;
+      min-width:150px;
     }
-    .btn.secondary{background:#fff; color:var(--blue);}
+    .btn:focus{outline:3px solid rgba(242,201,76,0.65); outline-offset:2px;}
     .btn.gold{border-color:var(--gold); background:var(--gold); color:#111;}
     .btn.danger{border-color:#b00020; background:#b00020; color:#fff;}
-    .btn:focus{outline:3px solid rgba(242,201,76,0.65); outline-offset:2px;}
 
-    /* Canvas preview (student JPEG source) */
+    /* ===== PREVIEW ===== */
     .canvaswrap{
-      border:3px solid var(--blue);
+      border:3px solid var(--navy);
       border-radius:12px;
       overflow:hidden;
       background:#fff;
@@ -275,10 +296,9 @@
     canvas{
       display:block;
       width:100%;
-      height:420px; /* fixed, scroll-free */
+      height:420px; /* fixed */
       background:#fff;
     }
-
     .jpegbox{
       display:none;
       border:2px dashed var(--border);
@@ -293,45 +313,17 @@
       border-radius:10px;
       border:1px solid var(--border);
     }
-    .note{
-      color:var(--muted);
-      font-weight:700;
-      line-height:1.25rem;
+
+    .statusline{
       margin:0;
-    }
-
-    .help{
-      margin-top:auto;
-      border-top:1px solid var(--border);
-      padding-top:10px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      justify-content:space-between;
-      align-items:center;
-      color:var(--muted);
-      font-weight:800;
-      font-size:0.92rem;
-      flex:0 0 auto;
-    }
-    .smallpill{
-      padding:6px 10px;
-      border-radius:999px;
-      border:2px solid var(--gold);
-      background:#fff;
-      color:var(--blue);
       font-weight:1000;
-      white-space:nowrap;
+      color:var(--navy);
     }
-
-    .tool{display:none;}
-    .tool.active{display:block;}
-
     .toast{
       position:fixed;
-      top:12px; left:50%;
+      top:10px; left:50%;
       transform:translateX(-50%);
-      background:var(--blue);
+      background:var(--navy);
       color:#fff;
       border:3px solid var(--gold);
       border-radius:999px;
@@ -342,6 +334,10 @@
       max-width:92vw;
       text-align:center;
     }
+
+    /* tight text (S1) */
+    .hint{ margin:0; color:var(--muted); font-weight:800; }
+    .tinyhint{ margin:0; color:var(--muted); font-weight:800; font-size:0.92rem; }
   </style>
 </head>
 
@@ -349,41 +345,37 @@
   <div class="toast" id="toast"></div>
 
   <div class="app">
-    <div class="top">
-      <div class="badge">W</div>
-      <div class="title">
-        <p class="h">PBIS Ticket Maker</p>
-        <p class="s">3 activities • 5 checks • generates a student JPEG</p>
+    <!-- S5 + S6 -->
+    <div class="topbar">
+      <div class="crest">W</div>
+      <div class="brand">
+        <p class="t">PBIS Ticket Maker</p>
+        <p class="s">We are L.E.A.Ders • Teacher First</p>
       </div>
-      <div class="pill">We are L.E.A.Ders • Teacher First</div>
+      <div class="tiny">JPEG Ready</div>
     </div>
-
-    <div class="tabs" id="tabs"></div>
 
     <div class="stage">
       <div class="panel">
-        <div class="panelhead">
-          <div>
-            <h2 id="toolTitle">Activity</h2>
-            <p id="toolHint">Fill the form → click “Build Ticket” → “Make JPEG”.</p>
-          </div>
-          <div>
-            <p class="status" id="statusLine">Ready</p>
-            <p class="substatus" id="subLine">No logins • saves on this device</p>
-          </div>
-        </div>
-
-        <div class="content">
-          <!-- LEFT: inputs -->
+        <div class="row">
+          <!-- LEFT -->
           <div class="left">
+            <p class="statusline" id="statusLine">Select all 3 activities.</p>
+
+            <div class="pickrow" role="group" aria-label="Activities">
+              <button class="pick" id="pickCheckin" type="button">✅ CHECK IN</button>
+              <button class="pick" id="pickReflect" type="button">🔄 REFLECT</button>
+              <button class="pick" id="pickGoal" type="button">⭐ GOAL</button>
+            </div>
+
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <div style="flex:1 1 220px;">
-                <label>Student Name</label>
-                <input id="studentName" type="text" placeholder="Type name"/>
+                <label>Student</label>
+                <input id="studentName" type="text" placeholder="Name"/>
               </div>
               <div style="flex:1 1 220px;">
-                <label>Period / Group (optional)</label>
-                <input id="studentGroup" type="text" placeholder="e.g., Period 3"/>
+                <label>Group (optional)</label>
+                <input id="studentGroup" type="text" placeholder="Period / Group"/>
               </div>
             </div>
 
@@ -396,78 +388,55 @@
               <div class="check"><input type="checkbox" id="c5"><span>MY GOAL POINT</span></div>
             </div>
 
-            <!-- TOOL A: Check-In -->
-            <div class="tool" id="t-checkin">
-              <label>Activity 1: Quick Check-In</label>
-              <textarea id="a1" placeholder="Today I will… (one sentence)"></textarea>
-              <label>Teacher Note (optional)</label>
-              <textarea id="a1b" placeholder="Optional note for student / family"></textarea>
+            <!-- three inputs, always visible (simple / boomer-proof) -->
+            <label>CHECK IN</label>
+            <textarea id="a1" placeholder="Today I will…"></textarea>
+
+            <label>REFLECT</label>
+            <textarea id="b1" placeholder="What happened?"></textarea>
+
+            <label>GOAL</label>
+            <textarea id="g1" placeholder="My goal point is…"></textarea>
+
+            <div class="genwrap">
+              <button class="arrowbtn" id="generate" type="button" aria-label="Generate complete ticket">
+                <span class="arrow">➡️</span>
+                <span>Generate Complete Ticket</span>
+              </button>
+
+              <div class="minirow">
+                <button class="btn gold" id="makeJpeg" type="button">Make JPEG</button>
+                <button class="btn" id="save" type="button">Save</button>
+                <button class="btn danger" id="clear" type="button">Clean Up</button>
+              </div>
             </div>
 
-            <!-- TOOL B: Reflection / Reset -->
-            <div class="tool" id="t-reset">
-              <label>Activity 2: Reflection + Reset</label>
-              <textarea id="b1" placeholder="What happened? (facts)"></textarea>
-              <textarea id="b2" placeholder="Next time I will… (plan)"></textarea>
-            </div>
-
-            <!-- TOOL C: Goal Point -->
-            <div class="tool" id="t-goal">
-              <label>Activity 3: Goal Point</label>
-              <textarea id="g1" placeholder="My goal point is… (specific)"></textarea>
-              <textarea id="g2" placeholder="Steps I will take… (1–3 steps)"></textarea>
-            </div>
-
-            <div class="btnrow">
-              <button class="btn gold" id="build">Build Ticket</button>
-              <button class="btn" id="makeJpeg">Make JPEG</button>
-              <button class="btn secondary" id="save">Save</button>
-              <button class="btn danger" id="clear">Clear</button>
-            </div>
-
-            <p class="note" id="saveNote">
-              Tip: after “Make JPEG”, you can <b>save the image</b> (iPhone: long-press → Save Image).
-            </p>
-
-            <div class="help">
-              <div><b>Status:</b> <span id="lastSaved">—</span></div>
-              <div class="smallpill">Blue + Gold • Scroll-Free</div>
-            </div>
+            <p class="tinyhint" id="savedAt">—</p>
           </div>
 
-          <!-- RIGHT: preview + jpeg output -->
+          <!-- RIGHT -->
           <div class="right">
-            <h3 style="margin:0; color:var(--blue); font-weight:1000;">Student Ticket Preview</h3>
+            <p class="statusline">Ticket Preview</p>
             <div class="canvaswrap">
               <canvas id="ticket"></canvas>
             </div>
 
             <div class="jpegbox" id="jpegBox">
-              <p class="note" style="margin:0 0 8px;">
-                JPEG Output (student-facing). iPhone: <b>long-press</b> → Save Image.
+              <p class="hint" style="margin:0 0 8px;">
+                JPEG Output (student). iPhone: long-press → Save Image.
               </p>
               <img id="jpegImg" alt="Ticket JPEG"/>
             </div>
 
-            <div class="help">
-              <div><b>Date:</b> <span id="today"></span></div>
-              <div class="smallpill">W.L.E.A.D.</div>
-            </div>
+            <p class="tinyhint"><span id="today"></span></p>
           </div>
-        </div>
-
-        <div class="help">
-          <div><b>Fail-proof:</b> big buttons • clear labels • no scrolling • local save</div>
-          <div class="smallpill">PBIS-Ready</div>
         </div>
       </div>
     </div>
   </div>
 
 <script>
-  // ---------- helpers ----------
   const $ = (s, el=document)=> el.querySelector(s);
-  const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
   const store = {
     get(k, fallback){
       try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
@@ -480,77 +449,56 @@
     t.textContent = msg;
     t.style.display = "block";
     clearTimeout(toast._t);
-    toast._t = setTimeout(()=> t.style.display="none", 1600);
+    toast._t = setTimeout(()=> t.style.display="none", 1400);
   }
 
-  // ---------- tabs ----------
-  const TOOLS = [
-    { id:"t-checkin", label:"✅ Check-In", title:"Activity 1 — Quick Check-In", hint:"Short commitment + optional note." },
-    { id:"t-reset",   label:"🔄 Reset",    title:"Activity 2 — Reflection + Reset", hint:"Facts → plan." },
-    { id:"t-goal",    label:"⭐ Goal",     title:"Activity 3 — Goal Point", hint:"Goal point + steps." },
-  ];
-  const tabs = $("#tabs");
-  TOOLS.forEach(t=>{
-    const b = document.createElement("button");
-    b.className = "tabbtn";
-    b.textContent = t.label;
-    b.dataset.id = t.id;
-    b.addEventListener("click", ()=> setActive(t.id));
-    tabs.appendChild(b);
-  });
-
-  function setHeader(toolId){
-    const t = TOOLS.find(x=>x.id===toolId);
-    $("#toolTitle").textContent = t ? t.title : "Activity";
-    $("#toolHint").textContent = t ? t.hint : "";
-  }
-
-  function setActive(toolId){
-    store.set("pbis_active_tab", toolId);
-    $$(".tabbtn").forEach(b=> b.classList.toggle("active", b.dataset.id===toolId));
-    $$(".tool").forEach(sec=> sec.classList.toggle("active", sec.id===toolId));
-    setHeader(toolId);
-    $("#statusLine").textContent = "Ready";
-    $("#subLine").textContent = "No logins • saves on this device";
-    $("#jpegBox").style.display = "none";
-  }
-
-  setActive(store.get("pbis_active_tab", "t-checkin"));
-
-  // ---------- date ----------
+  // date
   const d = new Date();
-  $("#today").textContent = d.toLocaleDateString();
+  $("#today").textContent = "Date: " + d.toLocaleDateString();
 
-  // ---------- canvas setup ----------
-  const canvas = $("#ticket");
-  const ctx = canvas.getContext("2d", { alpha:false });
+  // activity picks (must select all 3 to show big arrow)
+  const picks = {
+    checkin: $("#pickCheckin"),
+    reflect: $("#pickReflect"),
+    goal: $("#pickGoal"),
+  };
+  let selected = store.get("pbis_selected_3", {checkin:false, reflect:false, goal:false});
 
-  function fitCanvas(){
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    canvas.width = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    drawTicket(true); // blank-ish draw
+  function applyPicks(){
+    picks.checkin.classList.toggle("active", !!selected.checkin);
+    picks.reflect.classList.toggle("active", !!selected.reflect);
+    picks.goal.classList.toggle("active", !!selected.goal);
+
+    const ready = !!selected.checkin && !!selected.reflect && !!selected.goal;
+    $("#generate").style.display = ready ? "inline-flex" : "none";
+    $("#statusLine").textContent = ready ? "Ready. Click the big arrow." : "Select all 3 activities.";
   }
-  window.addEventListener("resize", ()=>fitCanvas());
-  setTimeout(fitCanvas, 50);
 
-  // ---------- form state ----------
+  function togglePick(key){
+    selected[key] = !selected[key];
+    store.set("pbis_selected_3", selected);
+    $("#jpegBox").style.display = "none";
+    applyPicks();
+  }
+
+  picks.checkin.addEventListener("click", ()=>togglePick("checkin"));
+  picks.reflect.addEventListener("click", ()=>togglePick("reflect"));
+  picks.goal.addEventListener("click", ()=>togglePick("goal"));
+  applyPicks();
+
+  // form fields
   const fields = {
     name: $("#studentName"),
     group: $("#studentGroup"),
     c1: $("#c1"), c2: $("#c2"), c3: $("#c3"), c4: $("#c4"), c5: $("#c5"),
-    a1: $("#a1"), a1b: $("#a1b"),
-    b1: $("#b1"), b2: $("#b2"),
-    g1: $("#g1"), g2: $("#g2"),
+    a1: $("#a1"),
+    b1: $("#b1"),
+    g1: $("#g1"),
   };
 
   function collect(){
-    const active = store.get("pbis_active_tab","t-checkin");
     return {
-      active,
+      selected,
       name: (fields.name.value||"").trim(),
       group: (fields.group.value||"").trim(),
       checks: {
@@ -561,27 +509,19 @@
         c5: fields.c5.checked,
       },
       a1: fields.a1.value||"",
-      a1b: fields.a1b.value||"",
       b1: fields.b1.value||"",
-      b2: fields.b2.value||"",
       g1: fields.g1.value||"",
-      g2: fields.g2.value||"",
     };
   }
 
-  function save(){
-    store.set("pbis_form", collect());
-    const stamp = new Date().toLocaleString();
-    store.set("pbis_saved_at", stamp);
-    $("#lastSaved").textContent = stamp;
-    toast("Saved ✓");
-  }
-
   function restore(){
-    const v = store.get("pbis_form", null);
+    const v = store.get("pbis_ticket_v3", null);
     if(!v) return;
-
-    if(v.active) setActive(v.active);
+    if(v.selected){
+      selected = v.selected;
+      store.set("pbis_selected_3", selected);
+      applyPicks();
+    }
     fields.name.value = v.name || "";
     fields.group.value = v.group || "";
     if(v.checks){
@@ -592,24 +532,44 @@
       fields.c5.checked = !!v.checks.c5;
     }
     fields.a1.value = v.a1 || "";
-    fields.a1b.value = v.a1b || "";
     fields.b1.value = v.b1 || "";
-    fields.b2.value = v.b2 || "";
     fields.g1.value = v.g1 || "";
-    fields.g2.value = v.g2 || "";
 
-    const stamp = store.get("pbis_saved_at","—");
-    $("#lastSaved").textContent = stamp;
+    const stamp = store.get("pbis_saved_at_v3","—");
+    $("#savedAt").textContent = stamp === "—" ? "—" : ("Saved: " + stamp);
   }
   restore();
 
-  // autosave on input (gentle)
+  // autosave light
   Object.values(fields).forEach(el=>{
-    el.addEventListener("input", ()=>{ store.set("pbis_form", collect()); });
-    el.addEventListener("change", ()=>{ store.set("pbis_form", collect()); });
+    el.addEventListener("input", ()=> store.set("pbis_ticket_v3", collect()));
+    el.addEventListener("change", ()=> store.set("pbis_ticket_v3", collect()));
   });
 
-  // ---------- drawing ----------
+  function save(){
+    store.set("pbis_ticket_v3", collect());
+    const stamp = new Date().toLocaleString();
+    store.set("pbis_saved_at_v3", stamp);
+    $("#savedAt").textContent = "Saved: " + stamp;
+    toast("Saved ✓");
+  }
+
+  // canvas
+  const canvas = $("#ticket");
+  const ctx = canvas.getContext("2d", { alpha:false });
+
+  function fitCanvas(){
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawTicket(true);
+  }
+  window.addEventListener("resize", fitCanvas);
+  setTimeout(fitCanvas, 50);
+
   function wrapText(text, maxChars){
     const words = (text||"").replace(/\r/g,"").split(/\s+/).filter(Boolean);
     const lines = [];
@@ -626,7 +586,6 @@
     if(line) lines.push(line);
     return lines;
   }
-
   function checkLabel(k){
     if(k==="c1") return "ENGAGE in SAFTEY";
     if(k==="c2") return "LEARN TO EARN";
@@ -636,49 +595,38 @@
     return k;
   }
 
-  function drawTicket(isBlank=false){
+  function drawTicket(blank=false){
     const w = canvas.clientWidth, h = canvas.clientHeight;
     const v = collect();
 
-    // background
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0,0,w,h);
 
-    // top bar
+    // header stripe
     ctx.fillStyle = "#0b2a5b";
-    ctx.fillRect(0,0,w,64);
-
-    // gold accent line
+    ctx.fillRect(0,0,w,62);
     ctx.fillStyle = "#f2c94c";
-    ctx.fillRect(0,62,w,6);
+    ctx.fillRect(0,60,w,6);
 
-    // badge circle
-    const cx=28, cy=32, r=22;
-    ctx.beginPath();
-    ctx.arc(cx,cy,r,0,Math.PI*2);
-    ctx.fillStyle = "#f2c94c";
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(cx,cy,r-5,0,Math.PI*2);
-    ctx.fillStyle = "#0b2a5b";
-    ctx.fill();
+    // left crest
+    const cx=28, cy=31, r=22;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle="#f2c94c"; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy,r-5,0,Math.PI*2); ctx.fillStyle="#0b2a5b"; ctx.fill();
     ctx.fillStyle="#ffffff";
     ctx.font="900 16px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
+    ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText("W", cx, cy);
 
-    // title
-    ctx.textAlign="left";
-    ctx.textBaseline="alphabetic";
+    // header text
+    ctx.textAlign="left"; ctx.textBaseline="alphabetic";
     ctx.fillStyle="#ffffff";
-    ctx.font="900 16px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.font="1000 15px system-ui, -apple-system, Segoe UI, Arial";
     ctx.fillText("PBIS TICKET • W.L.E.A.D.", 62, 30);
-    ctx.font="800 12px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillStyle="rgba(255,255,255,0.9)";
+    ctx.font="900 12px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillStyle="rgba(255,255,255,0.92)";
     ctx.fillText("We are L.E.A.Ders • Teacher First", 62, 50);
 
-    // meta box
+    // meta
     ctx.fillStyle="#123b7a";
     ctx.fillRect(w-250, 10, 240, 44);
     ctx.fillStyle="#ffffff";
@@ -687,95 +635,87 @@
     ctx.fillText("Date: " + dateStr, w-238, 28);
     ctx.fillText("Group: " + (v.group || "—"), w-238, 46);
 
-    // Name line
+    // student
     ctx.fillStyle="#111";
-    ctx.font="900 16px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillText("Student: " + (v.name || "________________"), 16, 96);
+    ctx.font="1000 16px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.textAlign="left";
+    ctx.fillText("Student: " + (v.name || "________________"), 16, 92);
 
-    // Activity title
-    const active = v.active;
-    let activityTitle = "Activity";
-    if(active==="t-checkin") activityTitle = "ACTIVITY 1 — QUICK CHECK-IN";
-    if(active==="t-reset")   activityTitle = "ACTIVITY 2 — REFLECTION + RESET";
-    if(active==="t-goal")    activityTitle = "ACTIVITY 3 — GOAL POINT";
-
+    // selected 3 line
+    const selLine = "Selected: " +
+      (v.selected.checkin ? "CHECK IN " : "") +
+      (v.selected.reflect ? "REFLECT " : "") +
+      (v.selected.goal ? "GOAL" : "");
     ctx.fillStyle="#0b2a5b";
-    ctx.font="1000 14px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillText(activityTitle, 16, 126);
+    ctx.font="1000 13px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText(selLine.trim(), 16, 118);
 
-    // Checks box
-    const boxX=16, boxY=140, boxW=w-32, boxH=118;
+    // checks box
+    const boxX=16, boxY=130, boxW=w-32, boxH=118;
     ctx.strokeStyle="#d7d7d7";
     ctx.lineWidth=2;
     ctx.strokeRect(boxX, boxY, boxW, boxH);
 
     ctx.fillStyle="#0b2a5b";
-    ctx.font="900 12px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillText("PBIS CHECKS (5):", boxX+10, boxY+22);
+    ctx.font="1000 12px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("PBIS CHECKS:", boxX+10, boxY+22);
 
     const checks = v.checks;
     const items = ["c1","c2","c3","c4","c5"];
     ctx.font="900 12px system-ui, -apple-system, Segoe UI, Arial";
     let x=boxX+10, y=boxY+44;
     const colGap = Math.floor((boxW-20)/2);
+
     items.forEach((k, idx)=>{
-      const isOn = !!checks[k];
+      const on = !!checks[k];
       const col = (idx<3) ? 0 : 1;
       const row = (idx<3) ? idx : (idx-3);
       const px = x + col*colGap;
       const py = y + row*24;
 
-      // checkbox
       ctx.strokeStyle="#0b2a5b";
       ctx.lineWidth=2;
       ctx.strokeRect(px, py-12, 16, 16);
-      if(isOn){
+      if(on){
         ctx.fillStyle="#f2c94c";
         ctx.fillRect(px+3, py-9, 10, 10);
       }
-
       ctx.fillStyle="#0b2a5b";
       ctx.fillText(checkLabel(k), px+24, py+2);
     });
 
-    // Body box
-    const bodyX=16, bodyY=270, bodyW=w-32, bodyH=h-270-40;
+    // body box
+    const bodyX=16, bodyY=258, bodyW=w-32, bodyH=h-258-40;
     ctx.strokeStyle="#d7d7d7";
     ctx.lineWidth=2;
     ctx.strokeRect(bodyX, bodyY, bodyW, bodyH);
 
-    // Body content
-    ctx.fillStyle="#111";
-    ctx.font="900 12px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillText("STUDENT RESPONSE:", bodyX+10, bodyY+22);
+    ctx.fillStyle="#0b2a5b";
+    ctx.font="1000 12px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("STUDENT TEXT:", bodyX+10, bodyY+22);
 
-    ctx.font="800 13px system-ui, -apple-system, Segoe UI, Arial";
     ctx.fillStyle="#111";
+    ctx.font="900 13px system-ui, -apple-system, Segoe UI, Arial";
 
     let lines = [];
-    if(active==="t-checkin"){
-      lines.push("Today I will:");
-      lines = lines.concat(wrapText(v.a1 || (isBlank ? "" : "______________________________"), 52).slice(0,4));
+    if(v.selected.checkin){
+      lines.push("CHECK IN:");
+      lines = lines.concat(wrapText(v.a1 || (blank ? "" : "________________"), 60).slice(0,3));
       lines.push("");
-      lines.push("Teacher note (optional):");
-      lines = lines.concat(wrapText(v.a1b || "", 52).slice(0,4));
     }
-    if(active==="t-reset"){
-      lines.push("What happened (facts):");
-      lines = lines.concat(wrapText(v.b1 || "", 52).slice(0,4));
+    if(v.selected.reflect){
+      lines.push("REFLECT:");
+      lines = lines.concat(wrapText(v.b1 || "", 60).slice(0,3));
       lines.push("");
-      lines.push("Next time I will (plan):");
-      lines = lines.concat(wrapText(v.b2 || "", 52).slice(0,4));
     }
-    if(active==="t-goal"){
-      lines.push("My goal point is:");
-      lines = lines.concat(wrapText(v.g1 || "", 52).slice(0,4));
-      lines.push("");
-      lines.push("Steps I will take:");
-      lines = lines.concat(wrapText(v.g2 || "", 52).slice(0,4));
+    if(v.selected.goal){
+      lines.push("GOAL:");
+      lines = lines.concat(wrapText(v.g1 || "", 60).slice(0,3));
+    }
+    if(!v.selected.checkin && !v.selected.reflect && !v.selected.goal){
+      lines = ["(Select all 3 activities to generate.)"];
     }
 
-    // draw lines with safe bounds
     let ty = bodyY+46;
     const maxY = bodyY + bodyH - 14;
     for(const ln of lines){
@@ -787,36 +727,42 @@
     // footer
     ctx.fillStyle="#0b2a5b";
     ctx.font="900 11px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillText("W.L.E.A.D. • PBIS • Teacher-owned • Print-first", 16, h-14);
+    ctx.textAlign="left";
+    ctx.fillText("W.L.E.A.D. • PBIS", 16, h-14);
     ctx.textAlign="right";
     ctx.fillStyle="#123b7a";
-    ctx.fillText("Student copy (JPEG ready)", w-16, h-14);
+    ctx.fillText("Student copy (JPEG)", w-16, h-14);
     ctx.textAlign="left";
   }
 
-  // ---------- buttons ----------
-  $("#build").addEventListener("click", ()=>{
+  function canGenerate(){
+    return !!selected.checkin && !!selected.reflect && !!selected.goal;
+  }
+
+  $("#generate").addEventListener("click", ()=>{
+    if(!canGenerate()){
+      toast("Select all 3 activities first");
+      return;
+    }
     drawTicket(false);
     $("#jpegBox").style.display = "none";
-    $("#statusLine").textContent = "Built ✓";
-    $("#subLine").textContent = "Preview updated";
-    toast("Ticket built ✓");
+    $("#statusLine").textContent = "Generated ✓";
+    toast("Generated ✓");
   });
 
   $("#makeJpeg").addEventListener("click", ()=>{
-    // Ensure latest draw
+    if(!canGenerate()){
+      toast("Select all 3 activities first");
+      return;
+    }
     drawTicket(false);
-
-    // Convert to JPEG
     try{
       const url = canvas.toDataURL("image/jpeg", 0.92);
       $("#jpegImg").src = url;
       $("#jpegBox").style.display = "block";
-      $("#statusLine").textContent = "JPEG Ready ✓";
-      $("#subLine").textContent = "Long-press image to save";
       toast("JPEG ready ✓");
     }catch(e){
-      toast("JPEG failed (browser blocked)");
+      toast("JPEG failed");
     }
   });
 
@@ -826,16 +772,16 @@
     fields.name.value = "";
     fields.group.value = "";
     fields.c1.checked = fields.c2.checked = fields.c3.checked = fields.c4.checked = fields.c5.checked = false;
-
-    fields.a1.value = ""; fields.a1b.value = "";
-    fields.b1.value = ""; fields.b2.value = "";
-    fields.g1.value = ""; fields.g2.value = "";
-
-    store.set("pbis_form", collect());
+    fields.a1.value = "";
+    fields.b1.value = "";
+    fields.g1.value = "";
+    selected = {checkin:false, reflect:false, goal:false};
+    store.set("pbis_selected_3", selected);
+    store.set("pbis_ticket_v3", collect());
     $("#jpegBox").style.display = "none";
+    applyPicks();
     drawTicket(true);
     $("#statusLine").textContent = "Cleared";
-    $("#subLine").textContent = "Ready";
     toast("Cleared");
   });
 
