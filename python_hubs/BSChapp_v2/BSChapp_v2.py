@@ -580,8 +580,12 @@ button[kind="primary"] {{
     st.write(body)
 
     st.divider()
-
+    
+    
+def main():
+    # ------------------------------------------------------------
     # Block download until subject selected (boomer rail)
+    # ------------------------------------------------------------
     if subject_mode == "Select...":
         st.warning("Select a subject to enable download.")
     else:
@@ -608,7 +612,9 @@ button[kind="primary"] {{
                 use_container_width=True,
             )
         else:
-            st.warning("PDF engine not installed yet. Add `reportlab` to requirements.txt to enable PDF downloads.")
+            st.warning(
+                "PDF engine not installed yet. Add `reportlab` to requirements.txt to enable PDF downloads."
+            )
             html = build_html(
                 artifact=artifact,
                 lesson_title=lesson_title.strip(),
@@ -628,11 +634,18 @@ button[kind="primary"] {{
                 mime="text/html",
                 use_container_width=True,
             )
-            st.info("iPhone: after download → open HTML → Share → Print → pinch-out → Save/Share PDF.")
+            st.info(
+                "iPhone: after download → open HTML → Share → Print → pinch-out → Save/Share PDF."
+            )
 
-    # bottom padding for ticker
+    # ------------------------------------------------------------
+    # Bottom padding for ticker
+    # ------------------------------------------------------------
     st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
 
 
+# ------------------------------------------------------------
+# Router-safe execution
+# ------------------------------------------------------------
 if __name__ == "__main__":
     main()
