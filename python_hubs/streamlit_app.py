@@ -11,6 +11,48 @@ try:
 except Exception:
     REPORTLAB_OK = False
 
+# =====================
+# RIGID RAILS (Boomer-proof)
+# =====================
+GRADE_BANDS = ["HS", "MS", "5", "4", "3", "2", "1", "K"]
+
+SUBJECTS = ["Science"]  # rigid for now
+
+SCIENCE_BRANCHES = [
+    "Earth & Space Science",
+    "Life Science",
+    "Physical Science"
+]
+
+SCIENCE_UNITS = {
+    "Earth & Space Science": [
+        "Weather & Climate",
+        "Water Cycle & Watersheds",
+        "Plate Tectonics",
+        "Rocks & Minerals",
+        "Earth Systems Interactions",
+        "Space Systems"
+    ],
+    "Life Science": [
+        "Cells & Body Systems",
+        "Genetics & Traits",
+        "Ecosystems",
+        "Natural Selection & Adaptations",
+        "Human Impacts on Ecosystems"
+    ],
+    "Physical Science": [
+        "Matter & Its Interactions",
+        "Chemical Reactions",
+        "Forces & Motion",
+        "Energy",
+        "Waves",
+        "Electricity & Magnetism"
+    ]
+}
+
+# =====================
+# ARTIFACTS
+# =====================
 ARTIFACTS = [
     "Exit Ticket",
     "Worksheet",
@@ -27,7 +69,13 @@ DEFAULT_PROMPTS = {
     "Photo Evidence": "Artifact Type:\n\nEvidence Summary (Teacher):\n\nStudent Objective:\n\nNotes:"
 }
 
+# UI colors
 BSCL_BLUE = "#2F5BEA"
+SCIENCE_GREEN = "#2E7D32"  # Science Mode accent
+
+# Emblems (text-only, reliable)
+NGSS_EMBLEM = "NGSS"
+FIVE_E_EMBLEM = "5E"
 
 
 def wrap_lines(text: str, max_chars: int = 95):
@@ -44,7 +92,17 @@ def wrap_lines(text: str, max_chars: int = 95):
     return out
 
 
-def build_pdf_bytes(artifact, lesson_title, standard_tags, signature, body_text) -> bytes:
+def build_pdf_bytes(
+    artifact,
+    lesson_title,
+    standard_tags,
+    signature,
+    body_text,
+    grade_band,
+    subject,
+    science_branch,
+    unit
+) -> bytes:
     # Only call when REPORTLAB_OK is True
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=letter)
@@ -53,15 +111,42 @@ def build_pdf_bytes(artifact, lesson_title, standard_tags, signature, body_text)
     x0 = margin
     y = h - margin
 
-    # Header
+    # Header title
     c.setFont("Helvetica-Bold", 18)
     c.drawString(x0, y, artifact)
+
+    # Emblems top-right (always for science mode)
+    # keep simple: text badges
+    badge_text = f"[{NGSS_EMBLEM}]  [{FIVE_E_EMBLEM}]"
+    c.setFont("Helvetica-Bold", 11)
+    c.drawRightString(w - margin, y + 2, badge_text)
+
     y -= 0.32 * inch
 
+    # Date
     c.setFont("Helvetica", 12)
     c.drawString(x0, y, f"Date: {date.today().isoformat()}")
     y -= 0.22 * inch
 
+    # Rigid rails
+    c.setFont("Helvetica-Bold", 12); c.drawString(x0, y, "Grade Band:")
+    c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, grade_band)
+    y -= 0.22 * inch
+
+    c.setFont("Helvetica-Bold", 12); c.drawString(x0, y, "Subject:")
+    c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, subject)
+    y -= 0.22 * inch
+
+    if science_branch:
+        c.setFont("Helvetica-Bold", 12); c.drawString(x0, y, "Branch:")
+        c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, science_branch)
+        y -= 0.22 * inch
+
+    c.setFont("Helvetica-Bold", 12); c.drawString(x0, y, "Unit:")
+    c.setFont("Helvetica", 12); c.drawString(x0 + 1.2 * inch, y, unit)
+    y -= 0.22 * inch
+
+    # Lesson/topic
     if lesson_title:
         c.setFont("Helvetica-Bold", 12)
         c.drawString(x0, y, "Lesson/Topic:")
@@ -69,6 +154,7 @@ def build_pdf_bytes(artifact, lesson_title, standard_tags, signature, body_text)
         c.drawString(x0 + 1.2 * inch, y, lesson_title)
         y -= 0.22 * inch
 
+    # Standards
     if standard_tags:
         c.setFont("Helvetica-Bold", 12)
         c.drawString(x0, y, "Standards:")
@@ -76,7 +162,7 @@ def build_pdf_bytes(artifact, lesson_title, standard_tags, signature, body_text)
         c.drawString(x0 + 1.2 * inch, y, standard_tags)
         y -= 0.22 * inch
 
-    # Signature top-right
+    # Signature top-right (blue bridge)
     if signature:
         c.setFillColorRGB(0.184, 0.357, 0.918)
         c.setFont("Helvetica-Bold", 11.5)
@@ -99,11 +185,17 @@ def build_pdf_bytes(artifact, lesson_title, standard_tags, signature, body_text)
         if y <= bottom + 0.6 * inch:
             c.showPage()
             y = h - margin
+
+            # repeat emblems + signature on new page
+            c.setFont("Helvetica-Bold", 11)
+            c.drawRightString(w - margin, y + 2, badge_text)
+
             if signature:
                 c.setFillColorRGB(0.184, 0.357, 0.918)
                 c.setFont("Helvetica-Bold", 11.5)
                 c.drawRightString(w - margin, h - margin + 0.05 * inch, f"✍️ {signature}")
                 c.setFillColorRGB(0, 0, 0)
+
             c.setFont("Helvetica", 12)
 
         c.drawString(x0, y, ln)
@@ -121,13 +213,38 @@ def build_pdf_bytes(artifact, lesson_title, standard_tags, signature, body_text)
     return buf.getvalue()
 
 
-def build_html(artifact, lesson_title, standard_tags, signature, body_text) -> str:
-    # Offline/iPhone fallback: download HTML then Print → Save as PDF
+def build_html(
+    artifact,
+    lesson_title,
+    standard_tags,
+    signature,
+    body_text,
+    grade_band,
+    subject,
+    science_branch,
+    unit
+) -> str:
+    # HTML fallback: download then Print → Save as PDF
     title_line = f"<div style='font-size:20pt;font-weight:900'>{artifact}</div>"
     meta = f"<div style='margin-top:8px'>Date: {date.today().isoformat()}</div>"
+
+    rails = f"""
+    <div><b>Grade Band:</b> {grade_band}</div>
+    <div><b>Subject:</b> {subject}</div>
+    <div><b>Branch:</b> {science_branch}</div>
+    <div><b>Unit:</b> {unit}</div>
+    """
+
     lt = f"<div><b>Lesson/Topic:</b> {lesson_title}</div>" if lesson_title else ""
     stags = f"<div><b>Standards:</b> {standard_tags}</div>" if standard_tags else ""
-    sig = f"<div style='position:fixed;top:24px;right:28px;color:{BSCL_BLUE};font-weight:800'>✍️ {signature}</div>" if signature else ""
+
+    sig = (
+        f"<div style='position:fixed;top:24px;right:28px;color:{BSCL_BLUE};font-weight:800'>✍️ {signature}</div>"
+        if signature else ""
+    )
+
+    emblems = f"<div style='position:fixed;top:24px;left:28px;font-weight:900'>[{NGSS_EMBLEM}] [{FIVE_E_EMBLEM}]</div>"
+
     body = (body_text or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     body = body.replace("\n", "<br/>")
 
@@ -142,9 +259,11 @@ hr {{ border:none; border-top:2px solid #000; margin: 14px 0; }}
 </style>
 </head>
 <body>
+{emblems}
 {sig}
 {title_line}
 {meta}
+{rails}
 {lt}
 {stags}
 <hr/>
@@ -154,11 +273,43 @@ hr {{ border:none; border-top:2px solid #000; margin: 14px 0; }}
 
 # ================= UI =================
 st.set_page_config(page_title="BSChapp v1", layout="centered")
-st.title("🧩 BSChapp v1")
-st.caption("Boomer-proof: edit → preview → download → tap to print")
 
+# Science Mode UI (green accent)
+st.markdown(f"""
+<style>
+/* science mode accent */
+div[data-testid="stAppViewContainer"] {{
+  background: #ffffff;
+}}
+/* Make primary buttons green-ish (best-effort, Streamlit UI varies) */
+button[kind="primary"] {{
+  border: 2px solid {SCIENCE_GREEN} !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
+st.title("🧩 BSChapp v1")
+st.caption("Boomer-proof: select rails → edit → preview → download → tap to print")
+
+# REQUIRED rails
+st.divider()
+st.markdown("### Required selections (rigid)")
+grade_band = st.selectbox("Grade Band (required)", GRADE_BANDS, index=0)
+subject = st.selectbox("Subject (required)", SUBJECTS, index=0)
+
+science_branch = None
+unit = None
+if subject == "Science":
+    science_branch = st.selectbox("Science Branch (required)", SCIENCE_BRANCHES, index=0)
+    unit = st.selectbox("Unit (required)", SCIENCE_UNITS[science_branch], index=0)
+else:
+    unit = st.selectbox("Unit (required)", ["General"], index=0)
+
+st.info(f"Science Mode: [{NGSS_EMBLEM}] + [{FIVE_E_EMBLEM}] enabled (auto).")
+
+# Optional headers
 lesson_title = st.text_input("Lesson / Topic Title (optional)")
-standard_tags = st.text_input("Standard Tags (optional)")
+standard_tags = st.text_input("Standard Tags (optional) — comma separated")
 signature = st.text_input("Signature (optional)", placeholder="Initials / name (cosmetic only)")
 
 st.divider()
@@ -175,6 +326,11 @@ st.divider()
 
 st.markdown("### Preview")
 st.write(f"**{artifact}**")
+st.write(f"**Grade Band:** {grade_band}  |  **Subject:** {subject}")
+if science_branch:
+    st.write(f"**Science Branch:** {science_branch}  |  **Unit:** {unit}")
+else:
+    st.write(f"**Unit:** {unit}")
 if lesson_title:
     st.write(f"**Lesson/Topic:** {lesson_title}")
 if standard_tags:
@@ -192,7 +348,11 @@ if REPORTLAB_OK:
         lesson_title=lesson_title.strip(),
         standard_tags=standard_tags.strip(),
         signature=signature.strip(),
-        body_text=body
+        body_text=body,
+        grade_band=grade_band,
+        subject=subject,
+        science_branch=science_branch or "",
+        unit=unit or ""
     )
     filename = f"{artifact.replace(' ', '_').lower()}_{today}.pdf"
     st.download_button(
@@ -209,7 +369,11 @@ else:
         lesson_title=lesson_title.strip(),
         standard_tags=standard_tags.strip(),
         signature=signature.strip(),
-        body_text=body
+        body_text=body,
+        grade_band=grade_band,
+        subject=subject,
+        science_branch=science_branch or "",
+        unit=unit or ""
     )
     filename = f"{artifact.replace(' ', '_').lower()}_{today}.html"
     st.download_button(
