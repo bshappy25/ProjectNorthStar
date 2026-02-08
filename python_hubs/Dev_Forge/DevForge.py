@@ -8,97 +8,130 @@ Features:
 - Code Library (copy/paste components)
 - ABC Branch Generator (architecture decisions)
 - Ms. Piluso Science Page (NGSS + New Visions)
+- Placeholder Apps (my_app1 / my_app2)
 
 Connected to BSChapp v2 ecosystem
 We are L.E.A.D.
 """
 
-import io
-import textwrap
+from __future__ import annotations
+
 from datetime import date
 
 import streamlit as st
-from PIL import Image, ImageDraw, ImageFont
 
-# =====================
-# SESSION STATE SETUP
-# =====================
+# ============================================================
+# CONFIG
+# ============================================================
 
-if "dev_theme" not in st.session_state:
-    st.session_state["dev_theme"] = "science"  # Default to science for Ms. Piluso
+APP_TITLE = "DevForge - Developer Hub"
+APP_ICON = "🔧"
 
-if "signature" not in st.session_state:
-    st.session_state["signature"] = ""  # Pull from BSChapp if available
+ADMIN_CODE = "Bshapp"  # PALM ID (Admin Gate)
 
-# NEW: NAV STATE (Primary vs Testers)
-if "devforge_panel" not in st.session_state:
-    st.session_state["devforge_panel"] = "Home (Primary)"
+# ============================================================
+# SESSION STATE (SAFE INIT)
+# ============================================================
 
-# =====================
-# THEME (GLASSY)
-# =====================
+def ss_init(key: str, default):
+    if key not in st.session_state:
+        st.session_state[key] = default
 
-NEUTRAL_BG = "#f2f2f2"
-NEUTRAL_CARD = "rgba(230, 230, 230, 0.7)"
-NEUTRAL_BORDER = "rgba(207, 207, 207, 0.5)"
-NEUTRAL_TEXT = "#000000"
-NEUTRAL_MUTED = "#1f1f1f"
-NEUTRAL_ACCENT = "#5a5a5a"
+# Core shared state
+ss_init("dev_theme", "science")   # science | neutral | pink
+ss_init("signature", "")          # developer name / signature (shared w/ BSChapp)
+ss_init("notes", "")              # quick scratch notes
 
-SCI_BG = "#061B15"
-SCI_CARD = "rgba(255,255,255,0.08)"
-SCI_BORDER = "rgba(120,255,220,0.3)"
-SCI_TEXT = "rgba(255,255,255,0.92)"
-SCI_MUTED = "rgba(255,255,255,0.74)"
-SCI_ACCENT = "#14B8A6"
-SCI_ACCENT2 = "#2F5BEA"
+# PALM ID admin gate state
+ss_init("palm_taps", 0)
+ss_init("show_admin_box", False)
+ss_init("admin_unlocked", False)
 
-# =====================
+# ============================================================
+# THEMES
+# ============================================================
+
+NEUTRAL = {
+    "BG": "#f2f2f2",
+    "CARD": "rgba(230, 230, 230, 0.7)",
+    "BORDER": "rgba(207, 207, 207, 0.5)",
+    "TEXT": "#000000",
+    "MUTED": "#1f1f1f",
+    "ACCENT": "#5a5a5a",
+    "ACCENT2": "#2F5BEA",
+}
+
+SCIENCE = {
+    "BG": "#061B15",
+    "CARD": "rgba(255,255,255,0.08)",
+    "BORDER": "rgba(120,255,220,0.3)",
+    "TEXT": "rgba(255,255,255,0.92)",
+    "MUTED": "rgba(255,255,255,0.74)",
+    "ACCENT": "#14B8A6",
+    "ACCENT2": "#2F5BEA",
+}
+
+# Fun Pink theme (only shows under PALM ID gate)
+PINK = {
+    "BG": "#140914",
+    "CARD": "rgba(255, 192, 203, 0.10)",
+    "BORDER": "rgba(255, 105, 180, 0.35)",
+    "TEXT": "rgba(255,255,255,0.92)",
+    "MUTED": "rgba(255,255,255,0.72)",
+    "ACCENT": "#FF4DA6",
+    "ACCENT2": "#FFB3D9",
+}
+
+def get_theme_dict(theme_key: str) -> dict:
+    if theme_key == "neutral":
+        return NEUTRAL
+    if theme_key == "pink":
+        return PINK
+    return SCIENCE
+
+# ============================================================
 # PAGE CONFIG
-# =====================
+# ============================================================
 
 st.set_page_config(
-    page_title="DevForge - Developer Hub",
-    page_icon="🔧",
+    page_title=APP_TITLE,
+    page_icon=APP_ICON,
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Determine theme
-is_science = st.session_state["dev_theme"] == "science"
-BG = SCI_BG if is_science else NEUTRAL_BG
-CARD = SCI_CARD if is_science else NEUTRAL_CARD
-BORDER = SCI_BORDER if is_science else NEUTRAL_BORDER
-TEXT = SCI_TEXT if is_science else NEUTRAL_TEXT
-MUTED = SCI_MUTED if is_science else NEUTRAL_MUTED
-ACCENT = SCI_ACCENT if is_science else NEUTRAL_ACCENT
+T = get_theme_dict(st.session_state["dev_theme"])
 
-# =====================
-# GLASSY UI STYLES
-# =====================
+# ============================================================
+# CSS / UI
+# ============================================================
 
 st.markdown(
     f"""
 <style>
 :root {{
-  --bg: {BG};
-  --card: {CARD};
-  --border: {BORDER};
-  --text: {TEXT};
-  --muted: {MUTED};
-  --accent: {ACCENT};
+  --bg: {T["BG"]};
+  --card: {T["CARD"]};
+  --border: {T["BORDER"]};
+  --text: {T["TEXT"]};
+  --muted: {T["MUTED"]};
+  --accent: {T["ACCENT"]};
+  --accent2: {T["ACCENT2"]};
 }}
 
-/* Background */
 div[data-testid="stAppViewContainer"] {{
   background-color: var(--bg) !important;
 }}
 
 .block-container {{
-  padding-top: 1.2rem;
+  padding-top: 1.15rem;
+  padding-bottom: 4.5rem;
 }}
 
-/* GLASSY TEXTURE */
+section[data-testid="stSidebar"] {{
+  background-color: transparent !important;
+}}
+
 section[data-testid="stSidebar"],
 div[data-testid="stExpander"],
 div[data-testid="stTextInput"] > div,
@@ -112,12 +145,14 @@ div[data-testid="stSelectbox"] > div,
   -webkit-backdrop-filter: blur(10px) !important;
 }}
 
-/* Text colors */
 h1, h2, h3, h4, h5, h6, p, span, label, div {{
   color: var(--text) !important;
 }}
 
-/* Inputs */
+small, .stCaption, .muted {{
+  color: var(--muted) !important;
+}}
+
 input, textarea, select {{
   background-color: var(--card) !important;
   color: var(--text) !important;
@@ -127,7 +162,6 @@ input, textarea, select {{
   -webkit-backdrop-filter: blur(10px) !important;
 }}
 
-/* Buttons */
 button {{
   background-color: var(--card) !important;
   border: 1px solid var(--border) !important;
@@ -135,7 +169,7 @@ button {{
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
   color: var(--text) !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
 }}
 
 button[kind="primary"] {{
@@ -143,41 +177,33 @@ button[kind="primary"] {{
   font-weight: 900 !important;
 }}
 
-/* Code blocks */
-.stCodeBlock {{
-  font-family: 'Courier New', monospace !important;
-  font-size: 13px !important;
-}}
-
-/* Cards */
 .dev-card {{
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 20px;
-  margin: 15px 0;
+  margin: 14px 0;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
 }}
 
 .dev-card h3 {{
   margin-top: 0;
   color: var(--accent) !important;
-  font-weight: 900;
+  font-weight: 950;
 }}
 
-/* Badge */
 .badge {{
   display: inline-block;
   padding: 6px 12px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  font-weight: 900;
+  font-weight: 950;
   background: var(--card);
   backdrop-filter: blur(10px);
   font-size: 0.85rem;
-  margin: 5px;
+  margin: 4px 6px 4px 0;
 }}
 
 .badge-accent {{
@@ -185,7 +211,17 @@ button[kind="primary"] {{
   color: var(--accent) !important;
 }}
 
-/* Ticker */
+.badge-accent2 {{
+  border-color: var(--accent2);
+  color: var(--accent2) !important;
+}}
+
+.hr {{
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
+}}
+
 .ticker {{
   position: fixed;
   bottom: 0;
@@ -193,96 +229,48 @@ button[kind="primary"] {{
   right: 0;
   background-color: var(--card);
   border-top: 1px solid var(--border);
-  padding: 8px 20px;
+  padding: 8px 18px;
   text-align: center;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 850;
   color: var(--muted);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 999;
 }}
+
+.kicker {{
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}}
+
+.callout {{
+  border-left: 4px solid var(--accent);
+  padding: 10px 14px;
+  margin: 10px 0;
+  background: rgba(0,0,0,0.06);
+  border-radius: 10px;
+}}
+
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-# =====================
+# ============================================================
 # TICKER
-# =====================
+# ============================================================
 
 st.markdown(
     "<div class='ticker'>DEVFORGE • Developer Productivity Hub • We are L.E.A.D. 🔧</div>",
     unsafe_allow_html=True,
 )
 
-# =====================
-# TESTER HELPERS (SCI-BLOCK)
-# =====================
-
-def _load_font(size: int, bold: bool = False):
-    candidates = []
-    if bold:
-        candidates = ["DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"]
-    else:
-        candidates = ["DejaVuSans.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
-    for path in candidates:
-        try:
-            return ImageFont.truetype(path, size)
-        except Exception:
-            continue
-    return ImageFont.load_default()
-
-def _safe(x: str) -> str:
-    x = (x or "").strip()
-    return x if x else "N/a"
-
-def generate_sci_block_jpeg(header_title: str, lines: list[tuple[str, bool]]) -> io.BytesIO:
-    width = 1200
-    body_bg = "#D9F2E6"
-    header_bg = "#0B3D2E"
-    body_text = "#1B4D3E"
-    header_text = "#E9FFF5"
-    pad_x = 60
-    pad_y = 48
-    header_h = 120
-
-    font_body = _load_font(34, bold=False)
-    font_bold = _load_font(36, bold=True)
-    font_header = _load_font(44, bold=True)
-
-    wrapper = textwrap.TextWrapper(width=52, break_long_words=False)
-
-    wrapped: list[tuple[str, bool]] = []
-    for txt, is_bold in lines:
-        if txt.strip() == "":
-            wrapped.append(("", is_bold))
-            continue
-        for wline in wrapper.wrap(txt):
-            wrapped.append((wline, is_bold))
-
-    line_h = 46
-    body_h = pad_y * 2 + line_h * max(1, len(wrapped))
-    height = header_h + body_h
-
-    img = Image.new("RGB", (width, height), body_bg)
-    draw = ImageDraw.Draw(img)
-    draw.rectangle([0, 0, width, header_h], fill=header_bg)
-    draw.text((pad_x, 30), header_title, fill=header_text, font=font_header)
-
-    y = header_h + pad_y
-    for txt, is_bold in wrapped:
-        draw.text((pad_x, y), txt, fill=body_text, font=(font_bold if is_bold else font_body))
-        y += line_h
-
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=95)
-    buf.seek(0)
-    return buf
-
-# =====================
-# SIDEBAR
-# =====================
+# ============================================================
+# SIDEBAR (WITH PALM ID + THEMES)
+# ============================================================
 
 with st.sidebar:
     st.title("🔧 DevForge")
@@ -290,300 +278,379 @@ with st.sidebar:
 
     st.divider()
 
-    # Theme toggle
+    # =========================
+    # PALM ID (Admin Gate)
+    # =========================
+    left, right = st.columns([0.86, 0.14], vertical_alignment="center")
+    with left:
+        st.markdown("#### PALM ID")
+        st.caption("Tap the palm 3× to open admin gate.")
+    with right:
+        if st.button("🤚", help="Palm ID (tap 3x)", key="palm_btn"):
+            st.session_state["palm_taps"] += 1
+            if st.session_state["palm_taps"] >= 3:
+                st.session_state["show_admin_box"] = True
+
+    if st.session_state["show_admin_box"] and not st.session_state["admin_unlocked"]:
+        st.markdown("**Palm ID:** enter admin code")
+        code_try = st.text_input("Admin Code", type="password", placeholder="Enter code...", key="admin_code_try")
+        cA, cB = st.columns([0.6, 0.4])
+        with cA:
+            if st.button("Unlock", key="unlock_btn"):
+                if code_try == ADMIN_CODE:
+                    st.session_state["admin_unlocked"] = True
+                    st.success("Admin override unlocked.")
+                else:
+                    st.error("Incorrect code.")
+        with cB:
+            if st.button("Reset", key="reset_palm_btn"):
+                st.session_state["palm_taps"] = 0
+                st.session_state["show_admin_box"] = False
+
+    if st.session_state["admin_unlocked"]:
+        st.caption("✅ Palm ID: unlocked")
+
+    st.divider()
+
+    # =========================
+    # THEME TOGGLE
+    # =========================
+    theme_options = ["Science", "Neutral"]
+    # Pink option only under PALM ID (as requested)
+    if st.session_state["admin_unlocked"]:
+        theme_options.append("Pink")
+
+    current = st.session_state["dev_theme"]
+    idx = 0
+    if current == "neutral":
+        idx = 1
+    if current == "pink":
+        idx = 2 if "Pink" in theme_options else 0
+
     theme_choice = st.radio(
         "Dev Theme",
-        ["Science", "Neutral"],
-        index=0 if is_science else 1,
+        theme_options,
+        index=idx,
         horizontal=True,
+        key="theme_choice_radio",
     )
-    if theme_choice.lower() != st.session_state["dev_theme"]:
-        st.session_state["dev_theme"] = theme_choice.lower()
+
+    choice_map = {"Science": "science", "Neutral": "neutral", "Pink": "pink"}
+    chosen_theme = choice_map[theme_choice]
+    if chosen_theme != st.session_state["dev_theme"]:
+        st.session_state["dev_theme"] = chosen_theme
         st.rerun()
 
     st.divider()
 
-    # Quick stats
+    # =========================
+    # QUICK STATS
+    # =========================
     st.subheader("📊 Session Info")
     st.write(f"**Date:** {date.today().isoformat()}")
 
-    if st.session_state.get("signature"):
-        st.write(f"**Dev:** {st.session_state['signature']}")
+    sig = st.session_state.get("signature", "")
+    if sig:
+        st.write(f"**Dev:** {sig}")
     else:
         st.caption("No signature (set in BSChapp)")
 
     st.divider()
 
-    # ===== DIVISION: Primary vs Tester Apps =====
-    st.subheader("🧭 Navigation")
-
-    st.caption("Primary Apps")
-    primary_choice = st.radio(
-        "Primary",
-        ["Home (Primary)"],
-        index=0,
-        label_visibility="collapsed",
-    )
-
-    st.divider()
-    st.caption("Tester Apps (Sandbox)")
-    tester_choice = st.radio(
-        "Testers",
-        ["Tester 1 — Simple Form", "Tester 2 — SCI-BLOCK", "Tester 3 — Scratchpad"],
-        index=0 if st.session_state["devforge_panel"].startswith("Tester 1") else
-              1 if st.session_state["devforge_panel"].startswith("Tester 2") else
-              2 if st.session_state["devforge_panel"].startswith("Tester 3") else 0,
-        label_visibility="collapsed",
-    )
-
-    # Decide active panel
-    use_testers = st.checkbox("Use Tester Apps", value=st.session_state["devforge_panel"].startswith("Tester"))
-
-    if use_testers:
-        st.session_state["devforge_panel"] = tester_choice
-    else:
-        st.session_state["devforge_panel"] = primary_choice
-
-    st.divider()
-    st.caption("Connected to Project North Star")
-
-# =====================
-# MAIN ROUTER
-# =====================
-
-panel = st.session_state["devforge_panel"]
-
-# =====================
-# PRIMARY: HOME
-# =====================
-
-if panel == "Home (Primary)":
-    st.title("🔧 DevForge - Developer Hub")
-    st.markdown("### Your Streamlit Development Assistant")
-
+    # =========================
+    # NAV HINTS (Multipage)
+    # =========================
+    st.subheader("🗺️ Pages")
+    st.caption("Your pages folder drives navigation automatically.")
     st.markdown(
         """
+- **ABC_Generator.py**
+- **Code_Library.py**
+- **Ms_Piluso_Science.py**
+- **my_app1.py**
+- **my_app2.py**
+"""
+    )
+
+    st.divider()
+
+    # =========================
+    # DEV NOTES
+    # =========================
+    st.subheader("📝 Scratch Notes")
+    st.session_state["notes"] = st.text_area(
+        "Notes",
+        value=st.session_state.get("notes", ""),
+        height=110,
+        placeholder="Quick notes while you build...",
+        label_visibility="collapsed",
+    )
+
+    st.divider()
+
+    # =========================
+    # ADMIN TOOLS (ONLY WHEN UNLOCKED)
+    # =========================
+    if st.session_state["admin_unlocked"]:
+        st.subheader("🧰 Admin Tools")
+        st.caption("Visible only when Palm ID is unlocked.")
+
+        if st.button("Reset Theme to Science", use_container_width=True):
+            st.session_state["dev_theme"] = "science"
+            st.rerun()
+
+        if st.button("Clear Scratch Notes", use_container_width=True):
+            st.session_state["notes"] = ""
+            st.rerun()
+
+        if st.button("Lock Admin Gate", use_container_width=True):
+            st.session_state["admin_unlocked"] = False
+            st.session_state["palm_taps"] = 0
+            st.session_state["show_admin_box"] = False
+            st.rerun()
+
+    st.caption("Connected to Project North Star")
+
+# ============================================================
+# MAIN CONTENT (HOME)
+# ============================================================
+
+st.title("🔧 DevForge - Developer Hub")
+st.markdown("### Your Streamlit Development Assistant")
+
+st.markdown(
+    """
 <div class='dev-card'>
+<div class='kicker'>SYSTEM OVERVIEW</div>
 <h3>🎯 Quick Start</h3>
 <p>DevForge helps you build Streamlit apps faster with:</p>
 <ul>
-<li><strong>Ms. Piluso Science Page</strong> - NGSS + New Visions curriculum tools</li>
-<li><strong>Code Library</strong> - Copy/paste glassy UI components</li>
+<li><strong>Ms. Piluso Science Page</strong> - NGSS + New Visions curriculum tools + SCI-BLOCK exports</li>
+<li><strong>Code Library</strong> - Copy/paste UI components and patterns</li>
 <li><strong>ABC Generator</strong> - Make architecture decisions quickly</li>
+<li><strong>my_app1 / my_app2</strong> - sandbox pages for experiments</li>
 </ul>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
+# ============================================================
+# FEATURE GRID
+# ============================================================
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown(
+        """
+<div class='dev-card'>
+<h3>🔬 Science Tools</h3>
+<p>NGSS-aligned lesson planning</p>
+<p>New Visions integration</p>
+<p>5E framework builder + accommodations</p>
+<br>
+<p><strong>→ Open “Ms_Piluso_Science” page</strong></p>
 </div>
 """,
         unsafe_allow_html=True,
     )
 
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.markdown(
-            """
-<div class='dev-card'>
-<h3>🔬 Science Tools</h3>
-<p>NGSS-aligned lesson planning</p>
-<p>New Visions integration</p>
-<p>5E framework builder</p>
-<br>
-<p><strong>→ See “Ms. Piluso Science” page</strong></p>
-</div>
-""",
-            unsafe_allow_html=True,
-        )
-
-    with col2:
-        st.markdown(
-            """
+with col2:
+    st.markdown(
+        """
 <div class='dev-card'>
 <h3>📚 Code Library</h3>
 <p>Glassy UI components</p>
-<p>PDF generators</p>
+<p>PDF + Image export patterns</p>
 <p>Session state patterns</p>
 <br>
-<p><strong>→ See “Code Library” page</strong></p>
+<p><strong>→ Open “Code_Library” page</strong></p>
 </div>
 """,
-            unsafe_allow_html=True,
-        )
+        unsafe_allow_html=True,
+    )
 
-    with col3:
-        st.markdown(
-            """
+with col3:
+    st.markdown(
+        """
 <div class='dev-card'>
 <h3>⚡ ABC Framework</h3>
 <p><strong>A</strong> - Architecture</p>
 <p><strong>B</strong> - Build pattern</p>
 <p><strong>C</strong> - Code style</p>
+<p><strong>S</strong> - Style selection</p>
 <br>
-<p><strong>→ See “ABC Generator” page</strong></p>
+<p><strong>→ Open “ABC_Generator” page</strong></p>
 </div>
 """,
-            unsafe_allow_html=True,
-        )
+        unsafe_allow_html=True,
+    )
 
-    st.divider()
+st.markdown("<div class='hr'></div>", unsafe_allow_html=True)
 
-    st.markdown("### 🚀 Quick Reference")
+# ============================================================
+# DEVFORGE "DIVISION" (Primary vs Tester Apps)
+# ============================================================
 
-    with st.expander("📋 Common Tasks", expanded=False):
-        st.markdown(
-            """
-**Create new science lesson:**
-1. Go to “Ms. Piluso Science” page
-2. Select NGSS standard
-3. Fill 5E framework
-4. Export to BSChapp
+st.markdown("## 🧭 Primary Apps vs Tester Apps")
 
-**Copy glassy UI component:**
-1. Go to "Code Library" page
-2. Browse components
-3. Click "Copy Code"
-4. Paste into your app
+st.markdown(
+    """
+<div class='dev-card'>
+<h3>Primary Apps</h3>
+<ul>
+  <li><strong>Ms_Piluso_Science</strong> — production lesson builder</li>
+  <li><strong>Code_Library</strong> — canonical snippets (copy/paste)</li>
+  <li><strong>ABC_Generator</strong> — build decisions + starter structures</li>
+</ul>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
-**Make architecture decision:**
-1. Go to "ABC Generator" page
-2. Answer A, B, C questions
-3. Get recommended structure
-4. Generate starter code
-"""
-        )
+st.markdown(
+    """
+<div class='dev-card'>
+<h3>Tester Apps</h3>
+<p class='muted'>Use these to experiment without risking your core pages.</p>
+<ul>
+  <li><strong>my_app1</strong> — small UI blocks / forms</li>
+  <li><strong>my_app2</strong> — export experiments, widgets, layouts</li>
+</ul>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
-    with st.expander("🔗 Connected Apps", expanded=False):
-        st.markdown(
-            """
-**DevForge connects to:**
-- **BSChapp v2** - Shares signature, theme
-- **Teacher Tools Hub** - HTML app testing
-- **Project North Star** - Ecosystem data
+st.markdown("<div class='hr'></div>", unsafe_allow_html=True)
 
-**Session state shared:**
-- `st.session_state["signature"]` - Developer name
-- `st.session_state["dev_theme"]` - UI theme
-- Future: shared student rosters, standards library
-"""
-        )
+# ============================================================
+# QUICK REFERENCE
+# ============================================================
 
-    with st.expander("⚙️ Dev Settings", expanded=False):
-        st.markdown("**Current Configuration:**")
-        st.json(
-            {
-                "theme": st.session_state["dev_theme"],
-                "signature": st.session_state.get("signature", "Not set"),
-                "date": date.today().isoformat(),
-                "ecosystem": "Project North Star",
-            }
-        )
+st.markdown("## 🚀 Quick Reference")
 
-    st.divider()
-
+with st.expander("📋 Common Tasks", expanded=False):
     st.markdown(
         """
-<div class='dev-card' style='text-align:center; background: linear-gradient(135deg, rgba(20,184,166,0.1), rgba(47,91,234,0.1));'>
+**Create new science lesson**
+1) Open **Ms_Piluso_Science**
+2) Select NGSS standard
+3) Fill 5E + Materials + Notes + Accommodations
+4) Export SCI-BLOCK.jpeg and/or copy the preview
+
+**Use sandbox**
+1) Open **my_app1** or **my_app2**
+2) Paste a UI block or feature idea
+3) Once stable, move it into a primary page
+
+**Make architecture decision**
+1) Open **ABC_Generator**
+2) Answer A, B, C, S
+3) Use the recommended structure + starter code
+"""
+    )
+
+with st.expander("🧱 Recommended Page Pattern", expanded=False):
+    st.markdown(
+        """
+**Keep each page stable**
+- Each page should start with:
+  - `import streamlit as st`
+  - `st.set_page_config(...)`
+  - theme read: `st.session_state.get("dev_theme", "science")`
+- No smart quotes. Only normal quotes: `"` and `'`
+
+**Sharing state across pages**
+- `st.session_state["dev_theme"]`
+- `st.session_state["signature"]`
+- Any shared objects should be dicts with safe init.
+"""
+    )
+
+with st.expander("🔒 PALM ID Notes", expanded=False):
+    st.markdown(
+        """
+**PALM ID gate**
+- Tap 🤚 three times
+- Enter admin code
+- Unlock reveals:
+  - **Pink** theme option (fun)
+  - Admin tools (reset notes / lock gate)
+
+If you ever get stuck, lock gate + reset theme to Science.
+"""
+    )
+
+st.markdown("<div class='hr'></div>", unsafe_allow_html=True)
+
+# ============================================================
+# STATUS / DEBUG (SAFE)
+# ============================================================
+
+st.markdown("## 🧩 Current State")
+
+cA, cB = st.columns([0.55, 0.45])
+
+with cA:
+    st.markdown(
+        """
+<div class='dev-card'>
+<h3>System Status</h3>
+<p><span class='badge badge-accent'>Theme</span> <strong>{theme}</strong></p>
+<p><span class='badge badge-accent2'>Signature</span> <strong>{sig}</strong></p>
+<p><span class='badge'>Admin</span> <strong>{admin}</strong></p>
+</div>
+""".format(
+            theme=st.session_state["dev_theme"],
+            sig=(st.session_state.get("signature") or "Not set"),
+            admin=("Unlocked" if st.session_state["admin_unlocked"] else "Locked"),
+        ),
+        unsafe_allow_html=True,
+    )
+
+with cB:
+    st.markdown(
+        """
+<div class='dev-card'>
+<h3>Developer Notes</h3>
+<p class='muted'>These are stored in session_state (temporary).</p>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    st.text_area(
+        "Notes Preview",
+        value=st.session_state.get("notes", ""),
+        height=155,
+        disabled=True,
+        label_visibility="collapsed",
+    )
+
+st.markdown("<div class='hr'></div>", unsafe_allow_html=True)
+
+# ============================================================
+# CTA
+# ============================================================
+
+st.markdown(
+    """
+<div class='dev-card' style='text-align:center; background: linear-gradient(135deg, rgba(20,184,166,0.12), rgba(47,91,234,0.10));'>
 <h3>🎯 Ready to Build?</h3>
-<p style='font-size:1.1rem;'>
-Use the sidebar. Toggle "Use Tester Apps" when you want sandbox panels.
+<p style='font-size:1.05rem;' class='muted'>
+Open a page from the left sidebar (Streamlit Pages).
+Use <strong>my_app1 / my_app2</strong> to prototype safely.
 </p>
-<div style='margin-top:20px;'>
+<div style='margin-top:18px;'>
 <span class='badge badge-accent'>NGSS Tools</span>
 <span class='badge badge-accent'>Code Snippets</span>
 <span class='badge badge-accent'>Architecture Help</span>
 </div>
 </div>
 """,
-        unsafe_allow_html=True,
-    )
+    unsafe_allow_html=True,
+)
 
-# =====================
-# TESTER 1 — SIMPLE FORM
-# =====================
-
-elif panel == "Tester 1 — Simple Form":
-    st.title("🧪 Tester 1 — Simple Form")
-    st.caption("Quick plug-and-play form block")
-
-    c1, c2 = st.columns(2)
-    with c1:
-        name = st.text_input("Name")
-        grade = st.selectbox("Grade", ["K", "1", "2", "3", "4", "5"])
-    with c2:
-        chosen_date = st.date_input("Date", value=date.today())
-        subject = st.selectbox("Subject", ["Math", "Science", "ELA"])
-
-    st.markdown("#### Output")
-    st.code(
-        {
-            "name": name,
-            "grade": grade,
-            "date": chosen_date.isoformat(),
-            "subject": subject,
-        }
-    )
-
-# =====================
-# TESTER 2 — SCI-BLOCK
-# =====================
-
-elif panel == "Tester 2 — SCI-BLOCK":
-    st.title("🧪 Tester 2 — SCI-BLOCK")
-    st.caption("Generate the exact SCI-BLOCK.jpeg artifact from typed content")
-
-    std = st.text_input("Standard", value="MS-ESS1-1")
-    d = st.date_input("Date", value=date.today())
-    header = f"SCI-BLOCK • {d.isoformat()} • {std}"
-
-    st.subheader("5E + Details")
-    engage = st.text_area("Engage", value="Students will watch a video", height=90)
-    explore = st.text_area("Explore", value="Students will gather data on freezing temps", height=90)
-    explain = st.text_area("Explain", value="Students will call and response", height=90)
-    elaborate = st.text_area("Elaborate", value="Students will make a brochure on water", height=90)
-    evaluate = st.text_area("Evaluate", value="Students will look at other examples of brochures and rate them", height=90)
-
-    materials = st.text_area("Materials", value="laptops and brochure materials", height=80)
-    notes = st.text_area("Notes", value="some students need help with inputs", height=80)
-    accom = st.text_area("Accommodations", value="N/a", height=80)
-
-    lines = [
-        ("5E Framework", True),
-        (f"Engage: {_safe(engage)}", False),
-        (f"Explore: {_safe(explore)}", False),
-        (f"Explain: {_safe(explain)}", False),
-        (f"Elaborate: {_safe(elaborate)}", False),
-        (f"Evaluate: {_safe(evaluate)}", False),
-        ("", False),
-        ("Materials", True),
-        (_safe(materials), False),
-        ("", False),
-        ("Notes", True),
-        (_safe(notes), False),
-        ("", False),
-        ("Accommodations", True),
-        (_safe(accom), False),
-    ]
-
-    buf = generate_sci_block_jpeg(header, lines)
-
-    st.download_button(
-        "📸 Download SCI-BLOCK.jpeg",
-        data=buf,
-        file_name="SCI-BLOCK.jpeg",
-        mime="image/jpeg",
-        use_container_width=True,
-        type="primary",
-    )
-
-# =====================
-# TESTER 3 — SCRATCHPAD
-# =====================
-
-elif panel == "Tester 3 — Scratchpad":
-    st.title("🧪 Tester 3 — Scratchpad")
-    st.caption("Paste anything here while prototyping. Nothing is persisted yet.")
-
-    scratch = st.text_area("Scratch", height=260, placeholder="Paste code, notes, JSON, ideas...")
-    st.markdown("#### Echo")
-    st.code(scratch if scratch.strip() else "—")
-
-# Bottom padding
+# Bottom padding (keeps ticker from covering content)
 st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
