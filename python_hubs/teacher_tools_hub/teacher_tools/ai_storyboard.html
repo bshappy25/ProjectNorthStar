@@ -785,36 +785,52 @@
     return frame;
   }
 
-  async function exportLandscapeJPG(){
-    const host = document.getElementById("exportHost");
-    host.innerHTML = "";
-    const frame = makeExportFrame();
-    host.appendChild(frame);
+async function exportLandscapeJPG(){
+  const host = document.getElementById("exportHost");
+  host.innerHTML = "";
+  const frame = makeExportFrame();
+  host.appendChild(frame);
 
-    // V3: crisp but safe scaling
-    const dpr = Math.min(3, (window.devicePixelRatio || 2) + 1);
-    const canvas = await html2canvas(frame, {
-      backgroundColor: "#ffffff",
-      scale: dpr,
-      useCORS: true,
-      imageTimeout: 20000,
-      removeContainer: true
-    });
+  const dpr = Math.min(3, (window.devicePixelRatio || 2) + 1);
+  const canvas = await html2canvas(frame, {
+    backgroundColor: "#ffffff",
+    scale: dpr,
+    useCORS: true,
+    imageTimeout: 20000,
+    removeContainer: true
+  });
 
-    const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g, "_");
-    const date = ($("dateStr").value || todayISO()).trim();
-    const filename = `StoryAi_${teacher}_${date}_LANDSCAPE_1920x1080.jpg`;
+  const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g, "_");
+  const date = ($("dateStr").value || todayISO()).trim();
+  const filename = `StoryAi_${teacher}_${date}_LANDSCAPE_1920x1080.jpg`;
 
-    const jpgData = canvas.toDataURL("image/jpeg", 0.95);
+  // ✅ iOS/Safari-friendly: Blob + object URL
+  canvas.toBlob((blob) => {
+    if (!blob) {
+      alert("Export failed (no blob). Try fewer images or a different browser.");
+      host.innerHTML = "";
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+
+    // Try normal download
     const a = document.createElement("a");
-    a.href = jpgData;
+    a.href = url;
     a.download = filename;
+    a.rel = "noopener";
     document.body.appendChild(a);
     a.click();
     a.remove();
 
-    host.innerHTML = "";
-  }
+    // Fallback for locked-down iframes/Safari: open image in new tab
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      host.innerHTML = "";
+    }, 1500);
+
+  }, "image/jpeg", 0.95);
+}
 
   $("exportJpgBtn").addEventListener("click", exportLandscapeJPG);
 </script>
