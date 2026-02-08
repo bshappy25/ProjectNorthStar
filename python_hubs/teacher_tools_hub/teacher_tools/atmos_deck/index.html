@@ -1,1 +1,1210 @@
-d
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Atmos Deck — Sound Studio (Beta)</title>
+<style>
+  :root{
+    --bg:#070A12;
+    --bg2:#0B1022;
+    --card: rgba(255,255,255,0.08);
+    --card2: rgba(255,255,255,0.12);
+    --border: rgba(120,255,220,0.28);
+    --text: rgba(255,255,255,0.92);
+    --muted: rgba(255,255,255,0.72);
+    --accent: #14B8A6;
+    --warn: #f59e0b;
+
+    --radius: 18px;
+    --pad: 14px;
+
+    --shadow: 0 18px 60px rgba(0,0,0,0.42);
+    --glow: 0 0 30px rgba(20,184,166,0.22);
+
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+    --ui: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+    /* theme overrides loaded from JSON */
+    --themeName: "Base";
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: var(--ui);
+    color: var(--text);
+    background:
+      radial-gradient(1200px 700px at 15% 0%, rgba(20,184,166,0.16), transparent 55%),
+      radial-gradient(900px 600px at 90% 20%, rgba(99,102,241,0.14), transparent 60%),
+      linear-gradient(160deg, var(--bg), var(--bg2));
+    overflow-x:hidden;
+  }
+
+  /* retro scan overlay */
+  .scan{
+    position:fixed; inset:0;
+    pointer-events:none; z-index:999;
+    background:
+      repeating-linear-gradient(0deg,
+        rgba(255,255,255,0.00) 0px,
+        rgba(255,255,255,0.00) 2px,
+        rgba(255,255,255,0.03) 2px,
+        rgba(255,255,255,0.03) 4px
+      );
+    mix-blend-mode: overlay;
+    opacity: 0.55;
+    animation: scan 10s linear infinite;
+  }
+  @keyframes scan{ 0%{transform:translateY(0)} 100%{transform:translateY(6px)} }
+
+  .wrap{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 16px 90px;
+  }
+
+  .topbar{
+    display:flex; gap:12px; align-items:center; justify-content:space-between;
+    margin: 8px 0 14px;
+  }
+  .brand{
+    display:flex; gap:12px; align-items:center;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+    box-shadow: var(--shadow), var(--glow);
+  }
+  .logo{
+    width: 44px; height: 44px; border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background:
+      radial-gradient(20px 20px at 30% 20%, rgba(255,255,255,0.35), transparent 60%),
+      radial-gradient(50px 40px at 60% 70%, rgba(20,184,166,0.35), transparent 60%),
+      rgba(0,0,0,0.20);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.4);
+  }
+  .brand h1{
+    margin:0;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 900;
+  }
+  .brand .sub{
+    margin-top: 4px;
+    font-size: 0.86rem;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .pill{
+    display:inline-flex; align-items:center; gap:10px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.22);
+    box-shadow: 0 12px 26px rgba(0,0,0,0.35);
+    user-select:none;
+  }
+  .dot{
+    width:10px; height:10px; border-radius:999px;
+    background: var(--accent);
+    box-shadow: 0 0 18px rgba(20,184,166,0.7);
+  }
+  .pill span{
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.88);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 14px;
+    align-items:start;
+  }
+  @media (max-width: 980px){
+    .grid{grid-template-columns: 1fr;}
+  }
+
+  .card{
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .cardHead{
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .cardHead h2{
+    margin:0;
+    font-size: 0.98rem;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    font-weight: 900;
+  }
+  .cardHead small{color:var(--muted); font-weight:700}
+  .cardBody{padding: 14px;}
+
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .btn{
+    cursor:pointer;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.24);
+    color: rgba(255,255,255,0.92);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    user-select:none;
+    transition: transform .06s ease, filter .2s ease;
+  }
+  .btn:hover{filter: brightness(1.05);}
+  .btn:active{transform: translateY(1px);}
+  .btn.primary{
+    border-color: rgba(20,184,166,0.45);
+    background: linear-gradient(135deg, rgba(20,184,166,0.25), rgba(20,184,166,0.10));
+    box-shadow: 0 0 0 3px rgba(20,184,166,0.12);
+  }
+  .btn.warn{
+    border-color: rgba(245,158,11,0.55);
+    background: linear-gradient(135deg, rgba(245,158,11,0.22), rgba(0,0,0,0.20));
+  }
+  .btn.ghost{
+    background: rgba(255,255,255,0.08);
+  }
+  .btn:disabled{
+    opacity:0.55;
+    cursor:not-allowed;
+  }
+
+  select, input[type="range"]{
+    width:100%;
+  }
+  select{
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.22);
+    color: rgba(255,255,255,0.92);
+    outline:none;
+    font-weight:800;
+  }
+
+  .tiles{
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+  @media (max-width: 560px){
+    .tiles{grid-template-columns: repeat(3, minmax(0, 1fr));}
+  }
+
+  .tile{
+    position:relative;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.22);
+    padding: 10px 10px 12px;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.35);
+    cursor:pointer;
+    user-select:none;
+    overflow:hidden;
+  }
+  .tile::before{
+    content:"";
+    position:absolute; inset:-40px -40px auto auto;
+    width: 90px; height: 90px;
+    background: radial-gradient(circle, rgba(255,255,255,0.18), transparent 60%);
+    transform: rotate(25deg);
+    pointer-events:none;
+  }
+  .tile .tag{
+    font-family: var(--mono);
+    font-size: 0.70rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
+  .tile .name{
+    margin-top: 6px;
+    font-weight: 1000;
+    letter-spacing: 0.06em;
+    font-size: 0.92rem;
+  }
+  .tile .hint{
+    margin-top: 6px;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.82rem;
+  }
+
+  /* placement grid (6 slots) */
+  .slots{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .slot{
+    position:relative;
+    border-radius: 18px;
+    border: 1px dashed rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.06);
+    padding: 10px;
+    min-height: 132px;
+    overflow:hidden;
+  }
+  .slot .slotLabel{
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.78);
+    opacity:0.95;
+  }
+  .slot .empty{
+    margin-top: 8px;
+    color: rgba(255,255,255,0.62);
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+
+  .block{
+    margin-top: 8px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.25);
+    padding: 10px;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.35);
+  }
+  .blockTop{
+    display:flex; gap:10px; align-items:center; justify-content:space-between;
+  }
+  .blockTop .bname{
+    font-weight: 1000;
+    letter-spacing: 0.06em;
+  }
+  .mini{
+    display:flex; gap:8px; align-items:center;
+  }
+  .miniBtn{
+    cursor:pointer;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.92);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 10px;
+    font-size: 0.72rem;
+    user-select:none;
+  }
+  .miniBtn.on{
+    border-color: rgba(20,184,166,0.55);
+    background: rgba(20,184,166,0.18);
+  }
+
+  .sliderRow{
+    margin-top: 10px;
+    display:grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items:center;
+  }
+  .pct{
+    font-family: var(--mono);
+    font-size: 0.80rem;
+    color: rgba(255,255,255,0.82);
+  }
+
+  input[type="range"]{
+    -webkit-appearance: none;
+    appearance: none;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.16);
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.90);
+    border: 2px solid rgba(20,184,166,0.55);
+    box-shadow: 0 0 18px rgba(20,184,166,0.55);
+    cursor:pointer;
+  }
+
+  .meterWrap{
+    margin-top: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.22);
+    padding: 10px;
+  }
+  .meterRow{
+    display:grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items:center;
+  }
+  .meterRow label{
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.78);
+  }
+  .meter{
+    position:relative;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.14);
+    overflow:hidden;
+  }
+  .meter > i{
+    position:absolute; left:0; top:0; bottom:0;
+    width: 0%;
+    background: linear-gradient(90deg, rgba(20,184,166,0.90), rgba(99,102,241,0.85));
+    box-shadow: 0 0 18px rgba(20,184,166,0.35);
+  }
+
+  .hintBox{
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.20);
+    color: rgba(255,255,255,0.78);
+    font-weight: 750;
+    line-height: 1.3rem;
+  }
+
+  .toast{
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    z-index: 1000;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 12px 14px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    box-shadow: var(--shadow);
+  }
+  .toast strong{letter-spacing:0.10em; text-transform:uppercase}
+  .toast small{color:rgba(255,255,255,0.72); font-weight:700}
+  .toast .x{cursor:pointer; font-weight:900; padding:6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06);}
+
+</style>
+</head>
+<body>
+<div class="scan"></div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Atmos Deck</h1>
+        <div class="sub">Flash-style Sound Studio • Drag your vibe into 6 slots • Export a mix</div>
+      </div>
+    </div>
+    <div class="pill" title="Theme currently loaded from JSON">
+      <div class="dot"></div>
+      <span id="themeLabel">THEME: BASE</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: TILE PALETTE -->
+    <div class="card">
+      <div class="cardHead">
+        <div>
+          <h2>Sound Palette</h2>
+          <small>Tap a tile → select a slot to place</small>
+        </div>
+        <div style="min-width:220px">
+          <select id="themeSelect" aria-label="Theme"></select>
+        </div>
+      </div>
+      <div class="cardBody">
+        <div class="row" style="margin-bottom:10px;">
+          <button class="btn ghost" id="btnStartAudio">▶ Start Audio</button>
+          <button class="btn ghost" id="btnStopAll">■ Stop All</button>
+          <button class="btn ghost" id="btnClearSlots">⟲ Clear Slots</button>
+        </div>
+
+        <div class="tiles" id="tiles"></div>
+
+        <div class="hintBox">
+          <div><strong>How it works:</strong> Choose a tile, then click a slot. Use <strong>Mute/Solo</strong> + the slider to shape the blend.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: 6-SLOT MIXER -->
+    <div class="card">
+      <div class="cardHead">
+        <div>
+          <h2>Mixer Grid (6 Slots)</h2>
+          <small>3–5 active tracks recommended</small>
+        </div>
+        <div class="row">
+          <button class="btn warn" id="modSpice" title="Random micro-variation (detune/pan/volume)">Spice</button>
+          <button class="btn warn" id="modLoFi" title="Lo-Fi filter (soft lowpass)">Lo-Fi</button>
+        </div>
+      </div>
+      <div class="cardBody">
+        <div class="slots" id="slots"></div>
+
+        <div class="meterWrap">
+          <div class="meterRow">
+            <label>Master</label>
+            <div class="meter"><i id="masterMeter"></i></div>
+          </div>
+          <div style="height:8px"></div>
+          <div class="row">
+            <button class="btn primary" id="btnRenderWav">⬇ Export WAV</button>
+            <button class="btn primary" id="btnRenderMp3">⬇ Export MP3 (beta)</button>
+            <button class="btn ghost" id="btnPreviewLast" disabled>♫ Preview Last Export</button>
+          </div>
+          <div class="hintBox" id="exportHint">
+            <div><strong>Export:</strong> WAV is always reliable. MP3 requires a small encoder library (see note after export).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" style="display:none;">
+  <div>
+    <strong id="toastTitle">NOTICE</strong><br/>
+    <small id="toastMsg">…</small>
+  </div>
+  <div class="x" id="toastClose">✕</div>
+</div>
+
+<script>
+/**
+ * ATMOS DECK — v1 BETA
+ * - Loads theme + sound tile catalog from: ./themes/atmos_deck.v1.json
+ * - Loads audio from: ./sounds/base/*.mp3 (or .wav)
+ * - 6 slots, each can host 1 sound
+ * - Controls: volume slider, mute, solo
+ * - Modifiers: Spice, Lo-Fi
+ * - Export:
+ *    - WAV (always)
+ *    - MP3 (beta) using lamejs via CDN if available
+ */
+
+// ---------- utilities ----------
+const $ = (sel) => document.querySelector(sel);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function toast(title, msg){
+  $("#toastTitle").textContent = title;
+  $("#toastMsg").textContent = msg;
+  $("#toast").style.display = "flex";
+}
+$("#toastClose").onclick = () => { $("#toast").style.display = "none"; };
+
+// ---------- config / state ----------
+const CONFIG_URL = "./themes/atmos_deck.v1.json";
+
+let CFG = null;
+let currentThemeId = "base";
+
+let selectedTileId = null;
+
+const SLOT_COUNT = 6;
+const slots = new Array(SLOT_COUNT).fill(null); // each: { tileId, gain, muted, solo, sourceNode? }
+let lastExportBlobUrl = null;
+let lastExportMime = null;
+
+let spiceOn = false;
+let lofiOn = false;
+
+// ---------- audio engine ----------
+let AC = null;
+let masterGain = null;
+let analyser = null;
+let meterRAF = null;
+
+// per-track nodes
+const trackNodes = new Map(); // slotIndex -> { buffer, source, gain, pan, filter, out }
+
+function ensureAudio(){
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = AC.createGain();
+  masterGain.gain.value = 0.9;
+
+  analyser = AC.createAnalyser();
+  analyser.fftSize = 512;
+
+  masterGain.connect(analyser);
+  analyser.connect(AC.destination);
+
+  startMeter();
+}
+
+function startMeter(){
+  if (meterRAF) cancelAnimationFrame(meterRAF);
+  const data = new Uint8Array(analyser.frequencyBinCount);
+
+  function tick(){
+    analyser.getByteTimeDomainData(data);
+    // compute RMS-ish
+    let sum = 0;
+    for (let i=0;i<data.length;i++){
+      const v = (data[i]-128)/128;
+      sum += v*v;
+    }
+    const rms = Math.sqrt(sum / data.length);
+    const pct = clamp(rms * 160, 0, 100); // tune visually
+    $("#masterMeter").style.width = pct + "%";
+    meterRAF = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+async function loadAudioBuffer(url){
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Fetch failed: " + url);
+  const arr = await res.arrayBuffer();
+  return await AC.decodeAudioData(arr);
+}
+
+function stopSlot(slotIndex){
+  const n = trackNodes.get(slotIndex);
+  if (n && n.source){
+    try { n.source.stop(); } catch(e){}
+  }
+  trackNodes.delete(slotIndex);
+}
+
+function stopAll(){
+  for (let i=0;i<SLOT_COUNT;i++) stopSlot(i);
+}
+
+function computeSoloState(){
+  return slots.some(s => s && s.solo);
+}
+
+function applyMuteSoloGains(){
+  const anySolo = computeSoloState();
+  for (let i=0;i<SLOT_COUNT;i++){
+    const s = slots[i];
+    const n = trackNodes.get(i);
+    if (!s || !n) continue;
+
+    let target = s.gain;
+    if (s.muted) target = 0;
+    if (anySolo && !s.solo) target = 0;
+
+    n.gain.gain.value = target;
+  }
+}
+
+function applyModifiers(slotIndex){
+  const n = trackNodes.get(slotIndex);
+  if (!n) return;
+  // Lo-Fi: lowpass filter
+  if (lofiOn){
+    n.filter.frequency.value = 1800;
+    n.filter.Q.value = 0.7;
+  } else {
+    n.filter.frequency.value = 20000;
+    n.filter.Q.value = 0.01;
+  }
+}
+
+function randomizeSpice(n){
+  // subtle micro-variation
+  const detune = spiceOn ? (Math.random()*18 - 9) : 0; // cents
+  const pan = spiceOn ? (Math.random()*0.28 - 0.14) : 0;
+  const vol = spiceOn ? (1 + (Math.random()*0.10 - 0.05)) : 1;
+  n.source.detune.value = detune;
+  n.pan.pan.value = pan;
+  n.gain.gain.value = clamp(n.gain.gain.value * vol, 0, 1);
+}
+
+async function playSlot(slotIndex){
+  ensureAudio();
+  if (AC.state === "suspended") await AC.resume();
+
+  const s = slots[slotIndex];
+  if (!s) return;
+
+  stopSlot(slotIndex);
+
+  const tile = CFG.tiles.find(t => t.id === s.tileId);
+  if (!tile) return;
+
+  // load buffer
+  const buffer = await loadAudioBuffer(tile.src);
+
+  // nodes
+  const source = AC.createBufferSource();
+  source.buffer = buffer;
+  source.loop = !!tile.loop;
+
+  const gain = AC.createGain();
+  gain.gain.value = s.gain;
+
+  const pan = AC.createStereoPanner();
+
+  const filter = AC.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = 20000;
+  filter.Q.value = 0.01;
+
+  // chain: source -> filter -> pan -> gain -> master
+  source.connect(filter);
+  filter.connect(pan);
+  pan.connect(gain);
+  gain.connect(masterGain);
+
+  const nodePack = { buffer, source, gain, pan, filter };
+  trackNodes.set(slotIndex, nodePack);
+
+  applyModifiers(slotIndex);
+  applyMuteSoloGains();
+  randomizeSpice(nodePack);
+
+  source.start(0);
+}
+
+async function restartAllActive(){
+  // restarts all currently placed slots (to apply modifier changes cleanly)
+  const active = [];
+  for (let i=0;i<SLOT_COUNT;i++){
+    if (slots[i]) active.push(i);
+  }
+  for (const i of active){
+    try { await playSlot(i); } catch(e){}
+  }
+}
+
+// ---------- UI build ----------
+function setThemeVars(theme){
+  if (!theme) return;
+  document.documentElement.style.setProperty("--bg", theme.bg);
+  document.documentElement.style.setProperty("--bg2", theme.bg2);
+  document.documentElement.style.setProperty("--border", theme.border);
+  document.documentElement.style.setProperty("--accent", theme.accent);
+  document.documentElement.style.setProperty("--themeName", `"${theme.name}"`);
+  $("#themeLabel").textContent = "THEME: " + theme.name.toUpperCase();
+}
+
+function renderTiles(){
+  const el = $("#tiles");
+  el.innerHTML = "";
+
+  for (const t of CFG.tiles){
+    const div = document.createElement("div");
+    div.className = "tile";
+    div.style.borderColor = t.colorBorder;
+    div.style.boxShadow = `0 14px 30px rgba(0,0,0,0.35), 0 0 0 3px rgba(255,255,255,0.02)`;
+    div.style.background = `linear-gradient(135deg, ${t.colorA}, rgba(0,0,0,0.22))`;
+
+    div.innerHTML = `
+      <div class="tag">${t.tag}</div>
+      <div class="name">${t.name}</div>
+      <div class="hint">${t.hint}</div>
+    `;
+
+    div.onclick = () => {
+      selectedTileId = t.id;
+      toast("Tile Selected", `Now click a slot to place: ${t.name}`);
+      // visually mark selection by brief pulse
+      div.animate([{transform:"scale(1)"},{transform:"scale(1.03)"},{transform:"scale(1)"}], {duration:240});
+    };
+
+    el.appendChild(div);
+  }
+}
+
+function renderSlots(){
+  const el = $("#slots");
+  el.innerHTML = "";
+
+  for (let i=0;i<SLOT_COUNT;i++){
+    const slot = document.createElement("div");
+    slot.className = "slot";
+    slot.innerHTML = `<div class="slotLabel">SLOT ${i+1}</div>`;
+
+    const s = slots[i];
+    if (!s){
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = selectedTileId ? "Tap to place tile" : "Empty (pick a tile)";
+      slot.appendChild(empty);
+
+      slot.onclick = async () => {
+        if (!selectedTileId){
+          toast("Pick a Tile", "Select a sound tile first (left).");
+          return;
+        }
+        const tile = CFG.tiles.find(t=>t.id===selectedTileId);
+        slots[i] = {
+          tileId: selectedTileId,
+          gain: tile.defaultGain ?? 0.65,
+          muted: false,
+          solo: false,
+        };
+        selectedTileId = null;
+        renderSlots();
+        try { await playSlot(i); } catch(e){
+          toast("Audio Load Failed", "Check that the sound file exists in /sounds/ and your browser allows audio.");
+        }
+      };
+    } else {
+      const tile = CFG.tiles.find(t=>t.id===s.tileId);
+      const b = document.createElement("div");
+      b.className = "block";
+      b.style.borderColor = tile.colorBorder;
+      b.style.background = `linear-gradient(135deg, ${tile.colorA}, rgba(0,0,0,0.22))`;
+
+      const muteOn = s.muted ? "on" : "";
+      const soloOn = s.solo ? "on" : "";
+
+      b.innerHTML = `
+        <div class="blockTop">
+          <div>
+            <div class="bname">${tile.name}</div>
+            <div style="margin-top:4px; color: rgba(255,255,255,0.76); font-weight:800; font-size:0.82rem;">
+              ${tile.tag} • ${tile.loop ? "LOOP" : "ONE-SHOT"}
+            </div>
+          </div>
+          <div class="mini">
+            <div class="miniBtn ${muteOn}" data-act="mute">MUTE</div>
+            <div class="miniBtn ${soloOn}" data-act="solo">SOLO</div>
+            <div class="miniBtn" data-act="clear">CLR</div>
+          </div>
+        </div>
+
+        <div class="sliderRow">
+          <input type="range" min="0" max="100" value="${Math.round(s.gain*100)}" />
+          <div class="pct">${Math.round(s.gain*100)}%</div>
+        </div>
+      `;
+
+      // wire controls
+      const btnMute = b.querySelector('[data-act="mute"]');
+      const btnSolo = b.querySelector('[data-act="solo"]');
+      const btnClr  = b.querySelector('[data-act="clear"]');
+      const rng = b.querySelector('input[type="range"]');
+      const pct = b.querySelector('.pct');
+
+      btnMute.onclick = (ev) => {
+        ev.stopPropagation();
+        s.muted = !s.muted;
+        applyMuteSoloGains();
+        renderSlots();
+      };
+
+      btnSolo.onclick = (ev) => {
+        ev.stopPropagation();
+        s.solo = !s.solo;
+        applyMuteSoloGains();
+        renderSlots();
+      };
+
+      btnClr.onclick = (ev) => {
+        ev.stopPropagation();
+        stopSlot(i);
+        slots[i] = null;
+        applyMuteSoloGains();
+        renderSlots();
+      };
+
+      rng.oninput = () => {
+        const v = Number(rng.value);
+        s.gain = clamp(v/100, 0, 1);
+        pct.textContent = Math.round(s.gain*100) + "%";
+        const n = trackNodes.get(i);
+        if (n){
+          n.gain.gain.value = s.gain;
+          applyMuteSoloGains();
+        }
+      };
+
+      slot.appendChild(b);
+      // click slot to re-trigger (nice for 1-shots)
+      slot.onclick = async () => {
+        try { await playSlot(i); } catch(e){}
+      };
+    }
+
+    el.appendChild(slot);
+  }
+}
+
+// ---------- theme loading ----------
+async function loadConfig(){
+  try{
+    const res = await fetch(CONFIG_URL, {cache:"no-store"});
+    if (!res.ok) throw new Error("config fetch failed");
+    CFG = await res.json();
+  }catch(e){
+    // fallback minimal config
+    CFG = {
+      themes: [{
+        id:"base", name:"Base", bg:"#070A12", bg2:"#0B1022",
+        border:"rgba(120,255,220,0.28)", accent:"#14B8A6"
+      }],
+      tiles: []
+    };
+    toast("Config Missing", "Could not load themes/atmos_deck.v1.json. Add it or fix the path.");
+  }
+
+  // theme select
+  const sel = $("#themeSelect");
+  sel.innerHTML = "";
+  for (const th of CFG.themes){
+    const opt = document.createElement("option");
+    opt.value = th.id;
+    opt.textContent = th.name;
+    sel.appendChild(opt);
+  }
+  currentThemeId = CFG.themes[0]?.id || "base";
+  sel.value = currentThemeId;
+  setThemeVars(CFG.themes.find(t=>t.id===currentThemeId));
+
+  sel.onchange = async () => {
+    currentThemeId = sel.value;
+    setThemeVars(CFG.themes.find(t=>t.id===currentThemeId));
+    // tiny audio feedback if running
+    if (AC) {
+      try{
+        const o = AC.createOscillator();
+        const g = AC.createGain();
+        o.type="triangle"; o.frequency.value=660;
+        g.gain.value=0.02;
+        o.connect(g); g.connect(masterGain);
+        o.start(); o.stop(AC.currentTime + 0.08);
+      }catch(e){}
+    }
+  };
+
+  // build UI
+  renderTiles();
+  renderSlots();
+}
+
+// ---------- modifier buttons ----------
+$("#modSpice").onclick = async () => {
+  spiceOn = !spiceOn;
+  $("#modSpice").classList.toggle("primary", spiceOn);
+  toast("Modifier", spiceOn ? "Spice ON: subtle random detune/pan" : "Spice OFF");
+  if (spiceOn) await restartAllActive(); // to apply immediately
+};
+
+$("#modLoFi").onclick = async () => {
+  lofiOn = !lofiOn;
+  $("#modLoFi").classList.toggle("primary", lofiOn);
+  toast("Modifier", lofiOn ? "Lo-Fi ON: soft lowpass filter" : "Lo-Fi OFF");
+  await restartAllActive();
+};
+
+// ---------- main buttons ----------
+$("#btnStartAudio").onclick = async () => {
+  ensureAudio();
+  if (AC.state === "suspended") await AC.resume();
+  toast("Audio Ready", "Mixer engine is awake.");
+};
+
+$("#btnStopAll").onclick = () => {
+  stopAll();
+  toast("Stopped", "All tracks stopped.");
+};
+
+$("#btnClearSlots").onclick = () => {
+  stopAll();
+  for (let i=0;i<SLOT_COUNT;i++) slots[i] = null;
+  renderSlots();
+  toast("Cleared", "All slots cleared.");
+};
+
+// ---------- export helpers (WAV) ----------
+function mixToStereoFloat32(durationSec, sampleRate){
+  // Offline render: mix all placed slots into stereo buffer
+  const active = [];
+  for (let i=0;i<SLOT_COUNT;i++){
+    if (slots[i]) active.push(i);
+  }
+  if (active.length === 0) throw new Error("No tracks to render.");
+
+  const length = Math.floor(durationSec * sampleRate);
+  const L = new Float32Array(length);
+  const R = new Float32Array(length);
+
+  // For simplicity: render first N seconds of each track, loop if tile.loop = true
+  for (const i of active){
+    const s = slots[i];
+    const tile = CFG.tiles.find(t=>t.id===s.tileId);
+    const n = trackNodes.get(i);
+    // if currently playing, we stored decoded buffer in nodePack
+    const buf = n?.buffer;
+    if (!buf) continue;
+
+    const anySolo = computeSoloState();
+    let g = s.gain;
+    if (s.muted) g = 0;
+    if (anySolo && !s.solo) g = 0;
+
+    // modifiers (approx): lofi ignored in offline; spice slight variance ignored
+    // (keeps offline deterministic + quick v1)
+    const ch0 = buf.getChannelData(0);
+    const ch1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : ch0;
+
+    let pos = 0;
+    for (let t=0;t<length;t++){
+      const idx = pos % ch0.length;
+      const l = ch0[idx] * g;
+      const r = ch1[idx] * g;
+      L[t] += l;
+      R[t] += r;
+      pos++;
+      // if not loop and ends, stop contributing
+      if (!tile.loop && pos >= ch0.length) break;
+    }
+  }
+
+  // normalize softly to prevent clipping
+  let peak = 0;
+  for (let i=0;i<length;i++){
+    peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
+  }
+  const norm = peak > 0.98 ? (0.98/peak) : 1.0;
+  for (let i=0;i<length;i++){
+    L[i] *= norm;
+    R[i] *= norm;
+  }
+
+  return {L,R};
+}
+
+function floatTo16BitPCM(output, input){
+  for (let i=0;i<input.length;i++){
+    let s = Math.max(-1, Math.min(1, input[i]));
+    output.setInt16(i*2, s < 0 ? s*0x8000 : s*0x7FFF, true);
+  }
+}
+
+function interleave(L, R){
+  const out = new Float32Array(L.length * 2);
+  let j=0;
+  for (let i=0;i<L.length;i++){
+    out[j++] = L[i];
+    out[j++] = R[i];
+  }
+  return out;
+}
+
+function encodeWAV(L, R, sampleRate){
+  const inter = interleave(L, R);
+  const buffer = new ArrayBuffer(44 + inter.length * 2);
+  const view = new DataView(buffer);
+
+  function writeString(offset, str){
+    for (let i=0;i<str.length;i++) view.setUint8(offset+i, str.charCodeAt(i));
+  }
+
+  /* RIFF identifier */
+  writeString(0, "RIFF");
+  /* file length */
+  view.setUint32(4, 36 + inter.length*2, true);
+  /* RIFF type */
+  writeString(8, "WAVE");
+  /* format chunk identifier */
+  writeString(12, "fmt ");
+  /* format chunk length */
+  view.setUint32(16, 16, true);
+  /* sample format (raw) */
+  view.setUint16(20, 1, true);
+  /* channel count */
+  view.setUint16(22, 2, true);
+  /* sample rate */
+  view.setUint32(24, sampleRate, true);
+  /* byte rate (sample rate * block align) */
+  view.setUint32(28, sampleRate * 4, true);
+  /* block align (channel count * bytes per sample) */
+  view.setUint16(32, 4, true);
+  /* bits per sample */
+  view.setUint16(34, 16, true);
+  /* data chunk identifier */
+  writeString(36, "data");
+  /* data chunk length */
+  view.setUint32(40, inter.length * 2, true);
+
+  // PCM samples
+  const pcm = new DataView(buffer, 44);
+  for (let i=0;i<inter.length;i++){
+    let s = Math.max(-1, Math.min(1, inter[i]));
+    pcm.setInt16(i*2, s < 0 ? s*0x8000 : s*0x7FFF, true);
+  }
+
+  return new Blob([buffer], {type: "audio/wav"});
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  return url;
+}
+
+function nowStamp(){
+  const d = new Date();
+  const pad = (n)=> String(n).padStart(2,"0");
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
+// ---------- Export: WAV ----------
+$("#btnRenderWav").onclick = async () => {
+  try{
+    // ensure buffers exist (play at least once per slot)
+    ensureAudio();
+    const active = slots.filter(Boolean).length;
+    if (active === 0){ toast("Export", "No tracks placed."); return; }
+
+    // pick duration from config or default
+    const durationSec = CFG.export?.durationSec ?? 20;
+    const sampleRate = CFG.export?.sampleRate ?? 44100;
+
+    toast("Rendering", `Building WAV… (${durationSec}s)`);
+    const {L,R} = mixToStereoFloat32(durationSec, sampleRate);
+    const wav = encodeWAV(L, R, sampleRate);
+    const name = `atmos_deck_${nowStamp()}.wav`;
+    const url = downloadBlob(wav, name);
+
+    lastExportBlobUrl = url;
+    lastExportMime = "audio/wav";
+    $("#btnPreviewLast").disabled = false;
+
+    $("#exportHint").innerHTML = `<div><strong>WAV exported:</strong> ${name} • Preview is ready.</div>`;
+    toast("Export Complete", "WAV downloaded. Use Preview Last to listen.");
+  }catch(e){
+    toast("Export Failed", "Make sure sounds are loaded (tap slots to play) and try again.");
+  }
+};
+
+// ---------- MP3 (beta via lamejs) ----------
+async function ensureLame(){
+  if (window.lamejs) return true;
+  // Try loading from CDN (you can later download this file into /js/ for offline)
+  const src = "https://unpkg.com/lamejs@1.2.1/lame.min.js";
+  return new Promise((resolve) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = () => resolve(!!window.lamejs);
+    s.onerror = () => resolve(false);
+    document.head.appendChild(s);
+  });
+}
+
+function wavFloatsToMp3Blob(L, R, sampleRate){
+  // convert float [-1..1] to Int16
+  const toInt16 = (x) => {
+    const v = Math.max(-1, Math.min(1, x));
+    return v < 0 ? (v * 0x8000) : (v * 0x7FFF);
+  };
+  const n = L.length;
+  const left = new Int16Array(n);
+  const right = new Int16Array(n);
+  for (let i=0;i<n;i++){
+    left[i] = toInt16(L[i]);
+    right[i] = toInt16(R[i]);
+  }
+
+  const mp3enc = new lamejs.Mp3Encoder(2, sampleRate, 128);
+  const blockSize = 1152;
+  const mp3Data = [];
+  for (let i=0;i<n;i+=blockSize){
+    const lChunk = left.subarray(i, i+blockSize);
+    const rChunk = right.subarray(i, i+blockSize);
+    const buf = mp3enc.encodeBuffer(lChunk, rChunk);
+    if (buf.length) mp3Data.push(new Int8Array(buf));
+  }
+  const end = mp3enc.flush();
+  if (end.length) mp3Data.push(new Int8Array(end));
+  return new Blob(mp3Data, {type:"audio/mpeg"});
+}
+
+$("#btnRenderMp3").onclick = async () => {
+  ensureAudio();
+  const active = slots.filter(Boolean).length;
+  if (active === 0){ toast("Export", "No tracks placed."); return; }
+
+  toast("MP3 Export", "Loading encoder…");
+  const ok = await ensureLame();
+  if (!ok){
+    toast("MP3 Unavailable", "Encoder failed to load. Use WAV export, or bundle lamejs locally later.");
+    $("#exportHint").innerHTML = `<div><strong>MP3 note:</strong> This browser couldn't load the encoder. WAV works everywhere.</div>`;
+    return;
+  }
+
+  try{
+    const durationSec = CFG.export?.durationSec ?? 20;
+    const sampleRate = CFG.export?.sampleRate ?? 44100;
+
+    toast("Rendering", `Building MP3… (${durationSec}s)`);
+    const {L,R} = mixToStereoFloat32(durationSec, sampleRate);
+    const mp3 = wavFloatsToMp3Blob(L, R, sampleRate);
+    const name = `atmos_deck_${nowStamp()}.mp3`;
+    const url = downloadBlob(mp3, name);
+
+    lastExportBlobUrl = url;
+    lastExportMime = "audio/mpeg";
+    $("#btnPreviewLast").disabled = false;
+
+    $("#exportHint").innerHTML = `<div><strong>MP3 exported:</strong> ${name} • Preview is ready.</div>`;
+    toast("Export Complete", "MP3 downloaded. Use Preview Last to listen.");
+  }catch(e){
+    toast("MP3 Export Failed", "Try WAV first to confirm your sounds are loading correctly.");
+  }
+};
+
+// ---------- Preview last export ----------
+$("#btnPreviewLast").onclick = () => {
+  if (!lastExportBlobUrl) return;
+  const audio = new Audio(lastExportBlobUrl);
+  audio.play().catch(()=>{});
+  toast("Preview", "Playing last export (device volume matters).");
+};
+
+// ---------- boot ----------
+loadConfig().then(()=>{
+  // Wire: when a slot is placed, it plays; but buffers exist only after play.
+  // This is intentional: it keeps v1 predictable.
+});
+</script>
+
+</body>
+</html>
