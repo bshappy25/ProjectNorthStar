@@ -1,13 +1,3 @@
-Yep — that error is because the “header block” at the top is not actually a Python comment or docstring in your file. Python is trying to execute:
-
-DevForge - Developer Productivity Hub
-
-…as code on line 2, which triggers the SyntaxError.
-
-Here’s a working version. I only did what’s necessary:
-	•	Turned that header into a real triple-quoted docstring
-	•	Kept your structure the same
-	•	Left everything else alone (glassy CSS, ticker, sidebar, main)
 
 """
 DevForge - Developer Productivity Hub
