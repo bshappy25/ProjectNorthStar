@@ -1,0 +1,27 @@
+import sqlite3
+
+con = sqlite3.connect("ngss_ms.db")
+con.row_factory = sqlite3.Row
+cur = con.cursor()
+
+cur.execute("""
+INSERT OR IGNORE INTO standards (
+    pe_code,
+    grade_band,
+    topic_area,
+    domain_code,
+    domain_title,
+    pe_statement,
+    source_doc
+) VALUES (?, ?, ?, ?, ?, ?, ?)
+""", (
+    "MS-ESS1-1",
+    "MS",
+    "Earth-Space",
+    "ESS1",
+    "Earth’s Place in the Universe",
+    "Develop and use a model of the Earth-sun-moon system to describe the cyclic patterns of lunar phases, eclipses of the sun and moon, and seasons.",
+    "NGSS MS Combined"
+))
+
+con.commit()
