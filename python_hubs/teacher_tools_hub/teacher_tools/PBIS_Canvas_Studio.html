@@ -3,848 +3,1100 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PBIS Canvas Studio — Text + 3 Images (Confirm-to-Save)</title>
+<title>Landscape Lesson Export — PBIS + 3 Images (AI-Ready)</title>
+
 <style>
-:root{
-  --bg:#f3f3f3; --card:#fff; --ink:#111; --muted:#444; --line:#cfcfcf; --r:14px;
-  --blue:#0b2a5b;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Arial;
-  background:var(--bg);
-  color:var(--ink);
-  overflow:hidden; /* NO SCROLL */
-}
-.top{
-  height:64px; background:#000; color:#fff;
-  display:flex; align-items:center; gap:10px; padding:0 14px;
-}
-.badge{
-  width:34px; height:34px; border-radius:999px;
-  border:2px solid #fff; display:grid; place-items:center; font-weight:900;
-}
-.wrap{height:calc(100vh - 64px); padding:12px; display:flex; justify-content:center;}
-.card{
-  width:min(1260px,100%);
-  background:var(--card);
-  border:2px solid var(--line);
-  border-radius:var(--r);
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-}
-.grid{display:flex; gap:12px; min-height:0; flex:1;}
-.col{
-  flex:1; min-width:0;
-  border:2px dotted var(--line);
-  border-radius:12px;
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  min-height:0;
-}
-.h{margin:0;font-weight:900}
-.m{margin:0;color:var(--muted);font-weight:700}
-.row{display:flex; gap:10px; min-width:0}
-.row.wrap{flex-wrap:wrap; height:auto; padding:0; justify-content:flex-start}
+  :root{
+    --bg:#f3f3f3;
+    --card:#ffffff;
+    --line:#cfcfcf;
+    --ink:#111;
+    --muted:#555;
 
-input,textarea{
-  width:100%;
-  border:2px solid var(--line);
-  border-radius:12px;
-  padding:10px 12px;
-  font-size:16px;
-}
-textarea{resize:none; height:48px;} /* tight: prevents scroll */
+    --blue:#0b2a5b;   /* PBIS-style export banner */
+    --black:#000;
 
-.btn{
-  flex:1; min-width:0;
-  border:2px solid #000; background:#fff; color:#000;
-  border-radius:12px; padding:12px;
-  font-weight:900; cursor:pointer; user-select:none; white-space:nowrap;
-}
-.btn.on{background:#000;color:#fff}
-.small{
-  flex:0 0 auto;
-  border:2px solid #000; background:#fff;
-  border-radius:12px; padding:10px 12px;
-  font-weight:900; cursor:pointer; user-select:none; white-space:nowrap;
-}
-.small.primary{background:#000;color:#fff}
-.small.good{border-color:#0b7a34;background:#0b7a34;color:#fff}
-.small.warn{border-color:#8a5b00;background:#fff3cd;color:#111}
+    --r:14px;
+  }
 
-.foot{
-  display:flex; gap:10px; flex-wrap:wrap;
-  justify-content:flex-end; margin-top:auto;
-}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    overflow:hidden; /* page does NOT scroll; left column will */
+  }
 
-/* checks */
-.checks{
-  border:2px solid var(--line);
-  border-radius:12px;
-  padding:8px 10px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px 10px;
-}
-.check{
-  display:flex; align-items:center; gap:8px;
-  font-weight:900; color:#000; font-size:0.92rem; line-height:1.1; min-width:0;
-}
-.check input{width:18px;height:18px;accent-color:#000;}
-.check.full{grid-column:1 / -1;}
+  /* ===== TOP BAR ===== */
+  .top{
+    height:64px;
+    background:var(--black);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 14px;
+    user-select:none;
+  }
+  .badge{
+    width:34px;height:34px;border-radius:999px;
+    border:2px solid #fff;
+    display:grid;place-items:center;
+    font-weight:1000;
+    letter-spacing:.06em;
+  }
+  .top .title{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .top .t1{
+    font-weight:1000;
+    letter-spacing:.08em;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .top .t2{
+    font-weight:800;
+    opacity:.85;
+    font-size:.92rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
 
-/* Image library + slots */
-.libBox{
-  border:2px solid var(--line);
-  border-radius:12px;
-  padding:10px;
-  background:#fff;
-}
-.libTop{
-  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-}
-.libTop .hint{margin:0;color:var(--muted);font-weight:800;font-size:.92rem}
-.library{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:10px;
-  max-height:120px; /* keep no-scroll overall */
-  overflow:auto; /* only library scrolls if huge; rest stays fixed */
-  padding-bottom:2px;
-}
-.thumb{
-  width:110px; height:80px;
-  border:2px solid var(--line);
-  border-radius:12px;
-  overflow:hidden;
-  background:#fff;
-  cursor:pointer;
-  position:relative;
-  flex:0 0 auto;
-}
-.thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.thumb .tag{
-  position:absolute; left:6px; bottom:6px;
-  background:rgba(0,0,0,.65);
-  color:#fff;
-  font-size:10px;
-  padding:2px 7px;
-  border-radius:999px;
-  font-weight:950;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-.thumb.sel{
-  border-color:#0b7a34;
-  box-shadow:0 0 0 3px rgba(11,122,52,.15);
-}
+  /* ===== MAIN LAYOUT ===== */
+  .wrap{
+    height:calc(100vh - 64px);
+    padding:12px;
+    display:flex;
+    justify-content:center;
+    align-items:stretch;
+  }
+  .card{
+    width:min(1280px, 100%);
+    background:var(--card);
+    border:2px solid var(--line);
+    border-radius:var(--r);
+    padding:12px;
+    display:flex;
+    min-height:0;
+    gap:12px;
+  }
 
-.slotRow{
-  display:flex; gap:10px; flex-wrap:wrap;
-}
-.slot{
-  flex:1; min-width:160px;
-  border:2px solid #000;
-  border-radius:12px;
-  padding:10px;
-  background:#fff;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-.slot .cap{font-weight:950}
-.slot .sub{margin:0;color:var(--muted);font-weight:800;font-size:.9rem}
-.slot .box{
-  height:90px;
-  border:2px solid var(--line);
-  border-radius:10px;
-  overflow:hidden;
-  background:#fff;
-  display:grid;
-  place-items:center;
-}
-.slot .box img{width:100%;height:100%;object-fit:cover;display:block}
-.slot .box .ph{color:var(--muted);font-weight:900;font-size:.92rem;padding:8px;text-align:center}
-.slot.active{
-  outline:3px solid rgba(11,122,52,.35);
-  outline-offset:2px;
-}
+  /* Left scrolls */
+  .left{
+    flex:1 1 520px;
+    min-width:340px;
+    border:2px dotted var(--line);
+    border-radius:12px;
+    padding:12px;
+    min-height:0;
+    overflow:auto; /* ✅ allow scrolling on LEFT */
+  }
 
-/* Preview stage canvas */
-.previewStage{
-  position:relative;
-  flex:1;
-  min-height:0;
-  border:2px solid #000;
-  border-radius:12px;
-  overflow:hidden;
-  background:#fff;
-}
-canvas{width:100%;height:100%;display:block}
+  /* Right is locked/sticky */
+  .right{
+    flex:0 0 520px;
+    min-width:360px;
+    border:2px dotted var(--line);
+    border-radius:12px;
+    padding:12px;
+    min-height:0;
+    position:relative;
+  }
+  .rightSticky{
+    position:sticky;
+    top:12px; /* ✅ lock preview at top (right) */
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height:0;
+    height:calc(100vh - 64px - 24px - 24px); /* viewport - topbar - wrap padding - card padding-ish */
+  }
 
-/* JPEG overlay */
-.jpegOverlay{
-  position:absolute;
-  inset:10px;
-  border-radius:12px;
-  border:2px solid var(--line);
-  background:rgba(255,255,255,0.86);
-  display:none;
-  padding:10px;
-  overflow:hidden;
-}
-.jpegOverlay .bar{
-  display:flex; justify-content:space-between; align-items:center;
-  gap:10px; margin-bottom:8px;
-}
-.jpegOverlay .hint{
-  margin:0; font-weight:800; color:var(--muted); font-size:.92rem;
-}
-.jpegOverlay .close{
-  border:2px solid #000; background:#fff;
-  border-radius:10px; padding:8px 10px;
-  font-weight:900; cursor:pointer;
-}
-.jpegOverlay img{
-  width:100%;
-  height:calc(100% - 44px);
-  object-fit:contain;
-  display:block;
-  border-radius:10px;
-  background:#fff;
-}
+  /* ===== INPUTS ===== */
+  .h{margin:0;font-weight:1000}
+  .m{margin:0;color:var(--muted);font-weight:800}
+
+  label{
+    display:block;
+    margin:10px 0 6px;
+    font-size:12px;
+    font-weight:1000;
+    color:#222;
+    letter-spacing:.02em;
+  }
+  input[type="text"], textarea, select{
+    width:100%;
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:10px 12px;
+    font-size:16px;
+    background:#fff;
+    color:var(--ink);
+    outline:none;
+  }
+  textarea{resize:vertical; min-height:96px}
+
+  .row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .row > *{flex:1; min-width:220px}
+
+  /* PBIS checks (compact) */
+  .checks{
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:8px 10px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px 10px;
+    background:#fff;
+  }
+  .check{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:1000;
+    color:#000;
+    font-size:.92rem;
+    line-height:1.1;
+    min-width:0;
+  }
+  .check input{width:18px;height:18px;accent-color:#000}
+
+  /* ===== CLEAN BUTTONS ===== */
+  .btnRow{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:flex-start;
+    margin-top:12px;
+  }
+  .btn{
+    border:2px solid #000;
+    background:#fff;
+    color:#000;
+    border-radius:12px;
+    padding:10px 12px;
+    font-weight:1000;
+    cursor:pointer;
+    user-select:none;
+    white-space:nowrap;
+  }
+  .btn.primary{background:#000;color:#fff}
+  .btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn:active{transform:translateY(1px)}
+  .mini{
+    font-weight:900;
+    color:var(--muted);
+    font-size:.92rem;
+    margin:8px 0 0;
+  }
+
+  /* ===== IMAGE LOADER (ONE chooser) ===== */
+  .imgPanel{
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:10px;
+    background:#fff;
+  }
+  .thumbs{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .thumb{
+    width:92px;
+    height:68px;
+    border:2px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    background:#fff;
+    cursor:pointer;
+    position:relative;
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb.sel{
+    border-color:#000;
+    box-shadow:0 0 0 3px rgba(0,0,0,.12);
+  }
+  .thumb .tag{
+    position:absolute;
+    left:6px;
+    bottom:6px;
+    background:rgba(0,0,0,.78);
+    color:#fff;
+    font-size:10px;
+    padding:2px 7px;
+    border-radius:999px;
+    font-weight:1000;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+
+  /* ===== PREVIEW STAGE ===== */
+  .stage{
+    flex:1 1 auto;
+    min-height:0;
+    border:2px solid #000;
+    border-radius:12px;
+    overflow:hidden;
+    background:#fff;
+    position:relative;
+  }
+
+  /* Live preview (HTML) */
+  .preview{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    background:#fff;
+  }
+  .pBanner{
+    height:54px;
+    background:#000; /* preview stays simple (black) */
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 12px;
+    gap:10px;
+    border-bottom:2px solid #fff;
+  }
+  .pBanner .left{
+    display:flex;align-items:center;gap:10px;min-width:0;
+  }
+  .pChip{
+    border:2px solid #fff;
+    border-radius:999px;
+    padding:6px 10px;
+    font-weight:1000;
+    font-size:12px;
+    letter-spacing:.08em;
+    white-space:nowrap;
+  }
+  .pTitle{
+    font-weight:1000;
+    letter-spacing:.06em;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .pDate{
+    font-weight:900;
+    opacity:.92;
+    white-space:nowrap;
+  }
+
+  .pBody{
+    flex:1;
+    min-height:0;
+    display:grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap:10px;
+    padding:10px;
+  }
+
+  .pText{
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:10px;
+    overflow:hidden;
+  }
+  .pText .k{
+    font-size:11px;
+    font-weight:1000;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 6px;
+  }
+  .pText .v{
+    margin:0;
+    font-weight:900;
+    white-space:pre-wrap;
+    line-height:1.25;
+    max-height:72px;
+    overflow:hidden;
+  }
+
+  .pImages{
+    border:2px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    display:grid;
+    grid-template-rows: 1.1fr .9fr;
+    gap:8px;
+    padding:8px;
+    background:#fff;
+  }
+  .slot{
+    border:2px dashed var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    position:relative;
+    background:#fff;
+  }
+  .slot img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .slot .slotLabel{
+    position:absolute;
+    left:8px;
+    top:8px;
+    background:rgba(0,0,0,.72);
+    color:#fff;
+    font-size:10px;
+    padding:2px 7px;
+    border-radius:999px;
+    font-weight:1000;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+
+  .twoSmall{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:8px;
+    min-height:0;
+  }
+
+  /* confirm overlay (doesn't save until confirm) */
+  .confirm{
+    position:absolute;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,.86);
+    padding:10px;
+  }
+  .confirmBox{
+    width:min(360px, 92%);
+    border:2px solid #000;
+    border-radius:14px;
+    background:#fff;
+    padding:12px;
+  }
+  .confirmBox p{margin:0 0 10px;font-weight:1000}
+  .confirmBtns{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+  .confirmBtns .btn{min-width:120px}
+
+  /* hidden export host */
+  #exportHost{position:fixed;left:-99999px;top:0;z-index:-1}
+  .exportFrame{
+    width:1920px;
+    height:1080px;
+    background:#fff;
+    overflow:hidden;
+    position:relative;
+    border:1px solid #e5e7eb;
+  }
+  .exportBanner{
+    height:74px;
+    background:var(--blue); /* ✅ BLUE ONLY for export */
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    border-bottom:6px solid #000;
+  }
+  .exportBanner .L{
+    display:flex;align-items:center;gap:12px;min-width:0;
+  }
+  .exportBanner .B{
+    width:44px;height:44px;border-radius:999px;
+    border:3px solid #fff;
+    display:grid;place-items:center;
+    font-weight:1000;
+    letter-spacing:.06em;
+  }
+  .exportBanner .T{
+    display:flex;flex-direction:column;gap:4px;min-width:0;
+  }
+  .exportBanner .T1{
+    font-weight:1000;
+    letter-spacing:.10em;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .exportBanner .T2{
+    font-weight:900;
+    opacity:.92;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .exportBanner .R{
+    font-weight:1000;
+    letter-spacing:.04em;
+    white-space:nowrap;
+  }
+  .exportBody{
+    height:calc(100% - 74px);
+    display:grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap:18px;
+    padding:18px;
+  }
+  .exportTextCol{
+    border-right:4px dotted #d1d5db;
+    padding-right:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .box{
+    border:2px solid #e5e7eb;
+    border-radius:18px;
+    padding:14px 14px;
+    min-height:120px;
+  }
+  .box .k{
+    font-size:12px;
+    font-weight:1000;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:#6b7280;
+    margin:0 0 10px;
+  }
+  .box .v{
+    margin:0;
+    font-weight:900;
+    font-size:18px;
+    line-height:1.25;
+    white-space:pre-wrap;
+    overflow:hidden;
+    max-height:240px;
+  }
+  .exportImgs{
+    display:grid;
+    grid-template-rows: 1.2fr .8fr;
+    gap:14px;
+    padding-left:0;
+  }
+  .imgBox{
+    border:2px solid #e5e7eb;
+    border-radius:18px;
+    overflow:hidden;
+    background:#fff;
+    position:relative;
+  }
+  .imgBox img{width:100%;height:100%;object-fit:cover;display:block}
+  .imgBox .tag{
+    position:absolute;left:14px;top:14px;
+    background:rgba(0,0,0,.72);
+    color:#fff;
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:1000;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    font-size:11px;
+  }
+  .twoRow{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 
 <body>
-<div class="top">
-  <div class="badge">PB</div>
-  <div>
-    <div style="font-weight:900;letter-spacing:.08em">PBIS CANVAS STUDIO</div>
-    <div style="font-weight:700;opacity:.85;font-size:.92rem">Text + Images • Confirm-to-Save • Landscape Export</div>
+  <div class="top">
+    <div class="badge">PB</div>
+    <div class="title">
+      <div class="t1">LANDSCAPE LESSON EXPORT</div>
+      <div class="t2">PBIS badge only • 3 images max • Confirm before saving • AI-readable output</div>
+    </div>
   </div>
-</div>
 
-<div class="wrap">
-  <div class="card">
-    <div class="grid">
+  <div class="wrap">
+    <div class="card">
 
-      <!-- LEFT -->
-      <div class="col" id="left">
-        <p class="h" id="status">1) Upload images  2) Select image  3) Tap slot (A/B/C)  4) Confirm</p>
-
-        <div class="row wrap" role="group" aria-label="Activities">
-          <button class="btn" id="tCheck" type="button">CHECK IN</button>
-          <button class="btn" id="tReflect" type="button">REFLECT</button>
-          <button class="btn" id="tGoal" type="button">GOAL</button>
-        </div>
+      <!-- LEFT (scrollable) -->
+      <div class="left">
+        <p class="h">Text Log (scrolls)</p>
+        <p class="m">Fill this out. The Export includes BOTH text + images.</p>
 
         <div class="row">
-          <div style="flex:1;min-width:0">
-            <p class="m">Student</p>
-            <input id="name" placeholder="Name"/>
+          <div>
+            <label>Teacher / Owner</label>
+            <input id="teacher" type="text" placeholder="e.g., Ms. Rivera"/>
           </div>
-          <div style="flex:1;min-width:0">
-            <p class="m">Group</p>
-            <input id="group" placeholder="Period"/>
+          <div>
+            <label>Date</label>
+            <input id="dateStr" type="text" placeholder="YYYY-MM-DD (auto)"/>
           </div>
         </div>
 
-        <p class="m">PBIS Checks (5)</p>
+        <label>PBIS Checks (5)</label>
         <div class="checks" aria-label="PBIS Checks">
           <label class="check"><input type="checkbox" id="c1"/>ENGAGE in SAFTEY</label>
           <label class="check"><input type="checkbox" id="c2"/>LEARN TO EARN</label>
           <label class="check"><input type="checkbox" id="c3"/>ALWAYS RESPECTFUL</label>
           <label class="check"><input type="checkbox" id="c4"/>DO THE RIGHT THING</label>
-          <label class="check full"><input type="checkbox" id="c5"/>MY GOAL POINT</label>
+          <label class="check" style="grid-column:1 / -1;"><input type="checkbox" id="c5"/>MY GOAL POINT</label>
         </div>
 
-        <p class="m">CHECK IN</p><textarea id="a1" placeholder="Today I will…"></textarea>
-        <p class="m">REFLECT</p><textarea id="b1" placeholder="What happened?"></textarea>
-        <p class="m">GOAL</p><textarea id="g1" placeholder="My goal point is…"></textarea>
+        <label>Standard / Goal</label>
+        <input id="standard" type="text" placeholder="e.g., Behavior goal / PBIS focus"/>
 
-        <!-- ONE IMAGE UPLOADER + SLOTS -->
-        <div class="libBox">
-          <div class="libTop">
-            <div style="flex:1;min-width:220px">
-              <div class="m" style="margin:0 0 6px 0;">Image Library (upload once)</div>
-              <input id="imgUpload" type="file" accept="image/*" multiple />
-            </div>
-            <p class="hint">Select an image → tap a slot (A/B/C) → Confirm to save.</p>
-          </div>
+        <label>Objective (one sentence)</label>
+        <input id="objective" type="text" placeholder="Students will..."/>
 
-          <div class="library" id="library" aria-label="Uploaded images"></div>
+        <label>CHECK IN</label>
+        <textarea id="a1" placeholder="Today I will…"></textarea>
 
-          <div class="slotRow" style="margin-top:10px">
-            <div class="slot" id="slotA" data-slot="A" tabindex="0">
-              <div class="cap">SLOT A (Large)</div>
-              <p class="sub">Export: top-right</p>
-              <div class="box" id="boxA"><div class="ph">Tap to stage image</div></div>
-              <button class="small" type="button" id="clearA">Clear A</button>
-            </div>
-            <div class="slot" id="slotB" data-slot="B" tabindex="0">
-              <div class="cap">SLOT B (Small)</div>
-              <p class="sub">Export: bottom-right (left)</p>
-              <div class="box" id="boxB"><div class="ph">Tap to stage image</div></div>
-              <button class="small" type="button" id="clearB">Clear B</button>
-            </div>
-            <div class="slot" id="slotC" data-slot="C" tabindex="0">
-              <div class="cap">SLOT C (Small)</div>
-              <p class="sub">Export: bottom-right (right)</p>
-              <div class="box" id="boxC"><div class="ph">Tap to stage image</div></div>
-              <button class="small" type="button" id="clearC">Clear C</button>
-            </div>
-          </div>
+        <label>REFLECT</label>
+        <textarea id="b1" placeholder="What happened?"></textarea>
 
-          <div class="row" style="margin-top:10px; justify-content:flex-end;">
-            <button class="small warn" type="button" id="cancelStage">Cancel Staged</button>
-            <button class="small good" type="button" id="confirmStage">Confirm Image Placement</button>
-          </div>
+        <label>GOAL</label>
+        <textarea id="g1" placeholder="My goal point is…"></textarea>
 
-          <p class="m" id="stageNote" style="margin-top:6px;">
-            Staged: none. (Nothing changes until you Confirm.)
-          </p>
+        <label>Notes (short)</label>
+        <textarea id="notes" placeholder="Any extra notes..."></textarea>
+
+        <div class="btnRow">
+          <button class="btn blue" id="exportBtn" type="button">🖼️ Export LANDSCAPE JPG (AI)</button>
+          <button class="btn primary" id="saveDraftBtn" type="button">Save Draft</button>
+          <button class="btn" id="clearAllBtn" type="button">Clean Up</button>
         </div>
 
-        <div class="foot">
-          <button class="small" id="preview" type="button">Preview JPEG</button>
-          <button class="small primary" id="download" type="button">Download JPEG</button>
-          <button class="small" id="openTab" type="button">Open JPEG Tab</button>
-          <button class="small" id="clearAll" type="button">Clean Up</button>
-        </div>
-
-        <p class="m">If Sites blocks downloads: Preview → long-press image → Save. Or use “Open JPEG Tab”.</p>
+        <p class="mini" id="saveStamp">—</p>
+        <p class="mini">Google Sites tip: If download is blocked, Export still generates—your browser may open it in a new tab. Save from there.</p>
       </div>
 
-      <!-- RIGHT -->
-      <div class="col" id="right">
-        <p class="h">Export Preview (Text + Images)</p>
+      <!-- RIGHT (locked preview) -->
+      <div class="right">
+        <div class="rightSticky">
+          <p class="h" style="margin:0;">Preview (locked)</p>
+          <p class="m" style="margin:0;">One chooser → select image → tap a slot → Confirm (only then saved).</p>
 
-        <div class="previewStage" id="stage">
-          <canvas id="cv"></canvas>
+          <div class="imgPanel">
+            <label style="margin-top:0;">Choose Images (max 3)</label>
+            <input id="imgUpload" type="file" accept="image/*" multiple />
+            <div class="thumbs" id="thumbs"></div>
+            <p class="mini" id="armed">No image selected.</p>
+          </div>
 
-          <div class="jpegOverlay" id="jpegBox">
-            <div class="bar">
-              <p class="hint">JPEG Preview</p>
-              <button class="close" id="closeJpeg" type="button">Close</button>
+          <div class="stage">
+            <div class="preview" id="preview">
+              <div class="pBanner">
+                <div class="left">
+                  <div class="pChip">PBIS</div>
+                  <div class="pTitle" id="pTitle">Lesson Export Preview</div>
+                </div>
+                <div class="pDate" id="pDate">Date: —</div>
+              </div>
+
+              <div class="pBody">
+                <div style="display:flex;flex-direction:column;gap:10px;min-height:0;">
+                  <div class="pText">
+                    <p class="k">Standard / Goal</p>
+                    <p class="v" id="pStandard">—</p>
+                  </div>
+                  <div class="pText">
+                    <p class="k">Objective</p>
+                    <p class="v" id="pObjective">—</p>
+                  </div>
+                  <div class="pText">
+                    <p class="k">PBIS Checks</p>
+                    <p class="v" id="pChecks">—</p>
+                  </div>
+                  <div class="pText">
+                    <p class="k">Student Text</p>
+                    <p class="v" id="pStudentText">—</p>
+                  </div>
+                </div>
+
+                <div class="pImages">
+                  <div class="slot" id="slotBig" data-slot="big" role="button" tabindex="0" aria-label="Big image slot">
+                    <div class="slotLabel">Large</div>
+                  </div>
+                  <div class="twoSmall">
+                    <div class="slot" id="slotS1" data-slot="s1" role="button" tabindex="0" aria-label="Small image slot 1">
+                      <div class="slotLabel">Small 1</div>
+                    </div>
+                    <div class="slot" id="slotS2" data-slot="s2" role="button" tabindex="0" aria-label="Small image slot 2">
+                      <div class="slotLabel">Small 2</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- confirm overlay -->
+              <div class="confirm" id="confirm">
+                <div class="confirmBox">
+                  <p id="confirmMsg">Confirm placement?</p>
+                  <div class="confirmBtns">
+                    <button class="btn" id="cancelPlace" type="button">Cancel</button>
+                    <button class="btn primary" id="confirmPlace" type="button">Confirm</button>
+                  </div>
+                </div>
+              </div>
+
             </div>
-            <img id="jpegImg" alt="JPEG Preview"/>
+          </div>
+
+          <div class="btnRow" style="margin:0; justify-content:flex-end;">
+            <button class="btn" id="unselectBtn" type="button">Unselect Image</button>
+            <button class="btn" id="clearImgsBtn" type="button">Clear Images</button>
           </div>
         </div>
       </div>
 
     </div>
   </div>
-</div>
+
+  <div id="exportHost"></div>
 
 <script>
-const $=(s,el=document)=>el.querySelector(s);
+  const $ = (s, el=document)=> el.querySelector(s);
 
-// ----- TEXT + CHECK STATE -----
-const S={check:false,reflect:false,goal:false};
-const btns={check:$("#tCheck"),reflect:$("#tReflect"),goal:$("#tGoal")};
-const f={
-  name:$("#name"), group:$("#group"),
-  a1:$("#a1"), b1:$("#b1"), g1:$("#g1"),
-  c1:$("#c1"), c2:$("#c2"), c3:$("#c3"), c4:$("#c4"), c5:$("#c5"),
-};
-
-// ----- CANVAS -----
-const cv=$("#cv");
-const ctx=cv.getContext("2d",{alpha:false});
-
-// ----- IMAGE LIBRARY + COMMITTED SLOTS -----
-const library=[]; // {id,name,dataUrl}
-let selectedImageId=null;
-
-// committed slots (only these appear in export)
-const committed = { A:null, B:null, C:null }; // {dataUrl, imgObj} or null
-
-// staged (does NOT affect export until confirm)
-let staged = { slot:null, imageId:null, dataUrl:null };
-
-// ----- HELPERS -----
-function hideJpeg(){ $("#jpegBox").style.display="none"; }
-$("#closeJpeg").onclick=hideJpeg;
-
-function uid(){
-  return (crypto && crypto.randomUUID) ? crypto.randomUUID() :
-    "id-"+Math.random().toString(16).slice(2)+"-"+Date.now();
-}
-
-function fileToDataURL(file){
-  return new Promise((resolve,reject)=>{
-    const r=new FileReader();
-    r.onload=()=>resolve(r.result);
-    r.onerror=reject;
-    r.readAsDataURL(file);
-  });
-}
-
-function wrapLines(t,max=46){
-  const w=(t||"").replace(/\r/g,"").split(/\s+/).filter(Boolean);
-  let out=[], line="";
-  for(const word of w){
-    const test=line?line+" "+word:word;
-    if(test.length>max){ if(line) out.push(line); line=word; }
-    else line=test;
-  }
-  if(line) out.push(line);
-  return out;
-}
-function checkedLabels(){
-  const labels=[];
-  if(f.c1.checked) labels.push("ENGAGE in SAFTEY");
-  if(f.c2.checked) labels.push("LEARN TO EARN");
-  if(f.c3.checked) labels.push("ALWAYS RESPECTFUL");
-  if(f.c4.checked) labels.push("DO THE RIGHT THING");
-  if(f.c5.checked) labels.push("MY GOAL POINT");
-  return labels;
-}
-
-// ----- ACTIVITIES -----
-function toggleAct(k){
-  S[k]=!S[k];
-  btns[k].classList.toggle("on",S[k]);
-  hideJpeg(); draw("screen");
-}
-btns.check.onclick=()=>toggleAct("check");
-btns.reflect.onclick=()=>toggleAct("reflect");
-btns.goal.onclick=()=>toggleAct("goal");
-
-// live redraw for text/checkbox changes
-["input","change"].forEach(evt=>{
-  Object.values(f).forEach(el=>el.addEventListener(evt, ()=>{ hideJpeg(); draw("screen"); }));
-});
-
-// ----- IMAGE LIBRARY UI -----
-function renderThumb(item){
-  const d=document.createElement("div");
-  d.className="thumb";
-  d.dataset.id=item.id;
-
-  const im=document.createElement("img");
-  im.src=item.dataUrl;
-
-  const tag=document.createElement("div");
-  tag.className="tag";
-  tag.textContent="Tap";
-
-  d.appendChild(im);
-  d.appendChild(tag);
-
-  d.addEventListener("click", ()=>{
-    if(selectedImageId===item.id){ selectedImageId=null; }
-    else selectedImageId=item.id;
-
-    document.querySelectorAll(".thumb").forEach(t=>t.classList.remove("sel"));
-    if(selectedImageId) d.classList.add("sel");
-
-    // update staged note only (still not saved)
-    updateStageNote();
-  });
-
-  $("#library").appendChild(d);
-}
-
-$("#imgUpload").addEventListener("change", async (e)=>{
-  const files = Array.from(e.target.files||[]);
-  for(const file of files){
-    const dataUrl = await fileToDataURL(file);
-    const item = { id: uid(), name: file.name, dataUrl };
-    library.push(item);
-    renderThumb(item);
-  }
-  e.target.value="";
-});
-
-// ----- SLOTS (tap slot to STAGE) -----
-function slotEl(letter){ return $("#slot"+letter); }
-function boxEl(letter){ return $("#box"+letter); }
-
-function clearActiveSlotHighlights(){
-  ["A","B","C"].forEach(k=>slotEl(k).classList.remove("active"));
-}
-
-function stageInto(slotLetter){
-  clearActiveSlotHighlights();
-  slotEl(slotLetter).classList.add("active");
-
-  if(!selectedImageId){
-    staged = { slot: slotLetter, imageId: null, dataUrl: null };
-    updateStageNote();
-    return;
-  }
-  const item = library.find(x=>x.id===selectedImageId);
-  if(!item){
-    staged = { slot: slotLetter, imageId: null, dataUrl: null };
-    updateStageNote();
-    return;
-  }
-  staged = { slot: slotLetter, imageId: item.id, dataUrl: item.dataUrl };
-  updateStageNote();
-}
-
-["A","B","C"].forEach(letter=>{
-  slotEl(letter).addEventListener("click", ()=> stageInto(letter));
-  slotEl(letter).addEventListener("keydown", (ev)=>{
-    if(ev.key==="Enter" || ev.key===" "){ ev.preventDefault(); stageInto(letter); }
-  });
-});
-
-// ----- COMMITTED SLOT UI -----
-function setSlotBox(letter, dataUrl){
-  const b = boxEl(letter);
-  b.innerHTML="";
-  if(!dataUrl){
-    const ph=document.createElement("div");
-    ph.className="ph";
-    ph.textContent="Tap to stage image";
-    b.appendChild(ph);
-    return;
-  }
-  const im=document.createElement("img");
-  im.src=dataUrl;
-  b.appendChild(im);
-}
-
-function updateStageNote(){
-  const slot = staged.slot ? staged.slot : "none";
-  const hasImg = staged.dataUrl ? "YES" : "NO";
-  $("#stageNote").textContent = `Staged: slot ${slot} • image selected: ${hasImg}. (Nothing changes until you Confirm.)`;
-}
-
-// ----- CONFIRM / CANCEL -----
-function commitStaged(){
-  if(!staged.slot || !staged.dataUrl){
-    alert("Stage an image first: select an image, then tap a slot (A/B/C).");
-    return;
-  }
-  const letter = staged.slot;
-  const dataUrl = staged.dataUrl;
-
-  // load Image object for canvas cover draw
-  const img = new Image();
-  img.onload = ()=>{
-    committed[letter] = { dataUrl, imgObj: img };
-    setSlotBox(letter, dataUrl);
-    clearActiveSlotHighlights();
-    staged = { slot:null, imageId:null, dataUrl:null };
-    updateStageNote();
-    hideJpeg();
-    draw("screen");
+  // ---------- storage ----------
+  const store = {
+    get(k, fb=null){
+      try{ const v=localStorage.getItem(k); return v?JSON.parse(v):fb; }catch(e){ return fb; }
+    },
+    set(k, v){
+      try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){}
+    }
   };
-  img.onerror = ()=>{
-    alert("That image failed to load. Try a different file.");
+
+  // ---------- date ----------
+  function todayISO(){
+    const d=new Date();
+    const yyyy=d.getFullYear();
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const dd=String(d.getDate()).padStart(2,'0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  $("#dateStr").value = todayISO();
+
+  // ---------- form refs ----------
+  const F = {
+    teacher: $("#teacher"),
+    dateStr: $("#dateStr"),
+    standard: $("#standard"),
+    objective: $("#objective"),
+    a1: $("#a1"),
+    b1: $("#b1"),
+    g1: $("#g1"),
+    notes: $("#notes"),
+    c1: $("#c1"), c2: $("#c2"), c3: $("#c3"), c4: $("#c4"), c5: $("#c5"),
   };
-  img.src = dataUrl;
-}
 
-function cancelStaged(){
-  clearActiveSlotHighlights();
-  staged = { slot:null, imageId:null, dataUrl:null };
-  updateStageNote();
-}
-
-$("#confirmStage").onclick=commitStaged;
-$("#cancelStage").onclick=cancelStaged;
-
-// clear individual committed slots
-function clearSlot(letter){
-  committed[letter]=null;
-  setSlotBox(letter, null);
-  hideJpeg(); draw("screen");
-}
-$("#clearA").onclick=()=>clearSlot("A");
-$("#clearB").onclick=()=>clearSlot("B");
-$("#clearC").onclick=()=>clearSlot("C");
-
-// ----- CANVAS FIT -----
-function fit(){
-  const box=$("#stage").getBoundingClientRect();
-  const dpr=Math.max(1,window.devicePixelRatio||1);
-  cv.width=Math.floor(box.width*dpr);
-  cv.height=Math.floor(box.height*dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  draw("screen");
-}
-window.addEventListener("resize",fit);
-
-// ----- CANVAS DRAW (LANDSCAPE COMPOSITION) -----
-function drawCover(img, rect){
-  const iw = img.naturalWidth || img.width;
-  const ih = img.naturalHeight || img.height;
-  if(!iw || !ih) return;
-
-  const r = rect.w / rect.h;
-  const ir = iw / ih;
-
-  let sx=0, sy=0, sw=iw, sh=ih;
-  if(ir > r){
-    sh = ih;
-    sw = Math.floor(ih * r);
-    sx = Math.floor((iw - sw)/2);
-    sy = 0;
-  }else{
-    sw = iw;
-    sh = Math.floor(iw / r);
-    sx = 0;
-    sy = Math.floor((ih - sh)/2);
+  function checksSelected(){
+    const out=[];
+    if(F.c1.checked) out.push("ENGAGE in SAFTEY");
+    if(F.c2.checked) out.push("LEARN TO EARN");
+    if(F.c3.checked) out.push("ALWAYS RESPECTFUL");
+    if(F.c4.checked) out.push("DO THE RIGHT THING");
+    if(F.c5.checked) out.push("MY GOAL POINT");
+    return out;
   }
 
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(rect.x, rect.y, rect.w, rect.h);
-  ctx.clip();
-  ctx.drawImage(img, sx, sy, sw, sh, rect.x, rect.y, rect.w, rect.h);
-  ctx.restore();
-
-  ctx.strokeStyle="#000";
-  ctx.lineWidth=4;
-  ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-}
-
-function frame(rect, label){
-  ctx.strokeStyle="#000"; ctx.lineWidth=4;
-  ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-  ctx.fillStyle="#444";
-  ctx.font="900 28px system-ui, -apple-system, Segoe UI, Arial";
-  ctx.fillText(label, rect.x+14, rect.y+38);
-}
-
-function draw(mode="screen"){
-  const W=cv.clientWidth, H=cv.clientHeight;
-  const dateStr = new Date().toLocaleDateString();
-
-  // virtual 1920x1080, scaled into preview box
-  const baseW=1920, baseH=1080;
-  const scale=Math.min(W/baseW, H/baseH);
-  const ox=Math.floor((W-baseW*scale)/2);
-  const oy=Math.floor((H-baseH*scale)/2);
-
-  ctx.fillStyle="#fff";
-  ctx.fillRect(0,0,W,H);
-
-  ctx.save();
-  ctx.translate(ox,oy);
-  ctx.scale(scale,scale);
-
-  // bg
-  ctx.fillStyle="#fff";
-  ctx.fillRect(0,0,baseW,baseH);
-
-  // header
-  const headerH=96;
-  if(mode==="download"){
-    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--blue").trim() || "#0b2a5b";
-  }else{
-    ctx.fillStyle="#000";
-  }
-  ctx.fillRect(0,0,baseW,headerH);
-
-  ctx.fillStyle="#fff";
-  ctx.textAlign="left";
-  ctx.font="900 46px system-ui, -apple-system, Segoe UI, Arial";
-  ctx.fillText("PBIS TICKET", 44, 62);
-  ctx.font="700 30px system-ui, -apple-system, Segoe UI, Arial";
-  ctx.fillText("W.L.E.A.D.", 44, 92);
-
-  if(mode==="download"){
-    ctx.textAlign="right";
-    ctx.font="900 34px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillText("Date: " + dateStr, baseW-44, 62);
-    ctx.textAlign="left";
+  function clamp(s, n){
+    s=(s||"").trim();
+    if(!s) return "—";
+    if(s.length<=n) return s;
+    return s.slice(0, n-1) + "…";
   }
 
-  const pad=44;
-  const contentTop=headerH+34;
-
-  // left text dominates
-  const leftW=980, gap=40;
-  const rightX=pad+leftW+gap;
-  const rightW=baseW-rightX-pad;
-
-  // panel borders
-  ctx.strokeStyle="#cfcfcf";
-  ctx.lineWidth=4;
-  ctx.strokeRect(pad, contentTop, leftW, baseH-contentTop-pad);
-  ctx.strokeRect(rightX, contentTop, rightW, baseH-contentTop-pad);
-
-  // LEFT text
-  let x=pad+34;
-  let y=contentTop+60;
-
-  const student=(f.name.value||"").trim() || "__________";
-  const group=(f.group.value||"").trim() || "—";
-
-  ctx.fillStyle="#111";
-  ctx.font="900 52px system-ui, -apple-system, Segoe UI, Arial";
-  ctx.fillText("Student: " + student, x, y);
-  y+=64;
-
-  ctx.font="800 40px system-ui, -apple-system, Segoe UI, Arial";
-  ctx.fillText("Group: " + group + "   Date: " + dateStr, x, y);
-  y+=44;
-
-  // divider
-  ctx.strokeStyle="#cfcfcf";
-  ctx.lineWidth=4;
-  ctx.beginPath(); ctx.moveTo(x, y+24); ctx.lineTo(pad+leftW-34, y+24); ctx.stroke();
-  y+=80;
-
-  // checks
-  const checks=checkedLabels();
-  if(checks.length){
-    ctx.fillStyle="#000";
-    ctx.font="900 44px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillText("PBIS CHECKS:", x, y); y+=58;
-
-    ctx.font="800 36px system-ui, -apple-system, Segoe UI, Arial";
-    const joined=checks.join(" • ");
-    const cLines=wrapLines(joined,42).slice(0,2);
-    for(const ln of cLines){ ctx.fillText(ln, x, y); y+=46; }
-    y+=24;
-
-    ctx.strokeStyle="#cfcfcf";
-    ctx.lineWidth=4;
-    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(pad+leftW-34, y); ctx.stroke();
-    y+=66;
+  function studentText(){
+    const parts=[];
+    const a=F.a1.value.trim(), b=F.b1.value.trim(), g=F.g1.value.trim();
+    if(a) parts.push("CHECK IN: " + a);
+    if(b) parts.push("REFLECT: " + b);
+    if(g) parts.push("GOAL: " + g);
+    const n=F.notes.value.trim();
+    if(n) parts.push("NOTES: " + n);
+    return parts.join("\n\n") || "—";
   }
 
-  // sections
-  function section(title, text){
-    ctx.fillStyle="#000";
-    ctx.font="900 44px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillText(title, x, y); y+=56;
+  // ---------- image library (max 3) ----------
+  let library = store.get("pns_img_lib_v1", []); // [{id,name,dataUrl}]
+  let armedId = null;
 
-    ctx.font="800 38px system-ui, -apple-system, Segoe UI, Arial";
-    const lines=wrapLines(text||"",46).slice(0,3);
-    if(lines.length===0){ ctx.fillText("—", x, y); y+=46; }
-    else { for(const ln of lines){ ctx.fillText(ln, x, y); y+=46; } }
-    y+=54;
+  // confirmed placements (persisted)
+  let placements = store.get("pns_img_slots_v1", { big:null, s1:null, s2:null }); // slot -> imgId
+
+  // pending placement (NOT saved until confirm)
+  let pending = null; // {slot, imgId}
+
+  function uuid(){
+    return (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + "_" + Math.random().toString(16).slice(2);
   }
 
-  const any = S.check || S.reflect || S.goal;
-  if(S.check) section("CHECK IN:", f.a1.value);
-  if(S.reflect) section("REFLECT:", f.b1.value);
-  if(S.goal) section("GOAL:", f.g1.value);
-  if(!any){
-    ctx.fillStyle="#111";
-    ctx.font="900 40px system-ui, -apple-system, Segoe UI, Arial";
-    ctx.fillText("Tap CHECK IN / REFLECT / GOAL to add sections.", x, y);
+  function fileToDataURL(file){
+    return new Promise((resolve, reject)=>{
+      const r=new FileReader();
+      r.onload=()=>resolve(r.result);
+      r.onerror=reject;
+      r.readAsDataURL(file);
+    });
   }
 
-  // RIGHT images: committed only
-  const rx=rightX+26, ry=contentTop+26;
-  const rInnerW=rightW-52;
-  const rInnerH=baseH-contentTop-pad-52;
+  function renderThumbs(){
+    const wrap=$("#thumbs");
+    wrap.innerHTML="";
+    library.forEach(item=>{
+      const d=document.createElement("div");
+      d.className="thumb" + (armedId===item.id ? " sel":"");
+      d.title="Tap to select";
+      const img=document.createElement("img");
+      img.src=item.dataUrl;
 
-  const bigH=Math.floor(rInnerH*0.62);
-  const smallH=rInnerH-bigH-18;
-  const smallW=Math.floor((rInnerW-18)/2);
+      const tag=document.createElement("div");
+      tag.className="tag";
+      tag.textContent="Tap";
 
-  const A={x:rx,y:ry,w:rInnerW,h:bigH};
-  const B={x:rx,y:ry+bigH+18,w:smallW,h:smallH};
-  const C={x:rx+smallW+18,y:ry+bigH+18,w:smallW,h:smallH};
+      d.appendChild(img);
+      d.appendChild(tag);
 
-  if(committed.A && committed.A.imgObj) drawCover(committed.A.imgObj, A);
-  else frame(A, "SLOT A (Large)");
+      d.addEventListener("click", ()=>{
+        armedId = (armedId===item.id) ? null : item.id;
+        renderThumbs();
+        updateArmed();
+      });
 
-  if(committed.B && committed.B.imgObj) drawCover(committed.B.imgObj, B);
-  else frame(B, "SLOT B");
-
-  if(committed.C && committed.C.imgObj) drawCover(committed.C.imgObj, C);
-  else frame(C, "SLOT C");
-
-  ctx.restore();
-
-  $("#status").textContent =
-    ("Selected: " + (S.check?"CHECK IN ":"") + (S.reflect?"REFLECT ":"") + (S.goal?"GOAL":"")).trim()
-    || "1) Upload images  2) Select image  3) Tap slot  4) Confirm";
-}
-
-// ----- PREVIEW / DOWNLOAD -----
-function canvasToJpegURL(q=0.92){ return cv.toDataURL("image/jpeg", q); }
-
-$("#preview").onclick=()=>{
-  draw("screen");
-  try{
-    $("#jpegImg").src = canvasToJpegURL(0.92);
-    $("#jpegBox").style.display="block";
-  }catch(e){ alert("Preview failed."); }
-};
-
-$("#download").onclick=()=>{
-  draw("download");
-  const base=(f.name.value.trim()||"pbis_canvas").replace(/\s+/g,"_");
-  const file=base+"_LANDSCAPE.jpg";
-  const restore=()=>setTimeout(()=>draw("screen"), 70);
-
-  if(cv.toBlob){
-    cv.toBlob(blob=>{
-      if(!blob){ alert("Download failed."); restore(); return; }
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a");
-      a.href=url; a.download=file; a.rel="noopener";
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=>{ try{URL.revokeObjectURL(url);}catch(e){} }, 1400);
-      restore();
-    },"image/jpeg",0.95);
-  }else{
-    try{
-      const a=document.createElement("a");
-      a.href=canvasToJpegURL(0.95);
-      a.download=file;
-      document.body.appendChild(a); a.click(); a.remove();
-    }catch(e){ alert("Download failed."); }
-    restore();
+      wrap.appendChild(d);
+    });
+    updateArmed();
   }
-};
 
-$("#openTab").onclick=()=>{
-  draw("download");
-  try{
-    const url = canvasToJpegURL(0.95);
-    const w = window.open();
-    if(!w){ alert("Pop-up blocked. Use Preview and long-press save."); draw("screen"); return; }
-    w.document.write(`<title>PBIS JPEG</title><img src="${url}" style="max-width:100%;height:auto;display:block;margin:0 auto"/>`);
-    w.document.close();
-  }catch(e){ alert("Open tab failed."); }
-  setTimeout(()=>draw("screen"), 90);
-};
+  function updateArmed(){
+    const msg=$("#armed");
+    if(!armedId){
+      msg.textContent="No image selected.";
+      return;
+    }
+    const item=library.find(x=>x.id===armedId);
+    msg.textContent = item ? ("Selected: " + item.name) : "Selected image.";
+  }
 
-// ----- CLEAN UP -----
-$("#clearAll").onclick=()=>{
-  // text
-  f.name.value=""; f.group.value="";
-  f.a1.value=""; f.b1.value=""; f.g1.value="";
-  f.c1.checked=f.c2.checked=f.c3.checked=f.c4.checked=f.c5.checked=false;
-  S.check=S.reflect=S.goal=false;
-  Object.values(btns).forEach(b=>b.classList.remove("on"));
+  $("#imgUpload").addEventListener("change", async (e)=>{
+    const files = Array.from(e.target.files || []);
+    for(const f of files){
+      if(library.length >= 3) break; // max 3
+      const dataUrl = await fileToDataURL(f);
+      library.push({ id: uuid(), name: f.name, dataUrl });
+    }
+    store.set("pns_img_lib_v1", library);
+    e.target.value="";
+    renderThumbs();
+    syncPreview();
+  });
 
-  // images
-  committed.A=committed.B=committed.C=null;
-  setSlotBox("A", null); setSlotBox("B", null); setSlotBox("C", null);
+  $("#unselectBtn").addEventListener("click", ()=>{
+    armedId=null;
+    renderThumbs();
+  });
 
-  // stage
-  cancelStaged();
+  $("#clearImgsBtn").addEventListener("click", ()=>{
+    armedId=null;
+    placements={big:null,s1:null,s2:null};
+    library=[];
+    store.set("pns_img_lib_v1", library);
+    store.set("pns_img_slots_v1", placements);
+    renderThumbs();
+    syncPreview();
+  });
 
-  hideJpeg();
-  draw("screen");
-};
+  // ---------- confirm gating ----------
+  function showConfirm(slot, imgId){
+    pending = { slot, imgId };
+    const item = library.find(x=>x.id===imgId);
+    $("#confirmMsg").textContent = item ? `Place "${item.name}" into ${slot.toUpperCase()} slot?` : "Confirm placement?";
+    $("#confirm").style.display="flex";
+  }
+  function hideConfirm(){
+    pending=null;
+    $("#confirm").style.display="none";
+  }
+  $("#cancelPlace").addEventListener("click", hideConfirm);
 
-// init
-setSlotBox("A", null); setSlotBox("B", null); setSlotBox("C", null);
-updateStageNote();
-setTimeout(()=>{ fit(); draw("screen"); }, 90);
+  $("#confirmPlace").addEventListener("click", ()=>{
+    if(!pending) return;
+    placements[pending.slot] = pending.imgId;
+    store.set("pns_img_slots_v1", placements); // ✅ only saved on confirm
+    hideConfirm();
+    syncPreview();
+  });
+
+  function slotClicked(slot){
+    if(!armedId) return;
+    showConfirm(slot, armedId);
+  }
+
+  // slot handlers
+  ["big","s1","s2"].forEach(key=>{
+    const el = key==="big" ? $("#slotBig") : (key==="s1" ? $("#slotS1") : $("#slotS2"));
+    el.addEventListener("click", ()=> slotClicked(key));
+    el.addEventListener("keydown", (e)=>{
+      if(e.key==="Enter" || e.key===" "){ e.preventDefault(); slotClicked(key); }
+    });
+  });
+
+  // ---------- preview rendering ----------
+  function slotFill(el, imgId){
+    // keep label
+    const label = el.querySelector(".slotLabel");
+    el.innerHTML="";
+    el.appendChild(label);
+
+    if(!imgId){
+      // empty
+      return;
+    }
+    const item = library.find(x=>x.id===imgId);
+    if(!item) return;
+
+    const img=document.createElement("img");
+    img.src=item.dataUrl;
+    el.appendChild(img);
+  }
+
+  function syncPreview(){
+    const teacher = clamp(F.teacher.value, 60);
+    const dateStr = (F.dateStr.value || todayISO()).trim();
+    $("#pTitle").textContent = teacher==="—" ? "Lesson Export Preview" : teacher;
+    $("#pDate").textContent = "Date: " + dateStr;
+
+    $("#pStandard").textContent = clamp(F.standard.value, 240);
+    $("#pObjective").textContent = clamp(F.objective.value, 300);
+
+    const checks = checksSelected();
+    $("#pChecks").textContent = checks.length ? clamp(checks.join(" • "), 280) : "—";
+
+    $("#pStudentText").textContent = clamp(studentText(), 500);
+
+    slotFill($("#slotBig"), placements.big);
+    slotFill($("#slotS1"), placements.s1);
+    slotFill($("#slotS2"), placements.s2);
+  }
+
+  Object.values(F).forEach(el=>{
+    el.addEventListener("input", syncPreview);
+    el.addEventListener("change", syncPreview);
+  });
+
+  // ---------- Draft save / restore ----------
+  function collectDraft(){
+    return {
+      teacher: F.teacher.value || "",
+      dateStr: F.dateStr.value || "",
+      standard: F.standard.value || "",
+      objective: F.objective.value || "",
+      a1: F.a1.value || "",
+      b1: F.b1.value || "",
+      g1: F.g1.value || "",
+      notes: F.notes.value || "",
+      checks: {
+        c1: !!F.c1.checked, c2: !!F.c2.checked, c3: !!F.c3.checked, c4: !!F.c4.checked, c5: !!F.c5.checked,
+      }
+    };
+  }
+
+  function applyDraft(d){
+    if(!d) return;
+    F.teacher.value = d.teacher || "";
+    F.dateStr.value = d.dateStr || todayISO();
+    F.standard.value = d.standard || "";
+    F.objective.value = d.objective || "";
+    F.a1.value = d.a1 || "";
+    F.b1.value = d.b1 || "";
+    F.g1.value = d.g1 || "";
+    F.notes.value = d.notes || "";
+
+    const c = d.checks || {};
+    F.c1.checked=!!c.c1; F.c2.checked=!!c.c2; F.c3.checked=!!c.c3; F.c4.checked=!!c.c4; F.c5.checked=!!c.c5;
+  }
+
+  $("#saveDraftBtn").addEventListener("click", ()=>{
+    store.set("pns_draft_v1", collectDraft());
+    const stamp = new Date().toLocaleString();
+    store.set("pns_saved_at_v1", stamp);
+    $("#saveStamp").textContent = "Saved: " + stamp;
+  });
+
+  function restoreAll(){
+    const d = store.get("pns_draft_v1", null);
+    if(d) applyDraft(d);
+    const stamp = store.get("pns_saved_at_v1", "—");
+    $("#saveStamp").textContent = stamp==="—" ? "—" : ("Saved: " + stamp);
+
+    // restore images/placements
+    library = store.get("pns_img_lib_v1", []);
+    placements = store.get("pns_img_slots_v1", {big:null,s1:null,s2:null});
+    renderThumbs();
+    syncPreview();
+  }
+
+  // ---------- CLEAN UP ----------
+  $("#clearAllBtn").addEventListener("click", ()=>{
+    // text only (keep images unless you hit Clear Images)
+    F.teacher.value=""; F.dateStr.value=todayISO();
+    F.standard.value=""; F.objective.value="";
+    F.a1.value=""; F.b1.value=""; F.g1.value=""; F.notes.value="";
+    F.c1.checked=F.c2.checked=F.c3.checked=F.c4.checked=F.c5.checked=false;
+    store.set("pns_draft_v1", collectDraft());
+    syncPreview();
+  });
+
+  // ---------- EXPORT LANDSCAPE (SINGLE CANVAS EXPORT) ----------
+  function makeExportFrame(){
+    const teacher = (F.teacher.value || "Teacher").trim();
+    const dateStr = (F.dateStr.value || todayISO()).trim();
+    const standard = clamp(F.standard.value, 420);
+    const objective = clamp(F.objective.value, 520);
+    const checks = checksSelected();
+    const checksStr = checks.length ? checks.join(" • ") : "—";
+    const body = studentText();
+
+    const frame = document.createElement("div");
+    frame.className="exportFrame";
+
+    // images (resolved dataUrls)
+    const resolveUrl = (imgId)=>{
+      const item = library.find(x=>x.id===imgId);
+      return item ? item.dataUrl : "";
+    };
+
+    const bigUrl = resolveUrl(placements.big);
+    const s1Url  = resolveUrl(placements.s1);
+    const s2Url  = resolveUrl(placements.s2);
+
+    frame.innerHTML = `
+      <div class="exportBanner">
+        <div class="L">
+          <div class="B">PB</div>
+          <div class="T">
+            <div class="T1">PBIS TICKET • LANDSCAPE EXPORT</div>
+            <div class="T2">${escapeHtml(teacher)} • W.L.E.A.D.</div>
+          </div>
+        </div>
+        <div class="R">Date: ${escapeHtml(dateStr)}</div>
+      </div>
+
+      <div class="exportBody">
+        <div class="exportTextCol">
+          <div class="box">
+            <p class="k">Standard / Goal</p>
+            <p class="v">${escapeHtml(standard)}</p>
+          </div>
+          <div class="box">
+            <p class="k">Objective</p>
+            <p class="v">${escapeHtml(objective)}</p>
+          </div>
+          <div class="box" style="min-height:140px;">
+            <p class="k">PBIS Checks</p>
+            <p class="v">${escapeHtml(clamp(checksStr, 520))}</p>
+          </div>
+          <div class="box" style="flex:1; min-height:280px;">
+            <p class="k">Student Text Log</p>
+            <p class="v">${escapeHtml(clamp(body, 1600))}</p>
+          </div>
+        </div>
+
+        <div class="exportImgs">
+          <div class="imgBox">
+            <div class="tag">Large</div>
+            ${bigUrl ? `<img src="${bigUrl}" alt="Large"/>` : ``}
+          </div>
+          <div class="twoRow">
+            <div class="imgBox">
+              <div class="tag">Small 1</div>
+              ${s1Url ? `<img src="${s1Url}" alt="Small 1"/>` : ``}
+            </div>
+            <div class="imgBox">
+              <div class="tag">Small 2</div>
+              ${s2Url ? `<img src="${s2Url}" alt="Small 2"/>` : ``}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    return frame;
+  }
+
+  function escapeHtml(s){
+    return String(s||"")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  async function exportLandscape(){
+    const host = document.getElementById("exportHost");
+    host.innerHTML="";
+    const frame = makeExportFrame();
+    host.appendChild(frame);
+
+    const dpr = Math.min(3, (window.devicePixelRatio || 2) + 1);
+    const canvas = await html2canvas(frame, {
+      backgroundColor:"#ffffff",
+      scale:dpr,
+      useCORS:true,
+      imageTimeout:20000,
+      removeContainer:true
+    });
+
+    const teacher = (F.teacher.value || "Teacher").trim().replace(/\s+/g,"_");
+    const dateStr = (F.dateStr.value || todayISO()).trim();
+    const filename = `PBIS_Landscape_${teacher}_${dateStr}_1920x1080.jpg`;
+
+    canvas.toBlob((blob)=>{
+      if(!blob){
+        alert("Export failed (no blob). Try fewer/lower-res images.");
+        host.innerHTML="";
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+
+      // normal download attempt
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      // cleanup
+      setTimeout(()=>{
+        try{ URL.revokeObjectURL(url); }catch(e){}
+        host.innerHTML="";
+      }, 1500);
+    }, "image/jpeg", 0.95);
+  }
+
+  $("#exportBtn").addEventListener("click", exportLandscape);
+
+  // ---------- init ----------
+  restoreAll();
 </script>
 </body>
 </html>
+```0
