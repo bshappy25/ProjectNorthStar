@@ -71,7 +71,7 @@ h1, h2, h3, h4, h5, h6, p, span, label, div {{
 
 .snippet-title {{
   font-weight: 900;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   margin-bottom: 10px;
 }}
 </style>
@@ -80,23 +80,12 @@ h1, h2, h3, h4, h5, h6, p, span, label, div {{
 )
 
 # =====================
-# HEADER
+# SNIPPETS (ALL AS STRINGS)
 # =====================
 
-st.title("📚 Code Library")
-st.markdown("### Copy/Paste Ready Components")
-st.caption("Click and drag to select, or use the copy button in the code block")
-st.divider()
+code_glassy_card = r'''import streamlit as st
 
-# =====================
-# GLASSY UI COMPONENTS
-# =====================
-
-st.markdown("## 🎨 Glassy UI Components")
-
-code_glassy_card = r'''# GLASSY CARD CSS
-import streamlit as st
-
+# GLASSY CARD CSS
 st.markdown("""
 <style>
 .glassy-card {
@@ -113,20 +102,15 @@ st.markdown("""
 # USAGE
 st.markdown("""
 <div class='glassy-card'>
-<h3>Your Title</h3>
-<p>Your content here</p>
+  <h3>Your Title</h3>
+  <p>Your content here</p>
 </div>
 """, unsafe_allow_html=True)
 '''
 
-with st.expander("🔲 Glassy Card Container", expanded=False):
-    st.markdown("**Use case:** Content sections, feature cards")
-    st.code(code_glassy_card, language="python")
-    st.caption("✅ Copy this entire block")
+code_theme = r'''import streamlit as st
 
-code_theme = r'''# THEME SETUP (Science + Neutral)
-import streamlit as st
-
+# THEME SETUP
 NEUTRAL_BG = "#f2f2f2"
 NEUTRAL_CARD = "rgba(230, 230, 230, 0.7)"
 NEUTRAL_BORDER = "rgba(207, 207, 207, 0.5)"
@@ -139,7 +123,7 @@ SCI_TEXT = "rgba(255,255,255,0.92)"
 SCI_ACCENT = "#14B8A6"
 
 # APPLY THEME
-is_science = st.session_state.get("theme_mode") == "science"
+is_science = st.session_state.get("dev_theme", "science") == "science"
 BG = SCI_BG if is_science else NEUTRAL_BG
 CARD = SCI_CARD if is_science else NEUTRAL_CARD
 BORDER = SCI_BORDER if is_science else NEUTRAL_BORDER
@@ -163,19 +147,16 @@ input, textarea, select {{
   background-color: var(--card) !important;
   color: var(--text) !important;
   border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
   backdrop-filter: blur(10px) !important;
 }}
 </style>
 """, unsafe_allow_html=True)
 '''
 
-with st.expander("🎨 Theme Variable System", expanded=False):
-    st.markdown("**Use case:** Consistent theming across app")
-    st.code(code_theme, language="python")
+code_ticker = r'''import streamlit as st
 
-code_ticker = r'''# TICKER CSS + HTML
-import streamlit as st
-
+# TICKER CSS + HTML
 st.markdown("""
 <style>
 .ticker {
@@ -190,32 +171,20 @@ st.markdown("""
   font-size: 0.85rem;
   font-weight: 700;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   z-index: 999;
 }
 </style>
-
 <div class='ticker'>YOUR MESSAGE • We are L.E.A.D. 🌟</div>
 """, unsafe_allow_html=True)
 
-# Add padding at bottom so ticker doesn’t cover content
+# Bottom padding so the ticker doesn't cover content
 st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
 '''
 
-with st.expander("📊 Bottom Ticker Bar", expanded=False):
-    st.markdown("**Use case:** Persistent footer with branding")
-    st.code(code_ticker, language="python")
+code_session = r'''import streamlit as st
 
-st.divider()
-
-# =====================
-# SESSION STATE PATTERNS
-# =====================
-
-st.markdown("## 💾 Session State Patterns")
-
-code_session = r'''# INITIALIZE SESSION STATE
-import streamlit as st
-
+# INITIALIZE SESSION STATE
 if "my_data" not in st.session_state:
     st.session_state["my_data"] = {
         "name": "",
@@ -229,17 +198,13 @@ current_name = st.session_state["my_data"]["name"]
 # UPDATE
 st.session_state["my_data"]["count"] += 1
 
-# SHARE ACROSS PAGES
-# All pages in multipage app can access st.session_state
+# NOTE:
+# All pages in a multipage app can access st.session_state
 '''
 
-with st.expander("🔄 Initialize Session State", expanded=False):
-    st.markdown("**Use case:** Set up persistent data")
-    st.code(code_session, language="python")
+code_cross = r'''import streamlit as st
 
-code_cross = r'''# IN BSCHAPP (sets signature)
-import streamlit as st
-
+# IN BSCHAPP (sets signature)
 signature = st.text_input("Signature")
 st.session_state["signature"] = signature
 
@@ -251,25 +216,14 @@ st.write(f"Welcome, {teacher_name}!")
 value = st.session_state.get("key", "default_value")
 '''
 
-with st.expander("🔗 Cross-App Data Sharing", expanded=False):
-    st.markdown("**Use case:** Share signature between BSChapp and DevForge")
-    st.code(code_cross, language="python")
-
-st.divider()
-
-# =====================
-# PDF GENERATION
-# =====================
-
-st.markdown("## 📄 PDF Generation (ReportLab)")
-
 code_pdf = r'''import io
+import streamlit as st
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 
-def generate_pdf(title, content):
-    """Generate simple PDF"""
+def generate_pdf(title: str, content: str) -> bytes:
+    """Generate simple PDF bytes."""
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=letter)
     w, h = letter
@@ -288,30 +242,15 @@ def generate_pdf(title, content):
     c.save()
     return buf.getvalue()
 
-# USAGE IN STREAMLIT
-import streamlit as st
-
 pdf_bytes = generate_pdf("My Title", "Line 1\\nLine 2\\nLine 3")
 
 st.download_button(
     "Download PDF",
     data=pdf_bytes,
     file_name="document.pdf",
-    mime="application/pdf"
+    mime="application/pdf",
 )
 '''
-
-with st.expander("📝 Basic PDF with ReportLab", expanded=False):
-    st.markdown("**Use case:** Generate downloadable PDFs")
-    st.code(code_pdf, language="python")
-
-st.divider()
-
-# =====================
-# FORM PATTERNS
-# =====================
-
-st.markdown("## 📝 Form Patterns")
 
 code_form = r'''import streamlit as st
 from datetime import date
@@ -338,17 +277,12 @@ with col3:
     st.button("Option C")
 '''
 
-with st.expander("🔘 Multi-Column Form Layout", expanded=False):
-    st.markdown("**Use case:** Compact forms")
-    st.code(code_form, language="python")
-
 code_validation = r'''import streamlit as st
 
 with st.form("my_form"):
     name = st.text_input("Name (required)")
     email = st.text_input("Email (required)")
     notes = st.text_area("Notes (optional)")
-
     submitted = st.form_submit_button("Submit")
 
 if submitted:
@@ -366,8 +300,111 @@ if submitted:
             st.error(error)
     else:
         st.success("Form submitted successfully!")
-        # Process data...
 '''
+
+code_date = r'''from datetime import date, timedelta
+import streamlit as st
+
+today = date.today()
+today_str = today.isoformat()
+formatted = today.strftime("%B %d, %Y")
+
+tomorrow = today + timedelta(days=1)
+week_ago = today - timedelta(weeks=1)
+
+st.write(f"Today: {today_str}")
+st.write(f"Formatted: {formatted}")
+st.write(f"Tomorrow: {tomorrow.isoformat()}")
+st.write(f"Week ago: {week_ago.isoformat()}")
+'''
+
+code_file = r'''from pathlib import Path
+import json
+
+def load_text(filepath: str) -> str:
+    return Path(filepath).read_text(encoding="utf-8")
+
+def save_text(filepath: str, content: str) -> None:
+    Path(filepath).write_text(content, encoding="utf-8")
+
+def save_json(filepath: str, data) -> None:
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+def load_json(filepath: str):
+    with open(filepath, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+Path("my_folder").mkdir(exist_ok=True)
+html_files = list(Path("folder").glob("*.html"))
+'''
+
+# =====================
+# HEADER UI
+# =====================
+
+st.title("📚 Code Library")
+st.markdown("### Copy/Paste Ready Components")
+st.caption("Snippets are safe strings — paste them into your app and edit as needed.")
+st.divider()
+
+# =====================
+# GLASSY UI COMPONENTS
+# =====================
+
+st.markdown("## 🎨 Glassy UI Components")
+
+with st.expander("🔲 Glassy Card Container", expanded=False):
+    st.markdown("**Use case:** Content sections, feature cards")
+    st.code(code_glassy_card, language="python")
+
+with st.expander("🎨 Theme Variable System", expanded=False):
+    st.markdown("**Use case:** Consistent theming across app")
+    st.code(code_theme, language="python")
+
+with st.expander("📊 Bottom Ticker Bar", expanded=False):
+    st.markdown("**Use case:** Persistent footer with branding")
+    st.code(code_ticker, language="python")
+
+st.divider()
+
+# =====================
+# SESSION STATE PATTERNS
+# =====================
+
+st.markdown("## 💾 Session State Patterns")
+
+with st.expander("🔄 Initialize Session State", expanded=False):
+    st.markdown("**Use case:** Set up persistent data")
+    st.code(code_session, language="python")
+
+with st.expander("🔗 Cross-App Data Sharing", expanded=False):
+    st.markdown("**Use case:** Share signature between BSChapp and DevForge")
+    st.code(code_cross, language="python")
+
+st.divider()
+
+# =====================
+# PDF GENERATION
+# =====================
+
+st.markdown("## 📄 PDF Generation (ReportLab)")
+
+with st.expander("📝 Basic PDF with ReportLab", expanded=False):
+    st.markdown("**Use case:** Generate downloadable PDFs")
+    st.code(code_pdf, language="python")
+
+st.divider()
+
+# =====================
+# FORM PATTERNS
+# =====================
+
+st.markdown("## 📝 Form Patterns")
+
+with st.expander("🔘 Multi-Column Form Layout", expanded=False):
+    st.markdown("**Use case:** Compact forms")
+    st.code(code_form, language="python")
 
 with st.expander("✅ Form with Validation", expanded=False):
     st.markdown("**Use case:** Required fields, error handling")
@@ -381,43 +418,8 @@ st.divider()
 
 st.markdown("## 🔧 Utility Functions")
 
-code_date = r'''from datetime import date, timedelta
-import streamlit as st
-
-today = date.today()
-today_str = today.isoformat()  # "2026-02-07"
-formatted = today.strftime("%B %d, %Y")
-
-tomorrow = today + timedelta(days=1)
-week_ago = today - timedelta(weeks=1)
-
-st.write(f"Today: {today_str}")
-date_input = st.date_input("Select Date", value=today)
-'''
-
 with st.expander("📅 Date Helpers", expanded=False):
     st.code(code_date, language="python")
-
-code_file = r'''from pathlib import Path
-import json
-
-def load_text(filepath):
-    return Path(filepath).read_text(encoding="utf-8")
-
-def save_text(filepath, content):
-    Path(filepath).write_text(content, encoding="utf-8")
-
-def save_json(filepath, data):
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-
-def load_json(filepath):
-    with open(filepath, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-Path("my_folder").mkdir(exist_ok=True)
-html_files = list(Path("folder").glob("*.html"))
-'''
 
 with st.expander("💾 File I/O Helpers", expanded=False):
     st.code(code_file, language="python")
@@ -433,19 +435,19 @@ st.markdown("## 📖 Quick Reference")
 with st.expander("🎨 Color Palette (BSChapp v2)", expanded=False):
     st.markdown(
         """
-**Neutral Theme:**
+**Neutral Theme**
 - Background: `#f2f2f2`
 - Card: `rgba(230, 230, 230, 0.7)`
 - Border: `rgba(207, 207, 207, 0.5)`
 - Text: `#000000`
 
-**Science Theme:**
+**Science Theme**
 - Background: `#061B15`
 - Card: `rgba(255,255,255,0.08)`
 - Border: `rgba(120,255,220,0.3)`
 - Text: `rgba(255,255,255,0.92)`
-- Accent: `#14B8A6` (teal)
-- Accent2: `#2F5BEA` (blue - for signatures)
+- Accent: `#14B8A6`
+- Accent2: `#2F5BEA`
 """
     )
 
@@ -466,10 +468,3 @@ if st.button("Click me"):
 file = st.file_uploader("Upload", type=["pdf", "png"])
 
 st.download_button("Download", data="hello", file_name="file.txt")
-
-“””
-)
-
-st.markdown(””, unsafe_allow_html=True)
-
-
