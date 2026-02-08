@@ -1,202 +1,285 @@
-"""
-My App 1 — Signature Maker (DevForge)
-Creates a reusable "signature bridge" snippet you can paste into other Streamlit apps.
-Also exports the snippet as a JPG "code block" (light aqua) with name + date.
-"""
-
-import io
-import os
-from datetime import date
-
+# app1_signature.py
 import streamlit as st
-from PIL import Image, ImageDraw, ImageFont
+from textwrap import dedent
 
+st.set_page_config(page_title="App 1 — Signature", layout="wide")
 
-# -----------------------------
-# Helpers: fonts + code-to-JPG
-# -----------------------------
-def _load_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
-    bold_candidates = [
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-    ]
-    regular_candidates = [
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-    ]
-    candidates = bold_candidates if bold else regular_candidates
-    for p in candidates:
-        if os.path.exists(p):
-            return ImageFont.truetype(p, size)
-    return ImageFont.load_default()
+# ============================================================
+# APP 1 — SIGNATURE THEME (your CSS block, cleaned + ready)
+# ============================================================
+THEME_CSS = r""":root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface2: #f8fafc;
+  --border: #d1d5db;
 
+  --text: #111827;
+  --muted: #6b7280;
 
-def code_block_to_jpeg(
-    title: str,
-    subtitle: str,
-    code: str,
-    bg_rgb=(201, 245, 243),        # light aqua
-    header_rgb=(7, 77, 73),        # darker teal
-    text_rgb=(9, 55, 52),          # deep teal
-) -> bytes:
-    W = 1400
-    pad = 70
-    header_h = 120
+  --accent: #2563eb;
+  --good: #16a34a;
+  --warn: #f59e0b;
+  --bad: #ef4444;
 
-    font_header = _load_font(54, bold=True)
-    font_sub = _load_font(34, bold=False)
-    font_mono = _load_font(34, bold=False)
+  --radius: 26px;
+  --pad: 14px;
+  --font: 'Comic Sans MS','Chalkboard SE','Comic Neue',cursive,sans-serif;
+  --font_weight: 900;
 
-    tmp = Image.new("RGB", (W, 10), bg_rgb)
-    dtmp = ImageDraw.Draw(tmp)
-    max_text_w = W - 2 * pad - 70
+  --shadow: 0 8px 24px rgba(0,0,0,0.12);
 
-    # Wrap code lines nicely
-    lines = []
-    for raw in code.splitlines():
-        if raw.strip() == "":
-            lines.append("")
-            continue
-        words = raw.split(" ")
-        cur = ""
-        for w in words:
-            test = (cur + " " + w).strip()
-            if dtmp.textlength(test, font=font_mono) <= max_text_w:
-                cur = test
-            else:
-                if cur:
-                    lines.append(cur)
-                cur = w
-        if cur:
-            lines.append(cur)
+  /* overlay */
+  --ov_bg: rgba(255,255,255,0.1);
+  --ov_border: rgba(120,255,220,0.3);
+  --ov_blur: 12px;
+  --ov_text_opacity: 0.45;
+  --ov_sheen: 0.16;
+  --ov_text_color: rgba(255,255,255,0.55);
+  --ov_text_shadow: rgba(0,0,0,0.25);
 
-    line_h = int(font_mono.size * 1.45)
-    body_h = line_h * (len(lines) + 4)
-    H = header_h + body_h + pad
+  /* ticker */
+  --ticker_bg: rgba(255,255,255,0.08);
+  --ticker_border: rgba(120,255,220,0.3);
+  --ticker_blur: 10px;
+  --ticker_size: 1.06rem;
+}
 
-    img = Image.new("RGB", (W, H), bg_rgb)
-    draw = ImageDraw.Draw(img)
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-weight: var(--font_weight);
+}
 
-    # Header bar
-    draw.rectangle([0, 0, W, header_h], fill=header_rgb)
-    draw.text((pad, 30), title, font=font_header, fill=(240, 255, 254))
+[data-testid="stAppViewContainer"] { background: var(--bg); }
+[data-testid="stHeader"] { background: transparent; }
 
-    # Subtitle
-    draw.text((pad, header_h + 20), subtitle, font=font_sub, fill=text_rgb)
+.block-container {
+  padding-top: 1.25rem;
+  padding-bottom: 2.6rem;
+}
 
-    # Code box
-    box_y0 = header_h + 80
-    box_x0 = pad
-    box_x1 = W - pad
-    box_y1 = H - pad
-    box_bg = (230, 255, 254)
-    draw.rounded_rectangle(
-        [box_x0, box_y0, box_x1, box_y1],
-        radius=28,
-        fill=box_bg,
-        outline=(120, 210, 205),
-        width=4,
+/* ====== SIMPLE COMPONENTS ====== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--pad);
+  box-shadow: var(--shadow);
+}
+
+.row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 10px 12px;
+}
+
+.badge {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  font-weight: 900;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.btn {
+  appearance:none;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 70%, black));
+  color: white;
+  border-radius: calc(var(--radius) - 2px);
+  padding: 10px 12px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.muted { color: var(--muted); }
+
+/* ====== OVERLAY CARD ====== */
+.overlay-card {
+  background: var(--ov_bg);
+  border: 1px solid var(--ov_border);
+  border-radius: var(--radius);
+  padding: 18px;
+  backdrop-filter: blur(var(--ov_blur));
+  -webkit-backdrop-filter: blur(var(--ov_blur));
+  position: relative;
+  overflow: hidden;
+}
+
+.overlay-card:before {
+  content: "";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,var(--ov_sheen)) 0%,
+    rgba(255,255,255,0.05) 35%,
+    rgba(255,255,255,0.00) 62%
+  );
+  pointer-events:none;
+  mix-blend-mode: screen;
+}
+
+.overlay-text {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding: 16px;
+  opacity: var(--ov_text_opacity);
+  color: var(--ov_text_color);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 900;
+  text-shadow: 0 2px 10px var(--ov_text_shadow);
+  pointer-events:none;
+}
+
+/* ====== TICKER ====== */
+.ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--ticker_bg);
+  border-top: 1px solid var(--ticker_border);
+  padding: 8px 20px;
+  text-align: center;
+  font-size: var(--ticker_size);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(var(--ticker_blur));
+  -webkit-backdrop-filter: blur(var(--ticker_blur));
+  z-index: 9999;
+}
+.ticker-spacer { height: 64px; }
+"""
+
+st.markdown(f"<style>{THEME_CSS}</style>", unsafe_allow_html=True)
+
+# ============================================================
+# TICKER (toggle + message)
+# ============================================================
+with st.sidebar:
+    st.title("App 1 — Signature")
+    st.caption("Signature UI scaffold using your theme.css block.")
+    show_ticker = st.toggle("Show ticker", value=True)
+    ticker_text = st.text_input("Ticker text", "NGSS Aligned")
+
+if show_ticker:
+    st.markdown(
+        f"<div class='ticker'>{ticker_text}</div><div class='ticker-spacer'></div>",
+        unsafe_allow_html=True
     )
 
-    # Draw code
-    x = box_x0 + 35
-    y = box_y0 + 30
-    for ln in lines:
-        draw.text((x, y), ln, font=font_mono, fill=(20, 45, 45))
-        y += line_h
+# ============================================================
+# APP 1 SIGNATURE LAYOUT (simple, reusable, clean)
+# ============================================================
+st.title("Signature App 1")
+st.caption("A clean, branded scaffold you can paste into your repo and build on.")
 
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=92)
-    return buf.getvalue()
+left, right = st.columns([1.15, 0.85], gap="large")
 
+with left:
+    st.subheader("Preview Panel")
 
-def signature_snippet(signature_value: str) -> str:
-    # This snippet is intentionally minimal + paste-safe
-    safe = signature_value.replace("\\", "\\\\").replace('"', '\\"')
-    return f'''# DevForge Signature Bridge (paste into any Streamlit app)
-import streamlit as st
+    st.markdown(
+        """
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+            <div>
+              <div style="font-size:1.05rem; font-weight:900;">Teacher Tool — App 1</div>
+              <div class="muted" style="margin-top:4px;">Signature layout with card / row / badge / overlay.</div>
+            </div>
+            <span class="badge">Signature</span>
+          </div>
 
-# Shared signature across pages/apps
-if "signature" not in st.session_state:
-    st.session_state["signature"] = "{safe}"
+          <div style="height:12px;"></div>
 
-sig = st.text_input("Signature", value=st.session_state.get("signature", ""))
-st.session_state["signature"] = sig
+          <div class="row">
+            <div>
+              <div style="font-weight:900;">Status</div>
+              <div class="muted" style="font-size:0.9rem;">Ready for your tool content</div>
+            </div>
+            <button class="btn">Run</button>
+          </div>
 
-# Read anywhere:
-# dev_name = st.session_state.get("signature", "")
-'''
+          <div style="height:12px;"></div>
 
-
-# -----------------------------
-# Streamlit page
-# -----------------------------
-st.set_page_config(page_title="Signature Maker", page_icon="✍️", layout="wide")
-
-st.title("✍️ Signature Maker")
-st.caption("Set a shared signature and export a paste-ready snippet (plus a code-block JPG).")
-
-# Session defaults
-if "signature" not in st.session_state:
-    st.session_state["signature"] = ""
-
-colA, colB = st.columns([1, 1])
-
-with colA:
-    st.subheader("1) Set signature")
-    sig = st.text_input("Signature", value=st.session_state["signature"], placeholder="e.g., Ms. Piluso")
-    st.session_state["signature"] = sig
-
-    st.markdown("**Quick actions**")
-    c1, c2 = st.columns(2)
-    with c1:
-        if st.button("Use today's date tag"):
-            st.session_state["signature"] = (st.session_state["signature"] + f" • {date.today().isoformat()}").strip()
-            st.rerun()
-    with c2:
-        if st.button("Clear"):
-            st.session_state["signature"] = ""
-            st.rerun()
-
-with colB:
-    st.subheader("2) Output snippet")
-    snippet = signature_snippet(st.session_state["signature"])
-    st.code(snippet, language="python")
-
-    # Download .py snippet
-    st.download_button(
-        "⬇️ Download snippet .py",
-        data=snippet.encode("utf-8"),
-        file_name="signature_bridge.py",
-        mime="text/x-python",
-        use_container_width=True,
+          <div class="overlay-card">
+            <div class="overlay-text">LAMINATED</div>
+            <div style="font-weight:900;">Overlay Zone</div>
+            <div class="muted" style="margin-top:4px;">
+              Put mission text, mode labels, or “AI usage” banners here.
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-st.divider()
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
-st.subheader("3) Export the snippet as a code-block JPG")
-snippet_name = st.text_input("Snippet name (for the image header)", value="SIGNATURE SNIPPET")
-today_str = date.today().isoformat()
+    st.markdown(
+        """
+        <div class="card">
+          <div style="font-weight:900; margin-bottom:6px;">Notes</div>
+          <div class="muted">This file is meant to be your App 1 “signature shell.” Replace the inner HTML blocks with your actual tool UI.</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-img_title = f"{snippet_name.upper()} • {today_str}"
-img_sub = "DevForge • paste-ready Streamlit snippet"
+with right:
+    st.subheader("Drop-in Blocks (for other apps)")
 
-jpeg_bytes = code_block_to_jpeg(
-    title=img_title,
-    subtitle=img_sub,
-    code=snippet,
-    bg_rgb=(201, 245, 243),      # light aqua
-    header_rgb=(7, 77, 73),      # darker teal
-    text_rgb=(9, 55, 52),        # hunter-ish green text
-)
+    st.markdown(
+        "<div class='card'><div style='font-weight:900;'>Copy/paste snippets</div>"
+        "<div class='muted' style='margin-top:6px;'>Use these in any Streamlit file.</div></div>",
+        unsafe_allow_html=True
+    )
 
-st.image(jpeg_bytes, caption="Preview (JPG)")
-st.download_button(
-    "⬇️ Download code-block JPG",
-    data=jpeg_bytes,
-    file_name="SIGNATURE_BLOCK.jpeg",
-    mime="image/jpeg",
-    use_container_width=True,
-)
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
-st.markdown("<div style='height:40px'></div>", unsafe_allow_html=True)
+    st.code(
+        dedent(f"""
+        import streamlit as st
+
+        THEME_CSS = r\"\"\"{THEME_CSS}\"\"\"
+        st.markdown(f"<style>{{THEME_CSS}}</style>", unsafe_allow_html=True)
+
+        # ticker (optional)
+        st.markdown("<div class='ticker'>NGSS Aligned</div><div class='ticker-spacer'></div>", unsafe_allow_html=True)
+        """).strip(),
+        language="python",
+    )
+
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+
+    st.code(
+        dedent("""
+        st.markdown(
+          "<div class='overlay-card'>"
+          "<div class='overlay-text'>LAMINATED</div>"
+          "<div style='font-weight:900;'>Overlay Zone</div>"
+          "<div class='muted' style='margin-top:4px;'>Your content</div>"
+          "</div>",
+          unsafe_allow_html=True
+        )
+        """).strip(),
+        language="python",
+    )
