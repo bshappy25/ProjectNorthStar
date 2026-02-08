@@ -14,6 +14,7 @@ from datetime import date
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
 import io
+
 # =====================
 # NGSS STANDARDS DATABASE
 # =====================
@@ -191,6 +192,92 @@ button[kind="primary"] {{
 )
 
 # =====================
+# IMAGE EXPORT HELPERS
+# =====================
+
+def _load_font(size: int, bold: bool = False):
+    """
+    Tries to load a sane default font. Falls back to PIL default if unavailable.
+    Bold uses DejaVuSans-Bold if present.
+    """
+    candidates = []
+    if bold:
+        candidates = ["DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"]
+    else:
+        candidates = ["DejaVuSans.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
+
+    for path in candidates:
+        try:
+            return ImageFont.truetype(path, size)
+        except Exception:
+            continue
+    return ImageFont.load_default()
+
+
+def generate_sci_block_jpeg(
+    title: str,
+    lines: list[tuple[str, bool]],
+    *,
+    width: int = 1200,
+    body_bg: str = "#D9F2E6",     # light green
+    header_bg: str = "#0B3D2E",   # darker green
+    body_text: str = "#1B4D3E",   # hunter green
+    header_text: str = "#E9FFF5", # very light mint
+) -> io.BytesIO:
+    """
+    Creates a JPEG with a dark header band + body content.
+    `lines` is a list of (text, is_bold).
+    """
+    pad_x = 60
+    pad_y = 48
+    header_h = 120
+
+    font_body = _load_font(34, bold=False)
+    font_bold = _load_font(36, bold=True)
+    font_header = _load_font(44, bold=True)
+
+    wrap_width_chars = 52  # tuned for 1200px with 34-36px font
+    wrapper = textwrap.TextWrapper(width=wrap_width_chars, break_long_words=False, replace_whitespace=False)
+
+    # Wrap lines
+    wrapped: list[tuple[str, bool]] = []
+    for txt, is_bold in lines:
+        if txt.strip() == "":
+            wrapped.append(("", is_bold))
+            continue
+        for wline in wrapper.wrap(txt):
+            wrapped.append((wline, is_bold))
+
+    line_h = 46  # stable spacing
+    body_h = pad_y * 2 + line_h * max(1, len(wrapped))
+    height = header_h + body_h
+
+    img = Image.new("RGB", (width, height), body_bg)
+    draw = ImageDraw.Draw(img)
+
+    # Header band
+    draw.rectangle([0, 0, width, header_h], fill=header_bg)
+    draw.text((pad_x, 30), title, fill=header_text, font=font_header)
+
+    # Body text
+    y = header_h + pad_y
+    for txt, is_bold in wrapped:
+        font = font_bold if is_bold else font_body
+        draw.text((pad_x, y), txt, fill=body_text, font=font)
+        y += line_h
+
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=95)
+    buf.seek(0)
+    return buf
+
+
+def safe_val(x: str) -> str:
+    x = (x or "").strip()
+    return x if x else "N/a"
+
+
+# =====================
 # HEADER
 # =====================
 
@@ -325,7 +412,7 @@ st.session_state["piluso_lesson"]["accommodations"] = accom
 st.divider()
 
 # =====================
-# PREVIEW & EXPORT
+# PREVIEW
 # =====================
 
 st.markdown("### 👁️ Preview")
@@ -357,6 +444,49 @@ preview_text = f"""
 """
 
 st.text_area("Lesson Preview", value=preview_text, height=420, disabled=True)
+
+st.divider()
+
+# =====================
+# ✅ SCI-BLOCK JPEG EXPORT (INSERTED HERE)
+# =====================
+
+st.markdown("### 🖼️ Export SCI-BLOCK (JPEG)")
+
+ngss_pick = safe_val(lesson.get("ngss"))
+today_str = date.today().isoformat()
+header_title = f"SCI-BLOCK • {today_str} • {ngss_pick}"
+
+# lines: (text, is_bold)
+img_lines: list[tuple[str, bool]] = [
+    ("5E Framework", True),
+    (f"Engage: {safe_val(lesson.get('engage'))}", False),
+    (f"Explore: {safe_val(lesson.get('explore'))}", False),
+    (f"Explain: {safe_val(lesson.get('explain'))}", False),
+    (f"Elaborate: {safe_val(lesson.get('elaborate'))}", False),
+    (f"Evaluate: {safe_val(lesson.get('evaluate'))}", False),
+    ("", False),
+    ("Materials", True),
+    (safe_val(lesson.get("materials")), False),
+    ("", False),
+    ("Notes", True),
+    (safe_val(lesson.get("notes")), False),
+    ("", False),
+    ("Accommodations", True),
+    (safe_val(lesson.get("accommodations")), False),
+]
+
+jpeg_buf = generate_sci_block_jpeg(header_title, img_lines)
+
+st.download_button(
+    label="📸 Download SCI-BLOCK.jpeg",
+    data=jpeg_buf,
+    file_name="SCI-BLOCK.jpeg",
+    mime="image/jpeg",
+    use_container_width=True,
+)
+
+st.caption("Tip: Download, then drop the image into chat as your exemplar block.")
 
 st.divider()
 
