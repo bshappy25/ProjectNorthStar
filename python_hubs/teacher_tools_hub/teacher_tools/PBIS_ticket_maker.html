@@ -7,6 +7,7 @@
 <style>
 :root{
   --bg:#f3f3f3; --card:#fff; --ink:#111; --muted:#444; --line:#cfcfcf; --r:14px;
+  --blue:#0b2a5b;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -100,7 +101,7 @@ input,textarea{
 }
 textarea{
   resize:none;
-  height:56px; /* slightly smaller to fit all embeds */
+  height:48px; /* tighter to prevent scroll */
 }
 .h{margin:0;font-weight:900}
 .m{margin:0;color:var(--muted);font-weight:700}
@@ -111,6 +112,27 @@ textarea{
   justify-content:flex-end;
   margin-top:auto; /* pins buttons to bottom */
 }
+
+/* PBIS checks block (compact, no scroll) */
+.checks{
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:8px 10px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px 10px;
+}
+.check{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:900;
+  color:#000;
+  font-size:0.92rem;
+  line-height:1.1;
+  min-width:0;
+}
+.check input{ width:18px; height:18px; accent-color:#000; }
 
 /* PREVIEW COLUMN: canvas always owns the space */
 .previewStage{
@@ -130,7 +152,7 @@ canvas{width:100%;height:100%;display:block}
   inset:10px;
   border-radius:12px;
   border:2px solid var(--line);
-  background:rgba(255,255,255,0.92);
+  background:rgba(255,255,255,0.88); /* slightly more transparent */
   display:none;
   padding:10px;
   overflow:hidden;
@@ -201,6 +223,15 @@ canvas{width:100%;height:100%;display:block}
           </div>
         </div>
 
+        <p class="m">PBIS Checks (5)</p>
+        <div class="checks" aria-label="PBIS Checks">
+          <label class="check"><input type="checkbox" id="c1"/>ENGAGE in SAFTEY</label>
+          <label class="check"><input type="checkbox" id="c2"/>LEARN TO EARN</label>
+          <label class="check"><input type="checkbox" id="c3"/>ALWAYS RESPECTFUL</label>
+          <label class="check"><input type="checkbox" id="c4"/>DO THE RIGHT THING</label>
+          <label class="check" style="grid-column:1 / -1;"><input type="checkbox" id="c5"/>MY GOAL POINT</label>
+        </div>
+
         <p class="m">CHECK IN</p><textarea id="a1" placeholder="Today I will…"></textarea>
         <p class="m">REFLECT</p><textarea id="b1" placeholder="What happened?"></textarea>
         <p class="m">GOAL</p><textarea id="g1" placeholder="My goal point is…"></textarea>
@@ -242,7 +273,11 @@ const $=(s,el=document)=>el.querySelector(s);
 // state
 const S={check:false,reflect:false,goal:false};
 const btns={check:$("#tCheck"),reflect:$("#tReflect"),goal:$("#tGoal")};
-const f={name:$("#name"),group:$("#group"),a1:$("#a1"),b1:$("#b1"),g1:$("#g1")};
+const f={
+  name:$("#name"), group:$("#group"),
+  a1:$("#a1"), b1:$("#b1"), g1:$("#g1"),
+  c1:$("#c1"), c2:$("#c2"), c3:$("#c3"), c4:$("#c4"), c5:$("#c5"),
+};
 
 const cv=$("#cv");
 const ctx=cv.getContext("2d",{alpha:false});
@@ -253,7 +288,7 @@ function toggle(k){
   S[k]=!S[k];
   btns[k].classList.toggle("on",S[k]);
   hideJpeg();
-  draw();
+  draw("screen");
 }
 btns.check.onclick=()=>toggle("check");
 btns.reflect.onclick=()=>toggle("reflect");
@@ -266,12 +301,12 @@ function fit(){
   cv.width=Math.floor(box.width*dpr);
   cv.height=Math.floor(box.height*dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  draw();
+  draw("screen");
 }
 window.addEventListener("resize",fit);
 
 // simple wrap by char count (stable)
-function lines(t,max=62){
+function wrapLines(t,max=62){
   const w=(t||"").replace(/\r/g,"").split(/\s+/).filter(Boolean);
   let out=[], line="";
   for(const word of w){
@@ -283,21 +318,59 @@ function lines(t,max=62){
   return out;
 }
 
-function draw(){
+function checkedLabels(){
+  const labels=[];
+  if(f.c1.checked) labels.push("ENGAGE in SAFTEY");
+  if(f.c2.checked) labels.push("LEARN TO EARN");
+  if(f.c3.checked) labels.push("ALWAYS RESPECTFUL");
+  if(f.c4.checked) labels.push("DO THE RIGHT THING");
+  if(f.c5.checked) labels.push("MY GOAL POINT");
+  return labels;
+}
+
+function hideJpeg(){
+  $("#jpegBox").style.display="none";
+  if(lastJpegURL){ lastJpegURL=null; }
+}
+$("#closeJpeg").onclick=hideJpeg;
+
+["input","change"].forEach(evt=>{
+  Object.values(f).forEach(el=>el.addEventListener(evt, ()=>{ hideJpeg(); draw("screen"); }));
+});
+
+function draw(mode="screen"){
   const w=cv.clientWidth, h=cv.clientHeight;
+  const dateStr = new Date().toLocaleDateString();
 
   ctx.fillStyle="#fff";
   ctx.fillRect(0,0,w,h);
 
-  // header
-  ctx.fillStyle="#000";
-  ctx.fillRect(0,0,w,54);
-  ctx.fillStyle="#fff";
-  ctx.font="900 14px system-ui";
-  ctx.textAlign="left";
-  ctx.fillText("PBIS TICKET", 12, 22);
-  ctx.font="700 12px system-ui";
-  ctx.fillText("W.L.E.A.D. • B/W Spine", 12, 42);
+  // header: screen = black, download = blue with date
+  const headerH = 54;
+  if(mode === "download"){
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--blue").trim() || "#0b2a5b";
+    ctx.fillRect(0,0,w,headerH);
+    ctx.fillStyle="#fff";
+    ctx.font="900 14px system-ui";
+    ctx.textAlign="left";
+    ctx.fillText("PBIS TICKET", 12, 22);
+    ctx.font="700 12px system-ui";
+    ctx.fillText("W.L.E.A.D.", 12, 42);
+
+    ctx.textAlign="right";
+    ctx.font="900 12px system-ui";
+    ctx.fillText("Date: " + dateStr, w-12, 22);
+    ctx.textAlign="left";
+  }else{
+    ctx.fillStyle="#000";
+    ctx.fillRect(0,0,w,headerH);
+    ctx.fillStyle="#fff";
+    ctx.font="900 14px system-ui";
+    ctx.textAlign="left";
+    ctx.fillText("PBIS TICKET", 12, 22);
+    ctx.font="700 12px system-ui";
+    ctx.fillText("W.L.E.A.D. • B/W Spine", 12, 42);
+  }
 
   // meta
   ctx.fillStyle="#111";
@@ -305,7 +378,7 @@ function draw(){
   ctx.fillText("Student: " + (f.name.value.trim()||"__________"), 12, 78);
   ctx.font="700 12px system-ui";
   ctx.fillText(
-    "Group: " + (f.group.value.trim()||"—") + "   Date: " + new Date().toLocaleDateString(),
+    "Group: " + (f.group.value.trim()||"—") + "   Date: " + dateStr,
     12, 98
   );
 
@@ -315,6 +388,28 @@ function draw(){
   ctx.beginPath(); ctx.moveTo(12,112); ctx.lineTo(w-12,112); ctx.stroke();
 
   let y=134;
+
+  // PBIS CHECKS line(s)
+  const checks = checkedLabels();
+  if(checks.length){
+    ctx.fillStyle="#000";
+    ctx.font="900 12px system-ui";
+    ctx.fillText("PBIS CHECKS:", 12, y); y+=18;
+
+    ctx.font="700 12px system-ui";
+    const joined = checks.join(" • ");
+    const checkLines = wrapLines(joined, 62).slice(0,2);
+    for(const ln of checkLines){ ctx.fillText(ln, 12, y); y+=16; }
+    y+=10;
+
+    // divider
+    ctx.strokeStyle="#cfcfcf";
+    ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(12,y); ctx.lineTo(w-12,y); ctx.stroke();
+    y += 22;
+  }
+
+  // body sections
   ctx.fillStyle="#000";
   ctx.font="900 12px system-ui";
 
@@ -323,19 +418,19 @@ function draw(){
   if(S.check){
     ctx.fillText("CHECK IN:", 12, y); y+=18;
     ctx.font="700 12px system-ui";
-    for(const ln of lines(f.a1.value,62).slice(0,3)){ ctx.fillText(ln, 12, y); y+=16; }
+    for(const ln of wrapLines(f.a1.value,62).slice(0,3)){ ctx.fillText(ln, 12, y); y+=16; }
     y+=10; ctx.font="900 12px system-ui";
   }
   if(S.reflect){
     ctx.fillText("REFLECT:", 12, y); y+=18;
     ctx.font="700 12px system-ui";
-    for(const ln of lines(f.b1.value,62).slice(0,3)){ ctx.fillText(ln, 12, y); y+=16; }
+    for(const ln of wrapLines(f.b1.value,62).slice(0,3)){ ctx.fillText(ln, 12, y); y+=16; }
     y+=10; ctx.font="900 12px system-ui";
   }
   if(S.goal){
     ctx.fillText("GOAL:", 12, y); y+=18;
     ctx.font="700 12px system-ui";
-    for(const ln of lines(f.g1.value,62).slice(0,3)){ ctx.fillText(ln, 12, y); y+=16; }
+    for(const ln of wrapLines(f.g1.value,62).slice(0,3)){ ctx.fillText(ln, 12, y); y+=16; }
     y+=10; ctx.font="900 12px system-ui";
   }
 
@@ -350,19 +445,9 @@ function draw(){
     || "Tap an activity. Preview updates instantly.";
 }
 
-function hideJpeg(){
-  $("#jpegBox").style.display="none";
-  if(lastJpegURL){ lastJpegURL=null; }
-}
-$("#closeJpeg").onclick=hideJpeg;
-
-["input","change"].forEach(evt=>{
-  Object.values(f).forEach(el=>el.addEventListener(evt, ()=>{ hideJpeg(); draw(); }));
-});
-
-// Preview JPEG (overlay)
+// Preview JPEG (overlay) — uses current screen styling
 $("#preview").onclick=()=>{
-  draw();
+  draw("screen");
   try{
     $("#jpegImg").src = cv.toDataURL("image/jpeg",0.92);
     $("#jpegBox").style.display="block";
@@ -371,27 +456,36 @@ $("#preview").onclick=()=>{
   }
 };
 
-// Download JPEG (best effort in embeds)
+// Download JPEG — renders with BLUE banner + date at top
 $("#download").onclick=()=>{
-  draw();
+  draw("download"); // special header ONLY for download
+
   const base=(f.name.value.trim()||"pbis_ticket").replace(/\s+/g,"_");
   const file=base+".jpg";
 
+  const finish = ()=> { setTimeout(()=>draw("screen"), 40); }; // restore preview look
+
   if(cv.toBlob){
     cv.toBlob(blob=>{
-      if(!blob){ alert("Download failed."); return; }
+      if(!blob){ alert("Download failed."); finish(); return; }
       const url=URL.createObjectURL(blob);
       lastJpegURL=url;
       const a=document.createElement("a");
       a.href=url; a.download=file;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=>{ try{URL.revokeObjectURL(url);}catch(e){} }, 1200);
+      finish();
     },"image/jpeg",0.92);
   }else{
-    const a=document.createElement("a");
-    a.href=cv.toDataURL("image/jpeg",0.92);
-    a.download=file;
-    document.body.appendChild(a); a.click(); a.remove();
+    try{
+      const a=document.createElement("a");
+      a.href=cv.toDataURL("image/jpeg",0.92);
+      a.download=file;
+      document.body.appendChild(a); a.click(); a.remove();
+    }catch(e){
+      alert("Download failed.");
+    }
+    finish();
   }
 };
 
@@ -399,14 +493,15 @@ $("#download").onclick=()=>{
 $("#clear").onclick=()=>{
   f.name.value=""; f.group.value="";
   f.a1.value=""; f.b1.value=""; f.g1.value="";
+  f.c1.checked=f.c2.checked=f.c3.checked=f.c4.checked=f.c5.checked=false;
   S.check=S.reflect=S.goal=false;
   Object.values(btns).forEach(b=>b.classList.remove("on"));
   hideJpeg();
-  draw();
+  draw("screen");
 };
 
 // init
-setTimeout(()=>{ fit(); draw(); }, 60);
+setTimeout(()=>{ fit(); draw("screen"); }, 60);
 </script>
 </body>
 </html>
