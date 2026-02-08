@@ -442,14 +442,14 @@ submitted = st.form_submit_button("Submit")
 
 if submitted:
     errors = []
-    
+
     if not name:
         errors.append("Name is required")
     if not email:
         errors.append("Email is required")
     elif "@" not in email:
         errors.append("Invalid email format")
-    
+
     if errors:
         for error in errors:
             st.error(error)
