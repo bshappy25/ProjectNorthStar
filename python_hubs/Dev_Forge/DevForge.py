@@ -269,7 +269,23 @@ st.markdown(
 )
 
 # ============================================================
-# SIDEBAR (WITH PALM ID + THEMES)
+# ADMIN + SESSION STATE (BEFORE SIDEBAR)
+# ============================================================
+
+ADMIN_CODE = "Bshapp"  # your Palm ID admin code
+
+if "palm_taps" not in st.session_state:
+    st.session_state["palm_taps"] = 0
+if "show_admin_box" not in st.session_state:
+    st.session_state["show_admin_box"] = False
+if "admin_unlocked" not in st.session_state:
+    st.session_state["admin_unlocked"] = False
+if "notes" not in st.session_state:
+    st.session_state["notes"] = ""
+    
+    
+# ============================================================
+# SIDEBAR (WITH PALM ID + THEMES + COMPLETED APPS)
 # ============================================================
 
 with st.sidebar:
@@ -293,17 +309,22 @@ with st.sidebar:
 
     if st.session_state["show_admin_box"] and not st.session_state["admin_unlocked"]:
         st.markdown("**Palm ID:** enter admin code")
-        code_try = st.text_input("Admin Code", type="password", placeholder="Enter code...", key="admin_code_try")
+        code_try = st.text_input(
+            "Admin Code",
+            type="password",
+            placeholder="Enter code...",
+            key="admin_code_try",
+        )
         cA, cB = st.columns([0.6, 0.4])
         with cA:
-            if st.button("Unlock", key="unlock_btn"):
+            if st.button("Unlock", key="unlock_btn", use_container_width=True):
                 if code_try == ADMIN_CODE:
                     st.session_state["admin_unlocked"] = True
                     st.success("Admin override unlocked.")
                 else:
                     st.error("Incorrect code.")
         with cB:
-            if st.button("Reset", key="reset_palm_btn"):
+            if st.button("Reset", key="reset_palm_btn", use_container_width=True):
                 st.session_state["palm_taps"] = 0
                 st.session_state["show_admin_box"] = False
 
@@ -316,16 +337,15 @@ with st.sidebar:
     # THEME TOGGLE
     # =========================
     theme_options = ["Science", "Neutral"]
-    # Pink option only under PALM ID (as requested)
     if st.session_state["admin_unlocked"]:
-        theme_options.append("Pink")
+        theme_options.append("Pink")  # only under PALM ID
 
-    current = st.session_state["dev_theme"]
+    current = st.session_state.get("dev_theme", "science")
     idx = 0
     if current == "neutral":
         idx = 1
-    if current == "pink":
-        idx = 2 if "Pink" in theme_options else 0
+    elif current == "pink" and "Pink" in theme_options:
+        idx = 2
 
     theme_choice = st.radio(
         "Dev Theme",
@@ -337,7 +357,7 @@ with st.sidebar:
 
     choice_map = {"Science": "science", "Neutral": "neutral", "Pink": "pink"}
     chosen_theme = choice_map[theme_choice]
-    if chosen_theme != st.session_state["dev_theme"]:
+    if chosen_theme != st.session_state.get("dev_theme", "science"):
         st.session_state["dev_theme"] = chosen_theme
         st.rerun()
 
@@ -358,10 +378,24 @@ with st.sidebar:
     st.divider()
 
     # =========================
+    # ✅ COMPLETED APPS (Option B)
+    # =========================
+    st.subheader("✅ Completed Apps")
+    st.caption("Quick launch your keepers:")
+
+    # Requires file: pages/Teacher_Tools.py
+    try:
+        st.page_link("pages/Teacher_Tools.py", label="🧰 Teacher Tools (HTML Hub)", icon="🧰")
+    except Exception:
+        st.caption("Teacher Tools link: (page_link not supported here) — use Streamlit page nav")
+
+    st.divider()
+
+    # =========================
     # NAV HINTS (Multipage)
     # =========================
     st.subheader("🗺️ Pages")
-    st.caption("Your pages folder drives navigation automatically.")
+    st.caption("Your pages/ folder drives navigation automatically.")
     st.markdown(
         """
 - **ABC_Generator.py**
@@ -384,6 +418,7 @@ with st.sidebar:
         height=110,
         placeholder="Quick notes while you build...",
         label_visibility="collapsed",
+        key="scratch_notes",
     )
 
     st.divider()
@@ -395,22 +430,22 @@ with st.sidebar:
         st.subheader("🧰 Admin Tools")
         st.caption("Visible only when Palm ID is unlocked.")
 
-        if st.button("Reset Theme to Science", use_container_width=True):
+        if st.button("Reset Theme to Science", use_container_width=True, key="adm_reset_theme"):
             st.session_state["dev_theme"] = "science"
             st.rerun()
 
-        if st.button("Clear Scratch Notes", use_container_width=True):
+        if st.button("Clear Scratch Notes", use_container_width=True, key="adm_clear_notes"):
             st.session_state["notes"] = ""
             st.rerun()
 
-        if st.button("Lock Admin Gate", use_container_width=True):
+        if st.button("Lock Admin Gate", use_container_width=True, key="adm_lock_gate"):
             st.session_state["admin_unlocked"] = False
             st.session_state["palm_taps"] = 0
             st.session_state["show_admin_box"] = False
             st.rerun()
 
     st.caption("Connected to Project North Star")
-
+    
 # ============================================================
 # MAIN CONTENT (HOME)
 # ============================================================
