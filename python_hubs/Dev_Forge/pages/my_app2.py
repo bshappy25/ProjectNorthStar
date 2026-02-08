@@ -1,17 +1,18 @@
-# theme_studio.py
+# theme_studio_app2.py
 import streamlit as st
 from textwrap import dedent
 import json
 
-st.set_page_config(page_title="Theme Studio — CSS Selector", layout="wide")
+st.set_page_config(page_title="Theme Studio (App 2) — Glass + Ticker", layout="wide")
 
-# -----------------------------
-# Helpers
-# -----------------------------
-def css_theme(v: dict) -> str:
+# ============================================================
+# CSS GENERATOR
+# ============================================================
+def build_css(v: dict) -> str:
     return dedent(f"""
     /* ==========================================================
-       THEME STUDIO OUTPUT (theme.css)
+       THEME STUDIO (APP 2) — CSS SELECTOR + GLASS OVERLAY + TICKER
+       Copy/paste safe • One-file • Streamlit-ready
        ========================================================== */
 
     :root {{
@@ -51,16 +52,29 @@ def css_theme(v: dict) -> str:
       --ticker_pad_x: {v["ticker_pad_x"]}px;
     }}
 
-    /* ---------- base ---------- */
     html, body {{
       background: var(--bg);
       color: var(--text);
       font-family: var(--font);
     }}
 
+    /* --- Streamlit frame polish --- */
+    .block-container {{
+      padding-top: 1.35rem;
+      padding-bottom: 2.6rem;
+    }}
+
+    /* Prevent Streamlit default backgrounds from fighting your theme */
+    [data-testid="stAppViewContainer"] {{
+      background: var(--bg);
+    }}
+    [data-testid="stHeader"] {{
+      background: transparent;
+    }}
+
+    /* ---------- base primitives ---------- */
     .ts-wrap {{ background: transparent; color: var(--text); font-family: var(--font); }}
 
-    /* ---------- standard primitives ---------- */
     .ts-card {{
       background: var(--surface);
       border: 1px solid var(--border);
@@ -69,15 +83,19 @@ def css_theme(v: dict) -> str:
       padding: var(--pad);
     }}
 
-    .ts-card--alt {{ background: var(--surface2); }}
+    .ts-card--alt {{
+      background: var(--surface2);
+    }}
 
     .ts-title {{
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: 0.02em;
       margin: 0 0 8px 0;
     }}
 
-    .ts-muted {{ color: var(--muted); }}
+    .ts-muted {{
+      color: var(--muted);
+    }}
 
     .ts-row {{
       display: flex;
@@ -98,8 +116,9 @@ def css_theme(v: dict) -> str:
       border-radius: 999px;
       border: 1px solid var(--border);
       background: var(--surface);
-      font-weight: 800;
+      font-weight: 900;
       font-size: 0.85rem;
+      white-space: nowrap;
     }}
 
     .ts-pill--accent {{
@@ -138,15 +157,21 @@ def css_theme(v: dict) -> str:
       transition: transform 120ms ease, filter 120ms ease;
     }}
 
-    .ts-btn:hover {{ transform: translateY(-1px); filter: brightness(1.03); }}
+    .ts-btn:hover {{
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }}
 
     .ts-btn--solid {{
       border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
       background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 70%, black));
-      color: white;
+      color: #ffffff;
     }}
 
-    .ts-btn--ghost {{ background: transparent; box-shadow: none; }}
+    .ts-btn--ghost {{
+      background: transparent;
+      box-shadow: none;
+    }}
 
     .ts-input {{
       width: 100%;
@@ -187,12 +212,11 @@ def css_theme(v: dict) -> str:
 
     /* ==========================================================
        GLASS OVERLAY (glassy / faded / laminated)
-       - Use inside any card to add that laminated look.
        ========================================================== */
     .glassy-card {{
       background: var(--glass_bg);
       border: 1px solid var(--glass_border);
-      border-radius: calc(var(--radius));
+      border-radius: var(--radius);
       padding: 20px;
       backdrop-filter: blur(var(--glass_blur));
       -webkit-backdrop-filter: blur(var(--glass_blur));
@@ -200,22 +224,22 @@ def css_theme(v: dict) -> str:
       overflow: hidden;
     }}
 
-    /* subtle laminated sheen */
+    /* laminated sheen */
     .glassy-card:before {{
       content: "";
       position: absolute;
       inset: 0;
       background: linear-gradient(
         135deg,
-        rgba(255,255,255,0.18) 0%,
-        rgba(255,255,255,0.06) 35%,
-        rgba(255,255,255,0.00) 60%
+        rgba(255,255,255,0.20) 0%,
+        rgba(255,255,255,0.07) 35%,
+        rgba(255,255,255,0.00) 62%
       );
       pointer-events: none;
       mix-blend-mode: screen;
     }}
 
-    /* optional text overlay that sits on top of content */
+    /* text overlay */
     .glassy-overlay-text {{
       position: absolute;
       inset: 0;
@@ -226,7 +250,7 @@ def css_theme(v: dict) -> str:
       padding: 18px;
       color: var(--glass_text);
       font-weight: 900;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       text-shadow: 0 2px 10px var(--glass_text_shadow);
       pointer-events: none;
@@ -250,48 +274,21 @@ def css_theme(v: dict) -> str:
       letter-spacing: 0.06em;
       backdrop-filter: blur(var(--ticker_blur));
       -webkit-backdrop-filter: blur(var(--ticker_blur));
-      z-index: 999;
+      z-index: 9999;
     }}
 
-    /* spacer so the ticker doesn't cover content */
-    .ticker-spacer {{ height: 64px; }}
-
-    /* ---------- Streamlit optional spacing ---------- */
-    .block-container {{
-      padding-top: 1.5rem;
-      padding-bottom: 2.5rem;
+    .ticker-spacer {{
+      height: 64px;
     }}
     """).strip()
 
 
-def streamlit_inject_snippet(css_text: str, ticker_text: str, show_ticker: bool) -> str:
-    ticker_block = ""
-    if show_ticker:
-        ticker_block = dedent(f"""
-        # Ticker (fixed bottom)
-        st.markdown(
-            \"\"\"<div class='ticker'>{ticker_text}</div>
-            <div class='ticker-spacer'></div>\"\"\",
-            unsafe_allow_html=True
-        )
-        """).strip()
+def ensure_defaults():
+    if "theme" in st.session_state:
+        return
 
-    return dedent(f"""
-    # --- Theme injection (paste into any Streamlit app) ---
-    import streamlit as st
-
-    THEME_CSS = r\"\"\"{css_text}\"\"\"
-    st.markdown(f"<style>{{THEME_CSS}}</style>", unsafe_allow_html=True)
-
-    {ticker_block}
-    """).strip()
-
-
-# -----------------------------
-# Session defaults
-# -----------------------------
-if "theme" not in st.session_state:
     st.session_state.theme = {
+        # Theme
         "bg": "#f3f4f6",
         "surface": "#ffffff",
         "surface2": "#f8fafc",
@@ -310,7 +307,7 @@ if "theme" not in st.session_state:
         "shadow_alpha": 0.12,
         "font_family": "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
 
-        # Glass overlay controls
+        # Glass overlay
         "glass_alpha": 0.10,
         "glass_border_alpha": 0.30,
         "glass_blur": 10,
@@ -318,7 +315,7 @@ if "theme" not in st.session_state:
         "overlay_text_alpha": 0.75,
         "overlay_shadow_alpha": 0.35,
 
-        # Ticker controls
+        # Ticker
         "ticker_enabled": True,
         "ticker_text": "YOUR MESSAGE • We are L.E.A.D. 🌟",
         "ticker_alpha": 0.08,
@@ -329,14 +326,19 @@ if "theme" not in st.session_state:
         "ticker_pad_x": 20,
     }
 
+
+# ============================================================
+# APP START
+# ============================================================
+ensure_defaults()
 t = st.session_state.theme
 
 # -----------------------------
-# Sidebar Controls (selector UI)
+# SIDEBAR: selector controls
 # -----------------------------
 with st.sidebar:
-    st.title("🎛️ Theme Studio")
-    st.caption("Adjust → preview → export.")
+    st.title("🎛️ Theme Studio (App 2)")
+    st.caption("Glassy overlay + ticker adjuster. Export code blocks for other apps.")
 
     st.subheader("Core Surfaces")
     t["bg"] = st.color_picker("Background", t["bg"])
@@ -402,16 +404,12 @@ with st.sidebar:
 
 
 # -----------------------------
-# Build Outputs
+# Apply theme CSS live
 # -----------------------------
-css_text = css_theme(t)
-inject_text = streamlit_inject_snippet(css_text, t["ticker_text"], bool(t["ticker_enabled"]))
-theme_json = json.dumps(t, indent=2)
-
-# Apply CSS live
+css_text = build_css(t)
 st.markdown(f"<style>{css_text}</style>", unsafe_allow_html=True)
 
-# Render ticker if enabled (actual runtime behavior)
+# Ticker render (if enabled)
 if t["ticker_enabled"]:
     st.markdown(
         f"<div class='ticker'>{t['ticker_text']}</div><div class='ticker-spacer'></div>",
@@ -419,13 +417,16 @@ if t["ticker_enabled"]:
     )
 
 # -----------------------------
-# UI
+# Main layout
 # -----------------------------
-st.title("Theme Studio — In-App CSS Selector")
-st.caption("Now with laminated glass overlay + ticker adjuster.")
+st.title("Theme Studio — App 2")
+st.caption("Glassy laminated overlay + ticker adjuster + reusable export blocks.")
 
 left, right = st.columns([1.15, 0.85], gap="large")
 
+# -----------------------------
+# Preview column
+# -----------------------------
 with left:
     st.subheader("Live Preview")
 
@@ -474,8 +475,8 @@ with left:
           <div style="height:14px"></div>
 
           <div class="ts-card ts-card--alt">
-            <div class="ts-title">Glassy / Laminated Card Demo</div>
-            <div class="ts-muted">This is your “glassy-card” with overlay text.</div>
+            <div class="ts-title">Glassy / Laminated Demo</div>
+            <div class="ts-muted">This is your laminated glass overlay with centered text.</div>
             <div style="height:10px"></div>
 
             <div class="glassy-card">
@@ -499,33 +500,49 @@ with left:
         unsafe_allow_html=True
     )
 
+# -----------------------------
+# Export column
+# -----------------------------
 with right:
     st.subheader("Export Blocks")
 
-    tab1, tab2, tab3 = st.tabs(["theme.css", "Streamlit inject", "theme.json"])
+    tab1, tab2, tab3 = st.tabs(["theme.css", "Streamlit snippet", "theme.json"])
 
     with tab1:
-        st.caption("Drop this into any app that supports CSS.")
+        st.caption("Reusable CSS you can inject into other apps.")
         st.code(css_text, language="css")
         st.download_button("Download theme.css", data=css_text, file_name="theme.css", mime="text/css")
 
     with tab2:
-        st.caption("Paste this near the top of any Streamlit app.")
-        st.code(inject_text, language="python")
-        st.download_button("Download inject_snippet.py", data=inject_text, file_name="inject_snippet.py", mime="text/plain")
+        st.caption("Paste this into any other Streamlit app (top of file).")
+        snippet = dedent(f"""
+        import streamlit as st
+
+        THEME_CSS = r\"\"\"{css_text}\"\"\"
+        st.markdown(f"<style>{{THEME_CSS}}</style>", unsafe_allow_html=True)
+
+        # Ticker (optional)
+        if {bool(t["ticker_enabled"])}:
+            st.markdown(
+                \"\"\"<div class='ticker'>{t["ticker_text"]}</div><div class='ticker-spacer'></div>\"\"\",
+                unsafe_allow_html=True
+            )
+        """).strip()
+        st.code(snippet, language="python")
+        st.download_button("Download streamlit_snippet.py", data=snippet, file_name="streamlit_snippet.py", mime="text/plain")
 
     with tab3:
-        st.caption("Save presets for per-app styles.")
-        st.code(theme_json, language="json")
-        st.download_button("Download theme.json", data=theme_json, file_name="theme.json", mime="application/json")
+        st.caption("Theme preset data (store and load per app).")
+        st.code(json.dumps(t, indent=2), language="json")
+        st.download_button("Download theme.json", data=json.dumps(t, indent=2), file_name="theme.json", mime="application/json")
 
 
 st.divider()
 st.markdown(
     """
-**Quick reuse in other apps**
-- Copy the CSS (tab: `theme.css`) or the snippet (tab: `Streamlit inject`)
-- Use the glass overlay anywhere:
-
+**Use your glass overlay anywhere**
 ```python
-st.markdown("<div class='glassy-card'><div class='glassy-overlay-text'>TEXT</div><h3>Title</h3><p>Content</p></div>", unsafe_allow_html=True)
+st.markdown(
+  "<div class='glassy-card'><div class='glassy-overlay-text'>TEXT</div><h3>Title</h3><p>Content</p></div>",
+  unsafe_allow_html=True
+)
