@@ -466,3 +466,10 @@ if st.button("Click me"):
 file = st.file_uploader("Upload", type=["pdf", "png"])
 
 st.download_button("Download", data="hello", file_name="file.txt")
+
+“””
+)
+
+st.markdown(””, unsafe_allow_html=True)
+
+
