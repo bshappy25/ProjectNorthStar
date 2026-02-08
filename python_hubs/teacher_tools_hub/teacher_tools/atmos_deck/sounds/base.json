@@ -1,1 +1,169 @@
-yolo
+{
+  "schema_version": 1,
+  "app_id": "atmos_deck",
+  "name": "Atmos Deck — Sound Studio",
+  "export": {
+    "durationSec": 20,
+    "sampleRate": 44100
+  },
+  "themes": [
+    {
+      "id": "base",
+      "name": "Base Studio",
+      "bg": "#070A12",
+      "bg2": "#0B1022",
+      "border": "rgba(120,255,220,0.28)",
+      "accent": "#14B8A6"
+    },
+    {
+      "id": "radiant",
+      "name": "Radiant",
+      "bg": "#0B0420",
+      "bg2": "#140A2D",
+      "border": "rgba(255,200,80,0.30)",
+      "accent": "#F59E0B"
+    },
+    {
+      "id": "noir",
+      "name": "Noir",
+      "bg": "#05060A",
+      "bg2": "#0A0B10",
+      "border": "rgba(255,255,255,0.18)",
+      "accent": "#A3A3A3"
+    }
+  ],
+  "tiles": [
+    {
+      "id": "paper",
+      "tag": "TEXTURE",
+      "name": "Paper",
+      "hint": "soft rustle loop",
+      "src": "./sounds/base/paper.mp3",
+      "loop": true,
+      "defaultGain": 0.55,
+      "colorA": "rgba(20,184,166,0.22)",
+      "colorBorder": "rgba(20,184,166,0.45)"
+    },
+    {
+      "id": "pencil",
+      "tag": "TEXTURE",
+      "name": "Pencil",
+      "hint": "gentle sketch loop",
+      "src": "./sounds/base/pencil.mp3",
+      "loop": true,
+      "defaultGain": 0.48,
+      "colorA": "rgba(99,102,241,0.22)",
+      "colorBorder": "rgba(99,102,241,0.45)"
+    },
+    {
+      "id": "tape",
+      "tag": "BED",
+      "name": "Tape Hiss",
+      "hint": "warm background",
+      "src": "./sounds/base/tape_hiss.mp3",
+      "loop": true,
+      "defaultGain": 0.35,
+      "colorA": "rgba(245,158,11,0.20)",
+      "colorBorder": "rgba(245,158,11,0.50)"
+    },
+    {
+      "id": "rain",
+      "tag": "AMBIENT",
+      "name": "Rain",
+      "hint": "calm wash loop",
+      "src": "./sounds/base/rain.mp3",
+      "loop": true,
+      "defaultGain": 0.55,
+      "colorA": "rgba(59,130,246,0.18)",
+      "colorBorder": "rgba(59,130,246,0.45)"
+    },
+    {
+      "id": "wind",
+      "tag": "AMBIENT",
+      "name": "Wind",
+      "hint": "soft drift loop",
+      "src": "./sounds/base/wind.mp3",
+      "loop": true,
+      "defaultGain": 0.40,
+      "colorA": "rgba(148,163,184,0.18)",
+      "colorBorder": "rgba(148,163,184,0.42)"
+    },
+    {
+      "id": "chime",
+      "tag": "SPARK",
+      "name": "Chime",
+      "hint": "light sparkle one-shot",
+      "src": "./sounds/base/chime.mp3",
+      "loop": false,
+      "defaultGain": 0.70,
+      "colorA": "rgba(167,139,250,0.20)",
+      "colorBorder": "rgba(167,139,250,0.50)"
+    },
+    {
+      "id": "pop",
+      "tag": "SPICY",
+      "name": "Pop",
+      "hint": "cute button pop",
+      "src": "./sounds/base/pop.mp3",
+      "loop": false,
+      "defaultGain": 0.75,
+      "colorA": "rgba(244,63,94,0.18)",
+      "colorBorder": "rgba(244,63,94,0.45)"
+    },
+    {
+      "id": "bloop",
+      "tag": "SPICY",
+      "name": "Bloop",
+      "hint": "retro arcade blip",
+      "src": "./sounds/base/bloop.mp3",
+      "loop": false,
+      "defaultGain": 0.75,
+      "colorA": "rgba(34,197,94,0.18)",
+      "colorBorder": "rgba(34,197,94,0.45)"
+    },
+    {
+      "id": "kick",
+      "tag": "BEAT",
+      "name": "Kick",
+      "hint": "soft thump loop",
+      "src": "./sounds/base/kick.mp3",
+      "loop": true,
+      "defaultGain": 0.40,
+      "colorA": "rgba(251,191,36,0.16)",
+      "colorBorder": "rgba(251,191,36,0.45)"
+    },
+    {
+      "id": "hat",
+      "tag": "BEAT",
+      "name": "Hi-Hat",
+      "hint": "tiny tick loop",
+      "src": "./sounds/base/hat.mp3",
+      "loop": true,
+      "defaultGain": 0.26,
+      "colorA": "rgba(255,255,255,0.10)",
+      "colorBorder": "rgba(255,255,255,0.22)"
+    },
+    {
+      "id": "pad",
+      "tag": "MUSIC",
+      "name": "Soft Pad",
+      "hint": "gentle chord bed",
+      "src": "./sounds/base/pad.mp3",
+      "loop": true,
+      "defaultGain": 0.45,
+      "colorA": "rgba(236,72,153,0.14)",
+      "colorBorder": "rgba(236,72,153,0.40)"
+    },
+    {
+      "id": "bass",
+      "tag": "MUSIC",
+      "name": "Bass Pulse",
+      "hint": "low pulse loop",
+      "src": "./sounds/base/bass.mp3",
+      "loop": true,
+      "defaultGain": 0.34,
+      "colorA": "rgba(16,185,129,0.16)",
+      "colorBorder": "rgba(16,185,129,0.45)"
+    }
+  ]
+}
