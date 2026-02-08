@@ -1,115 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Upload Mixer — B/W Tiles (6 Slots) + WAV Export</title>
+<style>
+  :root{
+    --bg:#0b0d12;
+    --panel:rgba(255,255,255,0.06);
+    --line:rgba(255,255,255,0.14);
+    --text:rgba(255,255,255,0.92);
+    --muted:rgba(255,255,255,0.62);
+    --radius:16px;
+    --shadow:0 16px 50px rgba(0,0,0,0.55);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 700px at 20% 0%, rgba(255,255,255,0.08), transparent 60%),
+      linear-gradient(180deg, #0a0c12, #070910);
+    color:var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 12px;
+    display:grid;
+    grid-template-columns: 380px 1fr;
+    gap: 10px;
+    align-items:start;
+  }
+  @media (max-width: 980px){
+    .wrap{grid-template-columns:1fr}
+  }
+
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .hdr{
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .title{
+    font-weight:900;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    font-size:.86rem;
+  }
+  .badge{
+    font-family: var(--mono);
+    font-size:.75rem;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .body{padding: 10px 12px;}
+  .muted{color:var(--muted); font-size:.88rem; line-height:1.25rem}
+  .hr{height:1px;background:var(--line);margin:10px 0}
+
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{
+    cursor:pointer;
+    border-radius: 12px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+    padding: 10px 10px;
+    font-weight: 900;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    font-size:.78rem;
+  }
+  .btn.small{padding:8px 9px; font-size:.74rem}
+  .btn.ghost{background: rgba(0,0,0,0.18)}
+  .btn[disabled]{opacity:.45; cursor:not-allowed}
+  .slider{
+    width:100%;
+    accent-color: #fff; /* b/w */
+  }
+
+  .field label{
+    display:block;
+    font-size:.72rem;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin: 0 0 6px 2px;
+    font-weight:900;
+  }
+  input[type="file"], input[type="number"]{
+    width:100%;
+    border-radius: 12px;
+    border:1px solid var(--line);
+    background: rgba(0,0,0,0.22);
+    color:var(--text);
+    padding: 10px 10px;
+    outline:none;
+    font-family: var(--mono);
+    font-size:.86rem;
+  }
+  .status{
+    font-family: var(--mono);
+    font-size:.78rem;
+    color: var(--muted);
+    margin-top: 8px;
+    white-space:pre-wrap;
+  }
+
+  /* Tiles */
+  .tileGrid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .tile{
+    border:1px solid var(--line);
+    border-radius: 14px;
+    padding: 10px 10px;
+    background: rgba(255,255,255,0.05);
+    cursor:pointer;
+    min-height:66px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:6px;
+  }
+  .tileTop{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .sym{
+    font-family: var(--mono);
+    font-weight: 900;
+    font-size: 1.05rem;
+    padding:2px 8px;
+    border-radius: 999px;
+    border:1px solid var(--line);
+    background: rgba(0,0,0,0.22);
+  }
+  .tile strong{
+    font-family: var(--mono);
+    font-size:.84rem;
+    letter-spacing:.06em;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .tile span{
+    font-size:.78rem;
+    color:var(--muted);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .tile:active{transform:translateY(1px)}
+
+  /* Slots */
+  .slotGrid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .slot{
+    border:1px dashed rgba(255,255,255,0.20);
+    border-radius: 18px;
+    padding: 10px;
+    background: rgba(0,0,0,0.18);
+    min-height:128px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .slot .topline{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family: var(--mono);
+    font-size:.78rem;
+    color:var(--muted);
+    letter-spacing:.10em;
+  }
+  .slot .name{
+    font-family: var(--mono);
+    font-size:.92rem;
+    font-weight:900;
+    line-height:1.1rem;
+    word-break:break-word;
+  }
+  .slot .empty{color:rgba(255,255,255,0.45)}
+  .slot .miniRow{display:flex; gap:8px; align-items:center}
+  .slot .miniBtn{
+    border-radius: 12px;
+    border:1px solid var(--line);
+    background: rgba(255,255,255,0.06);
+    color:var(--text);
+    padding:8px 8px;
+    font-family: var(--mono);
+    font-weight:900;
+    font-size:.80rem;
+    cursor:pointer;
+  }
+  .slot .miniBtn[disabled]{opacity:.45; cursor:not-allowed}
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- LEFT: Upload / Controls -->
+    <section class="card">
+      <div class="hdr">
+        <div class="title">UPLOAD + CONTROLS</div>
+        <div class="badge" id="capBadge">cap: 200MB</div>
+      </div>
+      <div class="body">
+        <div class="muted">
+          Upload audio files (mp3/wav/ogg). Each file becomes a <b>B/W tile</b> with a symbol.
+          Tap a tile → fills the next empty slot.
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="field">
+          <label>Audio Upload (10–12 recommended)</label>
+          <input id="audioUp" type="file" accept="audio/*" multiple />
+          <div class="status" id="upMsg">No files selected.</div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="field">
+          <label>Total Upload Cap (MB)</label>
+          <input id="capMB" type="number" min="1" max="200" value="200" />
+          <div class="status" id="capMsg">If uploads exceed the cap, tiles won’t load.</div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="field">
+          <label>Master Volume</label>
+          <input class="slider" id="masterVol" type="range" min="0" max="1" step="0.01" value="0.85" />
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <button class="btn small" id="btnClearAll">CLEAR ALL</button>
+          <button class="btn small ghost" id="btnStop">STOP</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="field">
+          <label>Export</label>
+          <div class="row">
+            <button class="btn" id="btnExport">↓ EXPORT WAV</button>
+            <span class="badge" id="mixBadge">slots: 0/6</span>
+          </div>
+          <div class="status" id="exportMsg">Export mixes the 6 slots into a simple WAV (offline render).</div>
+        </div>
+
+        <div class="status" id="hint">Mobile: tap once anywhere to enable audio.</div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Tiles + Slots -->
+    <section class="card">
+      <div class="hdr">
+        <div class="title">MIXER GRID (6 SLOTS)</div>
+        <div class="badge" id="tilesBadge">tiles: 0</div>
+      </div>
+      <div class="body">
+        <div class="row" style="justify-content:space-between;">
+          <div class="muted"><b>Tiles</b>: click to load. <b>Slots</b>: ▶ preview, ✕ clear.</div>
+        </div>
+
+        <div class="hr"></div>
+        <div class="tileGrid" id="tileGrid"></div>
+
+        <div class="hr"></div>
+        <div class="slotGrid" id="slotGrid"></div>
+      </div>
+    </section>
+
+  </div>
+
 <script>
-/** ---------------------------
- * DEMO TILE PACK (Hub-safe)
- * No external audio needed.
- * Generates sound with WebAudio.
- * --------------------------- */
-const DEMO_TILES = [
-  { id:"kick",    name:"Kick",    kind:"synth", tone:"kick" },
-  { id:"snare",   name:"Snare",   kind:"noise", tone:"snare" },
-  { id:"hat",     name:"Hi-Hat",  kind:"noise", tone:"hat" },
-  { id:"bass",    name:"Bass",    kind:"synth", tone:"bass" },
-  { id:"pad",     name:"Pad",     kind:"synth", tone:"pad" },
-  { id:"plink",   name:"Plink",   kind:"synth", tone:"plink" },
-  { id:"chime",   name:"Chime",   kind:"synth", tone:"chime" },
-  { id:"swell",   name:"Swell",   kind:"synth", tone:"swell" },
-  { id:"vinyl",   name:"Vinyl",   kind:"noise", tone:"vinyl" },
-  { id:"bloop",   name:"Bloop",   kind:"synth", tone:"bloop" },
-  { id:"clap",    name:"Clap",    kind:"noise", tone:"clap" },
-  { id:"sparkle", name:"Sparkle", kind:"synth", tone:"sparkle" },
-];
+/* =========================
+   STATE
+========================= */
+const SYMBOLS = ["◇","◆","✦","✧","✳","✶","✷","✸","✹","✺","✻","✼","☾","☉","☼","⚙","⚡","❖","✪","✫","✬","✭","✮","✯"];
+const MAX_TILES_DEFAULT = 12;
 
-// call this once on load:
-window.__tiles = DEMO_TILES;
-
-/** Minimal audio engine */
 let AC;
+let masterGain;
+
+const tiles = []; // {id, file, name, sym, arrayBuffer, audioBuffer}
+const slots = new Array(6).fill(null); // store tile index
+
+const audioUp = document.getElementById("audioUp");
+const upMsg = document.getElementById("upMsg");
+const capMB = document.getElementById("capMB");
+const capBadge = document.getElementById("capBadge");
+const capMsg = document.getElementById("capMsg");
+const tileGrid = document.getElementById("tileGrid");
+const slotGrid = document.getElementById("slotGrid");
+const tilesBadge = document.getElementById("tilesBadge");
+const mixBadge = document.getElementById("mixBadge");
+const hint = document.getElementById("hint");
+const masterVol = document.getElementById("masterVol");
+const exportMsg = document.getElementById("exportMsg");
+
 function getAC(){
-  if(!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  if(!AC){
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = AC.createGain();
+    masterGain.gain.value = parseFloat(masterVol.value || "0.85");
+    masterGain.connect(AC.destination);
+  }
   return AC;
 }
 
-function playTile(tile, {gain=0.5, duration=0.35}={}){
-  const ac = getAC();
-  const now = ac.currentTime;
+masterVol.addEventListener("input", ()=>{
+  if(masterGain) masterGain.gain.value = parseFloat(masterVol.value || "0.85");
+});
 
-  const out = ac.createGain();
-  out.gain.value = 0.0001;
-  out.connect(ac.destination);
+document.body.addEventListener("pointerdown", ()=>{
+  try{ getAC().resume(); }catch(e){}
+},{once:true});
 
-  // quick envelope
-  out.gain.setValueAtTime(0.0001, now);
-  out.gain.linearRampToValueAtTime(gain, now + 0.01);
-  out.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+function bytesToMB(b){ return b / (1024*1024); }
 
-  if(tile.kind === "noise"){
-    const bufferSize = Math.max(1, Math.floor(ac.sampleRate * duration));
-    const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++) data[i] = (Math.random()*2-1);
+function totalUploadedBytes(files){
+  let sum = 0;
+  for (const f of files) sum += f.size || 0;
+  return sum;
+}
 
-    const src = ac.createBufferSource();
-    src.buffer = buffer;
+function clampTiles(files){
+  // keep first 12 for a clean test, but you can raise later
+  return Array.from(files).slice(0, MAX_TILES_DEFAULT);
+}
 
-    // filter for different noise tones
-    const filt = ac.createBiquadFilter();
-    filt.type = "highpass";
-    filt.frequency.value = tile.tone === "hat" ? 7000 : tile.tone === "vinyl" ? 2000 : 1200;
+/* =========================
+   LOAD AUDIO FILES
+========================= */
+audioUp.addEventListener("change", async (e)=>{
+  const files = e.target.files ? Array.from(e.target.files) : [];
+  tiles.length = 0;
+  for (let i=0;i<slots.length;i++) slots[i]=null;
 
-    src.connect(filt);
-    filt.connect(out);
-    src.start(now);
-    src.stop(now + duration);
+  if (!files.length){
+    upMsg.textContent = "No files selected.";
+    renderAll();
     return;
   }
 
-  // synth
-  const osc = ac.createOscillator();
-  const filt = ac.createBiquadFilter();
-  const g2 = ac.createGain();
-  g2.gain.value = 0.8;
+  const cap = Math.min(200, Math.max(1, parseInt(capMB.value || "200", 10)));
+  capBadge.textContent = `cap: ${cap}MB`;
 
-  // pick tone
-  let f = 220;
-  switch(tile.tone){
-    case "kick":   f = 90; break;
-    case "bass":   f = 110; break;
-    case "pad":    f = 260; break;
-    case "plink":  f = 520; break;
-    case "chime":  f = 780; break;
-    case "swell":  f = 180; break;
-    case "bloop":  f = 340; break;
-    case "sparkle":f = 980; break;
-    default:       f = 300;
+  const total = totalUploadedBytes(files);
+  const totalMB = bytesToMB(total);
+
+  if (totalMB > cap){
+    upMsg.textContent = `❌ Upload too large: ${totalMB.toFixed(1)}MB > cap ${cap}MB. Reduce files or cap.`;
+    capMsg.textContent = "Blocked: uploads exceed cap.";
+    renderAll();
+    return;
   }
 
-  osc.type = (tile.tone==="pad" || tile.tone==="swell") ? "triangle" : "square";
-  osc.frequency.setValueAtTime(f, now);
+  const chosen = clampTiles(files);
+  upMsg.textContent = `Selected ${files.length} files • Using ${chosen.length} tiles • Total ${totalMB.toFixed(1)}MB`;
 
-  filt.type = "lowpass";
-  filt.frequency.setValueAtTime(tile.tone==="pad" ? 900 : 1800, now);
+  capMsg.textContent = "Loading audio… (first decode can take a moment)";
 
-  // a little pitch drop for kick/bloop
-  if(tile.tone==="kick" || tile.tone==="bloop"){
-    osc.frequency.exponentialRampToValueAtTime(Math.max(40, f*0.45), now + duration);
+  const ac = getAC();
+
+  // Load + decode each chosen file
+  for (let i=0;i<chosen.length;i++){
+    const f = chosen[i];
+    const sym = SYMBOLS[i % SYMBOLS.length];
+    const name = f.name || `track_${i+1}`;
+    const buf = await f.arrayBuffer();
+    let decoded = null;
+    try{
+      decoded = await ac.decodeAudioData(buf.slice(0));
+    }catch(err){
+      decoded = null;
+    }
+    tiles.push({
+      id: `t${i}`,
+      file: f,
+      name,
+      sym,
+      arrayBuffer: buf,
+      audioBuffer: decoded
+    });
   }
 
-  osc.connect(filt);
-  filt.connect(g2);
-  g2.connect(out);
+  capMsg.textContent = "Done. Tap tiles to load slots.";
+  renderAll();
+});
 
-  osc.start(now);
-  osc.stop(now + duration);
+/* =========================
+   TILE + SLOT UI
+========================= */
+function updateBadges(){
+  tilesBadge.textContent = `tiles: ${tiles.length}`;
+  const n = slots.filter(v=>v!==null).length;
+  mixBadge.textContent = `slots: ${n}/6`;
 }
 
-/** Hook for your UI: when user picks a tile */
-window.pickTileForSlot = function(slotIndex, tileId){
-  const tile = window.__tiles.find(t=>t.id===tileId);
-  if(!tile) return;
-  // TODO: store selection into your slot state here
-  playTile(tile, {gain:0.5, duration:0.35});
+function renderTiles(){
+  tileGrid.innerHTML = "";
+  tiles.forEach((t, idx)=>{
+    const el = document.createElement("div");
+    el.className = "tile";
+    const ok = !!t.audioBuffer;
+    const meta = ok ? `ready • ${(t.audioBuffer.duration||0).toFixed(1)}s` : "decode failed";
+    el.innerHTML = `
+      <div class="tileTop">
+        <div class="sym">${t.sym}</div>
+        <span class="badge">${ok ? "OK" : "ERR"}</span>
+      </div>
+      <strong title="${escapeHtml(t.name)}">${escapeHtml(t.name)}</strong>
+      <span title="${escapeHtml(meta)}">${escapeHtml(meta)}</span>
+    `;
+    el.onclick = ()=>{
+      if(!t.audioBuffer){
+        hint.textContent = `Can't use: ${t.name} (decode failed). Try WAV/MP3.`;
+        return;
+      }
+      const slotIdx = slots.findIndex(s=>s===null);
+      if(slotIdx === -1){
+        hint.textContent = "Slots full. Clear one to load another.";
+        previewTile(idx, 0.25);
+        return;
+      }
+      slots[slotIdx] = idx;
+      hint.textContent = `Loaded ${t.sym} ${t.name} → Slot ${slotIdx+1}`;
+      previewTile(idx, 0.45);
+      renderSlots();
+      updateBadges();
+    };
+    tileGrid.appendChild(el);
+  });
+}
+
+function renderSlots(){
+  slotGrid.innerHTML = "";
+  slots.forEach((tileIndex, i)=>{
+    const t = (tileIndex===null) ? null : tiles[tileIndex];
+    const el = document.createElement("div");
+    el.className = "slot";
+    const name = t ? `${t.sym} ${t.name}` : "EMPTY";
+    const meta = t ? `dur ${(t.audioBuffer.duration||0).toFixed(2)}s` : "pick a tile";
+    el.innerHTML = `
+      <div class="topline"><span>SLOT ${i+1}</span><span>${t ? "LOADED" : "EMPTY"}</span></div>
+      <div class="name ${t ? "" : "empty"}">${escapeHtml(name)}</div>
+      <div class="muted">${escapeHtml(meta)}</div>
+      <div class="miniRow">
+        <button class="miniBtn" ${t ? "" : "disabled"} data-act="play">▶</button>
+        <button class="miniBtn" ${t ? "" : "disabled"} data-act="clear">✕</button>
+      </div>
+    `;
+    el.querySelector('[data-act="play"]')?.addEventListener("click", (ev)=>{
+      ev.stopPropagation();
+      if(tileIndex===null) return;
+      previewTile(tileIndex, 0.55);
+      hint.textContent = `Preview: Slot ${i+1}`;
+    });
+    el.querySelector('[data-act="clear"]')?.addEventListener("click", (ev)=>{
+      ev.stopPropagation();
+      slots[i] = null;
+      renderSlots();
+      updateBadges();
+      hint.textContent = `Cleared Slot ${i+1}`;
+    });
+    slotGrid.appendChild(el);
+  });
+}
+
+function renderAll(){
+  renderTiles();
+  renderSlots();
+  updateBadges();
+}
+
+/* =========================
+   PLAYBACK
+========================= */
+const activeSources = new Set();
+
+function previewTile(tileIdx, vol=0.5){
+  const t = tiles[tileIdx];
+  if(!t?.audioBuffer) return;
+
+  const ac = getAC();
+  const src = ac.createBufferSource();
+  src.buffer = t.audioBuffer;
+
+  const g = ac.createGain();
+  g.gain.value = Math.max(0.001, vol);
+
+  src.connect(g);
+  g.connect(masterGain);
+
+  src.start();
+  activeSources.add(src);
+
+  src.onended = () => activeSources.delete(src);
+}
+
+function stopAll(){
+  activeSources.forEach(src=>{
+    try{ src.stop(); }catch(e){}
+  });
+  activeSources.clear();
+}
+
+document.getElementById("btnStop").onclick = ()=>{
+  stopAll();
+  hint.textContent = "Stopped.";
 };
 
-/** For quick rendering: get tile list */
-window.getTiles = () => window.__tiles;
+document.getElementById("btnClearAll").onclick = ()=>{
+  for (let i=0;i<slots.length;i++) slots[i]=null;
+  stopAll();
+  renderSlots(); updateBadges();
+  hint.textContent = "Cleared all slots.";
+};
+
+/* =========================
+   EXPORT WAV (simple mix)
+   - Mix each loaded slot from t=0
+   - Uses OfflineAudioContext
+========================= */
+document.getElementById("btnExport").onclick = async ()=>{
+  const loaded = slots.filter(v=>v!==null).map(v=>tiles[v]).filter(t=>t?.audioBuffer);
+  if(!loaded.length){
+    exportMsg.textContent = "No slots loaded. Load at least 1 tile.";
+    return;
+  }
+
+  exportMsg.textContent = "Rendering WAV…";
+
+  // Determine render length = max duration of loaded buffers
+  let maxDur = 0;
+  for (const t of loaded){
+    if(t.audioBuffer.duration > maxDur) maxDur = t.audioBuffer.duration;
+  }
+  maxDur = Math.min(Math.max(maxDur, 1.0), 30.0); // cap to 30s for demo safety
+
+  const sr = 44100;
+  const frames = Math.ceil(maxDur * sr);
+
+  const off = new OfflineAudioContext(2, frames, sr);
+  const out = off.createGain();
+  out.gain.value = parseFloat(masterVol.value || "0.85");
+  out.connect(off.destination);
+
+  // Mix each slot at equal gain (demo)
+  const per = 1 / Math.max(1, loaded.length);
+  for (const t of loaded){
+    const src = off.createBufferSource();
+    src.buffer = t.audioBuffer;
+
+    const g = off.createGain();
+    g.gain.value = Math.max(0.06, per);
+
+    src.connect(g);
+    g.connect(out);
+
+    src.start(0);
+  }
+
+  const rendered = await off.startRendering();
+  const wavBlob = audioBufferToWavBlob(rendered);
+
+  const ts = new Date().toISOString().slice(0,19).replace(/[:T]/g,"-");
+  const fname = `mix_${ts}.wav`;
+
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(wavBlob);
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  exportMsg.textContent = `✅ Exported WAV: ${fname} (length ~${maxDur.toFixed(1)}s)`;
+};
+
+/* =========================
+   WAV ENCODER
+   (16-bit PCM, little-endian)
+========================= */
+function audioBufferToWavBlob(buffer){
+  const numCh = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const length = buffer.length;
+
+  // interleave
+  const interleaved = new Float32Array(length * numCh);
+  for (let i=0;i<length;i++){
+    for (let ch=0;ch<numCh;ch++){
+      interleaved[i*numCh + ch] = buffer.getChannelData(ch)[i];
+    }
+  }
+
+  const bytesPerSample = 2;
+  const blockAlign = numCh * bytesPerSample;
+  const byteRate = sampleRate * blockAlign;
+  const dataSize = interleaved.length * bytesPerSample;
+
+  const ab = new ArrayBuffer(44 + dataSize);
+  const dv = new DataView(ab);
+
+  // RIFF
+  writeStr(dv, 0, "RIFF");
+  dv.setUint32(4, 36 + dataSize, true);
+  writeStr(dv, 8, "WAVE");
+
+  // fmt
+  writeStr(dv, 12, "fmt ");
+  dv.setUint32(16, 16, true);       // PCM
+  dv.setUint16(20, 1, true);        // format = 1
+  dv.setUint16(22, numCh, true);
+  dv.setUint32(24, sampleRate, true);
+  dv.setUint32(28, byteRate, true);
+  dv.setUint16(32, blockAlign, true);
+  dv.setUint16(34, 16, true);       // bits
+
+  // data
+  writeStr(dv, 36, "data");
+  dv.setUint32(40, dataSize, true);
+
+  // PCM samples
+  let off = 44;
+  for (let i=0;i<interleaved.length;i++){
+    let s = Math.max(-1, Math.min(1, interleaved[i]));
+    // 16-bit signed
+    dv.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    off += 2;
+  }
+
+  return new Blob([ab], {type:"audio/wav"});
+}
+function writeStr(dv, offset, str){
+  for (let i=0;i<str.length;i++) dv.setUint8(offset+i, str.charCodeAt(i));
+}
+
+/* =========================
+   UTIL
+========================= */
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+
+/* initial */
+renderAll();
 </script>
+</body>
+</html>
