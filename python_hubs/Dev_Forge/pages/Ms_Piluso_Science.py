@@ -98,6 +98,9 @@ if "piluso_lesson" not in st.session_state:
         "objective": "",
         "materials": "",
         "notes": "",
+        "accommodations": "",
+)
+st.session_state["piluso_lesson"]["accommodations"] = accom
     }
 
 # =====================
@@ -425,5 +428,13 @@ with st.expander("💡 Quick Tips for Ms. Piluso", expanded=False):
 7. Download PDF
 """
     )
+
+accom = st.text_area(
+    "Accommodations / Modifications",
+    value=st.session_state["piluso_lesson"].get("accommodations", ""),
+    placeholder="IEP/504 supports: visuals, sentence starters, extended time, breaks, reduced choices...",
+    height=100,
+)
+st.session_state["piluso_lesson"]["accommodations"] = accom
 
 st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
