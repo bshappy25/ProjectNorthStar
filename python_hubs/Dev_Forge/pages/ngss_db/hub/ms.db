@@ -25,3 +25,18 @@ INSERT OR IGNORE INTO standards (
 ))
 
 con.commit()
+
+CREATE TABLE IF NOT EXISTS sci_blocks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    block_code TEXT NOT NULL,        -- SCI-BLOCK
+    pe_code TEXT NOT NULL,           -- MS-ESS1-1
+    block_date TEXT NOT NULL,        -- 2026-02-08
+
+    five_e TEXT,                     -- full 5E text
+    materials TEXT,
+    notes TEXT,
+    accommodations TEXT,
+
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
