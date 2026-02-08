@@ -1,0 +1,115 @@
+<script>
+/** ---------------------------
+ * DEMO TILE PACK (Hub-safe)
+ * No external audio needed.
+ * Generates sound with WebAudio.
+ * --------------------------- */
+const DEMO_TILES = [
+  { id:"kick",    name:"Kick",    kind:"synth", tone:"kick" },
+  { id:"snare",   name:"Snare",   kind:"noise", tone:"snare" },
+  { id:"hat",     name:"Hi-Hat",  kind:"noise", tone:"hat" },
+  { id:"bass",    name:"Bass",    kind:"synth", tone:"bass" },
+  { id:"pad",     name:"Pad",     kind:"synth", tone:"pad" },
+  { id:"plink",   name:"Plink",   kind:"synth", tone:"plink" },
+  { id:"chime",   name:"Chime",   kind:"synth", tone:"chime" },
+  { id:"swell",   name:"Swell",   kind:"synth", tone:"swell" },
+  { id:"vinyl",   name:"Vinyl",   kind:"noise", tone:"vinyl" },
+  { id:"bloop",   name:"Bloop",   kind:"synth", tone:"bloop" },
+  { id:"clap",    name:"Clap",    kind:"noise", tone:"clap" },
+  { id:"sparkle", name:"Sparkle", kind:"synth", tone:"sparkle" },
+];
+
+// call this once on load:
+window.__tiles = DEMO_TILES;
+
+/** Minimal audio engine */
+let AC;
+function getAC(){
+  if(!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  return AC;
+}
+
+function playTile(tile, {gain=0.5, duration=0.35}={}){
+  const ac = getAC();
+  const now = ac.currentTime;
+
+  const out = ac.createGain();
+  out.gain.value = 0.0001;
+  out.connect(ac.destination);
+
+  // quick envelope
+  out.gain.setValueAtTime(0.0001, now);
+  out.gain.linearRampToValueAtTime(gain, now + 0.01);
+  out.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  if(tile.kind === "noise"){
+    const bufferSize = Math.max(1, Math.floor(ac.sampleRate * duration));
+    const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++) data[i] = (Math.random()*2-1);
+
+    const src = ac.createBufferSource();
+    src.buffer = buffer;
+
+    // filter for different noise tones
+    const filt = ac.createBiquadFilter();
+    filt.type = "highpass";
+    filt.frequency.value = tile.tone === "hat" ? 7000 : tile.tone === "vinyl" ? 2000 : 1200;
+
+    src.connect(filt);
+    filt.connect(out);
+    src.start(now);
+    src.stop(now + duration);
+    return;
+  }
+
+  // synth
+  const osc = ac.createOscillator();
+  const filt = ac.createBiquadFilter();
+  const g2 = ac.createGain();
+  g2.gain.value = 0.8;
+
+  // pick tone
+  let f = 220;
+  switch(tile.tone){
+    case "kick":   f = 90; break;
+    case "bass":   f = 110; break;
+    case "pad":    f = 260; break;
+    case "plink":  f = 520; break;
+    case "chime":  f = 780; break;
+    case "swell":  f = 180; break;
+    case "bloop":  f = 340; break;
+    case "sparkle":f = 980; break;
+    default:       f = 300;
+  }
+
+  osc.type = (tile.tone==="pad" || tile.tone==="swell") ? "triangle" : "square";
+  osc.frequency.setValueAtTime(f, now);
+
+  filt.type = "lowpass";
+  filt.frequency.setValueAtTime(tile.tone==="pad" ? 900 : 1800, now);
+
+  // a little pitch drop for kick/bloop
+  if(tile.tone==="kick" || tile.tone==="bloop"){
+    osc.frequency.exponentialRampToValueAtTime(Math.max(40, f*0.45), now + duration);
+  }
+
+  osc.connect(filt);
+  filt.connect(g2);
+  g2.connect(out);
+
+  osc.start(now);
+  osc.stop(now + duration);
+}
+
+/** Hook for your UI: when user picks a tile */
+window.pickTileForSlot = function(slotIndex, tileId){
+  const tile = window.__tiles.find(t=>t.id===tileId);
+  if(!tile) return;
+  // TODO: store selection into your slot state here
+  playTile(tile, {gain:0.5, duration:0.35});
+};
+
+/** For quick rendering: get tile list */
+window.getTiles = () => window.__tiles;
+</script>
