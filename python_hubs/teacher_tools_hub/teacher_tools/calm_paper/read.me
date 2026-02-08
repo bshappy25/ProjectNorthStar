@@ -1,0 +1,111 @@
+d# Paper Picker — Calm Writing (Retro Tab Dock)
+
+A full-screen “paper picker” web app that feels like a retro Flash mini-game: choose a paper style, pick a color, type inside preset boxes, and export a clean PNG that’s great for **Samsung Smart Select**.
+
+No Flash required — it’s pure **HTML/CSS/JS** and runs in modern mobile/desktop browsers.
+
+---
+
+## Features
+
+### Paper + Writing Modes
+- **Post-it** (3 writing boxes)
+- **Notebook** (Title + Body + Signature)
+- **Book Cover** (Title + Subtitle + Author)
+- **Blank** (free write)
+
+### Paper Colors (varied but calm)
+- 8 soft paper colors: Ivory, Lavender, Mint, Peach, Slate, Lilac, Butter, Sky
+
+### “Flash-like” Retro Feel
+- **Wood table** background
+- **CRT scanline overlay**
+- **Ornate wand cursor** + wand glow trail
+- Cute **stamps** (★ / ❤ / MODE) + a **LEVEL UP** pop
+
+### Audio (Browser-safe)
+- **SFX toggle** with layered sounds:
+  - tap / flip / stamp / sparkle / success
+- **Music selection**:
+  - Off / Chill Chiptune / Lo-fi Pad / Ambient Bells  
+> Audio starts only after pressing **Start** (required by browsers).
+
+### Export
+- **Export PNG** button saves the paper + text as a PNG image.
+
+---
+
+## Files
+
+- `index.html`  
+  (Single-file app — everything embedded)
+
+---
+
+## How to Run
+
+### Option A: Open directly
+1. Download `index.html`
+2. Open it in **Chrome** (recommended) or **Samsung Internet**
+3. Press **Start** to unlock audio
+
+### Option B: Host on GitHub Pages
+1. Put `index.html` in a repo
+2. Settings → Pages → Deploy from branch
+3. Visit your Pages URL
+
+---
+
+## Mobile Tips (Samsung Smart Select)
+
+- The app is already **full-screen paper mode**.
+- For best captures:
+  - Choose your paper + color
+  - Type text
+  - Hide the panel by tapping outside the dock
+  - Use **Smart Select** to capture the paper area
+
+---
+
+## Controls
+
+### Tab Dock (Bottom)
+- **Paper**: Switch paper type
+- **Music**: Select background music
+- **Color**: Pick paper color
+- **SFX**: Toggle sound effects
+- **Actions**: Random / Clear / Export PNG
+
+### Extra Interaction
+- Tap/click the paper background (not inside a text field) to trigger **sparkles**.
+
+---
+
+## Notes / Limitations
+
+- Audio requires a user gesture (pressing **Start**) to play.
+- Export uses an SVG→Canvas technique; if export fails:
+  - Try Chrome / Edge
+  - Ensure the browser allows downloads
+
+---
+
+## Roadmap (Next Up)
+
+- “Sound Lab” drawer: live sliders for
+  - Tap brightness
+  - Flip intensity
+  - Stamp punch
+  - Sparkle amount
+  - Reverb/delay tail
+  - Master volume
+- Stamp picker (more stickers)
+- Custom paper textures / book covers
+- Presets / save slots
+
+---
+
+## Credits / License
+
+Built as a lightweight, offline-friendly creative tool.  
+Use and modify freely for personal/educational projects.
