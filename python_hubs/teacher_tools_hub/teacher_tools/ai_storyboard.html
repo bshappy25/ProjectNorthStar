@@ -1,9 +1,9 @@
-doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AI Storyboard (V2) — Tap-to-Drop + 1-Page JPG Export</title>
+<title>AI Storyboard (V3) — Landscape Standard Export</title>
 
 <style>
   :root{
@@ -80,7 +80,7 @@ doctype html>
   }
   .btn:active{transform:translateY(1px)}
 
-  /* Layout: sidebar | dotted line | images/board */
+  /* Layout */
   main{
     max-width:1240px;
     margin:0 auto;
@@ -225,7 +225,6 @@ doctype html>
     display:block;
   }
 
-  /* Per-cell clear X */
   .cell .xclear{
     position:absolute;
     top:10px;
@@ -245,7 +244,6 @@ doctype html>
   }
   .cell.filled .xclear{display:flex}
 
-  /* “Armed” placement: wand cursor on cells */
   .armed .cell{
     cursor: url('data:image/svg+xml;utf8,\
 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36">\
@@ -257,10 +255,14 @@ doctype html>
     box-shadow: 0 0 0 2px rgba(22,163,74,0.18) inset;
   }
 
-  /* ---------- EXPORT FRAME (ONE PAGE JPG) ---------- */
+  /* ============================================================
+     V3 EXPORT: LANDSCAPE STANDARD (1920×1080)
+     - fixed aspect ratio
+     - uses devicePixelRatio scaling in html2canvas for sharpness
+     ============================================================ */
   .export-frame{
-    width: 1400px;
-    height: 900px;
+    width: 1920px;
+    height: 1080px;
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 18px;
@@ -268,9 +270,9 @@ doctype html>
     position: relative;
   }
 
-  /* S2: AI strip = white on black */
+  /* Top instruction strip: white on black (kept) */
   .export-instruction{
-    padding:8px 12px;
+    padding:10px 14px;
     background:#000000;
     color:#ffffff;
     font-size:12px;
@@ -284,7 +286,7 @@ doctype html>
   }
 
   .export-header{
-    padding: 12px 14px;
+    padding: 14px 16px;
     border-bottom: 1px solid #e5e7eb;
     display:flex;
     align-items:center;
@@ -299,7 +301,7 @@ doctype html>
   }
   .export-title{
     font-weight:1000;
-    letter-spacing:0.10em;
+    letter-spacing:0.12em;
     text-transform:uppercase;
     font-size:12px;
     color:#111827;
@@ -314,18 +316,17 @@ doctype html>
     background:#fff;
   }
 
+  /* V3: give the layout a bit more breathing room on 1080p */
   .export-body{
     display:grid;
-    grid-template-columns: 420px 1fr;
-    height: calc(100% - 50px);
+    grid-template-columns: 520px 1fr;
+    height: calc(100% - 56px);
   }
   .export-text{
     border-right: 3px dotted #d1d5db;
-    padding: 12px 12px;
+    padding: 14px 14px;
   }
-  .export-text .trow{
-    margin-bottom:10px;
-  }
+  .export-text .trow{ margin-bottom:12px; }
   .export-text .tlabel{
     font-size:11px;
     font-weight:1000;
@@ -337,22 +338,20 @@ doctype html>
   .export-text .tbox{
     border:1px solid #e5e7eb;
     border-radius:14px;
-    padding:10px 10px;
-    min-height:62px;
-    font-size:13px;
-    font-weight:800;
+    padding:12px 12px;
+    min-height:74px;
+    font-size:14px;
+    font-weight:850;
     color:#111827;
     line-height:1.25;
     white-space:pre-wrap;
     overflow:hidden;
   }
 
-  .export-board{
-    padding: 12px 12px;
-  }
+  .export-board{ padding: 14px 14px; }
   .export-board .board{
-    grid-auto-rows: 150px;
-    gap: 10px;
+    grid-auto-rows: 170px;
+    gap: 12px;
   }
   .export-board .cell{
     border: 2px solid #e5e7eb;
@@ -365,8 +364,8 @@ doctype html>
 
   .sig-stamp{
     position:absolute;
-    left: 12px;
-    bottom: 10px;
+    left: 14px;
+    bottom: 12px;
     display:flex;
     gap:10px;
     align-items:center;
@@ -375,7 +374,7 @@ doctype html>
     border:2px solid var(--good);
     color:#166534;
     border-radius:999px;
-    padding:5px 10px;
+    padding:6px 12px;
     font-weight:1000;
     letter-spacing:0.10em;
     text-transform:uppercase;
@@ -398,12 +397,12 @@ doctype html>
 <header>
   <div class="row">
     <div class="title">
-      <h1>AI Storyboard (V2) — Tap image → Tap box → Export 1-Page JPG</h1>
+      <h1>AI Storyboard (V3) — Tap image → Tap box → Export LANDSCAPE JPG</h1>
       <span class="pill" id="armedPill">No image selected</span>
     </div>
     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
       <button class="btn" id="clearAllBtn" title="Clear everything"><span style="font-size:16px;">✕</span> Clear</button>
-      <button class="btn primary" id="exportJpgBtn" title="Export ONE PAGE JPG"><span style="font-size:16px;">🖼️</span> Export JPG</button>
+      <button class="btn primary" id="exportJpgBtn" title="Export LANDSCAPE JPG (1920×1080)"><span style="font-size:16px;">🖼️</span> Export JPG</button>
     </div>
   </div>
 </header>
@@ -710,7 +709,7 @@ doctype html>
 
   setArmedPill();
 
-  // --------- ONE-PAGE EXPORT (JPG) ---------
+  // --------- LANDSCAPE EXPORT (1920×1080 JPG) ---------
   function clampText(s, maxChars){
     s = (s || "").trim();
     if (!s) return "—";
@@ -723,10 +722,10 @@ doctype html>
     const date = ($("dateStr").value || todayISO()).trim();
     const mode = ($("modeSel").value || "science").trim();
 
-    const standard = clampText($("standard").value, 70);
-    const objective = clampText($("objective").value, 150);
-    const procedure = clampText($("procedure").value, 420);
-    const notes = clampText($("notes").value, 280);
+    const standard = clampText($("standard").value, 110);
+    const objective = clampText($("objective").value, 220);
+    const procedure = clampText($("procedure").value, 700);
+    const notes = clampText($("notes").value, 420);
 
     const boardClone = document.getElementById("board").cloneNode(true);
     boardClone.querySelectorAll(".xclear").forEach(x => x.remove());
@@ -786,24 +785,25 @@ doctype html>
     return frame;
   }
 
-  async function exportOnePageJPG(){
+  async function exportLandscapeJPG(){
     const host = document.getElementById("exportHost");
     host.innerHTML = "";
     const frame = makeExportFrame();
     host.appendChild(frame);
 
-    // S1: Sharpen output
+    // V3: crisp but safe scaling
+    const dpr = Math.min(3, (window.devicePixelRatio || 2) + 1);
     const canvas = await html2canvas(frame, {
       backgroundColor: "#ffffff",
-      scale: 3,                 // sharper than 2
+      scale: dpr,
       useCORS: true,
-      imageTimeout: 15000,
+      imageTimeout: 20000,
       removeContainer: true
     });
 
     const teacher = ($("teacherName").value || "User").trim().replace(/\s+/g, "_");
     const date = ($("dateStr").value || todayISO()).trim();
-    const filename = `StoryAi_${teacher}_${date}.jpg`;
+    const filename = `StoryAi_${teacher}_${date}_LANDSCAPE_1920x1080.jpg`;
 
     const jpgData = canvas.toDataURL("image/jpeg", 0.95);
     const a = document.createElement("a");
@@ -816,7 +816,7 @@ doctype html>
     host.innerHTML = "";
   }
 
-  $("exportJpgBtn").addEventListener("click", exportOnePageJPG);
+  $("exportJpgBtn").addEventListener("click", exportLandscapeJPG);
 </script>
 </body>
 </html>
