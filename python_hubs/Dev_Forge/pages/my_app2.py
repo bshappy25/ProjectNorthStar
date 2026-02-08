@@ -1,304 +1,510 @@
-"""
-my_app2.py — Simplified HTML Viewer (DevForge Tester App)
-
-Includes:
-- PORTAL Viewing Window (TV frame + scanlines + glow)
-- PALM ID Admin Gate (tap 3x → password unlock)
-- EASY X Delete Tool (admin-only delete selected HTML tool)
-
-Expected folder:
-- tools_html/   (contains .html files)
-"""
-
-from __future__ import annotations
-
-import html
-from pathlib import Path
-from datetime import date
-
 import streamlit as st
-import streamlit.components.v1 as components
+from dataclasses import dataclass, asdict
+
+# ============================================================
+# UI CSS SELECTOR — Streamlit In-App Theme Builder
+# - Pick colors / presets
+# - Preview multiple components
+# - Export reusable code blocks (CSS + Python)
+# ============================================================
+
+st.set_page_config(page_title="UI CSS Selector", page_icon="🎨", layout="wide")
+
+# ---------------------------
+# Presets (easy starting points)
+# ---------------------------
+PRESETS = {
+    "Neutral Light (DOE-friendly)": {
+        "bg": "#F3F4F6",
+        "panel": "#FFFFFF",
+        "border": "#D1D5DB",
+        "text": "#111827",
+        "muted": "#6B7280",
+        "accent": "#2563EB",
+        "accent_text": "#FFFFFF",
+        "success": "#16A34A",
+        "warning": "#F59E0B",
+        "danger": "#DC2626",
+        "shadow": "0 10px 20px rgba(0,0,0,0.08)",
+        "radius": 18,
+    },
+    "Science Mode (Cool Lab)": {
+        "bg": "#ECFEFF",
+        "panel": "#FFFFFF",
+        "border": "#A7F3D0",
+        "text": "#0F172A",
+        "muted": "#334155",
+        "accent": "#0EA5E9",
+        "accent_text": "#FFFFFF",
+        "success": "#22C55E",
+        "warning": "#F97316",
+        "danger": "#EF4444",
+        "shadow": "0 14px 26px rgba(2,132,199,0.12)",
+        "radius": 20,
+    },
+    "Dark Neon (Arcade)": {
+        "bg": "#0B1020",
+        "panel": "#0F172A",
+        "border": "#1F2A44",
+        "text": "#E5E7EB",
+        "muted": "#9CA3AF",
+        "accent": "#A855F7",
+        "accent_text": "#0B1020",
+        "success": "#34D399",
+        "warning": "#FBBF24",
+        "danger": "#FB7185",
+        "shadow": "0 16px 32px rgba(168,85,247,0.12)",
+        "radius": 22,
+    },
+    "Warm Pastel (Calm)": {
+        "bg": "#FFF7ED",
+        "panel": "#FFFFFF",
+        "border": "#FED7AA",
+        "text": "#1F2937",
+        "muted": "#6B7280",
+        "accent": "#F97316",
+        "accent_text": "#111827",
+        "success": "#10B981",
+        "warning": "#EAB308",
+        "danger": "#EF4444",
+        "shadow": "0 12px 24px rgba(249,115,22,0.10)",
+        "radius": 18,
+    },
+}
+
+# ---------------------------
+# Theme model
+# ---------------------------
+@dataclass
+class ThemeTokens:
+    bg: str
+    panel: str
+    border: str
+    text: str
+    muted: str
+    accent: str
+    accent_text: str
+    success: str
+    warning: str
+    danger: str
+    shadow: str
+    radius: int
 
 
-# =====================
-# CONFIG
-# =====================
-
-TOOLS_DIR = Path(__file__).parent / "tools_html"   # put your .html files here
-TOOLS_DIR.mkdir(exist_ok=True)
-
-ADMIN_CODE = "Bshapp"  # PALM ID code
-
-
-# =====================
-# HELPERS
-# =====================
-
-def list_tools() -> list[str]:
-    return sorted([p.stem for p in TOOLS_DIR.glob("*.html")])
-
-
-def load_tool(tool_name: str) -> str | None:
-    p = TOOLS_DIR / f"{tool_name}.html"
-    if p.exists():
-        return p.read_text(encoding="utf-8", errors="ignore")
-    return None
+def theme_to_css_vars(t: ThemeTokens) -> str:
+    return f"""
+:root {{
+  --bg: {t.bg};
+  --panel: {t.panel};
+  --border: {t.border};
+  --text: {t.text};
+  --muted: {t.muted};
+  --accent: {t.accent};
+  --accentText: {t.accent_text};
+  --success: {t.success};
+  --warning: {t.warning};
+  --danger: {t.danger};
+  --shadow: {t.shadow};
+  --radius: {t.radius}px;
+}}
+""".strip()
 
 
-def delete_tool(tool_name: str) -> bool:
-    p = TOOLS_DIR / f"{tool_name}.html"
-    if p.exists():
-        p.unlink()
-        return True
-    return False
-
-
-def portal_view(tool_html: str, border: str = "rgba(20,184,166,0.65)") -> None:
-    """
-    Render the HTML in a "portal" TV-style frame using sandboxed iframe + srcdoc.
-    """
-    escaped = html.escape(tool_html, quote=True)
-
-    combined = f"""<!doctype html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+def app_css(t: ThemeTokens) -> str:
+    # This CSS styles BOTH: overall page and demo components
+    return f"""
 <style>
-  :root {{ --border: {border}; }}
+{theme_to_css_vars(t)}
 
-  body {{
-    margin: 0;
-    background: transparent;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-  }}
+html, body, [data-testid="stAppViewContainer"] {{
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}}
 
-  .tv-frame {{
-    position: relative;
-    width: 100%;
-    height: 820px;
-    border: 3px solid var(--border);
-    border-radius: 20px;
-    overflow: hidden;
-    background: rgba(0,0,0,0.05);
-    box-shadow:
-      0 0 40px rgba(20,184,166,0.20),
-      inset 0 0 60px rgba(20,184,166,0.05);
-  }}
+* {{
+  box-sizing: border-box;
+}}
 
-  .tv-frame:before {{
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(255,255,255,0.03) 2px,
-      rgba(255,255,255,0.03) 4px
-    );
-    pointer-events: none;
-    z-index: 2;
-    animation: scanlines 8s linear infinite;
-  }}
+.block {{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}}
 
-  @keyframes scanlines {{
-    0% {{ transform: translateY(0); }}
-    100% {{ transform: translateY(4px); }}
-  }}
+.h1 {{
+  font-weight: 900;
+  letter-spacing: .02em;
+  font-size: 1.35rem;
+  margin: 0 0 6px 0;
+}}
 
-  .tv-frame:after {{
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(20,184,166,0.12) 0%, transparent 55%);
-    pointer-events: none;
-    z-index: 1;
-    animation: glow 4s ease-in-out infinite alternate;
-  }}
+.muted {{
+  color: var(--muted);
+  font-size: 0.95rem;
+}}
 
-  @keyframes glow {{
-    0% {{ opacity: 0.25; }}
-    100% {{ opacity: 0.65; }}
-  }}
+.row {{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}}
 
-  .screen {{
-    position: relative;
-    z-index: 3;
-    width: 100%;
-    height: 100%;
-  }}
+.pill {{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.35);
+  color: var(--text);
+  font-weight: 700;
+}}
 
-  iframe {{
-    width: 100%;
-    height: 100%;
-    border: 0;
-    background: white;
-  }}
+.pill.success {{
+  border-color: color-mix(in srgb, var(--success) 55%, var(--border));
+}}
+.pill.warning {{
+  border-color: color-mix(in srgb, var(--warning) 55%, var(--border));
+}}
+.pill.danger {{
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
+}}
+
+.card {{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  min-width: 220px;
+}}
+
+.cardTitle {{
+  font-weight: 900;
+  margin-bottom: 6px;
+}}
+
+.btn {{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 10px 14px;
+  border-radius: calc(var(--radius) - 6px);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: var(--accent);
+  color: var(--accentText);
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+}}
+
+.btn.secondary {{
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}}
+
+.btn:hover {{
+  filter: brightness(0.98);
+}}
+
+.alert {{
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  font-weight: 800;
+}}
+
+.alert.success {{
+  border-color: color-mix(in srgb, var(--success) 60%, var(--border));
+  background: color-mix(in srgb, var(--success) 10%, var(--panel));
+}}
+.alert.warning {{
+  border-color: color-mix(in srgb, var(--warning) 60%, var(--border));
+  background: color-mix(in srgb, var(--warning) 10%, var(--panel));
+}}
+.alert.danger {{
+  border-color: color-mix(in srgb, var(--danger) 60%, var(--border));
+  background: color-mix(in srgb, var(--danger) 10%, var(--panel));
+}}
+
+.table {{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}}
+.tr {{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}}
+.td {{
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}}
+.td:first-child {{
+  border-left: 1px solid var(--border);
+  border-top-left-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
+  font-weight: 900;
+}}
+.td:last-child {{
+  border-right: 1px solid var(--border);
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  color: var(--muted);
+  font-weight: 700;
+}}
 </style>
-</head>
-<body>
-  <div class="tv-frame">
-    <div class="screen">
-      <iframe
-        sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads"
-        srcdoc="{escaped}">
-      </iframe>
-    </div>
-  </div>
-</body>
-</html>
-"""
-    components.html(combined, height=860, scrolling=False)
+""".strip()
 
 
-# =====================
-# SESSION STATE (PALM ID)
-# =====================
+# ---------------------------
+# Session state init
+# ---------------------------
+if "theme_name" not in st.session_state:
+    st.session_state.theme_name = "Neutral Light (DOE-friendly)"
+if "theme" not in st.session_state:
+    st.session_state.theme = PRESETS[st.session_state.theme_name].copy()
 
-if "palm_taps" not in st.session_state:
-    st.session_state["palm_taps"] = 0
+# ---------------------------
+# Sidebar controls
+# ---------------------------
+with st.sidebar:
+    st.markdown("## 🎨 UI CSS Selector")
+    st.caption("Pick a preset, then tweak tokens. Export code blocks for other apps.")
 
-if "show_admin_box" not in st.session_state:
-    st.session_state["show_admin_box"] = False
+    theme_name = st.selectbox(
+        "Preset",
+        list(PRESETS.keys()),
+        index=list(PRESETS.keys()).index(st.session_state.theme_name),
+    )
 
-if "admin_unlocked" not in st.session_state:
-    st.session_state["admin_unlocked"] = False
+    if theme_name != st.session_state.theme_name:
+        st.session_state.theme_name = theme_name
+        st.session_state.theme = PRESETS[theme_name].copy()
 
-if "current_tool" not in st.session_state:
-    st.session_state["current_tool"] = None
+    st.divider()
+    st.markdown("### Tokens")
 
+    t = st.session_state.theme
+    t["bg"] = st.color_picker("Background (bg)", t["bg"])
+    t["panel"] = st.color_picker("Panel (panel)", t["panel"])
+    t["border"] = st.color_picker("Border (border)", t["border"])
+    t["text"] = st.color_picker("Text (text)", t["text"])
+    t["muted"] = st.color_picker("Muted (muted)", t["muted"])
+    t["accent"] = st.color_picker("Accent (accent)", t["accent"])
+    t["accent_text"] = st.color_picker("Accent Text (accent_text)", t["accent_text"])
 
-# =====================
-# PAGE CONFIG
-# =====================
+    st.markdown("### Status Colors")
+    t["success"] = st.color_picker("Success", t["success"])
+    t["warning"] = st.color_picker("Warning", t["warning"])
+    t["danger"] = st.color_picker("Danger", t["danger"])
 
-st.set_page_config(page_title="My App 2 — HTML Viewer", page_icon="🖥️", layout="wide")
+    st.markdown("### Shape / Shadow")
+    t["radius"] = st.slider("Radius (px)", 8, 30, int(t["radius"]))
+    shadow_mode = st.selectbox(
+        "Shadow strength",
+        ["Soft", "Medium", "Bold", "Off"],
+        index=1,
+    )
+    if shadow_mode == "Soft":
+        t["shadow"] = "0 10px 20px rgba(0,0,0,0.08)"
+    elif shadow_mode == "Medium":
+        t["shadow"] = "0 14px 26px rgba(0,0,0,0.10)"
+    elif shadow_mode == "Bold":
+        t["shadow"] = "0 18px 36px rgba(0,0,0,0.14)"
+    else:
+        t["shadow"] = "none"
 
-
-# =====================
-# HEADER + PALM ID UI
-# =====================
-
-left, right = st.columns([0.88, 0.12], vertical_alignment="center")
-
-with left:
-    st.title("🖥️ My App 2 — Simplified HTML Viewer")
-    st.caption("Portal viewer for your local HTML tools (tools_html/*.html)")
-
-with right:
-    if st.button("🖐️", help="Palm ID (tap 3x)"):
-        st.session_state["palm_taps"] += 1
-        if st.session_state["palm_taps"] >= 3:
-            st.session_state["show_admin_box"] = True
+    st.divider()
+    if st.button("Reset to preset"):
+        st.session_state.theme = PRESETS[st.session_state.theme_name].copy()
         st.rerun()
 
-# Gate UI (only appears after 3 taps)
-if st.session_state["show_admin_box"] and not st.session_state["admin_unlocked"]:
-    st.markdown("**Palm ID:** enter admin code")
-    code_try = st.text_input("Admin Code", type="password", placeholder="Enter code...")
-    colA, colB = st.columns([0.6, 0.4])
+# ---------------------------
+# Build current theme + inject CSS
+# ---------------------------
+theme = ThemeTokens(**st.session_state.theme)
+st.markdown(app_css(theme), unsafe_allow_html=True)
 
-    with colA:
-        if st.button("Unlock"):
-            if code_try == ADMIN_CODE:
-                st.session_state["admin_unlocked"] = True
-                st.success("Admin override unlocked.")
-                st.rerun()
-            else:
-                st.error("Incorrect code.")
+# ---------------------------
+# Main layout: Preview + Export
+# ---------------------------
+left, right = st.columns([1.1, 0.9], gap="large")
 
-    with colB:
-        if st.button("Reset"):
-            st.session_state["palm_taps"] = 0
-            st.session_state["show_admin_box"] = False
-            st.session_state["admin_unlocked"] = False
-            st.rerun()
+with left:
+    st.markdown(
+        f"""
+        <div class="block">
+          <div class="h1">Preview — {st.session_state.theme_name}</div>
+          <div class="muted">These are sample components that will react to your token changes.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-# Optional tiny badge if unlocked
-if st.session_state["admin_unlocked"]:
-    st.caption("🖐️ Palm ID: unlocked")
+    st.markdown("")
 
+    # Component gallery
+    st.markdown(
+        """
+        <div class="row">
+          <div class="card">
+            <div class="cardTitle">Card</div>
+            <div class="muted">Panels, borders, text, shadow, radius.</div>
+          </div>
 
-st.divider()
+          <div class="card">
+            <div class="cardTitle">Pills</div>
+            <div class="row" style="margin-top:8px">
+              <span class="pill success">✅ Success</span>
+              <span class="pill warning">⚠️ Warning</span>
+              <span class="pill danger">🛑 Danger</span>
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
+    st.markdown("")
 
-# =====================
-# TOOL SELECTOR
-# =====================
+    st.markdown(
+        """
+        <div class="block">
+          <div class="row">
+            <a class="btn">Primary Button</a>
+            <a class="btn secondary">Secondary Button</a>
+            <span class="pill">🧠 Muted label demo</span>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-tools = list_tools()
+    st.markdown("")
 
-topL, topR = st.columns([0.72, 0.28], vertical_alignment="center")
+    st.markdown(
+        """
+        <div class="row">
+          <div class="alert success" style="flex:1">✅ Success alert — you can use this for “Saved / Exported”.</div>
+          <div class="alert warning" style="flex:1">⚠️ Warning alert — “Check inputs”.</div>
+          <div class="alert danger" style="flex:1">🛑 Danger alert — “Something failed”.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-with topL:
-    st.subheader("📁 Tools Folder")
-    st.caption(f"Path: {TOOLS_DIR} • {len(tools)} file(s) found • {date.today().isoformat()}")
+    st.markdown("")
 
-with topR:
-    st.markdown("**Current tool**")
-    if tools:
-        default_idx = 0
-        if st.session_state["current_tool"] in tools:
-            default_idx = tools.index(st.session_state["current_tool"])
-        picked = st.selectbox("Select HTML tool", tools, index=default_idx, label_visibility="collapsed")
-        st.session_state["current_tool"] = picked
-    else:
-        st.session_state["current_tool"] = None
-        st.info("Add .html files into tools_html/")
+    st.markdown(
+        """
+        <div class="block">
+          <div class="h1" style="font-size:1.05rem">Table-ish rows</div>
+          <div class="muted">This is a common teacher-tool pattern (quick status rows).</div>
+          <div style="margin-top:10px">
+            <table class="table">
+              <tr class="tr">
+                <td class="td">PBIS Ticket Maker</td>
+                <td class="td">Ready • Export OK</td>
+              </tr>
+              <tr class="tr">
+                <td class="td">AI Storyboard</td>
+                <td class="td">Draft • Needs Safari check</td>
+              </tr>
+              <tr class="tr">
+                <td class="td">Image Ticker</td>
+                <td class="td">Stable • Plug-in widget</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-st.divider()
+with right:
+    st.markdown(
+        """
+        <div class="block">
+          <div class="h1">Export Blocks</div>
+          <div class="muted">Copy these into other apps. The tokens stay consistent across projects.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
+    st.markdown("")
 
-# =====================
-# EASY X (Delete Tool) — ADMIN ONLY
-# =====================
+    # 1) CSS VARS
+    css_vars = theme_to_css_vars(theme)
+    st.markdown("### 1) CSS Variables (drop into any HTML/CSS)")
+    st.code(css_vars, language="css")
 
-def _render_delete_ui():
-    st.markdown("### 🧨 EASY X (Delete Tool)")
-    st.caption("Admin-only: deletes the currently selected HTML file from tools_html/")
+    # 2) Streamlit injector
+    injector = f"""# --- UI THEME INJECTOR (Streamlit) ---
+import streamlit as st
 
-    if not st.session_state.get("current_tool"):
-        st.warning("No tool selected.")
-        return
+THEME_CSS = r\"\"\"<style>
+{css_vars}
 
-    tool_name = st.session_state["current_tool"]
-    colA, colB = st.columns([0.85, 0.15], vertical_alignment="center")
-    with colA:
-        st.markdown(f"**Selected:** `{tool_name}.html`")
-    with colB:
-        if st.button("✖", help="Delete tool"):
-            ok = delete_tool(tool_name)
-            if ok:
-                st.session_state["current_tool"] = None
-                st.success(f"✅ {tool_name}.html deleted.")
-            else:
-                st.error("File not found.")
-            st.rerun()
+html, body, [data-testid="stAppViewContainer"] {{
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}}
+</style>\"\"\"
 
+st.markdown(THEME_CSS, unsafe_allow_html=True)
+"""
+    st.markdown("### 2) Streamlit CSS Injector (minimal)")
+    st.code(injector, language="python")
 
-# show delete UI only when unlocked AND something is selected
-if st.session_state.get("admin_unlocked") and st.session_state.get("current_tool"):
-    with st.expander("🧨 Admin Tools", expanded=False):
-        _render_delete_ui()
+    # 3) A small helper module (paste as ui_theme.py)
+    theme_dict = asdict(theme)
+    module_block = f"""# ui_theme.py
+# Reusable theme tokens for Streamlit/HTML injection.
 
+THEME = {theme_dict}
 
-# =====================
-# PORTAL VIEW
-# =====================
+def css_vars(theme: dict) -> str:
+    return f\"\"\":root {{
+  --bg: {{theme['bg']}};
+  --panel: {{theme['panel']}};
+  --border: {{theme['border']}};
+  --text: {{theme['text']}};
+  --muted: {{theme['muted']}};
+  --accent: {{theme['accent']}};
+  --accentText: {{theme['accent_text']}};
+  --success: {{theme['success']}};
+  --warning: {{theme['warning']}};
+  --danger: {{theme['danger']}};
+  --shadow: {{theme['shadow']}};
+  --radius: {{theme['radius']}}px;
+}}\"\"\"
 
-st.subheader("🌀 PORTAL — Viewing Window")
+def inject(st_module, theme: dict = None) -> None:
+    t = theme or THEME
+    st_module.markdown(
+        "<style>" + css_vars(t) + "</style>",
+        unsafe_allow_html=True
+    )
+"""
+    st.markdown("### 3) Python Theme Module (drop into repo)")
+    st.code(module_block, language="python")
 
-if not st.session_state.get("current_tool"):
-    st.info("Pick a tool on the right, or add .html files into tools_html/")
-else:
-    tool_html = load_tool(st.session_state["current_tool"])
-    if tool_html:
-        portal_view(tool_html, border="rgba(20,184,166,0.65)")
-    else:
-        st.error(f"Tool file not found: {st.session_state['current_tool']}.html")
-
-st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
+    st.markdown("### Quick wiring tip")
+    st.markdown(
+        """
+- Put this app in your repo as `tools/ui_css_selector_app.py`
+- Put the exported module as `utils/ui_theme.py`
+- In any Streamlit app: `from utils import ui_theme; ui_theme.inject(st)`
+        """
+    )
