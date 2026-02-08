@@ -11,6 +11,9 @@ Quick export to BSChapp v2 format
 import streamlit as st
 from datetime import date
 
+from PIL import Image, ImageDraw, ImageFont
+import textwrap
+import io
 # =====================
 # NGSS STANDARDS DATABASE
 # =====================
