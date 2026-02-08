@@ -3,101 +3,266 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Paper Picker — Calm Writing</title>
+<title>Paper Picker — Retro Flash Deluxe</title>
 <style>
   :root{
-    --ui-bg: rgba(255,255,255,0.78);
-    --ui-border: rgba(0,0,0,0.12);
-    --text: #111827;
-    --muted: #6b7280;
-    --shadow: 0 18px 50px rgba(0,0,0,0.25);
+    --text:#eaf2ff;
+    --muted:#b8c7e6;
+
+    --ui: rgba(10,14,24,0.78);
+    --ui2: rgba(16,24,44,0.72);
+    --border: rgba(160,190,255,0.22);
+
+    --shadow: 0 18px 55px rgba(0,0,0,0.55);
     --radius: 18px;
 
-    /* paper colors (neutral 5) */
-    --p1: #fbf7ef; /* warm ivory */
-    --p2: #f2f2f2; /* soft gray */
-    --p3: #efe7da; /* parchment */
-    --p4: #e7edf2; /* cool mist */
-    --p5: #f4efe9; /* bone */
+    /* paper colors (5 neutrals) */
+    --p1:#fbf7ef; /* warm ivory */
+    --p2:#f2f2f2; /* soft gray */
+    --p3:#efe7da; /* parchment */
+    --p4:#e7edf2; /* cool mist */
+    --p5:#f4efe9; /* bone */
+
+    /* retro accents */
+    --neonA: #58f7ff;
+    --neonB: #c77dff;
+    --neonC: #66ff99;
+    --warn:  #ffd166;
+
+    /* runtime */
+    --paperColor: var(--p1);
   }
 
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     color: var(--text);
     overflow-x:hidden;
+    background:#050814;
   }
 
-  /* Wood table background (CSS-only, no images) */
+  /* ===== Wood table background (CSS-only) ===== */
   .wood{
     min-height:100vh;
-    padding: 22px;
+    padding: 18px;
     background:
-      radial-gradient(1200px 700px at 20% 0%, rgba(255,255,255,0.12), transparent 55%),
-      radial-gradient(900px 600px at 90% 15%, rgba(0,0,0,0.18), transparent 60%),
-      /* wood grain layers */
+      radial-gradient(1200px 700px at 20% 0%, rgba(255,255,255,0.10), transparent 58%),
+      radial-gradient(900px 600px at 90% 15%, rgba(0,0,0,0.24), transparent 62%),
       repeating-linear-gradient(90deg,
-        rgba(0,0,0,0.06) 0px,
-        rgba(0,0,0,0.00) 10px,
-        rgba(255,255,255,0.03) 18px,
-        rgba(0,0,0,0.00) 28px
+        rgba(0,0,0,0.08) 0px,
+        rgba(0,0,0,0.00) 12px,
+        rgba(255,255,255,0.035) 22px,
+        rgba(0,0,0,0.00) 34px
       ),
-      linear-gradient(135deg, #6a4a2f, #7b5636 45%, #5a3c25);
+      linear-gradient(135deg, #5e3f27, #7b5636 45%, #4b2f1b);
   }
 
+  /* ===== CRT overlay ===== */
+  .crt::before{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.22) 0px,
+        rgba(0,0,0,0.22) 1px,
+        rgba(0,0,0,0.0) 2px,
+        rgba(0,0,0,0.0) 4px
+      );
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+  }
+  .crt::after{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    background: radial-gradient(900px 600px at 50% 35%, rgba(255,255,255,0.08), transparent 60%);
+    opacity: 0.55;
+  }
+
+  /* ===== Custom cursor: ornate wooden wand (SVG data URI) ===== */
+  body{
+    cursor: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>\
+<defs>\
+  <linearGradient id='wood' x1='0' y1='0' x2='1' y2='1'>\
+    <stop offset='0' stop-color='%238b5a2b'/>\
+    <stop offset='0.5' stop-color='%236b3f1f'/>\
+    <stop offset='1' stop-color='%239a6a3a'/>\
+  </linearGradient>\
+  <radialGradient id='gem' cx='50%25' cy='50%25' r='60%25'>\
+    <stop offset='0' stop-color='%23ffffff' stop-opacity='0.9'/>\
+    <stop offset='0.35' stop-color='%2358f7ff' stop-opacity='0.9'/>\
+    <stop offset='1' stop-color='%23c77dff' stop-opacity='0.9'/>\
+  </radialGradient>\
+</defs>\
+<path d='M10 52 L52 10' stroke='url(%23wood)' stroke-width='6' stroke-linecap='round'/>\
+<path d='M14 56 L56 14' stroke='%23000000' stroke-opacity='0.25' stroke-width='2' stroke-linecap='round'/>\
+<circle cx='54' cy='12' r='6' fill='url(%23gem)' stroke='%23ffffff' stroke-opacity='0.35' stroke-width='1.2'/>\
+<path d='M50 16 L58 8' stroke='%23ffffff' stroke-opacity='0.35' stroke-width='1.4' stroke-linecap='round'/>\
+<path d='M18 44 L24 38' stroke='%23ffffff' stroke-opacity='0.12' stroke-width='1.2' stroke-linecap='round'/>\
+</svg>") 6 58, auto;
+  }
+
+  /* Wand glow follower (animated tip) */
+  #wandGlow{
+    position: fixed;
+    width: 18px; height: 18px;
+    border-radius: 999px;
+    pointer-events:none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.95), rgba(88,247,255,0.55) 35%, rgba(199,125,255,0.25) 65%, rgba(0,0,0,0) 72%);
+    filter: blur(0.2px);
+    opacity: 0.0;
+    transition: opacity 220ms ease;
+  }
+  .wandOn #wandGlow{ opacity: 0.95; }
+  #wandTrail{
+    position: fixed;
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    pointer-events:none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 50% 50%, rgba(88,247,255,0.18), rgba(199,125,255,0.08) 45%, rgba(0,0,0,0) 70%);
+    opacity: 0.0;
+    transition: opacity 220ms ease;
+    filter: blur(0.4px);
+  }
+  .wandOn #wandTrail{ opacity: 0.65; }
+
+  /* ===== Layout ===== */
   .wrap{
-    max-width: 1100px;
+    max-width: 1180px;
     margin: 0 auto;
     display:grid;
-    grid-template-columns: 340px 1fr;
-    gap: 18px;
+    grid-template-columns: 380px 1fr;
+    gap: 16px;
     align-items: start;
   }
-
-  @media (max-width: 940px){
-    .wrap{grid-template-columns: 1fr; }
+  @media (max-width: 980px){
+    .wrap{grid-template-columns: 1fr;}
   }
 
+  /* ===== Panels ===== */
   .panel{
-    background: var(--ui-bg);
-    border: 1px solid var(--ui-border);
+    position:relative;
+    background: linear-gradient(180deg, var(--ui), rgba(8,10,18,0.76));
+    border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+    box-shadow: var(--shadow);
     padding: 14px;
+    overflow:hidden;
     backdrop-filter: blur(10px);
   }
+  .panel::before{
+    content:"";
+    position:absolute; inset:-1px;
+    background:
+      radial-gradient(700px 220px at 15% 0%, rgba(88,247,255,0.20), transparent 55%),
+      radial-gradient(600px 220px at 85% 0%, rgba(199,125,255,0.18), transparent 55%);
+    pointer-events:none;
+    opacity: 0.8;
+  }
 
+  .brand{
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
   .title{
+    margin:0;
     font-weight: 900;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     font-size: 0.95rem;
-    margin: 0 0 6px 0;
+    text-shadow:
+      0 0 8px rgba(88,247,255,0.25),
+      0 0 16px rgba(199,125,255,0.18);
   }
-  .sub{
-    color: var(--muted);
-    font-size: 0.92rem;
-    margin: 0 0 12px 0;
-    line-height: 1.25rem;
+  .badge{
+    font-size:0.78rem;
+    font-weight:900;
+    letter-spacing:0.12em;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(88,247,255,0.34);
+    background: rgba(88,247,255,0.08);
+    color: #dffcff;
+    white-space:nowrap;
   }
 
-  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0;}
-  label{font-size:0.88rem; color:#374151; font-weight:700}
-  select, button, input[type="checkbox"]{
-    font: inherit;
+  .sub{
+    margin: 6px 0 12px 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.3rem;
+  }
+
+  label{
+    display:block;
+    font-size:0.82rem;
+    font-weight:900;
+    letter-spacing:0.10em;
+    text-transform: uppercase;
+    color:#cfe2ff;
+    margin: 10px 0 6px;
   }
 
   select{
     width:100%;
     padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.12);
-    background: rgba(255,255,255,0.9);
+    border-radius: 14px;
+    border: 1px solid rgba(160,190,255,0.22);
+    background: rgba(7,10,18,0.6);
+    color: var(--text);
     outline:none;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.35);
   }
 
+  /* ===== Retro buttons ===== */
+  .btnRow{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top: 12px;}
+  .btnRow3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top: 10px;}
+  .btn{
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(160,190,255,0.22);
+    background: linear-gradient(180deg, rgba(14,18,34,0.92), rgba(8,10,18,0.88));
+    color: var(--text);
+    font-weight: 900;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    cursor:pointer;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.45);
+    transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+  }
+  .btn:hover{
+    filter: brightness(1.08);
+    box-shadow: 0 0 0 4px rgba(88,247,255,0.08), 0 14px 30px rgba(0,0,0,0.45);
+  }
+  .btn:active{ transform: translateY(1px) scale(0.995); }
+  .btn.primary{ border-color: rgba(88,247,255,0.38); }
+  .btn.warn{ border-color: rgba(255,209,102,0.45); }
+  .btn.good{ border-color: rgba(102,255,153,0.30); }
+
+  /* ===== Toggles ===== */
+  .tog{
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(160,190,255,0.22);
+    background: rgba(7,10,18,0.50);
+    margin-top: 10px;
+  }
+  .tog span{font-weight:900; letter-spacing:0.08em; text-transform:uppercase;}
+  .tog small{display:block; color:var(--muted); font-weight:700; margin-top:2px; letter-spacing:0.02em}
+  input[type="checkbox"]{ transform: scale(1.2); accent-color: var(--neonA); }
+
+  /* ===== Color chips ===== */
   .chips{
     display:grid;
     grid-template-columns: repeat(5, 1fr);
@@ -105,208 +270,864 @@
     margin-top: 8px;
   }
   .chip{
-    height: 36px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.14);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    height: 34px;
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,0.18);
+    box-shadow: 0 10px 18px rgba(0,0,0,0.35);
     cursor:pointer;
     position: relative;
     overflow:hidden;
+    transition: transform 120ms ease, filter 120ms ease;
   }
-  .chip[aria-pressed="true"]{
-    outline: 3px solid rgba(37,99,235,0.35);
-  }
+  .chip:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+  .chip[aria-pressed="true"]{ outline: 3px solid rgba(88,247,255,0.35); }
   .chip::after{
     content:"";
     position:absolute; inset:0;
-    background: radial-gradient(120px 40px at 20% 0%, rgba(255,255,255,0.22), transparent 60%);
+    background: radial-gradient(120px 40px at 20% 0%, rgba(255,255,255,0.28), transparent 60%);
     pointer-events:none;
   }
 
-  .btn{
-    width:100%;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.12);
-    background: rgba(17,24,39,0.92);
-    color: white;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    cursor:pointer;
-  }
-  .btn:active{ transform: translateY(1px); }
-
-  .toggle{
-    display:flex; align-items:center; gap:10px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.12);
-    background: rgba(255,255,255,0.85);
-    user-select:none;
-  }
-  .toggle span{
-    font-weight: 800;
-    color:#111827;
-  }
-  .toggle small{
-    display:block;
-    color: var(--muted);
-    font-weight: 600;
-    margin-top: 2px;
-  }
-
-  /* Preview area */
-  .stage{
-    position: relative;
-    min-height: 520px;
-    padding: 12px;
-  }
+  /* ===== Stage ===== */
+  .stage{ position: relative; min-height: 590px; padding: 12px; }
   .paperFrame{
     position: relative;
-    margin: 8px auto;
-    width: min(640px, 100%);
+    margin: 10px auto;
+    width: min(760px, 100%);
     aspect-ratio: 4 / 3;
-    border-radius: 18px;
-    box-shadow: var(--shadow);
-    transform: rotate(-0.35deg);
+    border-radius: 22px;
+    box-shadow:
+      0 0 0 2px rgba(88,247,255,0.14),
+      0 0 0 6px rgba(199,125,255,0.10),
+      var(--shadow);
     overflow:hidden;
+    transform: rotate(-0.25deg);
+    background: rgba(255,255,255,0.03);
+  }
+  .paperFrame::before{
+    content:"";
+    position:absolute; inset:-40%;
+    background: linear-gradient(120deg, transparent 42%, rgba(88,247,255,0.12) 50%, transparent 58%);
+    transform: translateX(-40%) rotate(10deg);
+    animation: sweep 6s ease-in-out infinite;
+    pointer-events:none;
+    opacity: 0.55;
+  }
+  @keyframes sweep{
+    0%{ transform: translateX(-45%) rotate(10deg); }
+    50%{ transform: translateX(10%) rotate(10deg); }
+    100%{ transform: translateX(-45%) rotate(10deg); }
   }
 
-  /* Paper base */
+  /* ===== Paper ===== */
   .paper{
     position:absolute; inset:0;
-    background: var(--paperColor, var(--p1));
+    background: var(--paperColor);
+    transition: filter 220ms ease, background 180ms ease;
   }
-
-  /* Paper texture */
   .paper::before{
     content:"";
     position:absolute; inset:0;
     background:
-      radial-gradient(700px 500px at 10% 0%, rgba(255,255,255,0.25), transparent 55%),
-      radial-gradient(520px 420px at 100% 35%, rgba(0,0,0,0.09), transparent 60%),
+      radial-gradient(760px 520px at 10% 0%, rgba(255,255,255,0.22), transparent 60%),
+      radial-gradient(520px 420px at 100% 35%, rgba(0,0,0,0.10), transparent 60%),
       repeating-linear-gradient(0deg,
-        rgba(0,0,0,0.02) 0px,
-        rgba(0,0,0,0.00) 6px
+        rgba(0,0,0,0.020) 0px,
+        rgba(0,0,0,0.000) 6px
       );
-    mix-blend-mode: multiply;
-    opacity: 0.55;
+    opacity: 0.62;
     pointer-events:none;
+    mix-blend-mode: multiply;
   }
-
-  /* Top binding / styles */
-  .paper.postit{
-    border-radius: 14px;
-  }
+  .paper.postit{ border-radius: 14px; }
   .paper.postit::after{
     content:"";
-    position:absolute;
-    top:0; left:0; right:0;
-    height: 42px;
+    position:absolute; top:0; left:0; right:0; height: 44px;
     background: linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.00));
-    opacity: 0.25;
+    opacity: 0.30;
     pointer-events:none;
   }
-
   .paper.note::after{
     content:"";
     position:absolute; inset:0;
     background:
-      /* ruled lines */
-      repeating-linear-gradient(
-        to bottom,
+      repeating-linear-gradient(to bottom,
         rgba(17,24,39,0.00) 0px,
         rgba(17,24,39,0.00) 22px,
-        rgba(17,24,39,0.10) 23px,
+        rgba(17,24,39,0.12) 23px,
         rgba(17,24,39,0.00) 24px
       ),
-      /* margin line */
-      linear-gradient(to right, rgba(239,68,68,0.18), rgba(239,68,68,0.18)) ;
+      linear-gradient(to right, rgba(239,68,68,0.16), rgba(239,68,68,0.16));
     background-size: auto, 2px 100%;
-    background-position: 0 0, 60px 0;
+    background-position: 0 0, 62px 0;
     background-repeat: repeat, no-repeat;
-    opacity: 0.45;
+    opacity: 0.48;
     pointer-events:none;
   }
-
   .paper.book{
-    background: linear-gradient(135deg, rgba(0,0,0,0.06), rgba(0,0,0,0.00) 40%),
-                var(--paperColor, var(--p1));
+    background: linear-gradient(135deg, rgba(0,0,0,0.06), rgba(0,0,0,0.00) 40%), var(--paperColor);
   }
   .paper.book::after{
     content:"";
-    position:absolute;
-    left: 0; top:0; bottom:0;
-    width: 18%;
-    background: linear-gradient(90deg, rgba(0,0,0,0.14), rgba(0,0,0,0.02));
-    opacity: 0.55;
+    position:absolute; left:0; top:0; bottom:0; width: 18%;
+    background: linear-gradient(90deg, rgba(0,0,0,0.16), rgba(0,0,0,0.02));
+    opacity: 0.58;
     pointer-events:none;
   }
 
-  .paper.blank{ /* keep base */ }
-
-  /* Text boxes overlay */
+  /* ===== Boxes overlay ===== */
   .boxes{
     position:absolute; inset:0;
     padding: 26px;
     display:grid;
     gap: 12px;
+    animation: popIn 180ms ease-out;
+  }
+  @keyframes popIn{
+    from{ transform: translateY(6px); opacity:0.0; }
+    to{ transform: translateY(0); opacity:1; }
   }
 
   textarea, input[type="text"]{
     width:100%;
     border-radius: 14px;
-    border: 1px solid rgba(0,0,0,0.18);
-    background: rgba(255,255,255,0.42);
+    border: 1px solid rgba(0,0,0,0.20);
+    background: rgba(255,255,255,0.44);
     outline:none;
     padding: 12px 12px;
     color:#111827;
     resize:none;
-    box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.18);
+    font-family: inherit;
+    transition: transform 120ms ease, box-shadow 120ms ease;
   }
-
   textarea:focus, input[type="text"]:focus{
-    border-color: rgba(37,99,235,0.55);
-    box-shadow: 0 0 0 4px rgba(37,99,235,0.16), 0 10px 22px rgba(0,0,0,0.10);
+    border-color: rgba(88,247,255,0.52);
+    box-shadow: 0 0 0 4px rgba(88,247,255,0.16), 0 12px 20px rgba(0,0,0,0.18);
+    transform: translateY(-1px);
   }
 
+  /* Layouts */
+  .layout-postit .boxes{ grid-template-rows: 1fr 1fr 1fr; }
+  .layout-note .boxes{ grid-template-rows: auto 1fr auto; }
+  .layout-note input[type="text"]{ font-weight: 900; letter-spacing: 0.06em; }
+  .layout-note textarea{ line-height: 1.35rem; }
+
+  .layout-book .boxes{ grid-template-rows: 1fr auto auto; align-content: center; }
+  .layout-book input[type="text"]{ text-align:center; background: rgba(255,255,255,0.38); }
+  .layout-book .book-title{
+    font-size: 1.25rem; font-weight: 1000; letter-spacing: 0.12em;
+    text-transform: uppercase; padding: 14px;
+  }
+  .layout-book .book-sub{ font-size: 1.0rem; font-weight: 900; opacity: 0.92; }
+  .layout-book .book-author{ font-size: 0.92rem; font-weight: 1000; letter-spacing: 0.14em; }
+
+  .layout-blank .boxes{ grid-template-rows: 1fr; }
+
+  /* Hint bar */
   .hint{
     position:absolute;
     bottom: 10px; left: 14px; right:14px;
-    color: rgba(17,24,39,0.62);
-    font-size: 0.85rem;
-    font-weight: 700;
+    color: rgba(8,10,18,0.62);
+    font-size: 0.82rem;
+    font-weight: 900;
     display:flex;
     justify-content: space-between;
     gap: 10px;
     pointer-events:none;
-  }
-
-  /* Layouts */
-  .layout-postit .boxes{
-    grid-template-rows: 1fr 1fr 1fr;
-  }
-
-  .layout-note .boxes{
-    grid-template-rows: auto 1fr auto;
-  }
-  .layout-note input[type="text"]{ font-weight: 900; letter-spacing: 0.03em; }
-  .layout-note textarea{ line-height: 1.35rem; }
-
-  .layout-book .boxes{
-    grid-template-rows: 1fr auto auto;
-    align-content: center;
-  }
-  .layout-book input[type="text"]{
-    text-align:center;
-    background: rgba(255,255,255,0.34);
-  }
-  .layout-book .book-title{
-    font-size: 1.35rem;
-    font-weight: 1000;
-    letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 14px;
+    letter-spacing: 0.10em;
   }
-  .layout-book .book-sub{
-    font-size:
+
+  /* ===== Splash ===== */
+  .splash{
+    position:fixed; inset:0;
+    display:grid;
+    place-items:center;
+    background:
+      radial-gradient(900px 600px at 50% 35%, rgba(88,247,255,0.12), transparent 60%),
+      radial-gradient(900px 600px at 20% 15%, rgba(199,125,255,0.10), transparent 55%),
+      linear-gradient(180deg, rgba(5,8,20,0.96), rgba(0,0,0,0.86));
+    z-index: 50;
+  }
+  .sCard{
+    width:min(580px, 92vw);
+    border-radius: 22px;
+    border: 1px solid rgba(160,190,255,0.22);
+    background: rgba(10,14,24,0.78);
+    box-shadow: 0 22px 70px rgba(0,0,0,0.60);
+    padding: 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .sCard::before{
+    content:"";
+    position:absolute; inset:-1px;
+    background: repeating-linear-gradient(90deg,
+        rgba(255,255,255,0.06) 0px,
+        rgba(255,255,255,0.00) 3px,
+        rgba(0,0,0,0.00) 8px
+      );
+    opacity:0.35;
+    pointer-events:none;
+  }
+  .logo{
+    font-weight: 1000;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 1.05rem;
+    margin: 0 0 8px 0;
+    text-shadow: 0 0 18px rgba(88,247,255,0.20);
+  }
+  .meter{
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(160,190,255,0.18);
+    overflow:hidden;
+    margin: 12px 0 10px;
+  }
+  .meter > div{
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg, rgba(88,247,255,0.75), rgba(199,125,255,0.65), rgba(102,255,153,0.55));
+    animation: load 1.1s ease-out forwards;
+  }
+  @keyframes load{ to{ width: 100%; } }
+  .sSmall{ color: var(--muted); font-size:0.9rem; line-height:1.25rem; margin:0 0 12px;}
+  .sBtn{
+    width:100%;
+    padding: 12px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(88,247,255,0.38);
+    background: linear-gradient(180deg, rgba(15,22,44,0.92), rgba(8,10,18,0.88));
+    color: var(--text);
+    font-weight: 1000;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor:pointer;
+    box-shadow: 0 0 0 5px rgba(88,247,255,0.10), 0 18px 40px rgba(0,0,0,0.55);
+  }
+  .sBtn:active{ transform: translateY(1px); }
+  .hidden{ display:none !important; }
+
+  /* small footer */
+  .tiny{ margin-top: 10px; font-size: 0.82rem; color: var(--muted); line-height: 1.15rem; }
+
+  /* Export status toast */
+  .toast{
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(160,190,255,0.22);
+    background: rgba(10,14,24,0.88);
+    color: var(--text);
+    font-weight: 900;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+    opacity: 0;
+    pointer-events:none;
+    transition: opacity 180ms ease, transform 180ms ease;
+    z-index: 60;
+  }
+  .toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+  }
+</style>
+</head>
+
+<body class="crt">
+  <div id="wandTrail"></div>
+  <div id="wandGlow"></div>
+
+  <!-- Splash -->
+  <div class="splash" id="splash">
+    <div class="sCard">
+      <div class="logo">Paper Picker</div>
+      <div class="sSmall">Flash-era vibes • wand cursor • music select • export PNG</div>
+      <div class="meter"><div></div></div>
+      <button class="sBtn" id="startBtn">Start</button>
+      <div class="tiny">Audio unlocks after Start (browser rule). No Flash required.</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">EXPORTING…</div>
+
+  <div class="wood">
+    <div class="wrap">
+      <!-- Controls -->
+      <section class="panel">
+        <div class="brand">
+          <h1 class="title">Paper Picker</h1>
+          <div class="badge">FLASH DELUXE</div>
+        </div>
+        <p class="sub">
+          Pick a skin + neutral tone. Type inside preset boxes.
+          Use the wand. Export a screenshot. Choose a calm retro track.
+        </p>
+
+        <label for="paperType">Paper type</label>
+        <select id="paperType">
+          <option value="postit">Post-it Note</option>
+          <option value="note">Notebook Paper</option>
+          <option value="book">Book Cover</option>
+          <option value="blank">Blank Paper</option>
+        </select>
+
+        <label>Paper color (5 neutrals)</label>
+        <div class="chips" role="group" aria-label="Paper colors">
+          <button class="chip" data-color="--p1" aria-pressed="true" title="Ivory" style="background:var(--p1)"></button>
+          <button class="chip" data-color="--p2" aria-pressed="false" title="Soft Gray" style="background:var(--p2)"></button>
+          <button class="chip" data-color="--p3" aria-pressed="false" title="Parchment" style="background:var(--p3)"></button>
+          <button class="chip" data-color="--p4" aria-pressed="false" title="Cool Mist" style="background:var(--p4)"></button>
+          <button class="chip" data-color="--p5" aria-pressed="false" title="Bone" style="background:var(--p5)"></button>
+        </div>
+
+        <label for="musicMode">Music</label>
+        <select id="musicMode">
+          <option value="off">Off</option>
+          <option value="chip">Chill Chiptune</option>
+          <option value="pad">Lo-fi Pad</option>
+          <option value="bells">Ambient Bells</option>
+        </select>
+
+        <div class="tog">
+          <input id="sfxToggle" type="checkbox" checked />
+          <div>
+            <span>Calm SFX</span>
+            <small>hover + click + paper rustle</small>
+          </div>
+        </div>
+
+        <div class="btnRow3">
+          <button class="btn primary" id="exportBtn">Export PNG</button>
+          <button class="btn warn" id="clearBtn">Clear</button>
+          <button class="btn good" id="randomBtn">Random</button>
+        </div>
+
+        <div class="tiny">
+          Export saves a screenshot of the paper card (no uploads).
+          If a school device blocks downloads, try your phone/laptop.
+        </div>
+      </section>
+
+      <!-- Preview -->
+      <section class="panel stage">
+        <div class="paperFrame" id="paperFrame">
+          <div class="paper postit" id="paper"></div>
+          <div class="boxes" id="boxes"></div>
+          <div class="hint">
+            <span id="layoutHint">POST-IT • 3 BOXES</span>
+            <span id="colorHint">IVORY</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ===== Elements =====
+  const splash = document.getElementById('splash');
+  const startBtn = document.getElementById('startBtn');
+  const toast = document.getElementById('toast');
+
+  const paperType = document.getElementById('paperType');
+  const musicMode = document.getElementById('musicMode');
+  const paper = document.getElementById('paper');
+  const paperFrame = document.getElementById('paperFrame');
+  const boxes = document.getElementById('boxes');
+  const exportBtn = document.getElementById('exportBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const randomBtn = document.getElementById('randomBtn');
+  const sfxToggle = document.getElementById('sfxToggle');
+  const layoutHint = document.getElementById('layoutHint');
+  const colorHint = document.getElementById('colorHint');
+  const chips = Array.from(document.querySelectorAll('.chip'));
+
+  const wandGlow = document.getElementById('wandGlow');
+  const wandTrail = document.getElementById('wandTrail');
+
+  // ===== Wand follower (smooth) =====
+  let mx = window.innerWidth/2, my = window.innerHeight/2;
+  let gx = mx, gy = my;
+  let tx = mx, ty = my;
+
+  function anim(){
+    // smooth follow
+    gx += (mx - gx) * 0.22;
+    gy += (my - gy) * 0.22;
+    tx += (mx - tx) * 0.10;
+    ty += (my - ty) * 0.10;
+
+    wandGlow.style.left = gx + "px";
+    wandGlow.style.top  = gy + "px";
+    wandTrail.style.left = tx + "px";
+    wandTrail.style.top  = ty + "px";
+
+    requestAnimationFrame(anim);
+  }
+  anim();
+
+  window.addEventListener("pointermove", (e) => {
+    mx = e.clientX; my = e.clientY;
+  });
+
+  // enable glow after first click (so it feels “activated”)
+  document.body.classList.add("wandOn");
+
+  // ===== Audio (SFX + Music) =====
+  let audioCtx = null;
+  let musicNodes = [];
+  let musicTimer = null;
+
+  function ensureAudio(){
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  }
+
+  function stopMusic(){
+    if (musicTimer){ clearInterval(musicTimer); musicTimer = null; }
+    musicNodes.forEach(n => { try{ n.stop && n.stop(); }catch(_){} try{ n.disconnect && n.disconnect(); }catch(_){} });
+    musicNodes = [];
+  }
+
+  function playHover(){
+    if (!sfxToggle.checked) return;
+    ensureAudio();
+    const t0 = audioCtx.currentTime;
+
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(680, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.015, t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.06);
+    osc.connect(g).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.07);
+  }
+
+  function playTap(){
+    if (!sfxToggle.checked) return;
+    ensureAudio();
+    const t0 = audioCtx.currentTime;
+
+    // Tap
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(520, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.05, t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.10);
+
+    // Paper rustle noise
+    const dur = 0.18;
+    const size = Math.floor(audioCtx.sampleRate * dur);
+    const buf = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i=0;i<size;i++){
+      const x = i/size;
+      const decay = Math.exp(-11*x);
+      data[i] = (Math.random()*2-1) * 0.16 * decay;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buf;
+
+    const lp = audioCtx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.setValueAtTime(1700, t0);
+
+    const ng = audioCtx.createGain();
+    ng.gain.setValueAtTime(0.0001, t0);
+    ng.gain.exponentialRampToValueAtTime(0.03, t0 + 0.02);
+    ng.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+    noise.connect(lp).connect(ng).connect(audioCtx.destination);
+    noise.start(t0);
+  }
+
+  function playWhoosh(){
+    if (!sfxToggle.checked) return;
+    ensureAudio();
+    const t0 = audioCtx.currentTime;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.setValueAtTime(900, t0);
+    bp.Q.setValueAtTime(1.2, t0);
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(220, t0);
+    osc.frequency.exponentialRampToValueAtTime(140, t0 + 0.22);
+
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.02, t0 + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.24);
+
+    osc.connect(bp).connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.25);
+  }
+
+  // ===== Music Engines (simple loopers) =====
+  function setMusic(mode){
+    ensureAudio();
+    stopMusic();
+    if (mode === "off") return;
+
+    const master = audioCtx.createGain();
+    master.gain.value = 0.12;
+    master.connect(audioCtx.destination);
+
+    // helper
+    const now = () => audioCtx.currentTime;
+    const mkOsc = (type, freq) => {
+      const o = audioCtx.createOscillator();
+      o.type = type;
+      o.frequency.value = freq;
+      return o;
+    };
+    const mkEnv = (peak=0.06) => {
+      const g = audioCtx.createGain();
+      g.gain.value = 0.0001;
+      g._peak = peak;
+      return g;
+    };
+    const trigger = (g, t, a=0.01, d=0.18, peak=null) => {
+      const p = peak ?? g._peak ?? 0.06;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(p, t + a);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+    };
+
+    if (mode === "chip"){
+      // Chill chiptune: simple 8-bit arps
+      const scale = [0, 3, 7, 10]; // minor-ish
+      const base = 220;
+      let step = 0;
+
+      musicTimer = setInterval(() => {
+        const t = now() + 0.02;
+        const n = scale[step % scale.length];
+        const freq = base * Math.pow(2, n/12);
+
+        const o = mkOsc("square", freq);
+        const g = mkEnv(0.030);
+        const lp = audioCtx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 1400;
+
+        o.connect(lp).connect(g).connect(master);
+        o.start(t);
+        o.stop(t + 0.22);
+        trigger(g, t, 0.01, 0.16, 0.028);
+
+        musicNodes.push(o,g,lp);
+        step++;
+      }, 220);
+
+    } else if (mode === "pad"){
+      // Lo-fi pad: slow sine chords with gentle movement
+      const chord = [261.63, 311.13, 392.00]; // C minor-ish
+      const g = audioCtx.createGain();
+      g.gain.value = 0.028;
+
+      const lp = audioCtx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = 900;
+
+      const lfo = mkOsc("sine", 0.12);
+      const lfoG = audioCtx.createGain();
+      lfoG.gain.value = 45; // vibrato depth on filter
+      lfo.connect(lfoG).connect(lp.frequency);
+
+      g.connect(lp).connect(master);
+
+      chord.forEach((f,i) => {
+        const o = mkOsc("sine", f);
+        o.detune.value = (i-1) * 6;
+        o.connect(g);
+        o.start();
+        musicNodes.push(o);
+      });
+      lfo.start();
+      musicNodes.push(g,lp,lfo,lfoG);
+
+    } else if (mode === "bells"){
+      // Ambient bells: occasional chimes
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+      musicTimer = setInterval(() => {
+        const t = now() + 0.02;
+        const f = notes[Math.floor(Math.random()*notes.length)];
+        const o = mkOsc("sine", f);
+        const g = mkEnv(0.020);
+        const hp = audioCtx.createBiquadFilter();
+        hp.type = "highpass";
+        hp.frequency.value = 300;
+
+        o.connect(hp).connect(g).connect(master);
+        o.start(t);
+        o.stop(t + 0.7);
+
+        trigger(g, t, 0.01, 0.55, 0.018);
+        musicNodes.push(o,g,hp);
+      }, 850);
+    }
+  }
+
+  // ===== Layout builders =====
+  function el(tag, attrs = {}){
+    const n = document.createElement(tag);
+    for (const [k,v] of Object.entries(attrs)){
+      if (k === "class") n.className = v;
+      else n.setAttribute(k, v);
+    }
+    return n;
+  }
+
+  function buildPostIt(){
+    boxes.innerHTML = "";
+    const a = el("textarea", { rows:"3", placeholder:"Box 1..." });
+    const b = el("textarea", { rows:"3", placeholder:"Box 2..." });
+    const c = el("textarea", { rows:"3", placeholder:"Box 3..." });
+    boxes.append(a,b,c);
+    layoutHint.textContent = "POST-IT • 3 BOXES";
+  }
+
+  function buildNote(){
+    boxes.innerHTML = "";
+    const title = el("input", { type:"text", placeholder:"Title..." });
+    const body  = el("textarea", { rows:"10", placeholder:"Write your note..." });
+    const foot  = el("input", { type:"text", placeholder:"Footer / Signature..." });
+    boxes.append(title, body, foot);
+    layoutHint.textContent = "NOTEBOOK • TITLE + BODY + FOOTER";
+  }
+
+  function buildBook(){
+    boxes.innerHTML = "";
+    const title  = el("input", { type:"text", placeholder:"BOOK TITLE...", class:"book-title" });
+    const sub    = el("input", { type:"text", placeholder:"Subtitle...", class:"book-sub" });
+    const author = el("input", { type:"text", placeholder:"AUTHOR NAME", class:"book-author" });
+    boxes.append(title, sub, author);
+    layoutHint.textContent = "BOOK COVER • TITLE + SUBTITLE + AUTHOR";
+  }
+
+  function buildBlank(){
+    boxes.innerHTML = "";
+    const free = el("textarea", { rows:"14", placeholder:"Free write..." });
+    boxes.append(free);
+    layoutHint.textContent = "BLANK • FREE WRITE";
+  }
+
+  function applyType(type){
+    paper.classList.remove("postit","note","book","blank");
+    paper.classList.add(type);
+
+    paperFrame.classList.remove("layout-postit","layout-note","layout-book","layout-blank");
+    paperFrame.classList.add("layout-" + type);
+
+    paper.style.filter = "brightness(1.03)";
+    setTimeout(() => paper.style.filter = "brightness(1.00)", 140);
+
+    if (type === "postit") buildPostIt();
+    else if (type === "note") buildNote();
+    else if (type === "book") buildBook();
+    else buildBlank();
+  }
+
+  // ===== Color handling =====
+  const colorNames = {
+    "--p1":"IVORY",
+    "--p2":"SOFT GRAY",
+    "--p3":"PARCHMENT",
+    "--p4":"COOL MIST",
+    "--p5":"BONE"
+  };
+
+  function applyColor(cssVar){
+    const val = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    document.documentElement.style.setProperty("--paperColor", val);
+    colorHint.textContent = colorNames[cssVar] || "NEUTRAL";
+
+    chips.forEach(ch => ch.setAttribute("aria-pressed", "false"));
+    const active = chips.find(ch => ch.dataset.color === cssVar);
+    if (active) active.setAttribute("aria-pressed", "true");
+  }
+
+  // ===== Toast helper =====
+  let toastTimer = null;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 1200);
+  }
+
+  // ===== Export PNG (no libs) =====
+  // This renders the paperFrame into a canvas by cloning computed styles into SVG foreignObject.
+  // Works best in Chromium + modern Safari; if a district blocks downloads, the click may fail.
+  async function exportPNG(){
+    playTap();
+    showToast("EXPORTING…");
+
+    const node = paperFrame;
+
+    // Clone node
+    const clone = node.cloneNode(true);
+
+    // Inline computed styles for all elements (to keep look inside SVG)
+    const origAll = node.querySelectorAll("*");
+    const cloneAll = clone.querySelectorAll("*");
+    const origArr = [node, ...origAll];
+    const cloneArr = [clone, ...cloneAll];
+
+    for (let i=0;i<origArr.length;i++){
+      const o = origArr[i];
+      const c = cloneArr[i];
+      const cs = getComputedStyle(o);
+
+      // Copy a curated set of style props (enough for this app)
+      const props = [
+        "display","position","inset","top","left","right","bottom",
+        "width","height","margin","padding",
+        "border","borderRadius","boxShadow",
+        "background","backgroundImage","backgroundSize","backgroundPosition","backgroundRepeat",
+        "color","font","fontFamily","fontSize","fontWeight","letterSpacing","textTransform","textAlign","lineHeight",
+        "opacity","transform","filter",
+        "gridTemplateRows","gridTemplateColumns","gap","alignContent","justifyContent"
+      ];
+
+      let s = "";
+      props.forEach(p => { s += `${p}:${cs.getPropertyValue(p)};`; });
+
+      // Also lock textarea/input values into attributes for render
+      if (c.tagName === "TEXTAREA") c.textContent = o.value || "";
+      if (c.tagName === "INPUT") c.setAttribute("value", o.value || "");
+
+      c.setAttribute("style", s);
+    }
+
+    // Wrap clone in a container for serialization
+    const wrap = document.createElement("div");
+    wrap.appendChild(clone);
+
+    // Serialize to SVG foreignObject
+    const w = node.getBoundingClientRect().width;
+    const h = node.getBoundingClientRect().height;
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${Math.ceil(w)}" height="${Math.ceil(h)}">
+        <foreignObject width="100%" height="100%">
+          <div xmlns="http://www.w3.org/1999/xhtml">
+            ${wrap.innerHTML}
+          </div>
+        </foreignObject>
+      </svg>
+    `;
+
+    const blob = new Blob([svg], {type:"image/svg+xml;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.ceil(w) * 2;   // 2x for sharper export
+      canvas.height = Math.ceil(h) * 2;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(2,2);
+      ctx.drawImage(img, 0, 0);
+
+      URL.revokeObjectURL(url);
+
+      canvas.toBlob((png) => {
+        const a = document.createElement("a");
+        const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,"-");
+        a.download = `paper-picker-${stamp}.png`;
+        a.href = URL.createObjectURL(png);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        showToast("SAVED PNG");
+      }, "image/png");
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      showToast("EXPORT FAILED");
+      alert("Export failed in this browser/device. Try Chrome/Edge, or enable downloads.");
+    };
+    img.src = url;
+  }
+
+  // ===== Add hover SFX to clickable elements =====
+  function hookHoverSfx(){
+    const clickable = [
+      ...document.querySelectorAll("button, select, input[type='checkbox']")
+    ];
+    clickable.forEach(el => {
+      el.addEventListener("pointerenter", () => playHover());
+    });
+  }
+
+  // ===== Events =====
+  startBtn.addEventListener("click", () => {
+    ensureAudio();
+    playTap();
+    splash.classList.add("hidden");
+    // start a default music mode only if user chose it (keep Off)
+    hookHoverSfx();
+  });
+
+  paperType.addEventListener("change", () => { playTap(); applyType(paperType.value); });
+  musicMode.addEventListener("change", () => { playTap(); setMusic(musicMode.value); });
+
+  chips.forEach(chip => {
+    chip.addEventListener("click", () => { playTap(); applyColor(chip.dataset.color); });
+  });
+
+  clearBtn.addEventListener("click", () => {
+    playWhoosh();
+    const fields = boxes.querySelectorAll("textarea, input[type='text']");
+    fields.forEach(f => f.value = "");
+    showToast("CLEARED");
+  });
+
+  randomBtn.addEventListener("click", () => {
+    playTap();
+    const types = ["postit","note","book","blank"];
+    const colors = ["--p1","--p2","--p3","--p4","--p5"];
+    const t = types[Math.floor(Math.random()*types.length)];
+    const c = colors[Math.floor(Math.random()*colors.length)];
+    paperType.value = t;
+    applyType(t);
+    applyColor(c);
+    showToast("RANDOMIZED");
+  });
+
+  exportBtn.addEventListener("click", exportPNG);
+
+  boxes.addEventListener("focusin", (e) => {
+    if (e.target && (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT")){
+      playTap();
+    }
+  });
+
+  // ===== Init =====
+  applyType("postit");
+  applyColor("--p1");
+})();
+</script>
+</body>
+</html>
