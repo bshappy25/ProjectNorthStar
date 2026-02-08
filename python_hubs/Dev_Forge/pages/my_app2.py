@@ -546,3 +546,7 @@ st.markdown(
   "<div class='glassy-card'><div class='glassy-overlay-text'>TEXT</div><h3>Title</h3><p>Content</p></div>",
   unsafe_allow_html=True
 )
+
+st.markdown("<div class='ticker'>YOUR MESSAGE • We are L.E.A.D. 🌟</div><div class='ticker-spacer'></div>", unsafe_allow_html=True)
+
+""" )
