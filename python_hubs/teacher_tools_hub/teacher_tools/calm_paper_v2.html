@@ -3,19 +3,23 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Paper Picker — Full Screen Paper Mode</title>
+<title>Paper Picker — Full Screen + Tab Dock</title>
 
 <style>
   :root{
     --text:#eaf2ff;
     --muted:#b8c7e6;
 
-    --ui: rgba(10,14,24,0.78);
+    --ui: rgba(10,14,24,0.80);
     --ui2: rgba(7,10,18,0.62);
     --border: rgba(160,190,255,0.22);
 
-    --shadow: 0 18px 55px rgba(0,0,0,0.55);
-    --radius: 18px;
+    --neonA:#58f7ff;
+    --neonB:#c77dff;
+    --neonC:#66ff99;
+    --warn:#ffd166;
+
+    --shadowDeep: 0 24px 70px rgba(0,0,0,0.62);
 
     /* Pastel + neutral palette (more varied, still calm) */
     --p1:#fbf7ef; /* warm ivory */
@@ -23,21 +27,19 @@
     --p3:#eaf7f1; /* mint fog */
     --p4:#fff1e6; /* peach veil */
     --p5:#f1f5f9; /* cool slate */
-    --p6:#f7efff; /* lilac paper */
+    --p6:#f7efff; /* lilac */
     --p7:#fff7d6; /* butter */
     --p8:#e9f3ff; /* sky */
 
-    --neonA:#58f7ff;
-    --neonB:#c77dff;
-    --neonC:#66ff99;
-    --warn:#ffd166;
-
     --paperColor: var(--p1);
 
-    /* UI sizing */
-    --toolbarH: 86px;
+    /* Safe areas */
     --safeTop: env(safe-area-inset-top);
     --safeBot: env(safe-area-inset-bottom);
+
+    /* Dock sizing */
+    --tabH: 56px;
+    --panelMax: 240px;   /* how tall the panel can get */
   }
 
   *{box-sizing:border-box}
@@ -139,7 +141,8 @@
   /* ===== FULL SCREEN PAPER ===== */
   .paperStage{
     position:fixed; inset:0;
-    padding: calc(10px + var(--safeTop)) 10px calc(var(--toolbarH) + 10px + var(--safeBot));
+    /* leave space for tab bar + safe area (panel floats above it) */
+    padding: calc(10px + var(--safeTop)) 10px calc(var(--tabH) + 12px + var(--safeBot));
     display:grid;
     place-items:center;
   }
@@ -148,15 +151,12 @@
     position:relative;
     width: min(940px, 100%);
     height: 100%;
-    max-height: 100%;
     border-radius: 26px;
     overflow:hidden;
-
     box-shadow:
       0 0 0 2px rgba(88,247,255,0.14),
       0 0 0 6px rgba(199,125,255,0.10),
       0 24px 70px rgba(0,0,0,0.58);
-
     transform: rotate(-0.12deg);
     background: rgba(255,255,255,0.03);
   }
@@ -308,7 +308,7 @@
     box-shadow: 0 0 0 4px rgba(88,247,255,0.16), 0 12px 20px rgba(0,0,0,0.16);
   }
 
-  /* Layouts (class is on .paperFrame) */
+  /* Layouts */
   .layout-postit .boxes{ grid-template-rows: 1fr 1fr 1fr; }
   .layout-note .boxes{ grid-template-rows: auto 1fr auto; }
   .layout-book .boxes{ grid-template-rows: 1fr auto auto; align-content: center; }
@@ -330,38 +330,57 @@
     z-index: 4;
   }
 
-  /* ===== Floating toolbar (bottom) ===== */
-  .toolbar{
+  /* ===== Tab Dock =====
+     Two parts:
+     1) A collapsible PANEL above the tab bar
+     2) The TAB BAR fixed to bottom
+  */
+  .dock{
     position:fixed;
     left: 10px;
     right: 10px;
     bottom: calc(10px + var(--safeBot));
-    height: var(--toolbarH);
+    z-index: 40;
+    pointer-events: none; /* allow paper interactions except on dock itself */
+  }
+  @media (min-width: 1100px){
+    .dock{ left: 50%; right: auto; transform: translateX(-50%); width: 1060px; }
+  }
+
+  .dockPanel{
+    pointer-events: auto;
     border-radius: 22px;
     border: 1px solid var(--border);
     background: linear-gradient(180deg, var(--ui), rgba(8,10,18,0.78));
-    box-shadow: 0 22px 70px rgba(0,0,0,0.62);
+    box-shadow: var(--shadowDeep);
     backdrop-filter: blur(12px);
-    padding: 10px 10px;
+    overflow:hidden;
+
+    /* collapsed by default: only tab bar shows */
+    max-height: 0px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: max-height 200ms ease, opacity 180ms ease, transform 180ms ease;
+    margin-bottom: 10px;
+  }
+  .dockPanel.open{
+    max-height: var(--panelMax);
+    opacity: 1;
+    transform: translateY(0px);
+  }
+
+  .panelInner{
+    padding: 12px;
     display:grid;
-    grid-template-columns: 1.25fr 1fr 1.2fr;
     gap: 10px;
-    align-items:center;
-    z-index: 30;
   }
 
-  @media (min-width: 1100px){
-    .toolbar{
-      left: 50%;
-      right: auto;
-      transform: translateX(-50%);
-      width: 1060px;
-    }
-  }
-
-  .group{
-    display:flex; align-items:center; gap:10px; flex-wrap:nowrap;
-    min-width:0;
+  /* Panel content blocks */
+  .block{
+    border-radius: 18px;
+    border: 1px solid rgba(160,190,255,0.18);
+    background: rgba(7,10,18,0.46);
+    padding: 10px;
   }
 
   .labelTiny{
@@ -369,16 +388,22 @@
     font-weight: 900;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    font-size: 0.70rem;
+    font-size: 0.72rem;
     color: #cfe2ff;
-    opacity: 0.9;
-    white-space:nowrap;
+    opacity: 0.95;
+    margin-bottom: 6px;
+  }
+
+  .row{
+    display:flex;
+    gap: 10px;
+    align-items:center;
+    flex-wrap: wrap;
   }
 
   select, button{
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
   }
-
   .sel{
     width: 100%;
     min-width: 0;
@@ -391,11 +416,10 @@
   }
 
   .chips{
-    display:flex; gap:8px; align-items:center;
-    min-width:0;
+    display:flex; gap:8px; align-items:center; flex-wrap:wrap;
   }
   .chip{
-    width: 28px; height: 28px;
+    width: 30px; height: 30px;
     border-radius: 12px;
     border: 1px solid rgba(0,0,0,0.18);
     box-shadow: 0 10px 18px rgba(0,0,0,0.35);
@@ -411,25 +435,6 @@
     background: radial-gradient(80px 28px at 20% 0%, rgba(255,255,255,0.28), transparent 60%);
     pointer-events:none;
   }
-
-  .btn{
-    padding: 11px 10px;
-    border-radius: 18px;
-    border: 1px solid rgba(160,190,255,0.22);
-    background: linear-gradient(180deg, rgba(14,18,34,0.92), rgba(8,10,18,0.88));
-    color: var(--text);
-    font-weight: 900;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-    cursor:pointer;
-    transition: transform 120ms ease, filter 120ms ease;
-    user-select:none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn:active{ transform: translateY(1px) scale(0.995); }
-  .btn.primary{ border-color: rgba(88,247,255,0.38); }
-  .btn.warn{ border-color: rgba(255,209,102,0.45); }
-  .btn.good{ border-color: rgba(102,255,153,0.30); }
 
   .tog{
     display:flex; align-items:center; gap:10px;
@@ -447,11 +452,75 @@
   }
   input[type="checkbox"]{ transform: scale(1.2); accent-color: var(--neonA); }
 
+  .btnRow{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .btn{
+    padding: 12px 10px;
+    border-radius: 18px;
+    border: 1px solid rgba(160,190,255,0.22);
+    background: linear-gradient(180deg, rgba(14,18,34,0.92), rgba(8,10,18,0.88));
+    color: var(--text);
+    font-weight: 900;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    cursor:pointer;
+    transition: transform 120ms ease, filter 120ms ease;
+    user-select:none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active{ transform: translateY(1px) scale(0.995); }
+  .btn.primary{ border-color: rgba(88,247,255,0.38); }
+  .btn.warn{ border-color: rgba(255,209,102,0.45); }
+  .btn.good{ border-color: rgba(102,255,153,0.30); }
+
+  /* TAB BAR */
+  .tabBar{
+    pointer-events: auto;
+    height: var(--tabH);
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--ui), rgba(8,10,18,0.78));
+    box-shadow: var(--shadowDeep);
+    backdrop-filter: blur(12px);
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    overflow:hidden;
+  }
+  .tab{
+    border:0;
+    background: transparent;
+    color: rgba(234,242,255,0.92);
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.76rem;
+    cursor:pointer;
+    position:relative;
+  }
+  .tab:hover{ background: rgba(255,255,255,0.04); }
+  .tab[aria-selected="true"]{
+    background: rgba(88,247,255,0.08);
+    color: #eaffff;
+  }
+  .tab[aria-selected="true"]::after{
+    content:"";
+    position:absolute;
+    left: 16px; right: 16px;
+    bottom: 8px;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(88,247,255,0.85), rgba(199,125,255,0.75));
+    box-shadow: 0 0 18px rgba(88,247,255,0.22);
+  }
+
   /* Toast */
   .toast{
     position: fixed;
     left: 50%;
-    bottom: calc(var(--toolbarH) + 18px + var(--safeBot));
+    bottom: calc(var(--tabH) + 22px + var(--safeBot));
     transform: translateX(-50%);
     padding: 10px 12px;
     border-radius: 16px;
@@ -481,7 +550,7 @@
     z-index: 80;
   }
   .sCard{
-    width:min(640px, 92vw);
+    width:min(680px, 92vw);
     border-radius: 22px;
     border: 1px solid rgba(160,190,255,0.22);
     background: rgba(10,14,24,0.78);
@@ -548,8 +617,8 @@
     <div class="sCard">
       <div class="logo">Paper Picker</div>
       <div class="sSmall">
-        Full-screen paper mode for Samsung Smart Select.
-        Retro wand + stamps + richer sound palette.
+        Full-screen paper mode for Samsung Smart Select.<br>
+        New tabbed dock so nothing gets crushed.
       </div>
       <div class="meter"><div></div></div>
       <button class="sBtn" id="startBtn">Start</button>
@@ -565,12 +634,11 @@
   <div class="paperStage">
     <div class="paperFrame layout-postit" id="paperFrame">
       <div class="paper postit" id="paper"></div>
-
       <canvas id="sparkCanvas"></canvas>
 
       <div class="stamps">
-        <div class="stamp star" id="stampStar">★ star</div>
-        <div class="stamp heart" id="stampHeart">❤ cute</div>
+        <div class="stamp star">★ star</div>
+        <div class="stamp heart">❤ cute</div>
         <div class="stamp mode" id="stampMode">MODE: POST-IT</div>
         <div class="stamp level" id="levelStamp">LEVEL UP!</div>
       </div>
@@ -584,60 +652,77 @@
     </div>
   </div>
 
-  <!-- Floating toolbar -->
-  <div class="toolbar" id="toolbar">
-    <!-- group 1: type + music -->
-    <div class="group">
-      <div style="min-width:0; flex:1;">
-        <div class="labelTiny">paper</div>
-        <select class="sel" id="paperType">
-          <option value="postit">Post-it</option>
-          <option value="note">Notebook</option>
-          <option value="book">Book Cover</option>
-          <option value="blank">Blank</option>
-        </select>
-      </div>
-      <div style="min-width:0; flex:1;">
-        <div class="labelTiny">music</div>
-        <select class="sel" id="musicMode">
-          <option value="off">Off</option>
-          <option value="chip">Chill Chiptune</option>
-          <option value="pad">Lo-fi Pad</option>
-          <option value="bells">Ambient Bells</option>
-        </select>
+  <!-- Tab Dock -->
+  <div class="dock" id="dock">
+    <div class="dockPanel" id="dockPanel" aria-hidden="true">
+      <div class="panelInner">
+        <!-- Paper tab -->
+        <div class="block tabPane" data-pane="paper">
+          <div class="labelTiny">paper</div>
+          <select class="sel" id="paperType">
+            <option value="postit">Post-it</option>
+            <option value="note">Notebook</option>
+            <option value="book">Book Cover</option>
+            <option value="blank">Blank</option>
+          </select>
+        </div>
+
+        <!-- Music tab -->
+        <div class="block tabPane" data-pane="music">
+          <div class="labelTiny">music</div>
+          <select class="sel" id="musicMode">
+            <option value="off">Off</option>
+            <option value="chip">Chill Chiptune</option>
+            <option value="pad">Lo-fi Pad</option>
+            <option value="bells">Ambient Bells</option>
+          </select>
+        </div>
+
+        <!-- Color tab -->
+        <div class="block tabPane" data-pane="color">
+          <div class="labelTiny">color</div>
+          <div class="chips" aria-label="Paper colors">
+            <button class="chip" data-color="--p1" aria-pressed="true" title="Ivory"   style="background:var(--p1)"></button>
+            <button class="chip" data-color="--p2" aria-pressed="false" title="Lavender" style="background:var(--p2)"></button>
+            <button class="chip" data-color="--p3" aria-pressed="false" title="Mint"   style="background:var(--p3)"></button>
+            <button class="chip" data-color="--p4" aria-pressed="false" title="Peach"  style="background:var(--p4)"></button>
+            <button class="chip" data-color="--p5" aria-pressed="false" title="Slate"  style="background:var(--p5)"></button>
+            <button class="chip" data-color="--p6" aria-pressed="false" title="Lilac"  style="background:var(--p6)"></button>
+            <button class="chip" data-color="--p7" aria-pressed="false" title="Butter" style="background:var(--p7)"></button>
+            <button class="chip" data-color="--p8" aria-pressed="false" title="Sky"    style="background:var(--p8)"></button>
+          </div>
+        </div>
+
+        <!-- SFX tab -->
+        <div class="block tabPane" data-pane="sfx">
+          <div class="labelTiny">sfx</div>
+          <div class="tog">
+            <input id="sfxToggle" type="checkbox" checked />
+            <div>
+              <small>tap • flip • stamp • sparkle • success</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions tab -->
+        <div class="block tabPane" data-pane="actions">
+          <div class="labelTiny">actions</div>
+          <div class="btnRow">
+            <button class="btn good" id="randomBtn">Random</button>
+            <button class="btn warn" id="clearBtn">Clear</button>
+            <button class="btn primary" id="exportBtn">Export PNG</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <!-- group 2: colors + sfx -->
-    <div class="group" style="justify-content:center;">
-      <div style="min-width:0;">
-        <div class="labelTiny">color</div>
-        <div class="chips" aria-label="Paper colors">
-          <button class="chip" data-color="--p1" aria-pressed="true" title="Ivory"   style="background:var(--p1)"></button>
-          <button class="chip" data-color="--p2" aria-pressed="false" title="Lavender" style="background:var(--p2)"></button>
-          <button class="chip" data-color="--p3" aria-pressed="false" title="Mint"   style="background:var(--p3)"></button>
-          <button class="chip" data-color="--p4" aria-pressed="false" title="Peach"  style="background:var(--p4)"></button>
-          <button class="chip" data-color="--p5" aria-pressed="false" title="Slate"  style="background:var(--p5)"></button>
-          <button class="chip" data-color="--p6" aria-pressed="false" title="Lilac"  style="background:var(--p6)"></button>
-          <button class="chip" data-color="--p7" aria-pressed="false" title="Butter" style="background:var(--p7)"></button>
-          <button class="chip" data-color="--p8" aria-pressed="false" title="Sky"    style="background:var(--p8)"></button>
-        </div>
-      </div>
-
-      <div class="tog" style="max-width: 210px;">
-        <input id="sfxToggle" type="checkbox" checked />
-        <div style="min-width:0">
-          <div class="labelTiny" style="margin-bottom:2px;">sfx</div>
-          <small>tap • flip • stamp • sparkle</small>
-        </div>
-      </div>
-    </div>
-
-    <!-- group 3: actions -->
-    <div class="group" style="justify-content:flex-end;">
-      <button class="btn good" id="randomBtn">Random</button>
-      <button class="btn warn" id="clearBtn">Clear</button>
-      <button class="btn primary" id="exportBtn">Export PNG</button>
+    <div class="tabBar" role="tablist" aria-label="Tool tabs">
+      <button class="tab" role="tab" data-tab="paper" aria-selected="false">Paper</button>
+      <button class="tab" role="tab" data-tab="music" aria-selected="false">Music</button>
+      <button class="tab" role="tab" data-tab="color" aria-selected="false">Color</button>
+      <button class="tab" role="tab" data-tab="sfx" aria-selected="false">SFX</button>
+      <button class="tab" role="tab" data-tab="actions" aria-selected="false">Actions</button>
     </div>
   </div>
 
@@ -652,6 +737,24 @@
   const paper = document.getElementById('paper');
   const boxes = document.getElementById('boxes');
 
+  const stampMode = document.getElementById('stampMode');
+  const levelStamp = document.getElementById('levelStamp');
+
+  const layoutHint = document.getElementById('layoutHint');
+  const colorHint = document.getElementById('colorHint');
+
+  const wandGlow = document.getElementById('wandGlow');
+  const wandTrail = document.getElementById('wandTrail');
+
+  const sparkCanvas = document.getElementById('sparkCanvas');
+  const ctx2d = sparkCanvas.getContext("2d");
+
+  // Dock / Tabs
+  const dockPanel = document.getElementById('dockPanel');
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  const panes = Array.from(document.querySelectorAll('.tabPane'));
+
+  // Controls (live inside panes)
   const paperType = document.getElementById('paperType');
   const musicMode = document.getElementById('musicMode');
   const sfxToggle = document.getElementById('sfxToggle');
@@ -660,17 +763,6 @@
   const randomBtn = document.getElementById('randomBtn');
   const clearBtn = document.getElementById('clearBtn');
   const exportBtn = document.getElementById('exportBtn');
-
-  const layoutHint = document.getElementById('layoutHint');
-  const colorHint = document.getElementById('colorHint');
-  const stampMode = document.getElementById('stampMode');
-  const levelStamp = document.getElementById('levelStamp');
-
-  const wandGlow = document.getElementById('wandGlow');
-  const wandTrail = document.getElementById('wandTrail');
-
-  const sparkCanvas = document.getElementById('sparkCanvas');
-  const ctx2d = sparkCanvas.getContext("2d");
 
   // ===== Wand follower =====
   let mx = innerWidth/2, my = innerHeight/2;
@@ -690,7 +782,7 @@
   animWand();
   addEventListener("pointermove", (e)=>{ mx=e.clientX; my=e.clientY; });
 
-  // ===== Sparkles (tiny particle burst) =====
+  // ===== Sparkles =====
   let sparks = [];
   function resizeSpark(){
     const r = paperFrame.getBoundingClientRect();
@@ -704,7 +796,6 @@
   addEventListener("resize", resizeSpark);
 
   function burst(x, y){
-    // x,y are page coords; convert to paperFrame local
     const r = paperFrame.getBoundingClientRect();
     const lx = x - r.left;
     const ly = y - r.top;
@@ -739,7 +830,6 @@
       ctx2d.translate(p.x, p.y);
       ctx2d.rotate(p.rot);
 
-      // little diamond sparkle
       ctx2d.beginPath();
       ctx2d.moveTo(0, -4);
       ctx2d.lineTo(3.5, 0);
@@ -757,12 +847,11 @@
 
       ctx2d.restore();
     }
-
     requestAnimationFrame(drawSparks);
   }
   drawSparks();
 
-  // ===== Audio System (richer SFX palette) =====
+  // ===== Audio =====
   let audioCtx = null;
   let musicNodes = [];
   let musicTimer = null;
@@ -779,7 +868,6 @@
     musicNodes = [];
   }
 
-  // Helpers
   function mkNoiseBuffer(dur=0.2){
     const size = Math.floor(audioCtx.sampleRate * dur);
     const buf = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
@@ -792,7 +880,6 @@
     return buf;
   }
 
-  // 1) Tap (click + subtle paper rustle)
   function playTap(){
     if (!sfxOn()) return;
     ensureAudio();
@@ -810,7 +897,6 @@
     osc.start(t0);
     osc.stop(t0 + 0.10);
 
-    // Rustle layer
     const noise = audioCtx.createBufferSource();
     noise.buffer = mkNoiseBuffer(0.18);
 
@@ -827,13 +913,11 @@
     noise.start(t0);
   }
 
-  // 2) Page flip (for type changes)
   function playFlip(){
     if (!sfxOn()) return;
     ensureAudio();
     const t0 = audioCtx.currentTime;
 
-    // broadband noise burst + bandpass sweep
     const src = audioCtx.createBufferSource();
     src.buffer = mkNoiseBuffer(0.28);
 
@@ -852,7 +936,6 @@
     src.connect(bp).connect(g).connect(audioCtx.destination);
     src.start(t0);
 
-    // tiny “thump” at end
     const th = audioCtx.createOscillator();
     const tg = audioCtx.createGain();
     th.type = "sine";
@@ -865,13 +948,11 @@
     th.stop(t0 + 0.27);
   }
 
-  // 3) Stamp (when level-up triggers)
   function playStamp(){
     if (!sfxOn()) return;
     ensureAudio();
     const t0 = audioCtx.currentTime;
 
-    // punch
     const osc = audioCtx.createOscillator();
     const g = audioCtx.createGain();
     osc.type = "square";
@@ -884,7 +965,6 @@
     osc.start(t0);
     osc.stop(t0 + 0.10);
 
-    // papery “poof”
     const n = audioCtx.createBufferSource();
     n.buffer = mkNoiseBuffer(0.12);
 
@@ -901,13 +981,12 @@
     n.start(t0);
   }
 
-  // 4) Sparkle (wand magic layer) — light triad
   function playSparkle(){
     if (!sfxOn()) return;
     ensureAudio();
     const t0 = audioCtx.currentTime;
 
-    const notes = [880, 1108.73, 1318.51]; // A5, C#6, E6-ish
+    const notes = [880, 1108.73, 1318.51];
     notes.forEach((f, i) => {
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
@@ -922,13 +1001,12 @@
     });
   }
 
-  // 5) Soft success chime (export saved)
   function playSuccess(){
     if (!sfxOn()) return;
     ensureAudio();
     const t0 = audioCtx.currentTime;
 
-    const seq = [523.25, 659.25, 783.99]; // C E G
+    const seq = [523.25, 659.25, 783.99];
     seq.forEach((f, i) => {
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
@@ -943,7 +1021,7 @@
     });
   }
 
-  // ===== Music (same 3 modes) =====
+  // Music
   function setMusic(mode){
     ensureAudio();
     stopMusic();
@@ -1037,14 +1115,14 @@
         o.connect(hp).connect(g).connect(master);
         o.start(t);
         o.stop(t + 0.7);
-
         trigger(g, t, 0.01, 0.55, 0.018);
+
         musicNodes.push(o,g,hp);
       }, 850);
     }
   }
 
-  // ===== UI Helpers =====
+  // ===== Toast =====
   let toastTimer = null;
   function showToast(msg){
     toast.textContent = msg;
@@ -1053,6 +1131,7 @@
     toastTimer = setTimeout(() => toast.classList.remove("show"), 1200);
   }
 
+  // ===== Level Up =====
   let levelTimer = null;
   function levelUp(){
     levelStamp.classList.add("show");
@@ -1060,6 +1139,48 @@
     if (levelTimer) clearTimeout(levelTimer);
     levelTimer = setTimeout(() => levelStamp.classList.remove("show"), 900);
   }
+
+  // ===== Tabs =====
+  let openTab = null;
+
+  function showPane(name){
+    panes.forEach(p => p.style.display = (p.dataset.pane === name ? "block" : "none"));
+  }
+
+  function setTab(name){
+    const same = (openTab === name);
+
+    // If tapping the same tab, toggle open/close
+    if (same){
+      const isOpen = dockPanel.classList.contains("open");
+      dockPanel.classList.toggle("open", !isOpen);
+      dockPanel.setAttribute("aria-hidden", String(isOpen));
+      tabs.forEach(t => t.setAttribute("aria-selected", String(!isOpen && t.dataset.tab === name)));
+      return;
+    }
+
+    openTab = name;
+    showPane(name);
+    dockPanel.classList.add("open");
+    dockPanel.setAttribute("aria-hidden", "false");
+    tabs.forEach(t => t.setAttribute("aria-selected", String(t.dataset.tab === name)));
+  }
+
+  // default: open Actions on first use (feels game-y)
+  tabs.forEach(t => t.addEventListener("click", () => { playTap(); setTab(t.dataset.tab); }));
+
+  // Clicking outside dock closes panel (keeps tab bar)
+  document.addEventListener("pointerdown", (e) => {
+    const dock = document.getElementById("dock");
+    if (!dock.contains(e.target)){
+      if (dockPanel.classList.contains("open")){
+        dockPanel.classList.remove("open");
+        dockPanel.setAttribute("aria-hidden","true");
+        tabs.forEach(t => t.setAttribute("aria-selected","false"));
+        openTab = null;
+      }
+    }
+  }, {passive:true});
 
   // ===== Layout builders =====
   function el(tag, attrs = {}){
@@ -1128,14 +1249,8 @@
 
   // ===== Colors =====
   const colorNames = {
-    "--p1":"IVORY",
-    "--p2":"LAVENDER",
-    "--p3":"MINT",
-    "--p4":"PEACH",
-    "--p5":"SLATE",
-    "--p6":"LILAC",
-    "--p7":"BUTTER",
-    "--p8":"SKY"
+    "--p1":"IVORY","--p2":"LAVENDER","--p3":"MINT","--p4":"PEACH",
+    "--p5":"SLATE","--p6":"LILAC","--p7":"BUTTER","--p8":"SKY"
   };
   function applyColor(cssVar){
     const val = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
@@ -1151,20 +1266,16 @@
   }
 
   // ===== Magic interactions =====
-  // Click anywhere on paper = sparkle + sparkle sound
   paperFrame.addEventListener("pointerdown", (e) => {
-    // avoid double-trigger if clicking input/textarea
     const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : "";
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON") return;
-
     burst(e.clientX, e.clientY);
     playSparkle();
   }, {passive:true});
 
-  // Focus in fields = tap
   boxes.addEventListener("focusin", () => playTap());
 
-  // ===== Export PNG (same approach, tuned for fullscreen) =====
+  // ===== Export PNG =====
   async function exportPNG(){
     ensureAudio();
     playTap();
@@ -1174,7 +1285,6 @@
     const node = paperFrame;
     const clone = node.cloneNode(true);
 
-    // Remove spark canvas from clone (avoid blank/odd export)
     const cCanvas = clone.querySelector("#sparkCanvas");
     if (cCanvas) cCanvas.remove();
 
@@ -1187,8 +1297,6 @@
       const o = origArr[i];
       const c = cloneArr[i];
       if (!c) continue;
-
-      // Skip the real spark canvas
       if (o.id === "sparkCanvas") continue;
 
       const cs = getComputedStyle(o);
@@ -1257,7 +1365,7 @@
     img.src = url;
   }
 
-  // ===== Toolbar events =====
+  // ===== Events =====
   paperType.addEventListener("change", () => applyType(paperType.value));
   musicMode.addEventListener("change", () => { playTap(); setMusic(musicMode.value); });
 
@@ -1273,6 +1381,7 @@
     applyType(t);
     applyColor(c);
     showToast("RANDOMIZED");
+    setTab("actions"); // keep actions visible
   });
 
   clearBtn.addEventListener("click", () => {
@@ -1284,16 +1393,17 @@
 
   exportBtn.addEventListener("click", exportPNG);
 
-  // ===== Start (unlock audio) =====
   startBtn.addEventListener("click", () => {
     ensureAudio();
     playTap();
     splash.classList.add("hidden");
+    // Open Actions by default so user instantly sees where Export lives
+    setTab("actions");
   });
 
   // ===== Init =====
   applyType("postit");
-  // Don't call applyColor here because it plays sounds / levelUp; do silent init:
+  // silent init color
   const initVar = "--p1";
   document.documentElement.style.setProperty("--paperColor",
     getComputedStyle(document.documentElement).getPropertyValue(initVar).trim()
