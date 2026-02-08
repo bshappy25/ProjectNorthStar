@@ -15,7 +15,6 @@ from datetime import date
 # NGSS STANDARDS DATABASE
 # =====================
 
-# MS (Middle School) NGSS Standards - Earth & Space Science focus
 NGSS_STANDARDS = {
     "MS-ESS1": {
         "title": "Earth’s Place in the Universe",
@@ -49,7 +48,6 @@ NGSS_STANDARDS = {
     },
 }
 
-# 5E Framework Phases
 FIVE_E_PHASES = {
     "Engage": "Hook students’ interest and activate prior knowledge",
     "Explore": "Students actively investigate and gather data",
@@ -58,7 +56,6 @@ FIVE_E_PHASES = {
     "Evaluate": "Assess student understanding and learning",
 }
 
-# New Visions Curriculum Units (PLACEHOLDER - expand as needed)
 NEW_VISIONS_UNITS = {
     "Earth Science": [
         "Unit 1: Plate Tectonics",
@@ -99,8 +96,6 @@ if "piluso_lesson" not in st.session_state:
         "materials": "",
         "notes": "",
         "accommodations": "",
-)
-st.session_state["piluso_lesson"]["accommodations"] = accom
     }
 
 # =====================
@@ -255,10 +250,7 @@ nv_branch = st.selectbox(
 )
 
 if nv_branch != "None":
-    nv_unit = st.selectbox(
-        "Unit",
-        options=NEW_VISIONS_UNITS[nv_branch],
-    )
+    nv_unit = st.selectbox("Unit", options=NEW_VISIONS_UNITS[nv_branch])
     st.session_state["piluso_lesson"]["nv_unit"] = nv_unit
     st.info(f"**Placeholder:** Integration with {nv_unit} resources coming soon!")
 
@@ -319,6 +311,14 @@ notes = st.text_area(
 )
 st.session_state["piluso_lesson"]["notes"] = notes
 
+accom = st.text_area(
+    "Accommodations / Modifications",
+    value=st.session_state["piluso_lesson"].get("accommodations", ""),
+    placeholder="IEP/504 supports: visuals, sentence starters, extended time, breaks, reduced choices...",
+    height=100,
+)
+st.session_state["piluso_lesson"]["accommodations"] = accom
+
 st.divider()
 
 # =====================
@@ -330,22 +330,17 @@ st.markdown("### 👁️ Preview")
 lesson = st.session_state["piluso_lesson"]
 
 preview_text = f"""
-**NGSS Standard:** {lesson['ngss']}
+**NGSS Standard:** {lesson.get('ngss', '—')}
 **New Visions Unit:** {lesson.get('nv_unit', 'N/A')}
 
 **Student Objective:**
 {lesson.get('objective', '—')}
 
 **5E Framework:**
-
 **Engage:** {lesson.get('engage', '—')}
-
 **Explore:** {lesson.get('explore', '—')}
-
 **Explain:** {lesson.get('explain', '—')}
-
 **Elaborate:** {lesson.get('elaborate', '—')}
-
 **Evaluate:** {lesson.get('evaluate', '—')}
 
 **Materials:**
@@ -353,9 +348,12 @@ preview_text = f"""
 
 **Notes:**
 {lesson.get('notes', '—')}
+
+**Accommodations:**
+{lesson.get('accommodations', '—')}
 """
 
-st.text_area("Lesson Preview", value=preview_text, height=400, disabled=True)
+st.text_area("Lesson Preview", value=preview_text, height=420, disabled=True)
 
 st.divider()
 
@@ -389,6 +387,7 @@ with col3:
             "objective": "",
             "materials": "",
             "notes": "",
+            "accommodations": "",
         }
         st.rerun()
 
@@ -401,40 +400,20 @@ st.divider()
 with st.expander("💡 Quick Tips for Ms. Piluso", expanded=False):
     st.markdown(
         """
-**NGSS Integration:**
-- Standards auto-populate from database
-- Phase 2: Direct link to NGSS appendices
+**5E Framework quick cues**
+- Engage: hook / phenomenon
+- Explore: hands-on investigation
+- Explain: student talk + teacher clarify
+- Elaborate: apply in new context
+- Evaluate: checks for understanding
 
-**5E Framework:**
-- Fill each phase with specific activities
-- Engage: Hook (demo, question, phenomenon)
-- Explore: Hands-on investigation
-- Explain: Student presentations + teacher input
-- Elaborate: Apply to new context
-- Evaluate: Formative + summative checks
-
-**New Visions (Placeholder):**
-- Future: Auto-load unit resources
-- Future: Suggested investigations per unit
-- Future: Assessment bank integration
-
-**Export Workflow:**
-1. Build lesson here
-2. Click "Export to BSChapp"
-3. Open BSChapp v2
-4. Select "Lesson Plan" artifact
-5. Paste content
-6. Add signature
-7. Download PDF
+**Export workflow**
+1) Build lesson here
+2) Export to BSChapp
+3) Paste into Lesson Plan artifact
+4) Add signature
+5) Download PDF
 """
     )
-
-accom = st.text_area(
-    "Accommodations / Modifications",
-    value=st.session_state["piluso_lesson"].get("accommodations", ""),
-    placeholder="IEP/504 supports: visuals, sentence starters, extended time, breaks, reduced choices...",
-    height=100,
-)
-st.session_state["piluso_lesson"]["accommodations"] = accom
 
 st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
