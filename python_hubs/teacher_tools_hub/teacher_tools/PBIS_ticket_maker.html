@@ -1,309 +1,765 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PBIS Ticket Maker (B/W Spine)</title>
-<style>
-:root{--bg:#f3f3f3;--card:#fff;--ink:#111;--muted:#444;--line:#cfcfcf;--r:14px}
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial;background:var(--bg);color:var(--ink);overflow:hidden}
-.top{height:64px;background:#000;color:#fff;display:flex;align-items:center;gap:10px;padding:0 14px}
-.badge{width:34px;height:34px;border-radius:999px;border:2px solid #fff;display:grid;place-items:center;font-weight:900}
-.wrap{height:calc(100vh - 64px);padding:12px;display:flex;justify-content:center}
-.card{width:min(1100px,100%);background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;min-height:0}
-.grid{display:flex;gap:12px;min-height:0;flex:1}
-.col{flex:1;min-width:0;border:2px dotted var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
-.row{display:flex;gap:10px;min-width:0}
-.row.wrap{flex-wrap:wrap;height:auto;padding:0;justify-content:flex-start}
-.btn{flex:1;min-width:0;border:2px solid #000;background:#fff;color:#000;border-radius:12px;padding:12px;font-weight:900;cursor:pointer}
-.btn.on{background:#000;color:#fff}
-.small{flex:0 0 auto;border:2px solid #000;background:#fff;border-radius:12px;padding:10px 12px;font-weight:900;cursor:pointer;min-width:140px}
-.small.primary{background:#000;color:#fff}
-input,textarea{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px}
-textarea{resize:none;height:58px}
-.h{margin:0;font-weight:900}
-.m{margin:0;color:var(--muted);font-weight:700}
-.canvas{flex:1;min-height:0;border:2px solid #000;border-radius:12px;overflow:hidden;background:#fff;position:relative}
-canvas{width:100%;height:100%;display:block}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>PBIS Ticket Maker — W.L.E.A.D. (JPEG)</title>
+  <style>
+    :root{
+      /* Starter Package palette */
+      --page:#fff6bf;         /* light yellow */
+      --card:#ffffff;
+      --ink:#0b1220;          /* deep ink */
+      --muted:#2b3445;
+      --border:#d9d9d9;
 
-/* PBIS checks (B/W) */
-label{font-weight:900}
-.checks{border:2px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:8px;background:#fff}
-.check{display:flex;align-items:center;gap:10px;font-weight:800}
-.check input{width:20px;height:20px;accent-color:#000}
+      --navy:#0b2a5b;
+      --navy2:#123b7a;
+      --gold:#f2c94c;
 
-/* JPEG preview area */
-.jpeg{display:none;border:2px solid var(--line);border-radius:12px;padding:10px;background:#fff}
-.jpeg img{width:100%;height:auto;display:block}
+      --r:16px;
+      --shadow: 0 10px 28px rgba(11,42,91,0.18);
+    }
 
-/* whirly woo (ONLY for Preview JPEG) */
-.whirl{
-  display:none;
-  position:absolute; inset:0;
-  background:rgba(255,255,255,0.55); /* more transparent */
-  backdrop-filter: blur(2px);
-  display:grid; place-items:center;
-}
-.whirl .dot{
-  width:40px;height:40px;border-radius:999px;
-  border:5px solid #e0e0e0; border-top-color:#000;
-  animation: spin .65s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--page);
+      color:var(--ink);
+      overflow:hidden; /* NO SCROLL */
+    }
 
-.foot{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-</style></head><body>
-<div class="top"><div class="badge">PB</div><div>
-  <div style="font-weight:900;letter-spacing:.08em">PBIS TICKET MAKER</div>
-  <div style="font-weight:700;opacity:.85;font-size:.92rem">B/W Spine • No Scroll • Wrapped Text</div>
-</div></div>
+    /* ===== Top bar (wide-screen effect) ===== */
+    .topbar{
+      height:72px;
+      background:var(--navy);
+      color:#fff;
+      border-bottom:4px solid var(--gold);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:0 14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .topbar::after{
+      content:"";
+      position:absolute; inset:0;
+      background:linear-gradient(90deg,
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.06) 20%,
+        rgba(255,255,255,0.00) 52%,
+        rgba(255,255,255,0.05) 82%,
+        rgba(255,255,255,0.00) 100%);
+      opacity:.55;
+      pointer-events:none;
+    }
+    .crest{
+      width:44px;height:44px;border-radius:999px;
+      border:3px solid var(--gold);
+      display:grid;place-items:center;
+      font-weight:1000; letter-spacing:.05em;
+      background:rgba(255,255,255,0.12);
+      z-index:1;
+      user-select:none;
+    }
+    .brand{flex:1; min-width:0; z-index:1}
+    .brand .t{
+      margin:0;
+      font-weight:1000;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-size:1.05rem;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .brand .s{
+      margin:4px 0 0;
+      font-weight:800;
+      font-size:.92rem;
+      opacity:.92;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .pill{
+      z-index:1;
+      font-weight:1000;
+      font-size:.92rem;
+      background:rgba(255,255,255,0.14);
+      border:1px solid rgba(255,255,255,0.25);
+      padding:8px 12px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
 
-<div class="wrap"><div class="card">
-  <div class="grid">
-    <div class="col">
-      <p class="h" id="status">Tap an activity. Preview updates instantly.</p>
+    /* ===== App layout (NO SCROLL) ===== */
+    .app{height:100vh; display:flex; flex-direction:column;}
+    .stage{
+      flex:1 1 auto;
+      min-height:0;
+      padding:12px;
+      display:flex;
+      justify-content:center;
+      align-items:stretch;
+    }
+    .panel{
+      width:min(1180px, 100%);
+      background:var(--card);
+      border:2px solid var(--border);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .row{
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+      gap:12px;
+    }
+    .col{
+      flex:1 1 0;
+      min-width:320px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      background:#fff;
+    }
 
-      <div class="row wrap" role="group" aria-label="Activities">
-        <button class="btn" id="tCheck" type="button">CHECK IN</button>
-        <button class="btn" id="tReflect" type="button">REFLECT</button>
-        <button class="btn" id="tGoal" type="button">GOAL</button>
-      </div>
+    /* Controls */
+    label{display:block; font-weight:1000; color:var(--navy); margin:8px 0 6px;}
+    input[type="text"], textarea{
+      width:100%;
+      border:2px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:1rem;
+      background:#fff;
+      color:var(--ink);
+      outline:none;
+    }
+    textarea{
+      height:78px;
+      resize:none;
+      line-height:1.25rem;
+    }
+    input:focus, textarea:focus{
+      border-color:var(--navy2);
+      box-shadow:0 0 0 3px rgba(18,59,122,0.12);
+    }
 
-      <div class="row">
-        <div style="flex:1;min-width:0">
-          <p class="m">Student</p>
-          <input id="name" placeholder="Name"/>
-        </div>
-        <div style="flex:1;min-width:0">
-          <p class="m">Group</p>
-          <input id="group" placeholder="Period"/>
-        </div>
-      </div>
+    /* Activity buttons */
+    .pickrow{display:flex; gap:10px; flex-wrap:wrap;}
+    .pick{
+      flex:1 1 150px;
+      min-width:150px;
+      border:2px solid var(--navy);
+      border-radius:12px;
+      background:#fff;
+      color:var(--navy);
+      font-weight:1000;
+      padding:12px;
+      cursor:pointer;
+      user-select:none;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .pick.active{
+      background:var(--navy);
+      color:#fff;
+      box-shadow:0 0 0 3px rgba(242,201,76,0.55) inset;
+    }
 
-      <label>PBIS Checks (5)</label>
-      <div class="checks">
-        <div class="check"><input type="checkbox" id="c1"><span>ENGAGE in SAFTEY</span></div>
-        <div class="check"><input type="checkbox" id="c2"><span>LEARN TO EARN</span></div>
-        <div class="check"><input type="checkbox" id="c3"><span>ALWAYS RESPECTFUL</span></div>
-        <div class="check"><input type="checkbox" id="c4"><span>DO THE RIGHT THING</span></div>
-        <div class="check"><input type="checkbox" id="c5"><span>MY GOAL POINT</span></div>
-      </div>
+    /* PBIS checks */
+    .checks{
+      border:2px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      display:grid;
+      gap:8px;
+    }
+    .check{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      color:var(--navy);
+    }
+    .check input{width:22px;height:22px; accent-color: var(--navy);}
 
-      <p class="m">CHECK IN</p><textarea id="a1" placeholder="Today I will…"></textarea>
-      <p class="m">REFLECT</p><textarea id="b1" placeholder="What happened?"></textarea>
-      <p class="m">GOAL</p><textarea id="g1" placeholder="My goal point is…"></textarea>
+    /* Buttons row (fixed footprint; NO SHIFT) */
+    .btnrow{
+      margin-top:auto;
+      padding-top:10px;
+      border-top:1px solid var(--border);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
 
-      <div class="foot">
-        <button class="small" id="preview" type="button">Preview JPEG</button>
-        <button class="small primary" id="download" type="button">Download JPEG</button>
-        <button class="small" id="clear" type="button">Clean Up</button>
-      </div>
-      <p class="m" id="note">If an embed blocks download: use Preview → long-press image → Save.</p>
+    /* Generate sits UNDER the Make/Save line (your request) */
+    .topactions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .btn{
+      appearance:none;
+      border:2px solid var(--navy);
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:1000;
+      background:#fff;
+      color:var(--navy);
+      cursor:pointer;
+      user-select:none;
+      min-width:160px;
+    }
+    .btn.gold{border-color:var(--gold); background:var(--gold); color:var(--ink);}
+    .btn.danger{border-color:#b00020; background:#b00020; color:#fff;}
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .generate{
+      width:100%;
+      border:0;
+      border-radius:14px;
+      padding:14px 14px;
+      background:linear-gradient(180deg, var(--navy2), var(--navy));
+      color:#fff;
+      font-weight:1000;
+      font-size:1.05rem;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      box-shadow:0 10px 24px rgba(11,42,91,0.22);
+    }
+    .generate .arrow{
+      width:44px;height:44px;border-radius:999px;
+      background:rgba(255,255,255,0.16);
+      border:2px solid rgba(242,201,76,0.95);
+      display:grid;place-items:center;
+      font-size:1.35rem;
+    }
+    /* IMPORTANT: no layout shift — reserve space even when hidden */
+    .generatewrap{min-height:64px;}
+    .generatewrap.hidden{visibility:hidden;}
+
+    /* Preview */
+    .previewtitle{margin:0; font-weight:1000; color:var(--navy);}
+    .canvaswrap{
+      margin-top:10px;
+      border:3px solid var(--navy);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+      position:relative;
+    }
+    canvas{
+      display:block;
+      width:100%;
+      height:420px;
+      background:#fff;
+    }
+
+    /* Foggy overlay for "Preview JPEG" only (subtle) */
+    .fog{
+      position:absolute;
+      inset:0;
+      background:rgba(255,255,255,0.10); /* slightly more transparent */
+      backdrop-filter: blur(1.5px);
+      pointer-events:none;
+      opacity:0;
+      transition:opacity .18s ease;
+    }
+    .fog.on{opacity:1;}
+
+    .jpegbox{
+      display:none;
+      margin-top:10px;
+      border:2px dashed var(--border);
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
+    }
+    .jpegbox img{max-width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--border);}
+    .hint{margin:0; font-weight:800; color:var(--muted); font-size:.95rem;}
+
+    .status{margin:0; font-weight:1000; color:var(--navy);}
+    .savedAt{margin:0; font-weight:900; color:var(--muted); font-size:.92rem;}
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="crest">PBIS</div>
+    <div class="brand">
+      <p class="t">PBIS Ticket Maker</p>
+      <p class="s">Teacher Tools Hub • We are L.E.A.D.</p>
     </div>
+    <div class="pill" id="datePill">Date: —</div>
+  </div>
 
-    <div class="col">
-      <p class="h">Preview</p>
-      <div class="jpeg" id="jpegBox"><img id="jpegImg" alt="JPEG Preview"/></div>
+  <div class="stage">
+    <div class="panel">
+      <div class="row">
+        <!-- LEFT -->
+        <div class="col" aria-label="Inputs">
+          <p class="status" id="statusLine">Select activities to build the ticket.</p>
 
-      <div class="canvas" id="canvasWrap">
-        <div class="whirl" id="whirl"><div class="dot" aria-label="Loading"></div></div>
-        <canvas id="cv"></canvas>
+          <label>Activities (tap to include)</label>
+          <div class="pickrow">
+            <button class="pick" id="pickCheckin" type="button">✅ CHECK IN</button>
+            <button class="pick" id="pickReflect" type="button">🔄 REFLECT</button>
+            <button class="pick" id="pickGoal" type="button">⭐ GOAL</button>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
+            <div style="flex:1 1 220px;">
+              <label>Student</label>
+              <input id="studentName" type="text" placeholder="Name"/>
+            </div>
+            <div style="flex:1 1 220px;">
+              <label>Group</label>
+              <input id="studentGroup" type="text" placeholder="Period / Group"/>
+            </div>
+          </div>
+
+          <label>PBIS Checks (5)</label>
+          <div class="checks">
+            <div class="check"><input type="checkbox" id="c1"><span>ENGAGE in SAFTEY</span></div>
+            <div class="check"><input type="checkbox" id="c2"><span>LEARN TO EARN</span></div>
+            <div class="check"><input type="checkbox" id="c3"><span>ALWAYS RESPECTFUL</span></div>
+            <div class="check"><input type="checkbox" id="c4"><span>DO THE RIGHT THING</span></div>
+            <div class="check"><input type="checkbox" id="c5"><span>MY GOAL POINT</span></div>
+          </div>
+
+          <label>CHECK IN</label>
+          <textarea id="a1" placeholder="Today I will…"></textarea>
+
+          <label>REFLECT</label>
+          <textarea id="b1" placeholder="What happened?"></textarea>
+
+          <label>GOAL</label>
+          <textarea id="g1" placeholder="My goal point is…"></textarea>
+
+          <div class="btnrow">
+            <!-- Line 1: Make/Save/Clean (fixed) -->
+            <div class="topactions">
+              <button class="btn gold" id="previewJpeg" type="button">Preview JPEG</button>
+              <button class="btn" id="saveJpeg" type="button" disabled>Save JPEG</button>
+              <button class="btn danger" id="clear" type="button">Clean Up</button>
+            </div>
+
+            <!-- Line 2: Generate (always reserves space; appears when all 3 selected) -->
+            <div class="generatewrap hidden" id="genWrap">
+              <button class="generate" id="generate" type="button" aria-label="Generate complete ticket">
+                <span class="arrow">➡️</span>
+                <span>Generate Complete Ticket</span>
+              </button>
+            </div>
+
+            <p class="savedAt" id="savedAt">—</p>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col" aria-label="Preview">
+          <p class="previewtitle">Ticket Preview</p>
+
+          <div class="canvaswrap">
+            <canvas id="ticket"></canvas>
+            <div class="fog" id="fog"></div>
+          </div>
+
+          <div class="jpegbox" id="jpegBox">
+            <p class="hint" style="margin:0 0 8px;">JPEG preview (student). Then click <b>Save JPEG</b>.</p>
+            <img id="jpegImg" alt="Ticket JPEG preview"/>
+          </div>
+
+          <p class="hint" id="helperLine" style="margin-top:10px;">
+            Tip: Select activities first. Preview updates automatically.
+          </p>
+        </div>
       </div>
     </div>
   </div>
-</div></div>
+</div>
 
 <script>
-const $=(s,el=document)=>el.querySelector(s);
-const S={check:false,reflect:false,goal:false};
-const btns={check:$("#tCheck"),reflect:$("#tReflect"),goal:$("#tGoal")};
-const f={
-  name:$("#name"), group:$("#group"),
-  c1:$("#c1"), c2:$("#c2"), c3:$("#c3"), c4:$("#c4"), c5:$("#c5"),
-  a1:$("#a1"), b1:$("#b1"), g1:$("#g1")
-};
+  const $ = (s, el=document) => el.querySelector(s);
 
-const cv=$("#cv"), ctx=cv.getContext("2d",{alpha:false});
-function showWhirl(on){ $("#whirl").style.display = on ? "grid" : "none"; }
+  // Date
+  const now = new Date();
+  $("#datePill").textContent = "Date: " + now.toLocaleDateString();
 
-function toggle(k){
-  S[k]=!S[k];
-  btns[k].classList.toggle("on",S[k]);
-  $("#jpegBox").style.display="none";
-  draw();
-}
-btns.check.onclick=()=>toggle("check");
-btns.reflect.onclick=()=>toggle("reflect");
-btns.goal.onclick=()=>toggle("goal");
+  // Local store (safe)
+  const store = {
+    get(k, fallback){
+      try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+      catch(e){ return fallback; }
+    },
+    set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  };
 
-function fit(){
-  const box=cv.parentElement.getBoundingClientRect();
-  const dpr=Math.max(1,window.devicePixelRatio||1);
-  cv.width=Math.floor(box.width*dpr);
-  cv.height=Math.floor(box.height*dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  draw();
-}
-window.addEventListener("resize",fit);
+  // Elements
+  const picks = {
+    checkin: $("#pickCheckin"),
+    reflect: $("#pickReflect"),
+    goal: $("#pickGoal"),
+  };
 
-/* === PIXEL-PERFECT WRAP === */
-function wrapByPixels(text, maxWidth){
-  const words=(text||"").replace(/\r/g,"").split(/\s+/).filter(Boolean);
-  if(!words.length) return [""];
-  const lines=[];
-  let line=words[0];
-  for(let i=1;i<words.length;i++){
-    const test=line+" "+words[i];
-    if(ctx.measureText(test).width<=maxWidth){ line=test; }
-    else{ lines.push(line); line=words[i]; }
-  }
-  lines.push(line);
-  return lines;
-}
-function drawWrappedParagraph(label, body, x, y, maxWidth, lineH, maxLines){
-  ctx.font="900 12px system-ui"; ctx.fillStyle="#000";
-  ctx.fillText(label, x, y); y += Math.floor(lineH * 1.15);
-  ctx.font="700 12px system-ui"; ctx.fillStyle="#000";
-  const lines = wrapByPixels(body||"", maxWidth).slice(0, maxLines);
-  for(const ln of lines){ ctx.fillText(ln, x, y); y += lineH; }
-  return y + Math.floor(lineH * 0.6);
-}
-function checksSelected(){
-  const names=[];
-  if(f.c1.checked) names.push("ENGAGE in SAFTEY");
-  if(f.c2.checked) names.push("LEARN TO EARN");
-  if(f.c3.checked) names.push("ALWAYS RESPECTFUL");
-  if(f.c4.checked) names.push("DO THE RIGHT THING");
-  if(f.c5.checked) names.push("MY GOAL POINT");
-  return names;
-}
+  const fields = {
+    name: $("#studentName"),
+    group: $("#studentGroup"),
+    c1: $("#c1"), c2: $("#c2"), c3: $("#c3"), c4: $("#c4"), c5: $("#c5"),
+    a1: $("#a1"),
+    b1: $("#b1"),
+    g1: $("#g1"),
+  };
 
-function draw(){
-  const w=cv.clientWidth, h=cv.clientHeight;
-  const pad=12, rightPad=12;
-  const maxTextW = (w - pad - rightPad);
-  const lineH=16;
+  const genWrap = $("#genWrap");
+  const generateBtn = $("#generate");
+  const previewBtn = $("#previewJpeg");
+  const saveBtn = $("#saveJpeg");
+  const clearBtn = $("#clear");
+  const statusLine = $("#statusLine");
+  const savedAt = $("#savedAt");
+  const fog = $("#fog");
+  const jpegBox = $("#jpegBox");
+  const jpegImg = $("#jpegImg");
 
-  ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h);
+  // State
+  let selected = store.get("pbis_selected_v4", {checkin:false, reflect:false, goal:false});
+  let lastJpegDataUrl = null;
 
-  // header
-  ctx.fillStyle="#000"; ctx.fillRect(0,0,w,54);
-  ctx.fillStyle="#fff"; ctx.textAlign="left";
-  ctx.font="900 14px system-ui";
-  ctx.fillText("PBIS TICKET", pad, 22);
-  ctx.font="700 12px system-ui";
-  ctx.fillText("W.L.E.A.D. • B/W Spine", pad, 42);
-
-  // student/meta (wrap-safe)
-  ctx.fillStyle="#111"; ctx.font="900 14px system-ui";
-  ctx.fillText("Student: " + (f.name.value.trim()||"__________"), pad, 80);
-
-  ctx.font="700 12px system-ui";
-  const meta = "Group: " + (f.group.value.trim()||"—") + "   Date: " + new Date().toLocaleDateString();
-  const metaLines = wrapByPixels(meta, maxTextW);
-  let metaY = 102;
-  for(const ln of metaLines.slice(0,2)){ ctx.fillText(ln, pad, metaY); metaY += 16; }
-
-  // divider
-  ctx.strokeStyle="#cfcfcf"; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(pad, metaY+6); ctx.lineTo(w-pad, metaY+6); ctx.stroke();
-
-  // checks line (wrapped)
-  const checked = checksSelected();
-  let y = metaY + 26;
-
-  ctx.fillStyle="#000";
-  ctx.font="900 12px system-ui";
-  ctx.fillText("PBIS CHECKS:", pad, y);
-  y += 18;
-
-  ctx.font="700 12px system-ui";
-  const checksText = checked.length ? checked.join(" • ") : "(none selected)";
-  for(const ln of wrapByPixels(checksText, maxTextW).slice(0,3)){
-    ctx.fillText(ln, pad, y);
-    y += 16;
+  function collect(){
+    const checks = {
+      c1: fields.c1.checked, c2: fields.c2.checked, c3: fields.c3.checked, c4: fields.c4.checked, c5: fields.c5.checked
+    };
+    return {
+      selected,
+      name: (fields.name.value||"").trim(),
+      group: (fields.group.value||"").trim(),
+      checks,
+      a1: fields.a1.value||"",
+      b1: fields.b1.value||"",
+      g1: fields.g1.value||"",
+      savedAt: store.get("pbis_savedAt_v4","—")
+    };
   }
 
-  // divider under checks
-  y += 6;
-  ctx.strokeStyle="#cfcfcf"; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w-pad, y); ctx.stroke();
-  y += 22;
-
-  // body
-  if(!S.check && !S.reflect && !S.goal){
-    ctx.fillStyle="#000"; ctx.font="900 13px system-ui";
-    const msg="Tap CHECK IN / REFLECT / GOAL to add sections.";
-    for(const ln of wrapByPixels(msg, maxTextW).slice(0,3)){ ctx.fillText(ln, pad, y); y += 18; }
-  } else {
-    const maxLinesPerSection = 4;
-    if(S.check)   y = drawWrappedParagraph("CHECK IN:", f.a1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
-    if(S.reflect) y = drawWrappedParagraph("REFLECT:", f.b1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
-    if(S.goal)    y = drawWrappedParagraph("GOAL:", f.g1.value, pad, y, maxTextW, lineH, maxLinesPerSection);
+  function persist(){
+    store.set("pbis_ticket_v4", collect());
   }
 
-  $("#status").textContent =
-    ("Selected: " + (S.check?"CHECK IN ":"") + (S.reflect?"REFLECT ":"") + (S.goal?"GOAL":"")).trim()
-    || "Tap an activity. Preview updates instantly.";
-}
+  function applyPicks(){
+    picks.checkin.classList.toggle("active", !!selected.checkin);
+    picks.reflect.classList.toggle("active", !!selected.reflect);
+    picks.goal.classList.toggle("active", !!selected.goal);
 
-["input","change"].forEach(evt=>{
-  Object.values(f).forEach(el=>{
-    el.addEventListener(evt, ()=>{ $("#jpegBox").style.display="none"; draw(); });
+    const ready = selected.checkin && selected.reflect && selected.goal;
+
+    // No shift: reserve space always, just hide visually
+    genWrap.classList.toggle("hidden", !ready);
+
+    statusLine.textContent = ready
+      ? "Ready. Click Generate if you want a finalized layout."
+      : "Select activities to build the ticket.";
+
+    // If selections change, JPEG is outdated
+    lastJpegDataUrl = null;
+    saveBtn.disabled = true;
+    jpegBox.style.display = "none";
+  }
+
+  function togglePick(k){
+    selected[k] = !selected[k];
+    store.set("pbis_selected_v4", selected);
+    applyPicks();
+    drawTicket(); // live update
+    persist();
+  }
+
+  picks.checkin.addEventListener("click", ()=>togglePick("checkin"));
+  picks.reflect.addEventListener("click", ()=>togglePick("reflect"));
+  picks.goal.addEventListener("click", ()=>togglePick("goal"));
+
+  // Restore
+  function restore(){
+    const v = store.get("pbis_ticket_v4", null);
+    if(!v) return;
+    if(v.selected){
+      selected = v.selected;
+      store.set("pbis_selected_v4", selected);
+    }
+    fields.name.value = v.name || "";
+    fields.group.value = v.group || "";
+    if(v.checks){
+      fields.c1.checked = !!v.checks.c1;
+      fields.c2.checked = !!v.checks.c2;
+      fields.c3.checked = !!v.checks.c3;
+      fields.c4.checked = !!v.checks.c4;
+      fields.c5.checked = !!v.checks.c5;
+    }
+    fields.a1.value = v.a1 || "";
+    fields.b1.value = v.b1 || "";
+    fields.g1.value = v.g1 || "";
+    const stamp = store.get("pbis_savedAt_v4","—");
+    savedAt.textContent = stamp === "—" ? "—" : ("Saved: " + stamp);
+  }
+  restore();
+  applyPicks();
+
+  // Auto persist (light)
+  Object.values(fields).forEach(el=>{
+    el.addEventListener("input", ()=>{ persist(); drawTicket(); });
+    el.addEventListener("change", ()=>{ persist(); drawTicket(); });
   });
-});
 
-$("#preview").onclick=()=>{
-  $("#jpegBox").style.display="none";
-  showWhirl(true); // ONLY here
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      draw();
-      try{
-        $("#jpegImg").src = cv.toDataURL("image/jpeg",0.92);
-        $("#jpegBox").style.display="block";
-      }catch(e){
-        alert("Preview failed.");
-      }finally{
-        showWhirl(false);
+  // ===== Canvas drawing with measureText wrapping (no cut-off) =====
+  const canvas = $("#ticket");
+  const ctx = canvas.getContext("2d", { alpha:false });
+
+  function fitCanvas(){
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawTicket();
+  }
+  window.addEventListener("resize", fitCanvas);
+
+  function wrapByMeasure(text, maxWidth){
+    const words = (text||"").replace(/\r/g,"").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = "";
+    for(const w of words){
+      const test = line ? (line + " " + w) : w;
+      if(ctx.measureText(test).width > maxWidth){
+        if(line) lines.push(line);
+        line = w;
+      }else{
+        line = test;
       }
-    });
-  });
-};
-
-$("#download").onclick=()=>{
-  // no whirly woo here (as requested)
-  draw();
-  const base=(f.name.value.trim()||"pbis_ticket").replace(/\s+/g,"_");
-  const file=base+".jpg";
-
-  if(cv.toBlob){
-    cv.toBlob(blob=>{
-      if(!blob){ alert("Download failed."); return; }
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a");
-      a.href=url; a.download=file;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),800);
-    },"image/jpeg",0.92);
-  }else{
-    try{
-      const a=document.createElement("a");
-      a.href=cv.toDataURL("image/jpeg",0.92);
-      a.download=file;
-      document.body.appendChild(a); a.click(); a.remove();
-    }catch(e){ alert("Download failed."); }
+    }
+    if(line) lines.push(line);
+    return lines;
   }
-};
 
-$("#clear").onclick=()=>{
-  f.name.value=""; f.group.value="";
-  f.c1.checked=f.c2.checked=f.c3.checked=f.c4.checked=f.c5.checked=false;
-  f.a1.value=""; f.b1.value=""; f.g1.value="";
-  S.check=S.reflect=S.goal=false;
-  Object.values(btns).forEach(b=>b.classList.remove("on"));
-  $("#jpegBox").style.display="none";
-  draw();
-};
+  function selectedLine(v){
+    const parts = [];
+    if(v.selected.checkin) parts.push("CHECK IN");
+    if(v.selected.reflect) parts.push("REFLECT");
+    if(v.selected.goal) parts.push("GOAL");
+    return parts.length ? ("Selected: " + parts.join(" • ")) : "Selected: —";
+  }
 
-setTimeout(()=>{ fit(); draw(); },50);
+  function checksLine(v){
+    const labels = [];
+    if(v.checks.c1) labels.push("ENGAGE in SAFTEY");
+    if(v.checks.c2) labels.push("LEARN TO EARN");
+    if(v.checks.c3) labels.push("ALWAYS RESPECTFUL");
+    if(v.checks.c4) labels.push("DO THE RIGHT THING");
+    if(v.checks.c5) labels.push("MY GOAL POINT");
+    return labels.length ? labels.join(" • ") : "—";
+  }
+
+  function drawTicket(){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    const v = collect();
+
+    // background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0,0,w,h);
+
+    // header
+    ctx.fillStyle = "#0b2a5b";
+    ctx.fillRect(0,0,w,64);
+    ctx.fillStyle = "#f2c94c";
+    ctx.fillRect(0,60,w,6);
+
+    // header text
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "1000 18px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.textAlign = "left";
+    ctx.fillText("PBIS TICKET", 16, 28);
+
+    ctx.font = "900 13px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.fillText("W.L.E.A.D. • Teacher Tools Hub", 16, 50);
+
+    // meta right
+    ctx.fillStyle = "#123b7a";
+    ctx.fillRect(w-260, 10, 244, 44);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 12px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("Date: " + new Date().toLocaleDateString(), w-248, 28);
+    ctx.fillText("Group: " + (v.group || "—"), w-248, 46);
+
+    // student line
+    ctx.fillStyle = "#0b1220";
+    ctx.font = "1000 18px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("Student: " + (v.name || "________________"), 16, 96);
+
+    // divider
+    ctx.fillStyle = "#d9d9d9";
+    ctx.fillRect(16, 112, w-32, 3);
+
+    // selected
+    ctx.fillStyle = "#0b2a5b";
+    ctx.font = "1000 13px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText(selectedLine(v), 16, 136);
+
+    // checks
+    ctx.fillStyle = "#0b1220";
+    ctx.font = "1000 14px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("PBIS CHECKS:", 16, 164);
+
+    ctx.font = "900 14px system-ui, -apple-system, Segoe UI, Arial";
+    const checksText = checksLine(v);
+    const maxChecksWidth = w - 32;
+    const checkLines = wrapByMeasure(checksText, maxChecksWidth);
+    let cy = 188;
+    for(const ln of checkLines.slice(0,2)){ // keep tight
+      ctx.fillText(ln, 16, cy);
+      cy += 20;
+    }
+
+    // divider
+    ctx.fillStyle = "#d9d9d9";
+    ctx.fillRect(16, cy+6, w-32, 3);
+
+    // body
+    let y = cy + 44;
+    const left = 16;
+    const maxWidth = w - 32;
+
+    function section(title, text){
+      ctx.fillStyle = "#0b1220";
+      ctx.font = "1000 16px system-ui, -apple-system, Segoe UI, Arial";
+      ctx.fillText(title, left, y);
+      y += 22;
+
+      ctx.font = "900 16px system-ui, -apple-system, Segoe UI, Arial";
+      const lines = wrapByMeasure(text || "—", maxWidth);
+      for(const ln of lines.slice(0,2)){ // keep within frame
+        ctx.fillText(ln, left, y);
+        y += 22;
+      }
+      y += 14;
+    }
+
+    if(v.selected.checkin) section("CHECK IN:", v.a1);
+    if(v.selected.reflect) section("REFLECT:", v.b1);
+    if(v.selected.goal) section("GOAL:", v.g1);
+
+    // footer
+    ctx.fillStyle = "#0b2a5b";
+    ctx.font = "900 11px system-ui, -apple-system, Segoe UI, Arial";
+    ctx.fillText("W.L.E.A.D. • PBIS", 16, h-14);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#123b7a";
+    ctx.fillText("Student copy (JPEG)", w-16, h-14);
+    ctx.textAlign = "left";
+  }
+
+  // initial sizing/draw
+  setTimeout(()=>{ fitCanvas(); }, 40);
+
+  // Generate: just forces a clean redraw + message (no layout shift)
+  generateBtn.addEventListener("click", ()=>{
+    drawTicket();
+    statusLine.textContent = "Generated ✓";
+  });
+
+  // Preview JPEG: ONLY place we show fog, and ONLY briefly (no “whirly woo”)
+  previewBtn.addEventListener("click", ()=>{
+    fog.classList.add("on");
+    drawTicket();
+
+    // build JPEG preview
+    try{
+      const url = canvas.toDataURL("image/jpeg", 0.92);
+      lastJpegDataUrl = url;
+      jpegImg.src = url;
+      jpegBox.style.display = "block";
+      saveBtn.disabled = false;
+      statusLine.textContent = "JPEG preview ready ✓";
+    }catch(e){
+      statusLine.textContent = "JPEG preview failed.";
+    }
+
+    // subtle fog pulse, then off
+    setTimeout(()=> fog.classList.remove("on"), 260);
+  });
+
+  // Save JPEG: real download file (works on most browsers; Google Sites embed varies by iOS)
+  saveBtn.addEventListener("click", ()=>{
+    if(!lastJpegDataUrl){
+      statusLine.textContent = "Preview JPEG first.";
+      return;
+    }
+    const a = document.createElement("a");
+    const stamp = new Date();
+    const y = stamp.getFullYear();
+    const m = String(stamp.getMonth()+1).padStart(2,"0");
+    const d = String(stamp.getDate()).padStart(2,"0");
+    a.download = `pbis_ticket_${y}-${m}-${d}.jpg`;
+    a.href = lastJpegDataUrl;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    const savedStamp = new Date().toLocaleString();
+    store.set("pbis_savedAt_v4", savedStamp);
+    savedAt.textContent = "Saved: " + savedStamp;
+    statusLine.textContent = "Downloaded ✓";
+  });
+
+  // Clean Up
+  clearBtn.addEventListener("click", ()=>{
+    fields.name.value = "";
+    fields.group.value = "";
+    fields.c1.checked = fields.c2.checked = fields.c3.checked = fields.c4.checked = fields.c5.checked = false;
+    fields.a1.value = "";
+    fields.b1.value = "";
+    fields.g1.value = "";
+    selected = {checkin:false, reflect:false, goal:false};
+    store.set("pbis_selected_v4", selected);
+    store.set("pbis_ticket_v4", null);
+    store.set("pbis_savedAt_v4", "—");
+    savedAt.textContent = "—";
+    jpegBox.style.display = "none";
+    lastJpegDataUrl = null;
+    saveBtn.disabled = true;
+    applyPicks();
+    drawTicket();
+    statusLine.textContent = "Cleared.";
+  });
+
+  // Always keep preview live
+  function wireLive(el){
+    el.addEventListener("input", ()=>{ persist(); drawTicket(); });
+    el.addEventListener("change", ()=>{ persist(); drawTicket(); });
+  }
+  Object.values(fields).forEach(wireLive);
+
+  // Apply picks to view
+  applyPicks();
 </script>
-</body></html>
+</body>
+</html>
