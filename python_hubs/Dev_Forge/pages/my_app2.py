@@ -1,510 +1,531 @@
+# theme_studio.py
 import streamlit as st
-from dataclasses import dataclass, asdict
+from textwrap import dedent
+import json
 
-# ============================================================
-# UI CSS SELECTOR — Streamlit In-App Theme Builder
-# - Pick colors / presets
-# - Preview multiple components
-# - Export reusable code blocks (CSS + Python)
-# ============================================================
+st.set_page_config(page_title="Theme Studio — CSS Selector", layout="wide")
 
-st.set_page_config(page_title="UI CSS Selector", page_icon="🎨", layout="wide")
+# -----------------------------
+# Helpers
+# -----------------------------
+def css_theme(v: dict) -> str:
+    return dedent(f"""
+    /* ==========================================================
+       THEME STUDIO OUTPUT (theme.css)
+       ========================================================== */
 
-# ---------------------------
-# Presets (easy starting points)
-# ---------------------------
-PRESETS = {
-    "Neutral Light (DOE-friendly)": {
-        "bg": "#F3F4F6",
-        "panel": "#FFFFFF",
-        "border": "#D1D5DB",
-        "text": "#111827",
-        "muted": "#6B7280",
-        "accent": "#2563EB",
-        "accent_text": "#FFFFFF",
-        "success": "#16A34A",
-        "warning": "#F59E0B",
-        "danger": "#DC2626",
-        "shadow": "0 10px 20px rgba(0,0,0,0.08)",
-        "radius": 18,
-    },
-    "Science Mode (Cool Lab)": {
-        "bg": "#ECFEFF",
-        "panel": "#FFFFFF",
-        "border": "#A7F3D0",
-        "text": "#0F172A",
-        "muted": "#334155",
-        "accent": "#0EA5E9",
-        "accent_text": "#FFFFFF",
-        "success": "#22C55E",
-        "warning": "#F97316",
-        "danger": "#EF4444",
-        "shadow": "0 14px 26px rgba(2,132,199,0.12)",
-        "radius": 20,
-    },
-    "Dark Neon (Arcade)": {
-        "bg": "#0B1020",
-        "panel": "#0F172A",
-        "border": "#1F2A44",
-        "text": "#E5E7EB",
-        "muted": "#9CA3AF",
-        "accent": "#A855F7",
-        "accent_text": "#0B1020",
-        "success": "#34D399",
-        "warning": "#FBBF24",
-        "danger": "#FB7185",
-        "shadow": "0 16px 32px rgba(168,85,247,0.12)",
-        "radius": 22,
-    },
-    "Warm Pastel (Calm)": {
-        "bg": "#FFF7ED",
-        "panel": "#FFFFFF",
-        "border": "#FED7AA",
-        "text": "#1F2937",
-        "muted": "#6B7280",
-        "accent": "#F97316",
-        "accent_text": "#111827",
-        "success": "#10B981",
-        "warning": "#EAB308",
-        "danger": "#EF4444",
-        "shadow": "0 12px 24px rgba(249,115,22,0.10)",
-        "radius": 18,
-    },
-}
+    :root {{
+      --bg: {v["bg"]};
+      --surface: {v["surface"]};
+      --surface2: {v["surface2"]};
+      --border: {v["border"]};
 
-# ---------------------------
-# Theme model
-# ---------------------------
-@dataclass
-class ThemeTokens:
-    bg: str
-    panel: str
-    border: str
-    text: str
-    muted: str
-    accent: str
-    accent_text: str
-    success: str
-    warning: str
-    danger: str
-    shadow: str
-    radius: int
+      --text: {v["text"]};
+      --muted: {v["muted"]};
 
+      --accent: {v["accent"]};
+      --accent2: {v["accent2"]};
+      --good: {v["good"]};
+      --warn: {v["warn"]};
+      --bad: {v["bad"]};
 
-def theme_to_css_vars(t: ThemeTokens) -> str:
-    return f"""
-:root {{
-  --bg: {t.bg};
-  --panel: {t.panel};
-  --border: {t.border};
-  --text: {t.text};
-  --muted: {t.muted};
-  --accent: {t.accent};
-  --accentText: {t.accent_text};
-  --success: {t.success};
-  --warning: {t.warning};
-  --danger: {t.danger};
-  --shadow: {t.shadow};
-  --radius: {t.radius}px;
-}}
-""".strip()
+      --radius: {v["radius"]}px;
+      --pad: {v["pad"]}px;
 
+      --shadow: 0 {v["shadow_y"]}px {v["shadow_blur"]}px rgba(0,0,0,{v["shadow_alpha"]});
+      --font: {v["font_family"]};
 
-def app_css(t: ThemeTokens) -> str:
-    # This CSS styles BOTH: overall page and demo components
-    return f"""
-<style>
-{theme_to_css_vars(t)}
+      /* --- glass layer controls --- */
+      --glass_bg: rgba(255,255,255,{v["glass_alpha"]});
+      --glass_border: rgba(120,255,220,{v["glass_border_alpha"]});
+      --glass_blur: {v["glass_blur"]}px;
+      --glass_text: rgba(255,255,255,{v["overlay_text_alpha"]});
+      --glass_text_shadow: rgba(0,0,0,{v["overlay_shadow_alpha"]});
 
-html, body, [data-testid="stAppViewContainer"] {{
-  background: var(--bg) !important;
-  color: var(--text) !important;
-}}
+      /* --- ticker controls --- */
+      --ticker_bg: rgba(255,255,255,{v["ticker_alpha"]});
+      --ticker_border: rgba(120,255,220,{v["ticker_border_alpha"]});
+      --ticker_blur: {v["ticker_blur"]}px;
+      --ticker_size: {v["ticker_size"]}rem;
+      --ticker_pad_y: {v["ticker_pad_y"]}px;
+      --ticker_pad_x: {v["ticker_pad_x"]}px;
+    }}
 
-* {{
-  box-sizing: border-box;
-}}
+    /* ---------- base ---------- */
+    html, body {{
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+    }}
 
-.block {{
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 16px;
-}}
+    .ts-wrap {{ background: transparent; color: var(--text); font-family: var(--font); }}
 
-.h1 {{
-  font-weight: 900;
-  letter-spacing: .02em;
-  font-size: 1.35rem;
-  margin: 0 0 6px 0;
-}}
+    /* ---------- standard primitives ---------- */
+    .ts-card {{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: var(--pad);
+    }}
 
-.muted {{
-  color: var(--muted);
-  font-size: 0.95rem;
-}}
+    .ts-card--alt {{ background: var(--surface2); }}
 
-.row {{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
-}}
+    .ts-title {{
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      margin: 0 0 8px 0;
+    }}
 
-.pill {{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.35);
-  color: var(--text);
-  font-weight: 700;
-}}
+    .ts-muted {{ color: var(--muted); }}
 
-.pill.success {{
-  border-color: color-mix(in srgb, var(--success) 55%, var(--border));
-}}
-.pill.warning {{
-  border-color: color-mix(in srgb, var(--warning) 55%, var(--border));
-}}
-.pill.danger {{
-  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
-}}
+    .ts-row {{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: calc(var(--radius) - 2px);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+    }}
 
-.card {{
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  box-shadow: var(--shadow);
-  min-width: 220px;
-}}
+    .ts-pill {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-weight: 800;
+      font-size: 0.85rem;
+    }}
 
-.cardTitle {{
-  font-weight: 900;
-  margin-bottom: 6px;
-}}
+    .ts-pill--accent {{
+      border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+      background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    }}
 
-.btn {{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding: 10px 14px;
-  border-radius: calc(var(--radius) - 6px);
-  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
-  background: var(--accent);
-  color: var(--accentText);
-  font-weight: 900;
-  text-decoration: none;
-  cursor: pointer;
-  user-select: none;
-}}
+    .ts-pill--good {{
+      border-color: color-mix(in srgb, var(--good) 35%, var(--border));
+      background: color-mix(in srgb, var(--good) 12%, var(--surface));
+    }}
 
-.btn.secondary {{
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--border);
-}}
+    .ts-pill--warn {{
+      border-color: color-mix(in srgb, var(--warn) 35%, var(--border));
+      background: color-mix(in srgb, var(--warn) 12%, var(--surface));
+    }}
 
-.btn:hover {{
-  filter: brightness(0.98);
-}}
+    .ts-pill--bad {{
+      border-color: color-mix(in srgb, var(--bad) 35%, var(--border));
+      background: color-mix(in srgb, var(--bad) 12%, var(--surface));
+    }}
 
-.alert {{
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  padding: 12px 14px;
-  font-weight: 800;
-}}
+    .ts-btn {{
+      appearance: none;
+      border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+      background: linear-gradient(180deg,
+        color-mix(in srgb, var(--accent) 18%, var(--surface)),
+        color-mix(in srgb, var(--accent) 10%, var(--surface))
+      );
+      color: var(--text);
+      border-radius: calc(var(--radius) - 2px);
+      padding: 10px 12px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 120ms ease, filter 120ms ease;
+    }}
 
-.alert.success {{
-  border-color: color-mix(in srgb, var(--success) 60%, var(--border));
-  background: color-mix(in srgb, var(--success) 10%, var(--panel));
-}}
-.alert.warning {{
-  border-color: color-mix(in srgb, var(--warning) 60%, var(--border));
-  background: color-mix(in srgb, var(--warning) 10%, var(--panel));
-}}
-.alert.danger {{
-  border-color: color-mix(in srgb, var(--danger) 60%, var(--border));
-  background: color-mix(in srgb, var(--danger) 10%, var(--panel));
-}}
+    .ts-btn:hover {{ transform: translateY(-1px); filter: brightness(1.03); }}
 
-.table {{
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 8px;
-}}
-.tr {{
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}}
-.td {{
-  padding: 10px 12px;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}}
-.td:first-child {{
-  border-left: 1px solid var(--border);
-  border-top-left-radius: var(--radius);
-  border-bottom-left-radius: var(--radius);
-  font-weight: 900;
-}}
-.td:last-child {{
-  border-right: 1px solid var(--border);
-  border-top-right-radius: var(--radius);
-  border-bottom-right-radius: var(--radius);
-  color: var(--muted);
-  font-weight: 700;
-}}
-</style>
-""".strip()
+    .ts-btn--solid {{
+      border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+      background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 70%, black));
+      color: white;
+    }}
+
+    .ts-btn--ghost {{ background: transparent; box-shadow: none; }}
+
+    .ts-input {{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: calc(var(--radius) - 2px);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+    }}
+
+    .ts-input:focus {{
+      border-color: color-mix(in srgb, var(--accent) 65%, var(--border));
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+    }}
+
+    .ts-alert {{
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 12px;
+      background: var(--surface);
+    }}
+
+    .ts-alert--good {{
+      border-color: color-mix(in srgb, var(--good) 40%, var(--border));
+      background: color-mix(in srgb, var(--good) 10%, var(--surface));
+    }}
+
+    .ts-alert--warn {{
+      border-color: color-mix(in srgb, var(--warn) 40%, var(--border));
+      background: color-mix(in srgb, var(--warn) 10%, var(--surface));
+    }}
+
+    .ts-alert--bad {{
+      border-color: color-mix(in srgb, var(--bad) 40%, var(--border));
+      background: color-mix(in srgb, var(--bad) 10%, var(--surface));
+    }}
+
+    /* ==========================================================
+       GLASS OVERLAY (glassy / faded / laminated)
+       - Use inside any card to add that laminated look.
+       ========================================================== */
+    .glassy-card {{
+      background: var(--glass_bg);
+      border: 1px solid var(--glass_border);
+      border-radius: calc(var(--radius));
+      padding: 20px;
+      backdrop-filter: blur(var(--glass_blur));
+      -webkit-backdrop-filter: blur(var(--glass_blur));
+      position: relative;
+      overflow: hidden;
+    }}
+
+    /* subtle laminated sheen */
+    .glassy-card:before {{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.18) 0%,
+        rgba(255,255,255,0.06) 35%,
+        rgba(255,255,255,0.00) 60%
+      );
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }}
+
+    /* optional text overlay that sits on top of content */
+    .glassy-overlay-text {{
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 18px;
+      color: var(--glass_text);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 10px var(--glass_text_shadow);
+      pointer-events: none;
+      opacity: {v["overlay_opacity"]};
+    }}
+
+    /* ==========================================================
+       TICKER (fixed bottom)
+       ========================================================== */
+    .ticker {{
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--ticker_bg);
+      border-top: 1px solid var(--ticker_border);
+      padding: var(--ticker_pad_y) var(--ticker_pad_x);
+      text-align: center;
+      font-size: var(--ticker_size);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      backdrop-filter: blur(var(--ticker_blur));
+      -webkit-backdrop-filter: blur(var(--ticker_blur));
+      z-index: 999;
+    }}
+
+    /* spacer so the ticker doesn't cover content */
+    .ticker-spacer {{ height: 64px; }}
+
+    /* ---------- Streamlit optional spacing ---------- */
+    .block-container {{
+      padding-top: 1.5rem;
+      padding-bottom: 2.5rem;
+    }}
+    """).strip()
 
 
-# ---------------------------
-# Session state init
-# ---------------------------
-if "theme_name" not in st.session_state:
-    st.session_state.theme_name = "Neutral Light (DOE-friendly)"
+def streamlit_inject_snippet(css_text: str, ticker_text: str, show_ticker: bool) -> str:
+    ticker_block = ""
+    if show_ticker:
+        ticker_block = dedent(f"""
+        # Ticker (fixed bottom)
+        st.markdown(
+            \"\"\"<div class='ticker'>{ticker_text}</div>
+            <div class='ticker-spacer'></div>\"\"\",
+            unsafe_allow_html=True
+        )
+        """).strip()
+
+    return dedent(f"""
+    # --- Theme injection (paste into any Streamlit app) ---
+    import streamlit as st
+
+    THEME_CSS = r\"\"\"{css_text}\"\"\"
+    st.markdown(f"<style>{{THEME_CSS}}</style>", unsafe_allow_html=True)
+
+    {ticker_block}
+    """).strip()
+
+
+# -----------------------------
+# Session defaults
+# -----------------------------
 if "theme" not in st.session_state:
-    st.session_state.theme = PRESETS[st.session_state.theme_name].copy()
+    st.session_state.theme = {
+        "bg": "#f3f4f6",
+        "surface": "#ffffff",
+        "surface2": "#f8fafc",
+        "border": "#d1d5db",
+        "text": "#111827",
+        "muted": "#6b7280",
+        "accent": "#2563eb",
+        "accent2": "#22c55e",
+        "good": "#16a34a",
+        "warn": "#f59e0b",
+        "bad": "#ef4444",
+        "radius": 18,
+        "pad": 14,
+        "shadow_y": 8,
+        "shadow_blur": 24,
+        "shadow_alpha": 0.12,
+        "font_family": "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
 
-# ---------------------------
-# Sidebar controls
-# ---------------------------
+        # Glass overlay controls
+        "glass_alpha": 0.10,
+        "glass_border_alpha": 0.30,
+        "glass_blur": 10,
+        "overlay_opacity": 0.55,
+        "overlay_text_alpha": 0.75,
+        "overlay_shadow_alpha": 0.35,
+
+        # Ticker controls
+        "ticker_enabled": True,
+        "ticker_text": "YOUR MESSAGE • We are L.E.A.D. 🌟",
+        "ticker_alpha": 0.08,
+        "ticker_border_alpha": 0.30,
+        "ticker_blur": 10,
+        "ticker_size": 0.85,
+        "ticker_pad_y": 8,
+        "ticker_pad_x": 20,
+    }
+
+t = st.session_state.theme
+
+# -----------------------------
+# Sidebar Controls (selector UI)
+# -----------------------------
 with st.sidebar:
-    st.markdown("## 🎨 UI CSS Selector")
-    st.caption("Pick a preset, then tweak tokens. Export code blocks for other apps.")
+    st.title("🎛️ Theme Studio")
+    st.caption("Adjust → preview → export.")
 
-    theme_name = st.selectbox(
-        "Preset",
-        list(PRESETS.keys()),
-        index=list(PRESETS.keys()).index(st.session_state.theme_name),
-    )
+    st.subheader("Core Surfaces")
+    t["bg"] = st.color_picker("Background", t["bg"])
+    t["surface"] = st.color_picker("Surface", t["surface"])
+    t["surface2"] = st.color_picker("Surface (Alt)", t["surface2"])
+    t["border"] = st.color_picker("Border", t["border"])
 
-    if theme_name != st.session_state.theme_name:
-        st.session_state.theme_name = theme_name
-        st.session_state.theme = PRESETS[theme_name].copy()
+    st.subheader("Text")
+    t["text"] = st.color_picker("Text", t["text"])
+    t["muted"] = st.color_picker("Muted", t["muted"])
 
-    st.divider()
-    st.markdown("### Tokens")
+    st.subheader("Semantic Colors")
+    t["accent"] = st.color_picker("Accent", t["accent"])
+    t["accent2"] = st.color_picker("Accent 2", t["accent2"])
+    t["good"] = st.color_picker("Good", t["good"])
+    t["warn"] = st.color_picker("Warn", t["warn"])
+    t["bad"] = st.color_picker("Bad", t["bad"])
 
-    t = st.session_state.theme
-    t["bg"] = st.color_picker("Background (bg)", t["bg"])
-    t["panel"] = st.color_picker("Panel (panel)", t["panel"])
-    t["border"] = st.color_picker("Border (border)", t["border"])
-    t["text"] = st.color_picker("Text (text)", t["text"])
-    t["muted"] = st.color_picker("Muted (muted)", t["muted"])
-    t["accent"] = st.color_picker("Accent (accent)", t["accent"])
-    t["accent_text"] = st.color_picker("Accent Text (accent_text)", t["accent_text"])
+    st.subheader("Shape & Depth")
+    t["radius"] = st.slider("Radius", 0, 32, int(t["radius"]))
+    t["pad"] = st.slider("Padding", 8, 24, int(t["pad"]))
+    t["shadow_y"] = st.slider("Shadow Y", 0, 20, int(t["shadow_y"]))
+    t["shadow_blur"] = st.slider("Shadow Blur", 0, 50, int(t["shadow_blur"]))
+    t["shadow_alpha"] = st.slider("Shadow Alpha", 0.00, 0.40, float(t["shadow_alpha"]), 0.01)
 
-    st.markdown("### Status Colors")
-    t["success"] = st.color_picker("Success", t["success"])
-    t["warning"] = st.color_picker("Warning", t["warning"])
-    t["danger"] = st.color_picker("Danger", t["danger"])
-
-    st.markdown("### Shape / Shadow")
-    t["radius"] = st.slider("Radius (px)", 8, 30, int(t["radius"]))
-    shadow_mode = st.selectbox(
-        "Shadow strength",
-        ["Soft", "Medium", "Bold", "Off"],
-        index=1,
-    )
-    if shadow_mode == "Soft":
-        t["shadow"] = "0 10px 20px rgba(0,0,0,0.08)"
-    elif shadow_mode == "Medium":
-        t["shadow"] = "0 14px 26px rgba(0,0,0,0.10)"
-    elif shadow_mode == "Bold":
-        t["shadow"] = "0 18px 36px rgba(0,0,0,0.14)"
+    st.subheader("Font")
+    preset = st.selectbox("Font preset", ["System", "Inter-like", "Serif", "Mono", "Comic-ish"], index=0)
+    if preset == "System":
+        t["font_family"] = "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+    elif preset == "Inter-like":
+        t["font_family"] = "Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+    elif preset == "Serif":
+        t["font_family"] = "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif"
+    elif preset == "Mono":
+        t["font_family"] = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
     else:
-        t["shadow"] = "none"
+        t["font_family"] = "'Comic Sans MS','Chalkboard SE','Comic Neue',cursive,sans-serif"
 
     st.divider()
-    if st.button("Reset to preset"):
-        st.session_state.theme = PRESETS[st.session_state.theme_name].copy()
+    st.subheader("🧊 Glass Overlay (laminated)")
+    t["glass_alpha"] = st.slider("Glass background alpha", 0.00, 0.30, float(t["glass_alpha"]), 0.01)
+    t["glass_border_alpha"] = st.slider("Glass border alpha", 0.00, 0.80, float(t["glass_border_alpha"]), 0.01)
+    t["glass_blur"] = st.slider("Glass blur (px)", 0, 30, int(t["glass_blur"]))
+    t["overlay_opacity"] = st.slider("Overlay text opacity", 0.00, 1.00, float(t["overlay_opacity"]), 0.01)
+    t["overlay_text_alpha"] = st.slider("Overlay text alpha", 0.00, 1.00, float(t["overlay_text_alpha"]), 0.01)
+    t["overlay_shadow_alpha"] = st.slider("Overlay shadow alpha", 0.00, 1.00, float(t["overlay_shadow_alpha"]), 0.01)
+
+    st.divider()
+    st.subheader("📣 Ticker Adjuster")
+    t["ticker_enabled"] = st.toggle("Enable ticker", value=bool(t["ticker_enabled"]))
+    t["ticker_text"] = st.text_input("Ticker text", t["ticker_text"])
+    t["ticker_alpha"] = st.slider("Ticker background alpha", 0.00, 0.30, float(t["ticker_alpha"]), 0.01)
+    t["ticker_border_alpha"] = st.slider("Ticker border alpha", 0.00, 0.80, float(t["ticker_border_alpha"]), 0.01)
+    t["ticker_blur"] = st.slider("Ticker blur (px)", 0, 30, int(t["ticker_blur"]))
+    t["ticker_size"] = st.slider("Ticker font size (rem)", 0.70, 1.20, float(t["ticker_size"]), 0.01)
+    t["ticker_pad_y"] = st.slider("Ticker padding Y (px)", 4, 16, int(t["ticker_pad_y"]))
+    t["ticker_pad_x"] = st.slider("Ticker padding X (px)", 8, 40, int(t["ticker_pad_x"]))
+
+    st.divider()
+    if st.button("Reset to defaults"):
+        st.session_state.pop("theme", None)
         st.rerun()
 
-# ---------------------------
-# Build current theme + inject CSS
-# ---------------------------
-theme = ThemeTokens(**st.session_state.theme)
-st.markdown(app_css(theme), unsafe_allow_html=True)
 
-# ---------------------------
-# Main layout: Preview + Export
-# ---------------------------
-left, right = st.columns([1.1, 0.9], gap="large")
+# -----------------------------
+# Build Outputs
+# -----------------------------
+css_text = css_theme(t)
+inject_text = streamlit_inject_snippet(css_text, t["ticker_text"], bool(t["ticker_enabled"]))
+theme_json = json.dumps(t, indent=2)
+
+# Apply CSS live
+st.markdown(f"<style>{css_text}</style>", unsafe_allow_html=True)
+
+# Render ticker if enabled (actual runtime behavior)
+if t["ticker_enabled"]:
+    st.markdown(
+        f"<div class='ticker'>{t['ticker_text']}</div><div class='ticker-spacer'></div>",
+        unsafe_allow_html=True
+    )
+
+# -----------------------------
+# UI
+# -----------------------------
+st.title("Theme Studio — In-App CSS Selector")
+st.caption("Now with laminated glass overlay + ticker adjuster.")
+
+left, right = st.columns([1.15, 0.85], gap="large")
 
 with left:
+    st.subheader("Live Preview")
+
     st.markdown(
         f"""
-        <div class="block">
-          <div class="h1">Preview — {st.session_state.theme_name}</div>
-          <div class="muted">These are sample components that will react to your token changes.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        <div class="ts-wrap">
 
-    st.markdown("")
+          <div class="ts-card">
+            <div class="ts-title">Base Card</div>
+            <div class="ts-muted">Standard surface + border + shadow.</div>
 
-    # Component gallery
-    st.markdown(
-        """
-        <div class="row">
-          <div class="card">
-            <div class="cardTitle">Card</div>
-            <div class="muted">Panels, borders, text, shadow, radius.</div>
+            <div style="height:10px"></div>
+
+            <div class="ts-row">
+              <div>
+                <div style="font-weight:900">Row Item</div>
+                <div class="ts-muted" style="font-size:0.9rem">Secondary line</div>
+              </div>
+              <div class="ts-pill ts-pill--accent">⭐ Accent</div>
+            </div>
+
+            <div style="height:10px"></div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap">
+              <button class="ts-btn">Button</button>
+              <button class="ts-btn ts-btn--solid">Primary</button>
+              <button class="ts-btn ts-btn--ghost">Ghost</button>
+              <span class="ts-pill ts-pill--good">✅ Good</span>
+              <span class="ts-pill ts-pill--warn">⚠️ Warn</span>
+              <span class="ts-pill ts-pill--bad">⛔ Bad</span>
+            </div>
+
+            <div style="height:12px"></div>
+
+            <input class="ts-input" placeholder="Input focus ring preview" />
+
+            <div style="height:12px"></div>
+
+            <div class="ts-alert ts-alert--good"><b>Success:</b> Positive alert panel.</div>
+            <div style="height:10px"></div>
+            <div class="ts-alert ts-alert--warn"><b>Warning:</b> Caution alert panel.</div>
+            <div style="height:10px"></div>
+            <div class="ts-alert ts-alert--bad"><b>Error:</b> Error alert panel.</div>
           </div>
 
-          <div class="card">
-            <div class="cardTitle">Pills</div>
-            <div class="row" style="margin-top:8px">
-              <span class="pill success">✅ Success</span>
-              <span class="pill warning">⚠️ Warning</span>
-              <span class="pill danger">🛑 Danger</span>
+          <div style="height:14px"></div>
+
+          <div class="ts-card ts-card--alt">
+            <div class="ts-title">Glassy / Laminated Card Demo</div>
+            <div class="ts-muted">This is your “glassy-card” with overlay text.</div>
+            <div style="height:10px"></div>
+
+            <div class="glassy-card">
+              <div class="glassy-overlay-text">GLASSY • FADED • LAMINATED</div>
+              <h3 style="margin:0 0 6px 0;">Your Title</h3>
+              <p style="margin:0;" class="ts-muted">
+                Your content here. Overlay text sits above without blocking clicks.
+              </p>
+            </div>
+
+            <div style="height:12px"></div>
+
+            <div class="ts-row">
+              <div style="font-weight:900">Ticker Status</div>
+              <div class="ts-pill ts-pill--good">{"ON" if t["ticker_enabled"] else "OFF"}</div>
             </div>
           </div>
+
         </div>
         """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("")
-
-    st.markdown(
-        """
-        <div class="block">
-          <div class="row">
-            <a class="btn">Primary Button</a>
-            <a class="btn secondary">Secondary Button</a>
-            <span class="pill">🧠 Muted label demo</span>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("")
-
-    st.markdown(
-        """
-        <div class="row">
-          <div class="alert success" style="flex:1">✅ Success alert — you can use this for “Saved / Exported”.</div>
-          <div class="alert warning" style="flex:1">⚠️ Warning alert — “Check inputs”.</div>
-          <div class="alert danger" style="flex:1">🛑 Danger alert — “Something failed”.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("")
-
-    st.markdown(
-        """
-        <div class="block">
-          <div class="h1" style="font-size:1.05rem">Table-ish rows</div>
-          <div class="muted">This is a common teacher-tool pattern (quick status rows).</div>
-          <div style="margin-top:10px">
-            <table class="table">
-              <tr class="tr">
-                <td class="td">PBIS Ticket Maker</td>
-                <td class="td">Ready • Export OK</td>
-              </tr>
-              <tr class="tr">
-                <td class="td">AI Storyboard</td>
-                <td class="td">Draft • Needs Safari check</td>
-              </tr>
-              <tr class="tr">
-                <td class="td">Image Ticker</td>
-                <td class="td">Stable • Plug-in widget</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 with right:
-    st.markdown(
-        """
-        <div class="block">
-          <div class="h1">Export Blocks</div>
-          <div class="muted">Copy these into other apps. The tokens stay consistent across projects.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.subheader("Export Blocks")
 
-    st.markdown("")
+    tab1, tab2, tab3 = st.tabs(["theme.css", "Streamlit inject", "theme.json"])
 
-    # 1) CSS VARS
-    css_vars = theme_to_css_vars(theme)
-    st.markdown("### 1) CSS Variables (drop into any HTML/CSS)")
-    st.code(css_vars, language="css")
+    with tab1:
+        st.caption("Drop this into any app that supports CSS.")
+        st.code(css_text, language="css")
+        st.download_button("Download theme.css", data=css_text, file_name="theme.css", mime="text/css")
 
-    # 2) Streamlit injector
-    injector = f"""# --- UI THEME INJECTOR (Streamlit) ---
-import streamlit as st
+    with tab2:
+        st.caption("Paste this near the top of any Streamlit app.")
+        st.code(inject_text, language="python")
+        st.download_button("Download inject_snippet.py", data=inject_text, file_name="inject_snippet.py", mime="text/plain")
 
-THEME_CSS = r\"\"\"<style>
-{css_vars}
+    with tab3:
+        st.caption("Save presets for per-app styles.")
+        st.code(theme_json, language="json")
+        st.download_button("Download theme.json", data=theme_json, file_name="theme.json", mime="application/json")
 
-html, body, [data-testid="stAppViewContainer"] {{
-  background: var(--bg) !important;
-  color: var(--text) !important;
-}}
-</style>\"\"\"
 
-st.markdown(THEME_CSS, unsafe_allow_html=True)
-"""
-    st.markdown("### 2) Streamlit CSS Injector (minimal)")
-    st.code(injector, language="python")
+st.divider()
+st.markdown(
+    """
+**Quick reuse in other apps**
+- Copy the CSS (tab: `theme.css`) or the snippet (tab: `Streamlit inject`)
+- Use the glass overlay anywhere:
 
-    # 3) A small helper module (paste as ui_theme.py)
-    theme_dict = asdict(theme)
-    module_block = f"""# ui_theme.py
-# Reusable theme tokens for Streamlit/HTML injection.
-
-THEME = {theme_dict}
-
-def css_vars(theme: dict) -> str:
-    return f\"\"\":root {{
-  --bg: {{theme['bg']}};
-  --panel: {{theme['panel']}};
-  --border: {{theme['border']}};
-  --text: {{theme['text']}};
-  --muted: {{theme['muted']}};
-  --accent: {{theme['accent']}};
-  --accentText: {{theme['accent_text']}};
-  --success: {{theme['success']}};
-  --warning: {{theme['warning']}};
-  --danger: {{theme['danger']}};
-  --shadow: {{theme['shadow']}};
-  --radius: {{theme['radius']}}px;
-}}\"\"\"
-
-def inject(st_module, theme: dict = None) -> None:
-    t = theme or THEME
-    st_module.markdown(
-        "<style>" + css_vars(t) + "</style>",
-        unsafe_allow_html=True
-    )
-"""
-    st.markdown("### 3) Python Theme Module (drop into repo)")
-    st.code(module_block, language="python")
-
-    st.markdown("### Quick wiring tip")
-    st.markdown(
-        """
-- Put this app in your repo as `tools/ui_css_selector_app.py`
-- Put the exported module as `utils/ui_theme.py`
-- In any Streamlit app: `from utils import ui_theme; ui_theme.inject(st)`
-        """
-    )
+```python
+st.markdown("<div class='glassy-card'><div class='glassy-overlay-text'>TEXT</div><h3>Title</h3><p>Content</p></div>", unsafe_allow_html=True)
