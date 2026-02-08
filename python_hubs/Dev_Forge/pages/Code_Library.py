@@ -74,6 +74,45 @@ h1, h2, h3, h4, h5, h6, p, span, label, div {{
 # SNIPPETS (SAFE STRINGS)
 # =====================
 
+code_piluso_export_block = (
+    "import json\n"
+    "import streamlit as st\n\n"
+    "# EXPECTED SESSION STATE (from Ms. Piluso page)\n"
+    "# st.session_state['piluso_lesson'] = {\n"
+    "#   'ngss': 'MS-ESS1-1',\n"
+    "#   'nv_unit': 'Unit 4: Weather & Climate',\n"
+    "#   'accommodations': 'Sentence starters, visuals, extended time',\n"
+    "#   ...\n"
+    "# }\n\n"
+    "lesson = st.session_state.get('piluso_lesson', {})\n\n"
+    "ngss = lesson.get('ngss', '').strip() or '—'\n"
+    "new_visions = lesson.get('nv_unit', '').strip() or '—'\n"
+    "accommodations = lesson.get('accommodations', '').strip() or '—'\n\n"
+    "# ONE COPY/PASTE CODE BLOCK (Markdown)\n"
+    "export_md = (\n"
+    "    '```\\n'\n"
+    "    f'ngss: {ngss}\\n'\n"
+    "    f'new_visions: {new_visions}\\n'\n"
+    "    f'accommodations: {accommodations}\\n'\n"
+    "    '```'\n"
+    ")\n\n"
+    "st.subheader('📦 Ms. Piluso Export (Copy Block)')\n"
+    "st.code(export_md, language='text')\n\n"
+    "# ALSO EXPORT AS JSON (for your future lesson storage page)\n"
+    "export_json = {\n"
+    "    'ngss': ngss,\n"
+    "    'new_visions': new_visions,\n"
+    "    'accommodations': accommodations,\n"
+    "}\n\n"
+    "st.download_button(\n"
+    "    '⬇️ Download lesson JSON',\n"
+    "    data=json.dumps(export_json, indent=2).encode('utf-8'),\n"
+    "    file_name='piluso_lesson_export.json',\n"
+    "    mime='application/json',\n"
+    ")\n"
+)
+
+
 code_glassy_card = (
     "import streamlit as st\n\n"
     "# GLASSY CARD CSS\n"
@@ -196,6 +235,13 @@ with st.expander("🎨 Theme Variable System", expanded=False):
 
 with st.expander("📊 Bottom Ticker Bar", expanded=False):
     st.code(code_ticker, language="python")
+
+st.divider()
+st.markdown("## 🧪 Ms. Piluso Exports")
+
+with st.expander("📦 Lesson Export → Code Block + JSON", expanded=False):
+    st.markdown("**Use case:** Turn Ms. Piluso lesson data into a clean copy/paste block + a JSON file for storage.")
+    st.code(code_piluso_export_block, language="python")
 
 st.divider()
 
