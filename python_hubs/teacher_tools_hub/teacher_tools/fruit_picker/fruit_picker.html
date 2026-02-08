@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<title>Citrus Picker — Flash Premium (Offline)</title>
+<style>
+  :root{
+    --bg:#f3f4f6;
+    --card:#ffffff;
+    --ink:#111827;
+    --muted:#6b7280;
+    --border:#d1d5db;
+    --shadow: 0 10px 30px rgba(0,0,0,.08);
+    --btn:#111827;
+    --btnInk:#ffffff;
+    --good:#16a34a;
+    --bad:#dc2626;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    user-select:none;
+    touch-action: manipulation;
+  }
+  header{
+    position:sticky; top:0; z-index:10;
+    background:linear-gradient(#fff, rgba(255,255,255,.9));
+    border-bottom:1px solid var(--border);
+    padding:10px 12px;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:12px;}
+  .row{display:grid;gap:12px;}
+  @media(min-width:860px){
+    .row{grid-template-columns: 1.1fr .9fr;}
+  }
+
+  /* B/W spine cards */
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .card .hd{
+    padding:10px 12px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .title{
+    font-weight:800;
+    letter-spacing:.2px;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:12px;
+  }
+  .pill{
+    font-size:12px;
+    padding:6px 10px;
+    border:1px solid var(--border);
+    border-radius:999px;
+    background:#fff;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .pill b{font-weight:800}
+  .body{padding:12px}
+
+  .btns{display:flex;flex-wrap:wrap;gap:8px}
+  button{
+    appearance:none;
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--ink);
+    border-radius:12px;
+    padding:10px 12px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button.primary{
+    background:var(--btn);
+    color:var(--btnInk);
+    border-color:var(--btn);
+  }
+  button:active{transform:translateY(1px)}
+  .hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:10px}
+
+  /* Game area */
+  .game{
+    position:relative;
+    height:420px;
+    border:1px dashed var(--border);
+    border-radius:16px;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(0,0,0,.04), transparent 45%),
+      radial-gradient(circle at 80% 30%, rgba(0,0,0,.03), transparent 50%),
+      linear-gradient(#fff, #fafafa);
+    overflow:hidden;
+    touch-action:none; /* allow drag without scrolling */
+  }
+
+  .fruit{
+    position:absolute;
+    width:64px;height:64px;
+    display:grid;place-items:center;
+    font-size:40px;
+    filter: drop-shadow(0 8px 10px rgba(0,0,0,.18));
+    border-radius:16px;
+    background:rgba(255,255,255,.92);
+    border:1px solid rgba(0,0,0,.08);
+    transform:translate(-50%,-50%);
+    cursor:grab;
+  }
+  .fruit:active{cursor:grabbing}
+
+  /* Basket */
+  .basket{
+    position:absolute;
+    left:50%; bottom:14px;
+    transform:translateX(-50%);
+    width:min(360px, 92%);
+    height:92px;
+    border-radius:18px;
+    border:2px solid var(--ink);
+    background:
+      linear-gradient(135deg, rgba(0,0,0,.06), rgba(0,0,0,.02));
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 14px;
+    gap:10px;
+  }
+  .basket .label{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .basket .label b{font-size:14px}
+  .basket .label span{font-size:12px;color:var(--muted)}
+  .basket .zone{
+    flex:1;
+    height:100%;
+    border-radius:14px;
+    border:1px dashed rgba(0,0,0,.35);
+    background:rgba(255,255,255,.65);
+    display:grid;place-items:center;
+    color:rgba(0,0,0,.45);
+    font-weight:800;
+    letter-spacing:.6px;
+  }
+  .basket.hot{
+    border-color: var(--good);
+    box-shadow:0 0 0 3px rgba(22,163,74,.18);
+  }
+
+  /* 10-slot tray (“table space before 10 fruit”) */
+  .tray{
+    display:grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap:6px;
+    padding:10px 12px;
+    border-top:1px solid var(--border);
+    background:#fff;
+  }
+  .slot{
+    height:34px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    display:grid;place-items:center;
+    background:#fafafa;
+    font-size:18px;
+  }
+  .slot.filled{
+    background:#fff;
+    border-color:#cbd5e1;
+  }
+
+  /* Status line */
+  .status{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    border-top:1px solid var(--border);
+    background:#fff;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .status b{color:var(--ink)}
+  .toast{
+    margin-top:10px;
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .toast.good{border-color:rgba(22,163,74,.35)}
+  .toast.bad{border-color:rgba(220,38,38,.35)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap" style="padding:0 12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <div>
+        <div class="title">Citrus Picker <span class="sub">— Flash Premium (Offline)</span></div>
+        <div class="sub">B/W spine UI • Fruits stay colored • Tap or drag into basket</div>
+      </div>
+      <div class="pill"><b>Easy Mode AI:</b> ON</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="row">
+    <!-- LEFT: GAME -->
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="title">Playfield</div>
+          <div class="sub">Fill the tray (10 slots) before overflow. Drag to basket or tap to collect.</div>
+        </div>
+        <div class="pill">Score: <b id="score">0</b> • Tray: <b id="trayCount">0</b>/10</div>
+      </div>
+
+      <div class="body">
+        <div id="game" class="game" aria-label="Game Area">
+          <div id="basket" class="basket" aria-label="Basket Drop Zone">
+            <div class="label">
+              <b>Basket</b>
+              <span>Drop fruit here</span>
+            </div>
+            <div class="zone">DROP</div>
+          </div>
+        </div>
+
+        <div class="toast" id="toast">
+          Tip: Your first tap unlocks sound on mobile. Then try <b>tap</b> and <b>drag</b> both.
+        </div>
+      </div>
+
+      <div class="tray" id="tray" aria-label="10-slot Tray"></div>
+
+      <div class="status">
+        <div>Spawn: <b id="spawnRate">Medium</b> • Sound: <b id="soundState">Locked</b></div>
+        <div>Fruits: 🍊 🍋 🍍 🍒 🍈</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CONTROLS / B/W SPINE -->
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="title">Controls</div>
+          <div class="sub">Offline single-file • Safari-friendly</div>
+        </div>
+        <div class="pill">Mode: <b>Tap + Drag</b></div>
+      </div>
+      <div class="body">
+        <div class="btns">
+          <button class="primary" id="startBtn">Start</button>
+          <button id="spawnBtn">Spawn Fruit</button>
+          <button id="clearBtn">Clear Board</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="hint">
+          <b>B/W spine</b> means the UI stays clean and neutral. Fruits remain colored emojis for clarity.
+          <br><br>
+          <b>Tray rule:</b> each collected fruit fills a slot (up to 10). If tray is full, further collects become “overflow” (we block and warn).
+          <br><br>
+          <b>Easy Mode AI:</b> the game auto-adjusts spawn timing if you start overflowing or missing drops.
+        </div>
+
+        <div style="margin-top:12px;font-size:13px;color:var(--muted);line-height:1.4">
+          <b>Sound note:</b> On iOS Safari, audio requires a user gesture. Press <b>Start</b> once to unlock pops.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ========= BASIC STATE =========
+  const game = document.getElementById('game');
+  const basket = document.getElementById('basket');
+  const scoreEl = document.getElementById('score');
+  const trayCountEl = document.getElementById('trayCount');
+  const trayEl = document.getElementById('tray');
+  const toast = document.getElementById('toast');
+  const soundStateEl = document.getElementById('soundState');
+  const spawnRateEl = document.getElementById('spawnRate');
+
+  const startBtn = document.getElementById('startBtn');
+  const spawnBtn = document.getElementById('spawnBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const FRUITS = [
+    {key:'orange', emoji:'🍊'},
+    {key:'lemon', emoji:'🍋'},
+    {key:'pineapple', emoji:'🍍'},
+    {key:'cherry', emoji:'🍒'},
+    {key:'lime', emoji:'🍈'}
+  ];
+
+  let score = 0;
+  let tray = []; // holds emojis
+  let running = false;
+
+  // Easy Mode AI controls
+  let spawnIntervalMs = 1100; // medium
+  let spawnTimer = null;
+
+  // ========= TRAY =========
+  function renderTray(){
+    trayEl.innerHTML = '';
+    for(let i=0;i<10;i++){
+      const slot = document.createElement('div');
+      slot.className = 'slot' + (tray[i] ? ' filled' : '');
+      slot.textContent = tray[i] || '';
+      trayEl.appendChild(slot);
+    }
+    trayCountEl.textContent = tray.length;
+  }
+
+  function setToast(msg, kind=''){
+    toast.className = 'toast' + (kind ? (' ' + kind) : '');
+    toast.innerHTML = msg;
+  }
+
+  function updateScore(delta){
+    score += delta;
+    scoreEl.textContent = score;
+  }
+
+  function trayFull(){
+    return tray.length >= 10;
+  }
+
+  // ========= SOUND (WebAudio “pops”) =========
+  let audioCtx = null;
+  let soundUnlocked = false;
+
+  function unlockSound(){
+    if(soundUnlocked) return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      // Resume in case iOS started it suspended
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      soundUnlocked = true;
+      soundStateEl.textContent = 'On';
+      setToast('Sound unlocked. Try collecting fruit — you’ll hear cute pops.', 'good');
+    }catch(e){
+      soundStateEl.textContent = 'Off';
+      setToast('Audio not available in this browser. Game still works.', 'bad');
+    }
+  }
+
+  function popSound(){
+    if(!soundUnlocked || !audioCtx) return;
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+
+    // "Cute pop": short rising chirp + quick decay
+    const base = 220 + Math.random()*220;
+    o.type = 'sine';
+    o.frequency.setValueAtTime(base, t);
+    o.frequency.exponentialRampToValueAtTime(base*2.2, t+0.04);
+
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.18, t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+0.08);
+
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    o.start(t);
+    o.stop(t+0.09);
+  }
+
+  // ========= SPAWN =========
+  function setSpawnRateLabel(){
+    if(spawnIntervalMs <= 850) spawnRateEl.textContent = 'Fast';
+    else if(spawnIntervalMs <= 1200) spawnRateEl.textContent = 'Medium';
+    else spawnRateEl.textContent = 'Slow';
+  }
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+
+  function spawnFruit(){
+    if(!running) return;
+
+    const rect = game.getBoundingClientRect();
+    const f = FRUITS[Math.floor(Math.random()*FRUITS.length)];
+
+    const el = document.createElement('div');
+    el.className = 'fruit';
+    el.textContent = f.emoji;
+    el.dataset.kind = f.key;
+
+    // spawn away from basket region
+    const x = rand(10, rect.width-10);
+    const y = rand(30, rect.height-140);
+
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+
+    // Tap-to-collect
+    el.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      collectFruit(el, 'tap');
+    });
+
+    // Drag-to-basket (pointer events)
+    let dragging = false;
+    let offsetX = 0, offsetY = 0;
+
+    el.addEventListener('pointerdown', (ev) => {
+      dragging = true;
+      el.setPointerCapture(ev.pointerId);
+      const r = el.getBoundingClientRect();
+      offsetX = ev.clientX - r.left;
+      offsetY = ev.clientY - r.top;
+      el.style.transition = 'none';
+    });
+
+    el.addEventListener('pointermove', (ev) => {
+      if(!dragging) return;
+      const g = game.getBoundingClientRect();
+      const nx = ev.clientX - g.left - offsetX + (el.offsetWidth/2);
+      const ny = ev.clientY - g.top - offsetY + (el.offsetHeight/2);
+      el.style.left = nx + 'px';
+      el.style.top  = ny + 'px';
+
+      // basket hot state if overlapping
+      const br = basket.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      const overlap = !(er.right < br.left || er.left > br.right || er.bottom < br.top || er.top > br.bottom);
+      basket.classList.toggle('hot', overlap);
+    });
+
+    el.addEventListener('pointerup', (ev) => {
+      if(!dragging) return;
+      dragging = false;
+      basket.classList.remove('hot');
+
+      // if dropped onto basket, collect
+      const br = basket.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      const overlap = !(er.right < br.left || er.left > br.right || er.bottom < br.top || er.top > br.bottom);
+      if(overlap){
+        collectFruit(el, 'drop');
+      }else{
+        // snap back a bit (small easing)
+        el.style.transition = 'transform .08s ease';
+      }
+    });
+
+    game.appendChild(el);
+  }
+
+  // ========= COLLECT =========
+  function collectFruit(el, method){
+    unlockSound(); // first gesture -> unlock audio
+    if(trayFull()){
+      // Easy Mode AI: slow spawns when tray is full to reduce frustration
+      spawnIntervalMs = Math.min(1500, spawnIntervalMs + 150);
+      setSpawnRateLabel();
+      restartSpawner();
+
+      setToast('Tray is full (10/10). Clear or reset to collect more.', 'bad');
+      popSound(); // still pop, but no score
+      // little shake
+      el.style.animation = 'shake .18s';
+      setTimeout(()=> el.style.animation = '', 200);
+      return;
+    }
+
+    tray.push(el.textContent);
+    renderTray();
+
+    updateScore(1);
+    popSound();
+
+    // Easy Mode AI: if you’re doing well, nudge speed up slightly
+    if(tray.length <= 6 && spawnIntervalMs > 900){
+      spawnIntervalMs -= 35;
+      setSpawnRateLabel();
+      restartSpawner();
+    }
+
+    // feedback
+    const verb = method === 'drop' ? 'Dropped' : 'Tapped';
+    setToast(`${verb} collected: <b>${el.textContent}</b> • Slot <b>${tray.length}</b>/10 • <span style="color:var(--muted)">pop</span>`, 'good');
+
+    el.remove();
+  }
+
+  // ========= SPAWNER CONTROL =========
+  function restartSpawner(){
+    if(!running) return;
+    if(spawnTimer) clearInterval(spawnTimer);
+    spawnTimer = setInterval(spawnFruit, spawnIntervalMs);
+  }
+
+  function startGame(){
+    running = true;
+    unlockSound();
+    setToast('Game started. Tap fruit to collect or drag into the basket.', 'good');
+    setSpawnRateLabel();
+    restartSpawner();
+  }
+
+  function stopGame(){
+    running = false;
+    if(spawnTimer) clearInterval(spawnTimer);
+    spawnTimer = null;
+  }
+
+  function clearBoard(){
+    [...game.querySelectorAll('.fruit')].forEach(el => el.remove());
+    basket.classList.remove('hot');
+  }
+
+  function resetAll(){
+    stopGame();
+    clearBoard();
+    score = 0;
+    tray = [];
+    spawnIntervalMs = 1100;
+    scoreEl.textContent = '0';
+    renderTray();
+    setSpawnRateLabel();
+    setToast('Reset complete. Press Start.', '');
+  }
+
+  // ========= EVENTS =========
+  startBtn.addEventListener('click', () => {
+    if(!running) startGame();
+    else { stopGame(); setToast('Paused. Press Start to resume.', ''); }
+    startBtn.textContent = running ? 'Pause' : 'Start';
+  });
+
+  spawnBtn.addEventListener('click', () => {
+    unlockSound();
+    running = true; // allow manual spawn even if paused
+    spawnFruit();
+    setToast('Spawned a fruit (manual).', '');
+  });
+
+  clearBtn.addEventListener('click', () => {
+    unlockSound();
+    clearBoard();
+    setToast('Cleared fruit from board.', '');
+  });
+
+  resetBtn.addEventListener('click', () => {
+    unlockSound();
+    resetAll();
+    startBtn.textContent = 'Start';
+  });
+
+  // unlock sound on any first interaction with playfield
+  game.addEventListener('pointerdown', unlockSound, {passive:true});
+
+  // init tray
+  renderTray();
+  setSpawnRateLabel();
+})();
+</script>
+
+</body>
+</html>
