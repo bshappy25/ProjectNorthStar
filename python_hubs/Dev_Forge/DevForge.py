@@ -376,20 +376,22 @@ with st.sidebar:
         st.caption("No signature (set in BSChapp)")
 
     st.divider()
-
+    
     # =========================
-    # ✅ COMPLETED APPS (Option B)
+    # ✅ COMPLETED APPS
     # =========================
+    st.divider()
     st.subheader("✅ Completed Apps")
     st.caption("Quick launch your keepers:")
 
-    # Requires file: pages/Teacher_Tools.py
-    try:
-        st.page_link("pages/Teacher_Tools.py", label="🧰 Teacher Tools (HTML Hub)", icon="🧰")
-    except Exception:
-        st.caption("Teacher Tools link: (page_link not supported here) — use Streamlit page nav")
+    # Teacher Tools (HTML Hub)
+    st.page_link(
+        "pages/Teacher_Tools.py",
+        label="🧰 Teacher Tools (HTML Hub)",
+        icon="🧰",
+    )
 
-    st.divider()
+
 
     # =========================
     # NAV HINTS (Multipage)
