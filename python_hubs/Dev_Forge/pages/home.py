@@ -1,13 +1,13 @@
 # pages/home.py
 """
-DevForge Home Page - Enhanced landing with visual impact
-Stable version suitable for direct GitHub commit
+DevForge Home Page - Enhanced landing with real functionality
+Preserves wow-factor styling while adding practical tools
 """
 
 import streamlit as st
 
 # ─────────────────────────────────────────────────────────────
-# Hero Section - Immersive entry point
+# Hero Section (unchanged stylistic core)
 # ─────────────────────────────────────────────────────────────
 
 st.markdown(
@@ -15,10 +15,7 @@ st.markdown(
     <div style="
         text-align: center;
         padding: 5rem 1.5rem 4rem;
-        background: linear-gradient(135deg, 
-            var(--bg), 
-            rgba(20,184,166,0.06)
-        );
+        background: linear-gradient(135deg, var(--bg), rgba(20,184,166,0.06));
         border-radius: 0 0 2rem 2rem;
         margin: -1.5rem -2rem 3rem;
         position: relative;
@@ -28,10 +25,7 @@ st.markdown(
             font-size: 4.5rem;
             margin: 0;
             letter-spacing: -0.03em;
-            background: linear-gradient(90deg, 
-                var(--accent), 
-                var(--accent2)
-            );
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -50,15 +44,8 @@ st.markdown(
             Your Personal Streamlit Development Forge
         </p>
         
-        <div style="
-            animation: pulse 4.5s infinite ease-in-out;
-            display: inline-block;
-        ">
-            <span style="
-                font-size: 1.25rem;
-                padding: 0.75rem 2rem;
-                border-radius: 3rem;
-            " class="badge badge-accent">
+        <div style="animation: pulse 4.5s infinite ease-in-out; display: inline-block;">
+            <span style="font-size: 1.25rem; padding: 0.75rem 2rem; border-radius: 3rem;" class="badge badge-accent">
                 We are L.E.A.D.
             </span>
         </div>
@@ -68,159 +55,128 @@ st.markdown(
 )
 
 # ─────────────────────────────────────────────────────────────
-# Feature Showcase - Staggered animated cards
+# Quick Launch Section – Core functionality
 # ─────────────────────────────────────────────────────────────
 
-st.markdown(
-    """
-    <style>
-    .feature-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 1.5rem;
-        margin: 2rem 0 4rem;
-    }
-    .feature-card {
-        animation: fadeInUp 1.1s ease-out forwards;
-        opacity: 0;
-    }
-    .feature-card:nth-child(1) { animation-delay: 0.2s; }
-    .feature-card:nth-child(2) { animation-delay: 0.45s; }
-    .feature-card:nth-child(3) { animation-delay: 0.7s; }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.subheader("Quick Launch Core Tools")
 
-st.markdown('<div class="feature-grid">', unsafe_allow_html=True)
+cols = st.columns(3)
 
-# Card 1
-st.markdown(
-    """
-    <div class="dev-card feature-card glow-hover">
-        <h3>🔬 Science Tools</h3>
-        <p>NGSS-aligned lesson planning<br>New Visions integration<br>5E framework + accommodations</p>
-        <div style="margin-top: 1.25rem;">
-            <span class="badge badge-accent">Production Ready</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+with cols[0]:
+    if st.button("🔬 Ms. Piluso Science", use_container_width=True, type="primary"):
+        st.switch_page("pages/Ms_Piluso_Science.py")
 
-# Card 2
-st.markdown(
-    """
-    <div class="dev-card feature-card glow-hover">
-        <h3>📚 Code Library</h3>
-        <p>Glassy UI components<br>Export patterns (PDF/Image)<br>Session state & layout utilities</p>
-        <div style="margin-top: 1.25rem;">
-            <span class="badge badge-accent">Reusable Patterns</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+with cols[1]:
+    if st.button("📚 Code Library", use_container_width=True, type="primary"):
+        st.switch_page("pages/Code_Library.py")
 
-# Card 3
-st.markdown(
-    """
-    <div class="dev-card feature-card glow-hover">
-        <h3>⚡ ABC Generator</h3>
-        <p>Architecture decisions<br>Build pattern selection<br>Code style + visual direction</p>
-        <div style="margin-top: 1.25rem;">
-            <span class="badge badge-accent">Decision Accelerator</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+with cols[2]:
+    if st.button("⚡ ABC Generator", use_container_width=True, type="primary"):
+        st.switch_page("pages/ABC_Generator.py")
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<div class='hr' style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────
-# Call to Action - Prominent & pulsing
+# Developer Identity & Notes (persistent across pages)
 # ─────────────────────────────────────────────────────────────
 
-st.markdown(
-    """
-    <div class="dev-card" style="
-        text-align: center;
-        background: linear-gradient(135deg, 
-            rgba(20,184,166,0.15), 
-            rgba(47,91,234,0.12)
-        );
-        animation: pulse 6s infinite ease-in-out;
-        padding: 3rem 1.5rem;
-        margin: 3rem 0 4rem;
-    ">
-        <h3 style="font-size: 2.8rem; margin-bottom: 1.25rem;">
-            Ready to Forge?
-        </h3>
-        <p style="font-size: 1.25rem; margin: 0 0 2rem; max-width: 640px; margin-left: auto; margin-right: auto;">
-            Launch tools from the sidebar.<br>
-            Prototype safely in sandboxes.<br>
-            Scale confidently to production.
-        </p>
-        <div style="margin-top: 1.5rem;">
-            <span class="badge badge-accent">NGSS Tools</span>
-            <span class="badge badge-accent2">UI Components</span>
-            <span class="badge badge-accent">Architecture Support</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.subheader("Developer Identity")
+
+col_sig, col_clear = st.columns([4, 1])
+
+with col_sig:
+    current_sig = st.session_state.get("signature", "")
+    new_sig = st.text_input(
+        "Your Developer Signature / Name",
+        value=current_sig,
+        placeholder="e.g., Ben • Lead Developer • L.E.A.D.",
+        help="This appears in the sidebar and can be used in exports.",
+        key="home_signature_input"
+    )
+    if new_sig != current_sig:
+        st.session_state["signature"] = new_sig.strip()
+        st.success("Signature updated.", icon="✅")
+
+with col_clear:
+    if st.button("Clear", help="Reset signature", use_container_width=True):
+        st.session_state["signature"] = ""
+        st.rerun()
 
 # ─────────────────────────────────────────────────────────────
-# Quick Reference & Status (collapsed by default)
+# Quick Notes Management
 # ─────────────────────────────────────────────────────────────
 
-with st.expander("📋 Common Workflows", expanded=False):
-    st.markdown("""
-    **Create new science lesson**  
-    → Open **Ms. Piluso Science** → select standard → build 5E → export SCI-BLOCK
+st.subheader("Quick Notes")
 
-    **Reuse UI patterns**  
-    → Open **Code Library** → copy component → paste into your app
+notes = st.session_state.get("notes", "")
+if notes:
+    lines = notes.splitlines()
+    preview_lines = lines[-3:] if len(lines) > 3 else lines
+    st.markdown("**Recent entries (last 3 lines):**")
+    st.code("\n".join(preview_lines), language=None)
+else:
+    st.info("No notes yet. Use the sidebar scratch pad or add below.")
 
-    **Make architecture decision**  
-    → Open **ABC Generator** → answer A/B/C/S → use recommended starter
+new_note = st.text_input("Add quick note", placeholder="One-line thought…", key="home_quick_note")
+if st.button("Append to Notes", use_container_width=True):
+    if new_note.strip():
+        st.session_state["notes"] = (notes + "\n" + new_note.strip()).strip()
+        st.success("Note appended.")
+        st.rerun()
 
-    **Experiment safely**  
-    → Use **Sandbox 1** or **Sandbox 2** → move stable pieces to core apps
-    """)
+if notes and st.button("Clear All Notes", type="secondary"):
+    st.session_state["notes"] = ""
+    st.success("Notes cleared.")
+    st.rerun()
 
-with st.expander("🧩 Current Session State", expanded=False):
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        st.markdown(
-            f"""
-            <div class="dev-card">
-                <h4>Active Configuration</h4>
-                <p><strong>Theme:</strong> {st.session_state.get('dev_theme', 'science').title()}</p>
-                <p><strong>Admin:</strong> {'Unlocked' if st.session_state.get('admin_unlocked', False) else 'Locked'}</p>
-                <p><strong>Developer:</strong> {st.session_state.get('signature', 'Not set')}</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    with col2:
-        st.markdown(
-            """
-            <div class="dev-card">
-                <h4>Quick Notes Preview</h4>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        st.text_area(
-            "Notes (read-only preview)",
-            value=st.session_state.get("notes", ""),
-            height=140,
-            disabled=True,
-            label_visibility="collapsed"
-        )
+st.markdown("<div class='hr' style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
 
-# Bottom spacing to prevent overlap with fixed ticker
+# ─────────────────────────────────────────────────────────────
+# Theme Quick Controls (alternative to sidebar radio)
+# ─────────────────────────────────────────────────────────────
+
+st.subheader("Theme Quick Switch")
+
+theme_cols = st.columns(3)
+
+with theme_cols[0]:
+    if st.button("Science (default)", use_container_width=True):
+        st.session_state["dev_theme"] = "science"
+        st.rerun()
+
+with theme_cols[1]:
+    if st.button("Neutral", use_container_width=True):
+        st.session_state["dev_theme"] = "neutral"
+        st.rerun()
+
+with theme_cols[2]:
+    if st.session_state.get("admin_unlocked", False):
+        if st.button("Pink (admin)", use_container_width=True):
+            st.session_state["dev_theme"] = "pink"
+            st.rerun()
+    else:
+        st.button("Pink (locked)", disabled=True, use_container_width=True)
+
+# ─────────────────────────────────────────────────────────────
+# Status Summary Dashboard
+# ─────────────────────────────────────────────────────────────
+
+st.subheader("Current Status")
+
+status_cols = st.columns(4)
+
+with status_cols[0]:
+    st.metric("Theme", st.session_state["dev_theme"].title())
+
+with status_cols[1]:
+    st.metric("Admin", "Unlocked" if st.session_state.get("admin_unlocked", False) else "Locked")
+
+with status_cols[2]:
+    sig = st.session_state.get("signature", "Not set")
+    st.metric("Developer", sig if sig else "—")
+
+with status_cols[3]:
+    notes_count = len(st.session_state.get("notes", "").splitlines())
+    st.metric("Notes Lines", notes_count)
+
 st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
