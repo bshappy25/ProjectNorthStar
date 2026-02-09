@@ -178,3 +178,4 @@ components.html(viewer_doc, height=height + 40, scrolling=False)
 
 with st.expander("🔎 Debug: show raw HTML (read-only)", expanded=False):
     st.code(raw_html, language="html")
+
