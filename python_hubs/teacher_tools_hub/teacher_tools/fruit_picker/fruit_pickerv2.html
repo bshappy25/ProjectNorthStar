@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<title>Citrus Picker — Accuracy First (2 Modes • Offline)</title>
+<style>
+  :root{
+    --bg:#f3f4f6;
+    --card:#ffffff;
+    --ink:#111827;
+    --muted:#6b7280;
+    --border:#d1d5db;
+    --shadow: 0 10px 30px rgba(0,0,0,.08);
+    --btn:#111827;
+    --btnInk:#ffffff;
+    --good:#16a34a;
+    --bad:#dc2626;
+    --warn:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    user-select:none;
+    touch-action: manipulation;
+  }
+  header{
+    position:sticky; top:0; z-index:10;
+    background:linear-gradient(#fff, rgba(255,255,255,.9));
+    border-bottom:1px solid var(--border);
+    padding:10px 12px;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:12px;}
+  .row{display:grid;gap:12px;}
+  @media(min-width:860px){
+    .row{grid-template-columns: 1.15fr .85fr;}
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .hd{
+    padding:10px 12px;
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .title{font-weight:900;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:12px;line-height:1.25}
+  .pill{
+    font-size:12px;
+    padding:6px 10px;
+    border:1px solid var(--border);
+    border-radius:999px;
+    background:#fff;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .pill b{font-weight:900}
+  .body{padding:12px}
+
+  .btns{display:flex;flex-wrap:wrap;gap:8px}
+  button{
+    appearance:none;
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--ink);
+    border-radius:12px;
+    padding:10px 12px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  button.primary{
+    background:var(--btn);
+    color:var(--btnInk);
+    border-color:var(--btn);
+  }
+  button:active{transform:translateY(1px)}
+  select{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 12px;
+    background:#fff;
+    font-weight:800;
+  }
+
+  .hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:10px}
+
+  /* Game */
+  .game{
+    position:relative;
+    height:460px;
+    border:1px dashed var(--border);
+    border-radius:16px;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(0,0,0,.04), transparent 45%),
+      radial-gradient(circle at 80% 30%, rgba(0,0,0,.03), transparent 50%),
+      linear-gradient(#fff, #fafafa);
+    overflow:hidden;
+    touch-action:none; /* reduce misfires while dragging */
+  }
+
+  .fruit{
+    position:absolute;
+    width:66px;height:66px;
+    display:grid;place-items:center;
+    font-size:40px;
+    filter: drop-shadow(0 8px 10px rgba(0,0,0,.18));
+    border-radius:16px;
+    background:rgba(255,255,255,.96);
+    border:1px solid rgba(0,0,0,.10);
+    transform:translate(-50%,-50%);
+    cursor:grab;
+    will-change: left, top;
+  }
+  .fruit:active{cursor:grabbing}
+
+  /* Centered drop target (big, stable, low misfire) */
+  .dropTargetWrap{
+    position:absolute;
+    left:50%;
+    bottom:16px;
+    transform:translateX(-50%);
+    width:min(420px, 94%);
+    pointer-events:none; /* only inner target receives */
+  }
+  .dropTarget{
+    pointer-events:auto;
+    height:110px;
+    border-radius:22px;
+    border:3px solid var(--ink);
+    background: linear-gradient(135deg, rgba(0,0,0,.06), rgba(0,0,0,.02));
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 16px;
+  }
+  .dropTarget.hot{
+    border-color:var(--good);
+    box-shadow:0 0 0 4px rgba(22,163,74,.18);
+  }
+  .dropLeft{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .dropLeft b{font-size:14px}
+  .dropLeft span{font-size:12px;color:var(--muted)}
+  .dropZone{
+    flex:1;
+    height:100%;
+    border-radius:16px;
+    border:2px dashed rgba(0,0,0,.35);
+    background:rgba(255,255,255,.7);
+    display:grid;place-items:center;
+    color:rgba(0,0,0,.45);
+    font-weight:900;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+  }
+  .needed{
+    min-width:92px;
+    height:100%;
+    border-radius:16px;
+    border:2px solid rgba(0,0,0,.15);
+    display:grid;
+    place-items:center;
+    background:#fff;
+  }
+  .needed .emoji{font-size:34px;line-height:1}
+  .needed .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+
+  /* Tray (10 slots) */
+  .tray{
+    display:grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap:6px;
+    padding:10px 12px;
+    border-top:1px solid var(--border);
+    background:#fff;
+  }
+  .slot{
+    height:34px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    display:grid;place-items:center;
+    background:#fafafa;
+    font-size:18px;
+  }
+  .slot.filled{background:#fff;border-color:#cbd5e1}
+
+  .status{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    border-top:1px solid var(--border);
+    background:#fff;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .status b{color:var(--ink)}
+
+  .toast{
+    margin-top:10px;
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .toast.good{border-color:rgba(22,163,74,.35)}
+  .toast.bad{border-color:rgba(220,38,38,.35)}
+  .toast.warn{border-color:rgba(245,158,11,.35)}
+
+  .scoreBox{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+    margin-top:10px;
+  }
+  .mini{
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#fff;
+    padding:10px 12px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.35;
+  }
+  .mini b{color:var(--ink);font-weight:900}
+  .bigScore{
+    font-size:28px;
+    font-weight:950;
+    letter-spacing:.4px;
+    color:var(--ink);
+  }
+  .zenith{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-weight:950;
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid rgba(22,163,74,.35);
+    background:rgba(22,163,74,.08);
+    color:var(--good);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap" style="padding:0 12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+      <div>
+        <div class="title">Citrus Picker <span class="sub">— Accuracy First (2 Modes • Offline)</span></div>
+        <div class="sub">Score out of 100 based on A drops, B leftovers (negative), C drop accuracy. ≥85 = Zenith.</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span class="pill">Zenith: <b id="zenithState">Locked</b></span>
+        <span class="pill">Sound: <b id="soundState">Locked</b></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="row">
+    <!-- LEFT: GAME -->
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="title">Playfield</div>
+          <div class="sub" id="modeDesc">Mode 1: Any fruit can score if dropped into the center tray.</div>
+        </div>
+        <div class="pill">Score: <b id="scorePct">0</b>/100</div>
+      </div>
+
+      <div class="body">
+        <div id="game" class="game" aria-label="Game Area">
+          <!-- Centered drop target -->
+          <div class="dropTargetWrap">
+            <div id="dropTarget" class="dropTarget" aria-label="Centered Tray Drop">
+              <div class="dropLeft">
+                <b>Tray Drop</b>
+                <span id="dropHint">Drop any fruit here</span>
+              </div>
+              <div class="dropZone">DROP</div>
+              <div class="needed" id="neededBox" style="display:none;">
+                <div style="text-align:center;">
+                  <div class="emoji" id="neededEmoji">🍊</div>
+                  <div class="lbl">Need</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toast" id="toast">
+          Press <b>Start</b> to unlock sound. Drag fruit into the centered tray to avoid misfires.
+        </div>
+
+        <div class="scoreBox">
+          <div class="mini">
+            <div><b>A (Drops)</b>: <span id="aDrops">0</span> successful</div>
+            <div><b>B (Leftovers)</b>: <span id="bLeft">0</span> remaining (penalty)</div>
+            <div><b>C (Accuracy)</b>: <span id="cAcc">0</span>% drop accuracy</div>
+          </div>
+          <div class="mini">
+            <div class="bigScore"><span id="scoreBig">0</span><span style="font-size:14px;color:var(--muted);font-weight:900;">/100</span></div>
+            <div style="margin-top:6px;" id="zenithBadgeWrap"></div>
+            <div style="margin-top:6px;color:var(--muted);font-size:12px;">
+              Attempts: <b id="dropAttempts">0</b> • Misses: <b id="dropMisses">0</b>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tray" id="tray" aria-label="10-slot Tray"></div>
+
+      <div class="status">
+        <div>Mode: <b id="modeLabel">1</b> • Difficulty: <b id="diffLabel">1</b> • Spawn: <b id="spawnLabel">Medium</b></div>
+        <div>Fruits: <span id="fruitSet">🍊 🍋 🍍 🍒 🍈</span></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CONTROLS -->
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="title">Controls</div>
+          <div class="sub">Accuracy-first scoring. Two modes only (for now).</div>
+        </div>
+        <div class="pill">UI: <b>B/W spine</b></div>
+      </div>
+      <div class="body">
+        <div class="btns">
+          <button class="primary" id="startBtn">Start</button>
+          <button id="pauseBtn">Pause</button>
+          <button id="endBtn">End Round</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center;">
+          <label class="pill">Mode
+            <select id="modeSel" aria-label="Mode select">
+              <option value="1">Mode 1 — Any Fruit Drop</option>
+              <option value="2">Mode 2 — Exact Match Drop (4 fruits)</option>
+            </select>
+          </label>
+
+          <label class="pill">Difficulty
+            <select id="diffSel" aria-label="Difficulty select">
+              <option value="1">1 (Slow)</option>
+              <option value="2">2 (Medium)</option>
+              <option value="3">3 (Fast)</option>
+              <option value="4">4 (Very Fast)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="hint">
+          <b>Scoring (0–100):</b><br>
+          <b>A</b> = successful drops (higher is better)<br>
+          <b>B</b> = remaining fruit on screen at end (penalty)<br>
+          <b>C</b> = drop accuracy = correct drops / total drop attempts<br><br>
+          <b>Zenith:</b> Score ≥ <b>85</b>
+          <br><br>
+          <b>Mode 2 rule:</b> the tray requests a specific fruit. Only that fruit counts as a correct drop.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // =========================
+  // ELEMENTS
+  // =========================
+  const game = document.getElementById('game');
+  const trayEl = document.getElementById('tray');
+  const toast = document.getElementById('toast');
+
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const endBtn = document.getElementById('endBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const modeSel = document.getElementById('modeSel');
+  const diffSel = document.getElementById('diffSel');
+
+  const modeLabel = document.getElementById('modeLabel');
+  const diffLabel = document.getElementById('diffLabel');
+  const spawnLabel = document.getElementById('spawnLabel');
+  const fruitSet = document.getElementById('fruitSet');
+
+  const modeDesc = document.getElementById('modeDesc');
+  const dropHint = document.getElementById('dropHint');
+  const dropTarget = document.getElementById('dropTarget');
+  const neededBox = document.getElementById('neededBox');
+  const neededEmoji = document.getElementById('neededEmoji');
+
+  const scorePct = document.getElementById('scorePct');
+  const scoreBig = document.getElementById('scoreBig');
+  const aDropsEl = document.getElementById('aDrops');
+  const bLeftEl = document.getElementById('bLeft');
+  const cAccEl = document.getElementById('cAcc');
+  const dropAttemptsEl = document.getElementById('dropAttempts');
+  const dropMissesEl = document.getElementById('dropMisses');
+  const zenithState = document.getElementById('zenithState');
+  const zenithBadgeWrap = document.getElementById('zenithBadgeWrap');
+  const soundState = document.getElementById('soundState');
+
+  // =========================
+  // GAME CONFIG
+  // =========================
+  const FRUITS_5 = [
+    {key:'orange', emoji:'🍊'},
+    {key:'lemon', emoji:'🍋'},
+    {key:'pineapple', emoji:'🍍'},
+    {key:'cherry', emoji:'🍒'},
+    {key:'lime', emoji:'🍈'}
+  ];
+  // Mode 2 uses exactly 4 fruits (requested)
+  const FRUITS_4 = [
+    {key:'orange', emoji:'🍊'},
+    {key:'lemon', emoji:'🍋'},
+    {key:'cherry', emoji:'🍒'},
+    {key:'lime', emoji:'🍈'}
+  ];
+
+  // Difficulty => constant spawn rate
+  const DIFF_TO_MS = {
+    1: 1400,
+    2: 1100,
+    3: 900,
+    4: 700
+  };
+
+  // Scoring weights (sum to 100)
+  // A = drops (cap at 10 drops => full A points)
+  // B = leftover penalty (cap at 10 leftovers => full penalty)
+  // C = accuracy (percent)
+  const W_A = 50;
+  const W_B = 20;
+  const W_C = 30;
+
+  // =========================
+  // STATE
+  // =========================
+  let running = false;
+  let paused = false;
+  let spawnTimer = null;
+
+  let mode = 1;
+  let diff = 1;
+  let spawnIntervalMs = DIFF_TO_MS[diff];
+
+  // Scoring counters
+  let successfulDrops = 0;     // A
+  let dropAttempts = 0;        // used for C
+  let dropMisses = 0;          // derived
+  let tray = [];               // 10-slot tray content (emojis)
+  let neededFruit = null;      // mode 2 required key
+
+  // =========================
+  // SOUND (WebAudio pops)
+  // =========================
+  let audioCtx = null;
+  let soundUnlocked = false;
+
+  function unlockSound(){
+    if(soundUnlocked) return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      soundUnlocked = true;
+      soundState.textContent = 'On';
+    }catch(e){
+      soundState.textContent = 'Off';
+    }
+  }
+
+  function popSound(ok=true){
+    if(!soundUnlocked || !audioCtx) return;
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    const base = ok ? (260 + Math.random()*180) : (140 + Math.random()*80);
+
+    o.type = 'sine';
+    o.frequency.setValueAtTime(base, t);
+    o.frequency.exponentialRampToValueAtTime(ok ? base*2.2 : base*0.85, t+0.05);
+
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(ok ? 0.18 : 0.12, t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+0.09);
+
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t+0.10);
+  }
+
+  // =========================
+  // UI HELPERS
+  // =========================
+  function setToast(msg, kind=''){
+    toast.className = 'toast' + (kind ? (' ' + kind) : '');
+    toast.innerHTML = msg;
+  }
+
+  function setSpawnLabel(){
+    if(spawnIntervalMs <= 750) spawnLabel.textContent = 'Very Fast';
+    else if(spawnIntervalMs <= 950) spawnLabel.textContent = 'Fast';
+    else if(spawnIntervalMs <= 1200) spawnLabel.textContent = 'Medium';
+    else spawnLabel.textContent = 'Slow';
+  }
+
+  function renderTray(){
+    trayEl.innerHTML = '';
+    for(let i=0;i<10;i++){
+      const slot = document.createElement('div');
+      slot.className = 'slot' + (tray[i] ? ' filled' : '');
+      slot.textContent = tray[i] || '';
+      trayEl.appendChild(slot);
+    }
+  }
+
+  function currentFruitSet(){
+    return (mode === 2) ? FRUITS_4 : FRUITS_5;
+  }
+
+  function chooseNeededFruit(){
+    // Mode 2: pick a required fruit from the 4-set
+    const set = FRUITS_4;
+    neededFruit = set[Math.floor(Math.random()*set.length)].key;
+    const obj = set.find(x => x.key === neededFruit);
+    neededEmoji.textContent = obj ? obj.emoji : '🍊';
+  }
+
+  function applyModeUI(){
+    modeLabel.textContent = String(mode);
+    diffLabel.textContent = String(diff);
+
+    if(mode === 1){
+      modeDesc.textContent = 'Mode 1: Any fruit counts if dropped into the centered tray.';
+      dropHint.textContent = 'Drop any fruit here';
+      neededBox.style.display = 'none';
+      fruitSet.textContent = '🍊 🍋 🍍 🍒 🍈';
+    }else{
+      modeDesc.textContent = 'Mode 2: Only the requested fruit counts as a correct drop (4 fruits).';
+      dropHint.textContent = 'Drop the exact match fruit';
+      neededBox.style.display = 'grid';
+      fruitSet.textContent = '🍊 🍋 🍒 🍈';
+      chooseNeededFruit();
+    }
+  }
+
+  // =========================
+  // SCORING (Accuracy-first)
+  // =========================
+  function leftoversOnScreen(){
+    return game.querySelectorAll('.fruit').length;
+  }
+
+  function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+
+  function computeScore(outOf100=true){
+    // A: successful drops (cap at 10 -> full W_A)
+    const A = clamp(successfulDrops / 10, 0, 1) * W_A;
+
+    // B: leftovers penalty (cap at 10 leftovers -> full W_B penalty)
+    const left = leftoversOnScreen();
+    const Bpen = clamp(left / 10, 0, 1) * W_B;
+
+    // C: accuracy = correct drops / attempts
+    const acc = (dropAttempts <= 0) ? 0 : (successfulDrops / dropAttempts);
+    const C = clamp(acc, 0, 1) * W_C;
+
+    const raw = A + C - Bpen;
+    const score = clamp(raw, 0, 100);
+
+    return {score, A, Bpen, C, accPct: Math.round(acc*100), left};
+  }
+
+  function updateScoreUI(){
+    const {score, accPct, left} = computeScore();
+    scorePct.textContent = String(Math.round(score));
+    scoreBig.textContent = String(Math.round(score));
+    aDropsEl.textContent = String(successfulDrops);
+    bLeftEl.textContent = String(left);
+    cAccEl.textContent = String(accPct);
+    dropAttemptsEl.textContent = String(dropAttempts);
+    dropMisses = Math.max(0, dropAttempts - successfulDrops);
+    dropMissesEl.textContent = String(dropMisses);
+
+    const zenith = score >= 85;
+    zenithState.textContent = zenith ? 'Unlocked' : 'Locked';
+    zenithBadgeWrap.innerHTML = zenith
+      ? `<span class="zenith">◇ ZENITH — ${Math.round(score)}/100</span>`
+      : '';
+  }
+
+  // =========================
+  // FRUIT SPAWN / DRAG-DROP
+  // =========================
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+
+  function spawnFruit(){
+    if(!running || paused) return;
+
+    const rect = game.getBoundingClientRect();
+    const set = currentFruitSet();
+    const f = set[Math.floor(Math.random()*set.length)];
+
+    const el = document.createElement('div');
+    el.className = 'fruit';
+    el.textContent = f.emoji;
+    el.dataset.kind = f.key;
+
+    // spawn away from bottom drop target zone to reduce accidental overlaps
+    const x = rand(24, rect.width - 24);
+    const y = rand(40, rect.height - 190);
+
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+
+    // Tap does NOT score. (Accuracy is about correct tray drop.)
+    // But tap can be used to "nudge" user: we count it as a miss attempt.
+    el.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      unlockSound();
+      // tapping is a "wrong input" for scoring, keeps your accuracy concept strong
+      dropAttempts += 1;
+      updateScoreUI();
+      setToast(`Tap = not a tray drop. Drag into the centered tray to score.`, 'warn');
+      popSound(false);
+    });
+
+    // Drag logic with pointer events (stable on mobile)
+    let dragging = false;
+    let offsetX = 0, offsetY = 0;
+
+    el.addEventListener('pointerdown', (ev) => {
+      unlockSound();
+      dragging = true;
+      el.setPointerCapture(ev.pointerId);
+      const r = el.getBoundingClientRect();
+      offsetX = ev.clientX - r.left;
+      offsetY = ev.clientY - r.top;
+      el.style.transition = 'none';
+    });
+
+    el.addEventListener('pointermove', (ev) => {
+      if(!dragging) return;
+      const g = game.getBoundingClientRect();
+      const nx = ev.clientX - g.left - offsetX + (el.offsetWidth/2);
+      const ny = ev.clientY - g.top - offsetY + (el.offsetHeight/2);
+      el.style.left = nx + 'px';
+      el.style.top  = ny + 'px';
+
+      // highlight if overlapping the drop target (low misfire)
+      const tr = dropTarget.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      const overlap = !(er.right < tr.left || er.left > tr.right || er.bottom < tr.top || er.top > tr.bottom);
+      dropTarget.classList.toggle('hot', overlap);
+    });
+
+    el.addEventListener('pointerup', () => {
+      if(!dragging) return;
+      dragging = false;
+      dropTarget.classList.remove('hot');
+
+      // count an attempt if the user released anywhere (this measures "drop correctness")
+      dropAttempts += 1;
+
+      const tr = dropTarget.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      const overlap = !(er.right < tr.left || er.left > tr.right || er.bottom < tr.top || er.top > tr.bottom);
+
+      if(overlap){
+        // Mode 2: must match neededFruit
+        let ok = true;
+        if(mode === 2){
+          ok = (el.dataset.kind === neededFruit);
+        }
+
+        if(ok){
+          // Put into tray if space, otherwise still counts as correct drop but no tray slot
+          if(tray.length < 10){
+            tray.push(el.textContent);
+            renderTray();
+          }
+          successfulDrops += 1;
+          popSound(true);
+
+          if(mode === 2){
+            chooseNeededFruit(); // next target
+          }
+
+          setToast(`✅ Correct drop. Accuracy matters.`, 'good');
+          el.remove();
+        }else{
+          // wrong fruit for mode 2
+          popSound(false);
+          setToast(`❌ Wrong fruit. Needed: <b>${neededEmoji.textContent}</b>. Try again.`, 'bad');
+          // keep fruit on board
+        }
+      }else{
+        // release not in tray
+        popSound(false);
+        setToast(`Missed tray. Drag into the centered tray to score.`, 'bad');
+      }
+
+      updateScoreUI();
+    });
+
+    game.appendChild(el);
+  }
+
+  // =========================
+  // ROUND CONTROL
+  // =========================
+  function startRound(){
+    unlockSound();
+    running = true;
+    paused = false;
+
+    // apply settings
+    mode = Number(modeSel.value);
+    diff = Number(diffSel.value);
+    spawnIntervalMs = DIFF_TO_MS[diff];
+    setSpawnLabel();
+    applyModeUI();
+
+    // reset round counters only when starting fresh
+    successfulDrops = 0;
+    dropAttempts = 0;
+    tray = [];
+    renderTray();
+    clearFruits();
+
+    updateScoreUI();
+    setToast(`Round started. Focus: <b>accuracy</b>. Drag into the centered tray.`, 'good');
+
+    stopSpawner();
+    spawnTimer = setInterval(spawnFruit, spawnIntervalMs);
+  }
+
+  function pauseRound(){
+    if(!running) return;
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+    setToast(paused ? 'Paused.' : 'Resumed.', '');
+  }
+
+  function endRound(){
+    if(!running) return;
+    stopSpawner();
+    paused = false;
+    pauseBtn.textContent = 'Pause';
+    running = false;
+
+    // final score update (leftovers penalty applied live anyway)
+    const {score, left, accPct} = computeScore();
+    updateScoreUI();
+
+    const zen = score >= 85;
+    setToast(
+      `Round ended. Final Score: <b>${Math.round(score)}/100</b> • Accuracy: <b>${accPct}%</b> • Leftovers: <b>${left}</b> • Zenith: <b>${zen ? 'YES ◇' : 'NO'}</b>`,
+      zen ? 'good' : 'warn'
+    );
+  }
+
+  function resetAll(){
+    stopSpawner();
+    running = false;
+    paused = false;
+    pauseBtn.textContent = 'Pause';
+
+    successfulDrops = 0;
+    dropAttempts = 0;
+    tray = [];
+    renderTray();
+    clearFruits();
+
+    updateScoreUI();
+    setToast('Reset complete. Choose mode/difficulty and press Start.', '');
+  }
+
+  function clearFruits(){
+    [...game.querySelectorAll('.fruit')].forEach(el => el.remove());
+    dropTarget.classList.remove('hot');
+  }
+
+  function stopSpawner(){
+    if(spawnTimer) clearInterval(spawnTimer);
+    spawnTimer = null;
+  }
+
+  // =========================
+  // WIRED EVENTS
+  // =========================
+  startBtn.addEventListener('click', () => startRound());
+  pauseBtn.addEventListener('click', () => pauseRound());
+  endBtn.addEventListener('click', () => endRound());
+  resetBtn.addEventListener('click', () => resetAll());
+
+  modeSel.addEventListener('change', () => {
+    // apply UI now (even before start)
+    mode = Number(modeSel.value);
+    applyModeUI();
+    updateScoreUI();
+  });
+
+  diffSel.addEventListener('change', () => {
+    diff = Number(diffSel.value);
+    spawnIntervalMs = DIFF_TO_MS[diff];
+    setSpawnLabel();
+    updateScoreUI();
+  });
+
+  // Unlock sound on first interaction anywhere
+  document.addEventListener('pointerdown', unlockSound, {passive:true, once:true});
+
+  // Init UI
+  renderTray();
+  applyModeUI();
+  setSpawnLabel();
+  updateScoreUI();
+})();
+</script>
+
+</body>
+</html>
