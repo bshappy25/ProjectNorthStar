@@ -1,38 +1,28 @@
-import streamlit as st
+# pages/Ms_Piluso_Science.py
+from __future__ import annotations
 
-st.title("🔬 Ms. Piluso Science")
-st.markdown("### NGSS + New Visions Curriculum Tools")
-
-# Placeholder for your core logic (e.g., lesson builder, 5E framework, exports)
-st.subheader("Select NGSS Standard")
-ngss_standard = st.selectbox("Standard", ["HS-LS1-1", "HS-PS2-3", "Other"])  # Extend as needed
-
-st.subheader("5E Framework Builder")
-engage = st.text_area("Engage")
-explore = st.text_area("Explore")
-explain = st.text_area("Explain")
-elaborate = st.text_area("Elaborate")
-evaluate = st.text_area("Evaluate")
-
-st.subheader("Materials & Accommodations")
-materials = st.text_area("Materials")
-accommodations = st.text_area("Accommodations")
-
-if st.button("Export SCI-BLOCK"):
-    # Placeholder export logic (e.g., to JPEG/PDF)
-    st.success("Exported successfully.")
-
-# Add more features as required
-from datetime import date
-
-from PIL import Image, ImageDraw, ImageFont
-import textwrap
 import io
+import textwrap
+from datetime import date
+from pathlib import Path
+from typing import Dict, Tuple, List
 
-# =====================
+import streamlit as st
+from PIL import Image, ImageDraw, ImageFont
+
+
+# ============================================================
+# PAGE CONFIG (top of file, once)
+# ============================================================
+st.set_page_config(
+    page_title="Ms. Piluso Science Tools",
+    page_icon="🔬",
+    layout="wide",
+)
+
+# ============================================================
 # NGSS STANDARDS DATABASE
-# =====================
-
+# ============================================================
 NGSS_STANDARDS = {
     "MS-ESS1": {
         "title": "Earth’s Place in the Universe",
@@ -74,6 +64,34 @@ FIVE_E_PHASES = {
     "Evaluate": "Assess student understanding and learning",
 }
 
+SENTENCE_STARTERS = {
+    "Engage": [
+        "Today we’re investigating…",
+        "What do you notice? What do you wonder?",
+        "Based on the phenomenon, I predict… because…",
+    ],
+    "Explore": [
+        "We tested… by…",
+        "The data shows…",
+        "A pattern I observed was…",
+    ],
+    "Explain": [
+        "My claim is…",
+        "My evidence is…",
+        "My reasoning is…",
+    ],
+    "Elaborate": [
+        "This concept also applies to…",
+        "A real-world example is…",
+        "If we change ___, then ___ because…",
+    ],
+    "Evaluate": [
+        "I can demonstrate understanding by…",
+        "One misconception I had was… now I think…",
+        "A strong answer would include…",
+    ],
+}
+
 NEW_VISIONS_UNITS = {
     "Earth Science": [
         "Unit 1: Plate Tectonics",
@@ -97,10 +115,9 @@ NEW_VISIONS_UNITS = {
     ],
 }
 
-# =====================
+# ============================================================
 # SESSION STATE
-# =====================
-
+# ============================================================
 if "piluso_lesson" not in st.session_state:
     st.session_state["piluso_lesson"] = {
         "ngss": "",
@@ -116,104 +133,13 @@ if "piluso_lesson" not in st.session_state:
         "accommodations": "",
     }
 
-# =====================
-# PAGE CONFIG
-# =====================
+lesson = st.session_state["piluso_lesson"]
 
-st.set_page_config(
-    page_title="Ms. Piluso Science Tools",
-    page_icon="🔬",
-    layout="wide",
-)
 
-# =====================
-# THEME (SCIENCE MODE)
-# =====================
-
-SCI_BG = "#061B15"
-SCI_CARD = "rgba(255,255,255,0.08)"
-SCI_BORDER = "rgba(120,255,220,0.3)"
-SCI_TEXT = "rgba(255,255,255,0.92)"
-SCI_MUTED = "rgba(255,255,255,0.74)"
-SCI_ACCENT = "#14B8A6"
-
-st.markdown(
-    f"""
-<style>
-:root {{
-  --bg: {SCI_BG};
-  --card: {SCI_CARD};
-  --border: {SCI_BORDER};
-  --text: {SCI_TEXT};
-  --muted: {SCI_MUTED};
-  --accent: {SCI_ACCENT};
-}}
-
-div[data-testid="stAppViewContainer"] {{
-  background-color: var(--bg) !important;
-}}
-
-h1, h2, h3, h4, h5, h6, p, span, label, div {{
-  color: var(--text) !important;
-}}
-
-div[data-testid="stExpander"],
-input, textarea, select {{
-  background-color: var(--card) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-}}
-
-button {{
-  background-color: var(--card) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 10px !important;
-  backdrop-filter: blur(10px) !important;
-  color: var(--text) !important;
-  font-weight: 700 !important;
-}}
-
-button[kind="primary"] {{
-  border: 2px solid var(--accent) !important;
-}}
-
-.sci-card {{
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 20px;
-  margin: 15px 0;
-  backdrop-filter: blur(10px);
-}}
-
-.badge {{
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--accent);
-  background: var(--card);
-  color: var(--accent) !important;
-  font-weight: 900;
-  font-size: 0.85rem;
-  margin: 5px;
-}}
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-# =====================
+# ============================================================
 # IMAGE EXPORT HELPERS
-# =====================
-
+# ============================================================
 def _load_font(size: int, bold: bool = False):
-    """
-    Tries to load a sane default font. Falls back to PIL default if unavailable.
-    Bold uses DejaVuSans-Bold if present.
-    """
     candidates = []
     if bold:
         candidates = ["DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"]
@@ -228,20 +154,21 @@ def _load_font(size: int, bold: bool = False):
     return ImageFont.load_default()
 
 
+def safe_val(x: str) -> str:
+    x = (x or "").strip()
+    return x if x else "N/a"
+
+
 def generate_sci_block_jpeg(
     title: str,
     lines: list[tuple[str, bool]],
     *,
     width: int = 1200,
-    body_bg: str = "#D9F2E6",     # light green
-    header_bg: str = "#0B3D2E",   # darker green
-    body_text: str = "#1B4D3E",   # hunter green
-    header_text: str = "#E9FFF5", # very light mint
+    body_bg: str = "#EEF2F7",     # neutral light
+    header_bg: str = "#0F2A3D",   # deep blue
+    body_text: str = "#111827",   # near black
+    header_text: str = "#F9FAFB", # near white
 ) -> io.BytesIO:
-    """
-    Creates a JPEG with a dark header band + body content.
-    `lines` is a list of (text, is_bold).
-    """
     pad_x = 60
     pad_y = 48
     header_h = 120
@@ -250,10 +177,9 @@ def generate_sci_block_jpeg(
     font_bold = _load_font(36, bold=True)
     font_header = _load_font(44, bold=True)
 
-    wrap_width_chars = 52  # tuned for 1200px with 34-36px font
+    wrap_width_chars = 52
     wrapper = textwrap.TextWrapper(width=wrap_width_chars, break_long_words=False, replace_whitespace=False)
 
-    # Wrap lines
     wrapped: list[tuple[str, bool]] = []
     for txt, is_bold in lines:
         if txt.strip() == "":
@@ -262,18 +188,16 @@ def generate_sci_block_jpeg(
         for wline in wrapper.wrap(txt):
             wrapped.append((wline, is_bold))
 
-    line_h = 46  # stable spacing
+    line_h = 46
     body_h = pad_y * 2 + line_h * max(1, len(wrapped))
     height = header_h + body_h
 
     img = Image.new("RGB", (width, height), body_bg)
     draw = ImageDraw.Draw(img)
 
-    # Header band
     draw.rectangle([0, 0, width, header_h], fill=header_bg)
     draw.text((pad_x, 30), title, fill=header_text, font=font_header)
 
-    # Body text
     y = header_h + pad_y
     for txt, is_bold in wrapped:
         font = font_bold if is_bold else font_body
@@ -286,42 +210,20 @@ def generate_sci_block_jpeg(
     return buf
 
 
-def safe_val(x: str) -> str:
-    x = (x or "").strip()
-    return x if x else "N/a"
-
-
-# =====================
-# HEADER
-# =====================
-
-st.title("🔬 Ms. Piluso Science - Phase 2")
+# ============================================================
+# HEADER (NO GLOBAL CSS INJECTION)
+# ============================================================
+st.title("🔬 Ms. Piluso Science")
 st.markdown("### NGSS + New Visions Curriculum Builder")
-
-st.markdown(
-    """
-<div class='sci-card'>
-<span class='badge'>[NGSS]</span>
-<span class='badge'>[5E]</span>
-<span class='badge'>[New Visions]</span>
-<p style='margin-top:15px; color:var(--muted);'>
-Quick lesson planning for department-wide use. Export directly to BSChapp v2 format.
-</p>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
+st.video("https://www.youtube.com/watch?v=9l2MVsYVxlE")
 st.divider()
 
-# =====================
-# NGSS STANDARD SELECTOR
-# =====================
-
+# ============================================================
+# STEP 1: NGSS STANDARD
+# ============================================================
 st.markdown("### 📋 Step 1: Select NGSS Standard")
 
-col1, col2 = st.columns([1, 2])
-
+col1, col2 = st.columns([1, 2], gap="large")
 with col1:
     domain = st.selectbox(
         "NGSS Domain",
@@ -330,7 +232,6 @@ with col1:
     )
 
 with col2:
-    selected_standard = ""
     if domain:
         standards_dict = NGSS_STANDARDS[domain]["standards"]
         selected_standard = st.selectbox(
@@ -338,100 +239,118 @@ with col2:
             options=list(standards_dict.keys()),
             format_func=lambda x: f"{x}: {standards_dict[x]}",
         )
-        st.session_state["piluso_lesson"]["ngss"] = selected_standard
+        lesson["ngss"] = selected_standard
 
 st.divider()
 
-# =====================
-# NEW VISIONS UNIT
-# =====================
-
+# ============================================================
+# STEP 2: NEW VISIONS (optional)
+# ============================================================
 st.markdown("### 📚 Step 2: New Visions Curriculum (Optional)")
 
-nv_branch = st.selectbox(
-    "New Visions Branch",
-    options=["None"] + list(NEW_VISIONS_UNITS.keys()),
-)
-
+nv_branch = st.selectbox("New Visions Branch", options=["None"] + list(NEW_VISIONS_UNITS.keys()))
 if nv_branch != "None":
     nv_unit = st.selectbox("Unit", options=NEW_VISIONS_UNITS[nv_branch])
-    st.session_state["piluso_lesson"]["nv_unit"] = nv_unit
-    st.info(f"**Placeholder:** Integration with {nv_unit} resources coming soon!")
+    lesson["nv_unit"] = nv_unit
 
 st.divider()
 
-# =====================
-# 5E FRAMEWORK BUILDER
-# =====================
-
+# ============================================================
+# STEP 3: 5E — WHEEL SELECTOR + ONE PANEL AT A TIME
+# (no custom component; uses query params so clicking works)
+# ============================================================
 st.markdown("### 🔄 Step 3: Build 5E Lesson")
-st.caption("Fill out each phase of the 5E instructional model:")
 
-for phase, description in FIVE_E_PHASES.items():
-    with st.expander(f"**{phase}** - {description}", expanded=False):
-        phase_key = phase.lower()
-        content = st.text_area(
-            f"{phase} Activities",
-            value=st.session_state["piluso_lesson"].get(phase_key, ""),
-            height=120,
-            placeholder=f"Describe {phase.lower()} activities…",
-            key=f"5e_{phase_key}",
-        )
-        st.session_state["piluso_lesson"][phase_key] = content
+# Wheel image path (you add this file)
+WHEEL_IMG = Path("python_hubs/Dev_Forge/assets/ms_piluso/5e_wheel.png")
+
+# Query param phase
+q = st.query_params
+current_phase = q.get("phase", "Engage")
+if current_phase not in FIVE_E_PHASES:
+    current_phase = "Engage"
+
+# Render wheel + clickable hotspots (links set ?phase=...)
+wheel_left, wheel_right = st.columns([1.05, 1.2], gap="large")
+
+with wheel_left:
+    if WHEEL_IMG.exists():
+        st.image(str(WHEEL_IMG), caption="5E Model", use_container_width=True)
+    else:
+        st.warning("Missing wheel image. Add: python_hubs/Dev_Forge/assets/ms_piluso/5e_wheel.png")
+
+    # Click targets: simple buttons (reliable) + optional links
+    bcols = st.columns(5)
+    phases = ["Engage", "Explore", "Explain", "Elaborate", "Evaluate"]
+    for i, ph in enumerate(phases):
+        with bcols[i]:
+            if st.button(ph, use_container_width=True, type="primary" if ph == current_phase else "secondary"):
+                st.query_params["phase"] = ph
+                st.rerun()
+
+with wheel_right:
+    st.subheader(current_phase)
+    st.caption(FIVE_E_PHASES[current_phase])
+
+    show_starters = st.toggle("Show sentence starters", value=True)
+    if show_starters:
+        starters = SENTENCE_STARTERS.get(current_phase, [])
+        if starters:
+            st.markdown("**Sentence starters:**")
+            st.write("\n".join([f"• {s}" for s in starters]))
+
+    key = current_phase.lower()
+    lesson[key] = st.text_area(
+        f"{current_phase} (what students do / say)",
+        value=lesson.get(key, ""),
+        height=180,
+        placeholder=f"Describe {key} activities…",
+    )
 
 st.divider()
 
-# =====================
-# ADDITIONAL DETAILS
-# =====================
-
+# ============================================================
+# STEP 4: DETAILS
+# ============================================================
 st.markdown("### ✏️ Step 4: Lesson Details")
 
-col1, col2 = st.columns(2)
-
-with col1:
-    objective = st.text_area(
+cA, cB = st.columns(2, gap="large")
+with cA:
+    lesson["objective"] = st.text_area(
         "Student Objective",
-        value=st.session_state["piluso_lesson"].get("objective", ""),
+        value=lesson.get("objective", ""),
         placeholder="Students will be able to…",
-        height=100,
+        height=110,
     )
-    st.session_state["piluso_lesson"]["objective"] = objective
 
-with col2:
-    materials = st.text_area(
+with cB:
+    lesson["materials"] = st.text_area(
         "Materials Needed",
-        value=st.session_state["piluso_lesson"].get("materials", ""),
+        value=lesson.get("materials", ""),
         placeholder="List materials, tech, handouts…",
-        height=100,
+        height=110,
     )
-    st.session_state["piluso_lesson"]["materials"] = materials
 
-notes = st.text_area(
+lesson["notes"] = st.text_area(
     "Teacher Notes / Differentiation",
-    value=st.session_state["piluso_lesson"].get("notes", ""),
+    value=lesson.get("notes", ""),
     placeholder="Notes, modifications, extensions…",
-    height=100,
+    height=110,
 )
-st.session_state["piluso_lesson"]["notes"] = notes
 
-accom = st.text_area(
+lesson["accommodations"] = st.text_area(
     "Accommodations / Modifications",
-    value=st.session_state["piluso_lesson"].get("accommodations", ""),
+    value=lesson.get("accommodations", ""),
     placeholder="IEP/504 supports: visuals, sentence starters, extended time, breaks, reduced choices...",
-    height=100,
+    height=110,
 )
-st.session_state["piluso_lesson"]["accommodations"] = accom
 
 st.divider()
 
-# =====================
+# ============================================================
 # PREVIEW
-# =====================
-
+# ============================================================
 st.markdown("### 👁️ Preview")
-
-lesson = st.session_state["piluso_lesson"]
 
 preview_text = f"""
 **NGSS Standard:** {lesson.get('ngss', '—')}
@@ -455,24 +374,22 @@ preview_text = f"""
 
 **Accommodations:**
 {lesson.get('accommodations', '—')}
-"""
+""".strip()
 
 st.text_area("Lesson Preview", value=preview_text, height=420, disabled=True)
 
 st.divider()
 
-# =====================
-# ✅ SCI-BLOCK JPEG EXPORT (INSERTED HERE)
-# =====================
-
+# ============================================================
+# SCI-BLOCK JPEG EXPORT (same output idea)
+# ============================================================
 st.markdown("### 🖼️ Export SCI-BLOCK (JPEG)")
 
 ngss_pick = safe_val(lesson.get("ngss"))
 today_str = date.today().isoformat()
 header_title = f"SCI-BLOCK • {today_str} • {ngss_pick}"
 
-# lines: (text, is_bold)
-img_lines: list[tuple[str, bool]] = [
+img_lines: List[Tuple[str, bool]] = [
     ("5E Framework", True),
     (f"Engage: {safe_val(lesson.get('engage'))}", False),
     (f"Explore: {safe_val(lesson.get('explore'))}", False),
@@ -500,28 +417,24 @@ st.download_button(
     use_container_width=True,
 )
 
-st.caption("Tip: Download, then drop the image into chat as your exemplar block.")
-
 st.divider()
 
-# =====================
+# ============================================================
 # EXPORT OPTIONS
-# =====================
-
+# ============================================================
 st.markdown("### 🚀 Export")
 
-col1, col2, col3 = st.columns(3)
+e1, e2, e3 = st.columns(3, gap="large")
 
-with col1:
+with e1:
     if st.button("📋 Copy to Clipboard", use_container_width=True):
-        st.info("Copy the preview text above manually")
+        st.info("Copy the preview text manually (Streamlit clipboard is browser-based).")
 
-with col2:
+with e2:
     if st.button("📄 Export to BSChapp", use_container_width=True, type="primary"):
         st.success("✅ Ready to paste into BSChapp v2 ‘Lesson Plan’ artifact!")
-        st.info("Navigate to BSChapp → Select ‘Lesson Plan’ → Paste content")
 
-with col3:
+with e3:
     if st.button("🗑️ Clear All", use_container_width=True):
         st.session_state["piluso_lesson"] = {
             "ngss": "",
@@ -536,31 +449,7 @@ with col3:
             "notes": "",
             "accommodations": "",
         }
+        st.query_params.clear()
         st.rerun()
-
-st.divider()
-
-# =====================
-# QUICK TIPS
-# =====================
-
-with st.expander("💡 Quick Tips for Ms. Piluso", expanded=False):
-    st.markdown(
-        """
-**5E Framework quick cues**
-- Engage: hook / phenomenon
-- Explore: hands-on investigation
-- Explain: student talk + teacher clarify
-- Elaborate: apply in new context
-- Evaluate: checks for understanding
-
-**Export workflow**
-1) Build lesson here
-2) Export to BSChapp
-3) Paste into Lesson Plan artifact
-4) Add signature
-5) Download PDF
-"""
-    )
 
 st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
