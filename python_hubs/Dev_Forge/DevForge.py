@@ -134,6 +134,9 @@ core_pages = [
     st.Page(P("Ms_Piluso_Science.py"), title="Ms. Piluso Science", icon="🔬"),
     st.Page(P("Code_Library.py"), title="Code Library", icon="📚"),
     st.Page(P("ABC_Generator.py"), title="ABC Generator", icon="⚡"),
+    st.Page(  "pages/ngss_ms_research_vault_app.py",
+    title="NGSS Research Vault",
+    icon="🗄️",
 ]
 
 sandbox_pages = [
