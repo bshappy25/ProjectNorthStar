@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-<title>Citrus Picker — Dual Tray Zenith (Dev Batch x5)</title>
+<title>Citrus Picker — Dual Tray + Swipe Drop (Dev)</title>
 <style>
   :root{
     --bg:#f3f4f6;
     --card:#ffffff;
     --ink:#111827;
     --muted:#6b7280;
-    --border:#d1d5db;
+    --border:#d1d5e1;
     --shadow: 0 10px 30px rgba(0,0,0,.08);
     --good:#16a34a;
     --bad:#dc2626;
@@ -65,7 +65,6 @@
   }
   .pill b{font-weight:950}
   .body{padding:12px}
-
   .btns{display:flex;flex-wrap:wrap;gap:8px}
   button{
     appearance:none;
@@ -90,7 +89,6 @@
     background:#fff;
     font-weight:900;
   }
-
   .hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:10px}
 
   /* Game */
@@ -230,6 +228,11 @@
     display:flex;
     flex-direction:column;
     gap:8px;
+    touch-action: pan-y;
+  }
+  .match.ready{
+    border-color: var(--good);
+    box-shadow:0 0 0 4px rgba(22,163,74,.18);
   }
   .match .top{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -293,6 +296,11 @@
     display:flex;
     flex-direction:column;
     gap:8px;
+    touch-action: pan-y;
+  }
+  .drop.ready{
+    border-color: var(--good);
+    box-shadow:0 0 0 4px rgba(22,163,74,.18);
   }
   .drop .top{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -397,9 +405,7 @@
     background:var(--night);
     color:var(--nightInk);
   }
-  .smallRow{
-    display:flex; gap:8px; flex-wrap:wrap; align-items:center;
-  }
+  .smallRow{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
 </style>
 </head>
 <body>
@@ -408,8 +414,8 @@
   <div class="wrap" style="padding:0 12px;">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
       <div>
-        <div class="title">Citrus Picker <span class="sub">— Dual Tray Zenith (Dev Batch x5)</span></div>
-        <div class="sub">Forced 5 sessions. Ends: Zenith or Abort or Time. Peppers live 5s; double-tap to remove (+points). Non-zenith: leftover fruit becomes dead fruit.</div>
+        <div class="title">Citrus Picker <span class="sub">— Dual Tray + Swipe Drop (Dev)</span></div>
+        <div class="sub">Key loop: fill tray → <b>SWIPE to DROP</b> (clears tray). Swipe while not ready = mistake. Export unlocks after 5 sessions.</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span class="pill">Session: <b id="sessNum">1</b>/5</span>
@@ -427,35 +433,36 @@
       <div class="hd">
         <div>
           <div class="title">Playfield</div>
-          <div class="sub">Drag fruit into Match slots (exact) + Drop tray (10). Mistakes reduce accuracy. Double-tap peppers to destroy.</div>
+          <div class="sub">Drag fruit into Match or Drop. When a tray is READY, swipe on that tray to clear it (counts as a successful tray drop).</div>
         </div>
         <div class="pill">Score: <b id="scoreOut">0</b>/100</div>
       </div>
 
       <div class="body">
-        <div id="game" class="game" aria-label="Game Area">
+        <div id="game" class="game">
           <div class="hud">
             <div class="line">Time: <b id="timeLeft">--</b>s • Difficulty: <b id="diffHud">1</b></div>
             <div class="line">Accuracy: <b id="accPct">100</b>% • Mistakes: <b id="mistakes">0</b> • Dead: <b id="deadCount">0</b></div>
-            <div class="line">Match: <b id="matchProg">0</b>/4 • Drop: <b id="dropProg">0</b>/10 • Pepper+: <b id="pepBonus">0</b></div>
+            <div class="line">MatchReady: <b id="matchReady">no</b> • DropReady: <b id="dropReady">no</b></div>
+            <div class="line">MatchDrops: <b id="matchDrops">0</b> • DropDrops: <b id="dropDrops">0</b> • Pepper+: <b id="pepBonus">0</b></div>
             <div class="line" id="zenLine" style="display:none;"><span class="zenBadge">◇ ZENITH ACHIEVED</span></div>
           </div>
 
           <div id="abortBtn" class="abort" title="Abort (triple tap)">✕<small><span id="abortTaps">0</span>/3 taps</small></div>
 
           <div class="zones">
-            <div id="matchTray" class="match" aria-label="Match Tray">
+            <div id="matchTray" class="match">
               <div class="top">
                 <b>Match Tray (Exact 4)</b>
-                <span>Fill each slot once</span>
+                <span>Fill → READY → swipe to drop</span>
               </div>
               <div id="matchSlots" class="slots"></div>
             </div>
 
-            <div id="dropTray" class="drop" aria-label="Drop Tray">
+            <div id="dropTray" class="drop">
               <div class="top">
-                <b>Drop Tray (Goal 10)</b>
-                <span>Any fruit counts (overflow → dead)</span>
+                <b>Drop Tray (10)</b>
+                <span>Fill → READY → swipe to drop</span>
               </div>
               <div id="dropZone" class="dropZone">DROP</div>
             </div>
@@ -463,7 +470,7 @@
         </div>
 
         <div class="toast" id="toast">
-          Press <b>Start</b>. Hint: if Drop stays 0/10, you’re not playing the full game loop.
+          Dev reminder: if trays don’t clear, the loop is broken. This build fixes that with <b>swipe-to-drop</b>.
         </div>
 
         <div class="miniGrid">
@@ -483,7 +490,7 @@
         </div>
       </div>
 
-      <div class="tray" id="tray10" aria-label="10-slot Visual Tray"></div>
+      <div class="tray" id="tray10"></div>
 
       <div class="status">
         <div>Difficulty: <b id="diffLabel">1</b> • spawn_ms: <b id="spawnLabel">2600</b> • cap: <b id="capLabel">8</b> • limit: <b id="limitLabel">180</b>s</div>
@@ -509,7 +516,7 @@
 
         <div class="smallRow" style="margin-top:10px;">
           <label class="pill">Difficulty
-            <select id="diffSel" aria-label="Difficulty select">
+            <select id="diffSel">
               <option value="1" selected>1 (spawn 2600 • cap 8 • 180s)</option>
               <option value="2">2 (spawn 2000 • cap 10 • 150s)</option>
               <option value="3">3 (spawn 1500 • cap 12 • 135s)</option>
@@ -519,10 +526,10 @@
         </div>
 
         <div class="hint">
-          <b>Zenith condition:</b> Score ≥ <b>85</b> AND Match <b>4/4</b> AND Drop <b>10/10</b>.<br>
-          <b>Abort:</b> triple-tap X (records ended_reason=abort).<br>
-          <b>Timeout:</b> ends_reason=time (still saved).<br>
-          <b>Peppers:</b> double-tap to destroy (+1 point; capped). After 5s → dead pepper (no bonus).
+          <b>Swipe-to-Drop:</b> swipe horizontally on tray when READY to clear.<br>
+          <b>Wrong swipe:</b> swipe when not READY → mistake (affects accuracy).<br>
+          <b>Zenith:</b> score ≥ 85 AND you have completed <b>at least 1 MatchDrop</b> and <b>1 DropDrop</b> in the session.<br>
+          <b>Peppers:</b> double-tap to destroy (+1, capped). After 5s → dead/gray.
         </div>
 
         <div style="margin-top:12px;">
@@ -540,9 +547,7 @@
 
 <script>
 (() => {
-  // =========================
-  // CONFIG (difficulty acknowledges your screenshot format)
-  // =========================
+  // ===== Config =====
   const USER_ID = "me";
   const BATCH_SIZE = 5;
 
@@ -563,24 +568,39 @@
   };
 
   const PEPPER_LIVE_MS = 5000;
-  const PEPPER_BONUS_CAP = 5; // max +points per session
-  const STORAGE_KEY = "cp_dualtray_devbatch_v2";
+  const PEPPER_BONUS_CAP = 5;
+  const STORAGE_KEY = "cp_swipe_reset_v3";
 
-  // Score weights
-  const W_ACC  = 70;
-  const W_DROP = 20;
-  const W_MATCH= 10;
-  const DEAD_PEN_MAX = 15;
+  // scoring (accuracy-first, acknowledges drops + dead fruit)
+  const W_ACC = 60;
+  const W_MATCH_DROPS = 20; // capped by function
+  const W_DROP_DROPS  = 20; // capped by function
+  const DEAD_PEN_MAX  = 20;
 
-  // =========================
-  // ELEMENTS
-  // =========================
+  // snap assist
+  function snapRect(er, targetRect, pad=18){
+    const tr = {
+      left: targetRect.left - pad,
+      right: targetRect.right + pad,
+      top: targetRect.top - pad,
+      bottom: targetRect.bottom + pad
+    };
+    return !(er.right < tr.left || er.left > tr.right || er.bottom < tr.top || er.top > tr.bottom);
+  }
+
+  // ===== Elements =====
   const game = document.getElementById('game');
-
   const startBtn = document.getElementById('startBtn');
   const pauseBtn = document.getElementById('pauseBtn');
   const resetBatchBtn = document.getElementById('resetBatchBtn');
   const diffSel = document.getElementById('diffSel');
+
+  const matchTrayEl = document.getElementById('matchTray');
+  const dropTrayEl = document.getElementById('dropTray');
+  const matchSlotsEl = document.getElementById('matchSlots');
+  const tray10El = document.getElementById('tray10');
+
+  const toast = document.getElementById('toast');
 
   const sessNumEl = document.getElementById('sessNum');
   const zenStateEl = document.getElementById('zenState');
@@ -591,11 +611,15 @@
   const accPctEl = document.getElementById('accPct');
   const mistakesEl = document.getElementById('mistakes');
   const deadCountEl = document.getElementById('deadCount');
-  const matchProgEl = document.getElementById('matchProg');
-  const dropProgEl = document.getElementById('dropProg');
-  const pepBonusEl = document.getElementById('pepBonus');
+
   const timeLeftEl = document.getElementById('timeLeft');
   const diffHudEl = document.getElementById('diffHud');
+
+  const matchReadyEl = document.getElementById('matchReady');
+  const dropReadyEl = document.getElementById('dropReady');
+  const matchDropsEl = document.getElementById('matchDrops');
+  const dropDropsEl = document.getElementById('dropDrops');
+  const pepBonusEl = document.getElementById('pepBonus');
 
   const attemptsEl = document.getElementById('attempts');
   const correctEl = document.getElementById('correct');
@@ -606,18 +630,13 @@
   const pepKillEl  = document.getElementById('pepKill');
   const pepExpireEl= document.getElementById('pepExpire');
 
-  const matchSlotsEl = document.getElementById('matchSlots');
-  const dropTrayEl = document.getElementById('dropTray');
-  const tray10El = document.getElementById('tray10');
+  const zenLine = document.getElementById('zenLine');
+  const zenBadgeWrap = document.getElementById('zenBadgeWrap');
 
   const diffLabelEl = document.getElementById('diffLabel');
   const spawnLabelEl = document.getElementById('spawnLabel');
   const capLabelEl = document.getElementById('capLabel');
   const limitLabelEl = document.getElementById('limitLabel');
-
-  const toast = document.getElementById('toast');
-  const zenLine = document.getElementById('zenLine');
-  const zenBadgeWrap = document.getElementById('zenBadgeWrap');
 
   const abortBtn = document.getElementById('abortBtn');
   const abortTapsEl = document.getElementById('abortTaps');
@@ -626,9 +645,7 @@
   const exportStatusEl = document.getElementById('exportStatus');
   const copyBtn = document.getElementById('copyBtn');
 
-  // =========================
-  // SOUND (WebAudio)
-  // =========================
+  // ===== Sound =====
   let audioCtx = null;
   let soundUnlocked = false;
   function unlockSound(){
@@ -658,9 +675,7 @@
     o.start(t); o.stop(t+0.11);
   }
 
-  // =========================
-  // UTIL
-  // =========================
+  // ===== Util =====
   function setToast(msg, kind=''){
     toast.className = 'toast' + (kind ? (' ' + kind) : '');
     toast.innerHTML = msg;
@@ -685,54 +700,48 @@
       return {batch:[]};
     }
   }
-  function saveState(st){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
-  }
+  function saveState(st){ localStorage.setItem(STORAGE_KEY, JSON.stringify(st)); }
 
-  // =========================
-  // GAME STATE
-  // =========================
-  let running = false;
-  let paused = false;
-  let ended = false;
-
+  // ===== Game state =====
+  let running=false, paused=false, ended=false;
   let diff = Number(diffSel.value);
   let cfg = DIFF_CFG[diff];
 
-  let spawnTimer = null;
-  let clockTimer = null;
-  let tStart = null;
-  let tEnd = null;
-  let timeLeft = cfg.limit_s;
+  let spawnTimer=null, clockTimer=null;
+  let tStart=null, tEnd=null;
+  let timeLeft=cfg.limit_s;
 
   // counters
-  let attempts = 0;
-  let correct = 0;
-  let wrong = 0;
+  let attempts=0, correct=0, wrong=0;
+  let deadFruit=0;
 
-  let dropCount = 0;
-  let tray10 = [];
+  // trays
   let matchState = {};
+  let dropTray = []; // holds emojis (max 10)
+  let matchReady=false, dropReady=false;
 
-  // dead fruit logic
-  let deadFruit = 0;
+  // drop counts
+  let matchDrops=0, dropDrops=0;
 
   // peppers
-  let peppersSpawned = 0;
-  let peppersDestroyed = 0;
-  let peppersExpired = 0;
-  let pepperBonusPoints = 0;
+  let peppersSpawned=0, peppersDestroyed=0, peppersExpired=0, pepperBonusPoints=0;
 
   // abort triple tap
-  let abortTaps = 0;
-  let abortTapTimer = null;
+  let abortTaps=0, abortTapTimer=null;
 
-  // session index within forced batch
-  let sessionNum = 1;
+  // forced batch session number
+  let sessionNum=1;
 
-  // =========================
-  // RENDER
-  // =========================
+  // ===== Render =====
+  function matchFilledCount(){
+    return MATCH_KEYS.reduce((acc,k)=> acc + (matchState[k] ? 1 : 0), 0);
+  }
+  function fruitsOnScreen(){
+    return [...game.querySelectorAll('.fruit')];
+  }
+  function leftoversCount(){
+    return fruitsOnScreen().length;
+  }
   function renderMatchSlots(){
     matchSlotsEl.innerHTML = '';
     for(const key of MATCH_KEYS){
@@ -754,106 +763,100 @@
       matchSlotsEl.appendChild(slot);
     }
   }
-
   function renderTray10(){
     tray10El.innerHTML = '';
     for(let i=0;i<10;i++){
       const slot = document.createElement('div');
-      slot.className = 'slot' + (tray10[i] ? ' filled' : '');
-      slot.textContent = tray10[i] || '';
+      slot.className = 'slot' + (dropTray[i] ? ' filled' : '');
+      slot.textContent = dropTray[i] || '';
       tray10El.appendChild(slot);
     }
   }
 
-  function matchFilledCount(){
-    return MATCH_KEYS.reduce((acc,k)=> acc + (matchState[k] ? 1 : 0), 0);
-  }
-
-  function fruitsOnScreen(){
-    return [...game.querySelectorAll('.fruit')];
-  }
-
-  function leftoversCount(){
-    return fruitsOnScreen().length;
-  }
-
-  // =========================
-  // SCORE
-  // =========================
+  // ===== Scoring =====
   function computeScore(zenithOverride=false){
     const acc = attempts <= 0 ? 1 : (correct / attempts);
     const accScore = clamp(acc, 0, 1) * W_ACC;
-    const dropScore = clamp(dropCount / 10, 0, 1) * W_DROP;
-    const matchScore = clamp(matchFilledCount() / 4, 0, 1) * W_MATCH;
 
-    const left = leftoversCount();
-    const pen = zenithOverride ? 0 : (clamp(deadFruit / 10, 0, 1) * DEAD_PEN_MAX);
+    // each successful tray drop worth points, capped
+    const md = clamp(matchDrops, 0, 3) / 3; // 0..1
+    const dd = clamp(dropDrops, 0, 3) / 3;  // 0..1
+    const matchDropScore = md * W_MATCH_DROPS;
+    const dropDropScore  = dd * W_DROP_DROPS;
 
-    const raw = accScore + dropScore + matchScore + pepperBonusPoints - pen;
+    const pen = zenithOverride ? 0 : (clamp(deadFruit / 15, 0, 1) * DEAD_PEN_MAX);
+
+    const raw = accScore + matchDropScore + dropDropScore + pepperBonusPoints - pen;
     const score = clamp(raw, 0, 100);
 
     return {
       score: Math.round(score),
-      accPct: Math.round(acc * 100),
-      left,
-      pen: Math.round(pen),
+      accPct: Math.round(acc*100),
       accScore: Math.round(accScore),
-      dropScore: Math.round(dropScore),
-      matchScore: Math.round(matchScore),
-      pepperBonus: pepperBonusPoints
+      matchDropScore: Math.round(matchDropScore),
+      dropDropScore: Math.round(dropDropScore),
+      pen: Math.round(pen),
+      left: leftoversCount()
     };
   }
 
   function isZenith(){
+    // must have at least 1 of each tray drop + score >= 85
     const s = computeScore(true);
-    return (s.score >= 85) && (matchFilledCount() === 4) && (dropCount >= 10);
+    return (s.score >= 85) && (matchDrops >= 1) && (dropDrops >= 1);
+  }
+
+  function updateReadyStates(){
+    matchReady = (matchFilledCount() === 4);
+    dropReady  = (dropTray.length >= 10);
+
+    matchTrayEl.classList.toggle('ready', matchReady);
+    dropTrayEl.classList.toggle('ready', dropReady);
+
+    matchReadyEl.textContent = matchReady ? 'YES' : 'no';
+    dropReadyEl.textContent  = dropReady ? 'YES' : 'no';
   }
 
   function updateHUD(){
+    updateReadyStates();
     const zen = isZenith();
     const s = computeScore(zen);
 
     scoreOutEl.textContent = String(s.score);
     scoreBigEl.textContent = String(s.score);
-
     accPctEl.textContent = String(s.accPct);
     mistakesEl.textContent = String(wrong);
     deadCountEl.textContent = String(deadFruit);
 
-    matchProgEl.textContent = String(matchFilledCount());
-    dropProgEl.textContent = String(dropCount);
+    timeLeftEl.textContent = String(Math.max(0, timeLeft));
+    diffHudEl.textContent = String(diff);
+
+    matchDropsEl.textContent = String(matchDrops);
+    dropDropsEl.textContent = String(dropDrops);
     pepBonusEl.textContent = String(pepperBonusPoints);
 
     attemptsEl.textContent = String(attempts);
     correctEl.textContent = String(correct);
     wrongEl.textContent = String(wrong);
-
     leftoversEl.textContent = String(s.left);
 
     pepSpawnEl.textContent = String(peppersSpawned);
-    pepKillEl.textContent = String(peppersDestroyed);
-    pepExpireEl.textContent = String(peppersExpired);
-
-    timeLeftEl.textContent = String(Math.max(0, timeLeft));
-    diffHudEl.textContent = String(diff);
+    pepKillEl.textContent  = String(peppersDestroyed);
+    pepExpireEl.textContent= String(peppersExpired);
 
     zenStateEl.textContent = zen ? "Unlocked" : "Locked";
     zenLine.style.display = zen ? "" : "none";
     zenBadgeWrap.innerHTML = zen ? `<span class="pill" style="border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.10);color:var(--good)"><b>◇ ZENITH</b> ${s.score}/100</span>` : "";
   }
 
-  // =========================
-  // ATTEMPTS
-  // =========================
+  // ===== Attempts =====
   function registerAttempt(ok){
     attempts += 1;
     if(ok) correct += 1;
-    else { wrong += 1; }
+    else wrong += 1;
   }
 
-  // =========================
-  // PEPPER
-  // =========================
+  // ===== Peppers =====
   function markPepperDead(el){
     if(el.dataset.pepperDead === "1") return;
     el.dataset.pepperDead = "1";
@@ -862,41 +865,31 @@
     peppersExpired += 1;
   }
 
-  function destroyPepper(el, rewarded){
-    // remove pepper from play
+  function destroyPepper(el){
+    // double tap to remove
+    const wasDead = (el.dataset.pepperDead === "1");
     el.remove();
-    deadFruit += 1; // removing counts as "allocated away" but still tracked (you asked for dead fruit counters)
-    if(rewarded){
+    deadFruit += 1; // counts toward dead fruit counter
+    if(!wasDead){
       peppersDestroyed += 1;
-      if(pepperBonusPoints < PEPPER_BONUS_CAP){
-        pepperBonusPoints += 1;
-      }
+      if(pepperBonusPoints < PEPPER_BONUS_CAP) pepperBonusPoints += 1;
       setToast('🌶️ Destroyed (bonus +1)', 'good');
       popSound(true);
     }else{
-      setToast('🌶️ Cleared (no bonus)', 'warn');
+      setToast('🌶️ Removed (no bonus)', 'warn');
       popSound(false);
     }
   }
 
-  // =========================
-  // SPAWN
-  // =========================
-  function maybeSpawnPepper(){
-    return Math.random() < cfg.pepper_prob;
-  }
+  // ===== Spawning =====
+  function maybePepper(){ return Math.random() < cfg.pepper_prob; }
 
-  function spawnFruitOrPepper(){
+  function spawnOne(){
     if(!running || paused || ended) return;
-
-    // cap control
-    const count = fruitsOnScreen().length;
-    if(count >= cfg.cap) return;
+    if(fruitsOnScreen().length >= cfg.cap) return;
 
     const rect = game.getBoundingClientRect();
-
-    const isPep = maybeSpawnPepper();
-    let obj = null;
+    const isPep = maybePepper();
 
     const el = document.createElement('div');
     el.className = 'fruit';
@@ -906,36 +899,31 @@
       el.classList.add('pepper');
       el.textContent = '🌶️';
       el.dataset.kind = 'pepper';
-      el.dataset.pepperBorn = String(Date.now());
       el.dataset.pepperDead = "0";
       const tag = document.createElement('div');
       tag.className = 'tag';
       tag.textContent = 'LIVE';
       el.appendChild(tag);
 
-      // pepper auto-expire after 5 seconds (becomes dead fruit if not removed)
       setTimeout(() => {
         if(!el.isConnected) return;
-        // if still on screen, become dead
         markPepperDead(el);
         updateHUD();
       }, PEPPER_LIVE_MS);
 
-      // double tap to remove (no UI change)
       el.addEventListener('dblclick', (ev) => {
         ev.stopPropagation();
         unlockSound();
-        const rewarded = (el.dataset.pepperDead !== "1"); // only reward if still live
-        destroyPepper(el, rewarded);
+        destroyPepper(el);
         updateHUD();
       });
 
     }else{
-      obj = FRUITS[Math.floor(Math.random()*FRUITS.length)];
+      const obj = FRUITS[Math.floor(Math.random()*FRUITS.length)];
       el.textContent = obj.emoji;
       el.dataset.kind = obj.key;
 
-      // Tap counts as a mistake (forces drag)
+      // tap = mistake
       el.addEventListener('click', (ev) => {
         ev.stopPropagation();
         unlockSound();
@@ -946,15 +934,14 @@
       });
     }
 
-    // spawn away from bottom zones
     const x = rand(30, rect.width - 30);
     const y = rand(55, rect.height - 230);
     el.style.left = x + 'px';
     el.style.top  = y + 'px';
 
-    // drag/drop
-    let dragging = false;
-    let offsetX = 0, offsetY = 0;
+    // drag handlers
+    let dragging=false;
+    let offsetX=0, offsetY=0;
 
     el.addEventListener('pointerdown', (ev) => {
       unlockSound();
@@ -974,43 +961,40 @@
       el.style.left = nx + 'px';
       el.style.top  = ny + 'px';
 
-      // highlight trays for accuracy
       const er = el.getBoundingClientRect();
 
-      const dr = dropTrayEl.getBoundingClientRect();
-      const overDrop = !(er.right < dr.left || er.left > dr.right || er.bottom < dr.top || er.top > dr.bottom);
-      dropTrayEl.classList.toggle('hot', overDrop);
-
+      // highlight match slots
       [...matchSlotsEl.querySelectorAll('.mslot')].forEach(s => {
         const sr = s.getBoundingClientRect();
-        const over = !(er.right < sr.left || er.left > sr.right || er.bottom < sr.top || er.top > sr.bottom);
+        const over = snapRect(er, sr, 16);
         s.classList.toggle('hot', over);
       });
+
+      // highlight drop tray
+      const dr = dropTrayEl.getBoundingClientRect();
+      const overDrop = snapRect(er, dr, 18);
+      dropTrayEl.classList.toggle('hot', overDrop);
     });
 
     el.addEventListener('pointerup', () => {
       if(!dragging) return;
-      dragging = false;
+      dragging=false;
 
       dropTrayEl.classList.remove('hot');
       [...matchSlotsEl.querySelectorAll('.mslot')].forEach(s => s.classList.remove('hot'));
 
       const er = el.getBoundingClientRect();
 
-      // match slots first
-      let placed = false;
-      const slots = [...matchSlotsEl.querySelectorAll('.mslot')];
-      for(const s of slots){
+      // Match slots first
+      for(const s of [...matchSlotsEl.querySelectorAll('.mslot')]){
         const sr = s.getBoundingClientRect();
-        const over = !(er.right < sr.left || er.left > sr.right || er.bottom < sr.top || er.top > sr.bottom);
-        if(over){
-          placed = true;
+        if(snapRect(er, sr, 18)){
           const need = s.dataset.need;
 
-          // peppers are NEVER correct for match
+          // pepper never correct
           if(el.dataset.kind === 'pepper'){
             registerAttempt(false);
-            setToast('❌ Pepper does not belong in Match Tray (counts as mistake).', 'bad');
+            setToast('❌ Pepper in Match Tray = mistake.', 'bad');
             popSound(false);
             updateHUD();
             return;
@@ -1027,99 +1011,184 @@
             renderMatchSlots();
           }else{
             popSound(false);
-            setToast('❌ Wrong match (or already filled). Accuracy down.', 'bad');
+            setToast('❌ Wrong match (or already filled).', 'bad');
           }
+
           updateHUD();
-          checkEndOrContinue();
+          maybeEnd();
           return;
         }
       }
 
-      // drop tray
+      // Drop tray
       const dr = dropTrayEl.getBoundingClientRect();
-      const overDrop = !(er.right < dr.left || er.left > dr.right || er.bottom < dr.top || er.top > dr.bottom);
-
-      if(overDrop){
-        // peppers: allowed, no penalty, but never help dropCount
+      if(snapRect(er, dr, 22)){
         if(el.dataset.kind === 'pepper'){
+          // pepper dropped = dead fruit + mistake (no penalty points beyond accuracy/dead)
           registerAttempt(false);
           deadFruit += 1;
           el.remove();
           popSound(false);
-          setToast('🌶️ Dropped pepper → counts as dead fruit + mistake (no score penalty beyond accuracy/dead).', 'warn');
+          setToast('🌶️ Dropped pepper → dead fruit + mistake.', 'warn');
           updateHUD();
-          checkEndOrContinue();
+          maybeEnd();
           return;
         }
 
-        if(dropCount < 10){
+        if(dropTray.length < 10){
           registerAttempt(true);
-          dropCount += 1;
-          tray10.push(el.textContent);
-          tray10 = tray10.slice(0,10);
+          dropTray.push(el.textContent);
+          el.remove();
           renderTray10();
           popSound(true);
-          setToast('✅ Drop tray +1', 'good');
-          el.remove();
+          setToast('✅ Added to drop tray.', 'good');
         }else{
-          // overflow: no direct score subtraction; counts as dead fruit + mistake
+          // overflow: counts as dead + mistake, no direct point subtraction
           registerAttempt(false);
           deadFruit += 1;
+          el.remove();
           popSound(false);
           setToast('Drop tray full → fruit becomes dead (mistake).', 'bad');
-          el.remove();
         }
+
         updateHUD();
-        checkEndOrContinue();
+        maybeEnd();
         return;
       }
 
-      // missed all
+      // miss
       registerAttempt(false);
       popSound(false);
-      setToast('❌ Missed trays. Accuracy down.', 'bad');
+      setToast('❌ Missed trays.', 'bad');
       updateHUD();
-      checkEndOrContinue();
+      maybeEnd();
     });
 
     game.appendChild(el);
     updateHUD();
   }
 
-  // =========================
-  // TIMER / END CONDITIONS
-  // =========================
+  // ===== Swipe-to-drop trays =====
+  function attachSwipeDrop(container, isReadyFn, onDropFn, onBadSwipeFn){
+    let sx=0, sy=0, active=false;
+
+    container.addEventListener('touchstart', (e) => {
+      if(!running || ended) return;
+      const t = e.touches[0];
+      sx = t.clientX; sy = t.clientY;
+      active = true;
+    }, {passive:true});
+
+    container.addEventListener('touchend', (e) => {
+      if(!active) return;
+      active = false;
+      if(!running || ended) return;
+
+      const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+      if(!t) return;
+
+      const dx = t.clientX - sx;
+      const dy = t.clientY - sy;
+
+      // horizontal swipe threshold (more forgiving)
+      if(Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy)){
+        unlockSound();
+        if(isReadyFn()){
+          onDropFn();
+        }else{
+          onBadSwipeFn();
+        }
+      }
+    }, {passive:true});
+
+    // mouse fallback
+    let mx=0, my=0, mDown=false;
+    container.addEventListener('mousedown', (e) => {
+      if(!running || ended) return;
+      mDown=true; mx=e.clientX; my=e.clientY;
+    });
+    window.addEventListener('mouseup', (e) => {
+      if(!mDown) return;
+      mDown=false;
+      if(!running || ended) return;
+      const dx = e.clientX - mx;
+      const dy = e.clientY - my;
+      if(Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy)){
+        unlockSound();
+        if(isReadyFn()){
+          onDropFn();
+        }else{
+          onBadSwipeFn();
+        }
+      }
+    });
+  }
+
+  function dropMatchTray(){
+    // clear match tray and count a success
+    matchDrops += 1;
+    MATCH_KEYS.forEach(k => matchState[k] = false);
+    renderMatchSlots();
+    setToast('✅ Match tray DROPPED (cleared).', 'good');
+    popSound(true);
+    updateHUD();
+    maybeEnd();
+  }
+
+  function dropDropTray(){
+    // clear drop tray and count a success
+    dropDrops += 1;
+    dropTray = [];
+    renderTray10();
+    setToast('✅ Drop tray DROPPED (cleared).', 'good');
+    popSound(true);
+    updateHUD();
+    maybeEnd();
+  }
+
+  function badSwipe(which){
+    // swipe when not ready counts as mistake (accuracy of “pressing drop correctly”)
+    registerAttempt(false);
+    deadFruit += 1; // optional: tracks “wasted action” as dead fruit
+    popSound(false);
+    setToast(`❌ ${which} swipe while NOT ready → mistake.`, 'bad');
+    updateHUD();
+  }
+
+  // ===== End logic =====
   function stopTimers(){
     if(spawnTimer) clearInterval(spawnTimer);
     if(clockTimer) clearInterval(clockTimer);
-    spawnTimer = null;
-    clockTimer = null;
+    spawnTimer=null; clockTimer=null;
+  }
+
+  function maybeEnd(){
+    if(ended) return;
+    if(isZenith()){
+      endSession('zenith');
+    }
   }
 
   function endSession(reason){
     if(ended) return;
-    ended = true;
-    tEnd = Date.now();
+    ended=true;
+    tEnd=Date.now();
     stopTimers();
 
     const zen = (reason === 'zenith');
-    // If not zenith: everything left becomes dead fruit (your rule)
     if(!zen){
       const left = leftoversCount();
-      if(left > 0){
-        deadFruit += left;
-      }
+      if(left > 0) deadFruit += left;
     }
 
-    // clear board (so next session starts clean)
-    [...game.querySelectorAll('.fruit')].forEach(el => el.remove());
+    // clear screen fruits
+    fruitsOnScreen().forEach(el => el.remove());
 
     const s = computeScore(zen);
 
-    // save record into batch
+    // save
     const st = loadState();
-    if(!Array.isArray(st.batch)) st.batch = [];
-
+    const batch = Array.isArray(st.batch) ? st.batch : [];
     const record = {
       session: sessionNum,
       started_at: new Date(tStart).toISOString().slice(0,19),
@@ -1133,47 +1202,33 @@
       score_100: s.score,
       zenith: zen,
       accuracy_pct: s.accPct,
-      attempts,
-      correct,
-      wrong,
-      match_filled: matchFilledCount(),
-      drop_count: dropCount,
-      leftovers: zen ? 0 : leftoversCount(),
+      attempts, correct, wrong,
       dead_fruit: deadFruit,
+      match_drops: matchDrops,
+      drop_drops: dropDrops,
       pepper_spawned: peppersSpawned,
       pepper_destroyed: peppersDestroyed,
       pepper_expired: peppersExpired,
       pepper_bonus_points: pepperBonusPoints,
       duration_s: Math.round((tEnd - tStart)/1000)
     };
-
-    st.batch.push(record);
+    batch.push(record);
+    st.batch = batch;
     saveState(st);
 
-    // advance session number
     if(sessionNum < BATCH_SIZE){
       sessionNum += 1;
       sessNumEl.textContent = String(sessionNum);
-      setToast(`Session ended (${reason}). Press Start for session ${sessionNum}/5.`, reason === 'zenith' ? 'good' : (reason === 'time' ? 'warn' : 'warn'));
       startBtn.textContent = `Start (Session ${sessionNum}/5)`;
+      setToast(`Session ended (${reason}). Start next.`, reason === 'zenith' ? 'good' : 'warn');
     }else{
-      // batch complete: export
-      setToast(`Batch complete (5/5). Export is unlocked.`, 'good');
-      startBtn.textContent = 'Batch Complete';
       exportStatusEl.textContent = 'Unlocked';
-      exportBox.value = buildExportBlock(st.batch.slice(-BATCH_SIZE));
+      exportBox.value = buildExportBlock(batch.slice(-BATCH_SIZE));
+      startBtn.textContent = 'Batch Complete';
+      setToast('Batch complete. Export unlocked.', 'good');
     }
 
     updateHUD();
-  }
-
-  function checkEndOrContinue(){
-    if(ended) return;
-    if(isZenith()){
-      endSession('zenith');
-      return;
-    }
-    // continue until time/abort/zenith
   }
 
   function tickClock(){
@@ -1185,17 +1240,14 @@
     }
   }
 
-  // =========================
-  // ABORT (triple tap X)
-  // =========================
+  // ===== Abort triple tap =====
   function resetAbortTaps(){
-    abortTaps = 0;
-    abortTapsEl.textContent = "0";
+    abortTaps=0;
+    abortTapsEl.textContent="0";
     abortBtn.classList.remove('hot');
     if(abortTapTimer) clearTimeout(abortTapTimer);
-    abortTapTimer = null;
+    abortTapTimer=null;
   }
-
   abortBtn.addEventListener('click', () => {
     unlockSound();
     if(!running || ended) return;
@@ -1205,9 +1257,7 @@
     popSound(false);
 
     if(abortTapTimer) clearTimeout(abortTapTimer);
-    abortTapTimer = setTimeout(() => {
-      resetAbortTaps();
-    }, 1200);
+    abortTapTimer = setTimeout(resetAbortTaps, 1200);
 
     if(abortTaps >= 3){
       resetAbortTaps();
@@ -1215,9 +1265,7 @@
     }
   });
 
-  // =========================
-  // START / PAUSE / RESET
-  // =========================
+  // ===== Controls =====
   function applyDiffFromUI(){
     diff = Number(diffSel.value);
     cfg = DIFF_CFG[diff];
@@ -1230,66 +1278,59 @@
   }
 
   function resetSessionState(){
-    attempts = 0; correct = 0; wrong = 0;
-    dropCount = 0;
-    tray10 = [];
-    matchState = {};
-    MATCH_KEYS.forEach(k => matchState[k] = false);
+    attempts=0; correct=0; wrong=0;
+    deadFruit=0;
+    matchDrops=0; dropDrops=0;
 
-    deadFruit = 0;
+    peppersSpawned=0; peppersDestroyed=0; peppersExpired=0; pepperBonusPoints=0;
 
-    peppersSpawned = 0;
-    peppersDestroyed = 0;
-    peppersExpired = 0;
-    pepperBonusPoints = 0;
+    matchState={};
+    MATCH_KEYS.forEach(k => matchState[k]=false);
+    dropTray=[];
 
     renderMatchSlots();
     renderTray10();
-    zenLine.style.display = "none";
-    zenBadgeWrap.innerHTML = "";
-    ended = false;
-    paused = false;
+    zenLine.style.display="none";
+    zenBadgeWrap.innerHTML="";
     resetAbortTaps();
+    updateHUD();
+  }
+
+  function stopAll(){
+    stopTimers();
+    running=false; paused=false; ended=false;
   }
 
   function startSession(){
     unlockSound();
     const st = loadState();
-    const batch = Array.isArray(st.batch) ? st.batch : [];
-
-    // force dev batch: if batch already complete, do nothing until Reset Batch
-    const last5 = batch.slice(-BATCH_SIZE);
+    const last5 = (st.batch || []).slice(-BATCH_SIZE);
     if(last5.length === BATCH_SIZE){
       exportStatusEl.textContent = 'Unlocked';
       exportBox.value = buildExportBlock(last5);
-      setToast('Batch already complete. Use Reset Batch to run a new set of 5 sessions.', 'warn');
+      setToast('Batch already complete. Reset Batch to run again.', 'warn');
       return;
     }
 
-    // sessionNum should follow batch length + 1
     sessionNum = last5.length + 1;
     sessNumEl.textContent = String(sessionNum);
 
     applyDiffFromUI();
-    resetSessionState();
 
-    // clear board
-    [...game.querySelectorAll('.fruit')].forEach(el => el.remove());
-
-    timeLeft = cfg.limit_s;
-    running = true;
-    ended = false;
-    paused = false;
-
+    stopAll();
+    ended=false; paused=false; running=true;
     tStart = Date.now();
-    tEnd = null;
+    timeLeft = cfg.limit_s;
 
-    setToast(`Session ${sessionNum}/5 started. Focus: Drop tray AND Match tray.`, 'good');
+    resetSessionState();
+    fruitsOnScreen().forEach(el => el.remove());
 
-    stopTimers();
-    spawnTimer = setInterval(spawnFruitOrPepper, cfg.spawn_ms);
+    spawnTimer = setInterval(spawnOne, cfg.spawn_ms);
     clockTimer = setInterval(tickClock, 1000);
 
+    startBtn.textContent = 'Running';
+    pauseBtn.textContent = 'Pause';
+    setToast(`Session ${sessionNum}/5 started. Fill → swipe to drop trays.`, 'good');
     updateHUD();
   }
 
@@ -1301,84 +1342,51 @@
   }
 
   function resetBatch(){
-    stopTimers();
-    running = false;
-    paused = false;
-    ended = false;
-
-    // clear storage
+    stopAll();
     saveState({batch:[]});
-
-    sessionNum = 1;
-    sessNumEl.textContent = "1";
-    exportStatusEl.textContent = 'Locked';
-    exportBox.value = 'Complete 5 sessions to unlock export…';
-
-    // clear board + reset session state
-    [...game.querySelectorAll('.fruit')].forEach(el => el.remove());
+    sessionNum=1;
+    sessNumEl.textContent="1";
+    exportStatusEl.textContent="Locked";
+    exportBox.value="Complete 5 sessions to unlock export…";
+    startBtn.textContent='Start';
+    pauseBtn.textContent='Pause';
     applyDiffFromUI();
     resetSessionState();
-    timeLeft = cfg.limit_s;
-    updateHUD();
-
-    startBtn.textContent = 'Start';
-    pauseBtn.textContent = 'Pause';
-    setToast('Batch reset. Forced 5 sessions begins again.', '');
+    fruitsOnScreen().forEach(el => el.remove());
+    setToast('Batch reset.', '');
   }
 
-  // =========================
-  // EXPORT (copy/paste ready)
-  // =========================
+  // ===== Export =====
   function buildExportBlock(records){
-    // aggregate totals + by difficulty
+    const agg = {sessions:records.length, zenith:0, abort:0, time:0, attempts:0, correct:0, wrong:0, dead:0, md:0, dd:0, scoreSum:0};
     const byD = {};
-    const agg = {
-      sessions: records.length,
-      zenith: 0,
-      abort: 0,
-      time: 0,
-      attempts: 0, correct: 0, wrong: 0,
-      dead_fruit: 0,
-      pepper_spawned: 0,
-      pepper_destroyed: 0,
-      pepper_expired: 0,
-      pepper_bonus_points: 0,
-      score_sum: 0
-    };
-
     for(const r of records){
-      agg.score_sum += r.score_100;
+      agg.scoreSum += r.score_100;
       agg.attempts += r.attempts;
       agg.correct += r.correct;
       agg.wrong += r.wrong;
-      agg.dead_fruit += r.dead_fruit;
-      agg.pepper_spawned += r.pepper_spawned;
-      agg.pepper_destroyed += r.pepper_destroyed;
-      agg.pepper_expired += r.pepper_expired;
-      agg.pepper_bonus_points += r.pepper_bonus_points;
-
+      agg.dead += r.dead_fruit;
+      agg.md += r.match_drops;
+      agg.dd += r.drop_drops;
       if(r.zenith) agg.zenith += 1;
-      if(r.ended_reason === 'abort') agg.abort += 1;
-      if(r.ended_reason === 'time') agg.time += 1;
+      if(r.ended_reason==='abort') agg.abort += 1;
+      if(r.ended_reason==='time') agg.time += 1;
 
-      if(!byD[r.difficulty]){
-        byD[r.difficulty] = {sessions:0, attempts:0, correct:0, wrong:0, score_sum:0, zenith:0};
-      }
+      if(!byD[r.difficulty]) byD[r.difficulty] = {sessions:0, attempts:0, correct:0, wrong:0, scoreSum:0, zenith:0};
       const d = byD[r.difficulty];
       d.sessions += 1;
       d.attempts += r.attempts;
       d.correct += r.correct;
       d.wrong += r.wrong;
-      d.score_sum += r.score_100;
+      d.scoreSum += r.score_100;
       d.zenith += r.zenith ? 1 : 0;
     }
-
-    const acc = agg.attempts ? (agg.correct / agg.attempts * 100) : 0;
-    const avgScore = records.length ? (agg.score_sum / records.length) : 0;
+    const acc = agg.attempts ? (agg.correct/agg.attempts*100) : 0;
+    const avgScore = agg.sessions ? (agg.scoreSum/agg.sessions) : 0;
 
     const lines = [];
     lines.push("```txt");
-    lines.push("CITRUS_DUALTRAY_EXPORT v2");
+    lines.push("CITRUS_DUALTRAY_EXPORT v3 (swipe-drop)");
     lines.push(`user_id=${USER_ID}`);
     lines.push(`generated=${nowISO()}`);
     lines.push("");
@@ -1386,19 +1394,19 @@
     lines.push(`- sessions=${agg.sessions} zenith=${agg.zenith} abort=${agg.abort} time=${agg.time}`);
     lines.push(`- attempts=${agg.attempts} correct=${agg.correct} wrong=${agg.wrong} accuracy=${acc.toFixed(1)}%`);
     lines.push(`- avg_score_100=${avgScore.toFixed(1)}`);
-    lines.push(`- dead_fruit_total=${agg.dead_fruit}`);
-    lines.push(`- peppers: spawned=${agg.pepper_spawned} destroyed=${agg.pepper_destroyed} expired=${agg.pepper_expired} bonus_points=${agg.pepper_bonus_points}`);
+    lines.push(`- dead_fruit_total=${agg.dead}`);
+    lines.push(`- total_match_drops=${agg.md} total_drop_drops=${agg.dd}`);
     lines.push("");
     lines.push("BY_DIFFICULTY");
-    Object.keys(byD).sort((a,b)=>Number(a)-Number(b)).forEach(k => {
+    Object.keys(byD).sort((a,b)=>Number(a)-Number(b)).forEach(k=>{
       const d = byD[k];
       const dAcc = d.attempts ? (d.correct/d.attempts*100) : 0;
-      const dAvg = d.sessions ? (d.score_sum/d.sessions) : 0;
+      const dAvg = d.sessions ? (d.scoreSum/d.sessions) : 0;
       lines.push(`- d${k}: sessions=${d.sessions} zenith=${d.zenith} attempts=${d.attempts} accuracy=${dAcc.toFixed(1)}% avg_score=${dAvg.toFixed(1)}`);
     });
     lines.push("");
     lines.push("SESSIONS");
-    records.forEach(r => {
+    records.forEach(r=>{
       lines.push(`SESSION ${r.session}/5`);
       lines.push(`- started_at: ${r.started_at}`);
       lines.push(`- ended_at: ${r.ended_at}`);
@@ -1408,15 +1416,15 @@
       lines.push(`- zenith: ${r.zenith}`);
       lines.push(`- accuracy_pct: ${r.accuracy_pct}`);
       lines.push(`- attempts: ${r.attempts} (correct=${r.correct} wrong=${r.wrong})`);
-      lines.push(`- match_filled: ${r.match_filled}/4`);
-      lines.push(`- drop_count: ${r.drop_count}/10`);
       lines.push(`- dead_fruit: ${r.dead_fruit}`);
+      lines.push(`- match_drops: ${r.match_drops}`);
+      lines.push(`- drop_drops: ${r.drop_drops}`);
       lines.push(`- peppers: spawned=${r.pepper_spawned} destroyed=${r.pepper_destroyed} expired=${r.pepper_expired} bonus_points=${r.pepper_bonus_points}`);
       lines.push(`- duration_s: ${r.duration_s}`);
       lines.push("");
     });
     lines.push("REQUEST");
-    lines.push("Analyze accuracy + mistakes; recommend tuning: spawn_ms, cap, pepper_prob, and zenith threshold if needed.");
+    lines.push("Analyze trends (accuracy, dead fruit, tray drops) and recommend tuning by difficulty.");
     lines.push("```");
     return lines.join("\n");
   }
@@ -1431,48 +1439,51 @@
       await navigator.clipboard.writeText(text);
       setToast('Export copied to clipboard.', 'good');
     }catch(e){
-      // fallback: select textarea
       exportBox.focus();
       exportBox.select();
       setToast('Select + copy manually (clipboard blocked).', 'warn');
     }
   }
 
-  // =========================
-  // EVENTS
-  // =========================
+  // ===== Swipe hookups =====
+  attachSwipeDrop(
+    matchTrayEl,
+    () => matchReady,
+    dropMatchTray,
+    () => badSwipe('Match tray')
+  );
+  attachSwipeDrop(
+    dropTrayEl,
+    () => dropReady,
+    dropDropTray,
+    () => badSwipe('Drop tray')
+  );
+
+  // ===== Events =====
   startBtn.addEventListener('click', startSession);
   pauseBtn.addEventListener('click', togglePause);
   resetBatchBtn.addEventListener('click', resetBatch);
-  diffSel.addEventListener('change', () => {
-    applyDiffFromUI();
-    updateHUD();
-  });
+  diffSel.addEventListener('change', () => { applyDiffFromUI(); updateHUD(); });
   copyBtn.addEventListener('click', copyExport);
   document.addEventListener('pointerdown', unlockSound, {passive:true, once:true});
 
-  // =========================
-  // INIT
-  // =========================
+  // ===== Init =====
   applyDiffFromUI();
   resetSessionState();
 
   const st = loadState();
   const last5 = (st.batch || []).slice(-BATCH_SIZE);
   if(last5.length === BATCH_SIZE){
-    exportStatusEl.textContent = 'Unlocked';
+    exportStatusEl.textContent='Unlocked';
     exportBox.value = buildExportBlock(last5);
-    startBtn.textContent = 'Batch Complete';
+    startBtn.textContent='Batch Complete';
   }else{
-    exportStatusEl.textContent = 'Locked';
-    exportBox.value = `Complete 5 sessions to unlock export…`;
-    startBtn.textContent = 'Start';
+    exportStatusEl.textContent='Locked';
+    exportBox.value='Complete 5 sessions to unlock export…';
+    startBtn.textContent='Start';
   }
-
-  timeLeft = cfg.limit_s;
   updateHUD();
 })();
 </script>
-
 </body>
 </html>
