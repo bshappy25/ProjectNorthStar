@@ -48,7 +48,17 @@ PATHWAYS = {
     "BLOCKFORGE_DIR": HERE,
     "BRANCH_DIR": BRANCH_DIR,
 }
+st.set_page_config(page_title="BlockForge", page_icon="🧱", layout="wide")
 
+
+@dataclass(frozen=True)
+class Block:
+    id: str
+    title: str
+    category: str
+    tags: List[str]
+    description: str
+    code: str
 ## 2) The app (`python_hubs/Dev_Forge/pages/BlockForge/BlockForge.py`)
 
 ```python
