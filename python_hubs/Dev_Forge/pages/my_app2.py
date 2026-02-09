@@ -1,3 +1,8 @@
+# --- PALETTES GUARANTEE ---
+if "PALETTES" not in globals():
+    PALETTES = {}
+
+
 # ============================================================
 # ADD-ON BLOCK: Extended Palettes + Aggressive Overlays + Custom Palette Save/Load
 # Paste this block INTO your file:
