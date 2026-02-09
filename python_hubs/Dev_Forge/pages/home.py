@@ -6,10 +6,7 @@ Preserves wow-factor styling while adding practical tools
 
 import streamlit as st
 
-# ─────────────────────────────────────────────────────────────
-# Hero Section – Consolidated & Fixed
-# ─────────────────────────────────────────────────────────────
-
+# Hero Section – single call, fully enabled for HTML rendering
 st.markdown(
     """
     <div style="
@@ -60,6 +57,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 # ─────────────────────────────────────────────────────────────
 # Quick Launch Section – Core functionality
 # ─────────────────────────────────────────────────────────────
