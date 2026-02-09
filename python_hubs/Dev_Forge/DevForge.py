@@ -1,7 +1,97 @@
 from __future__ import annotations
 
 from datetime import date
+# pages/home.py  (drop-in replacement for main content area)
+
 import streamlit as st
+
+# Assume T (theme dict) and other shared vars are accessible via session_state or import
+# For standalone testing, you can re-define minimal T here if needed
+
+st.markdown(
+    """
+    <div style="text-align: center; padding: 80px 20px 60px; background: linear-gradient(135deg, var(--bg), rgba(20,184,166,0.08)); border-radius: 0 0 32px 32px; margin: -20px -40px 40px;">
+        <h1 style="font-size: 4.2rem; margin: 0; letter-spacing: -0.02em; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            🔧 DevForge
+        </h1>
+        <p class="kicker" style="font-size: 1.5rem; margin: 16px 0 32px; opacity: 0.95;">
+            Your Personal Streamlit Forge — Build Faster, Smarter, Beautifully
+        </p>
+        <div style="animation: pulse 4s infinite ease-in-out;">
+            <span class="badge badge-accent" style="font-size: 1.1rem; padding: 10px 24px;">We are L.E.A.D.</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Add subtle load animation to CSS if not already present (extend your <style> block in entry file)
+st.markdown(
+    """
+    <style>
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .animate-fade { animation: fadeInUp 1.2s ease-out forwards; }
+    .glow-hover:hover { box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.4); transition: box-shadow 0.4s; }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Feature showcase — staggered cards with animation delay
+cols = st.columns([1, 1.2, 1])
+with cols[0]:
+    st.markdown(
+        f"""
+        <div class='dev-card glow-hover animate-fade' style='animation-delay: 0.2s;'>
+            <h3>🔬 Science Forge</h3>
+            <p>NGSS + New Visions lessons • 5E builder • SCI-BLOCK exports</p>
+            <span class='badge badge-accent'>Core Production</span>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+with cols[1]:
+    st.markdown(
+        f"""
+        <div class='dev-card glow-hover animate-fade' style='animation-delay: 0.5s; transform: translateY(-12px);'>
+            <h3>📚 Code Arsenal</h3>
+            <p>Glassy components • Export patterns • Session mastery</p>
+            <span class='badge badge-accent'>Canonical Snippets</span>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+with cols[2]:
+    st.markdown(
+        f"""
+        <div class='dev-card glow-hover animate-fade' style='animation-delay: 0.8s;'>
+            <h3>⚡ ABC Engine</h3>
+            <p>Architecture • Build • Code • Style decisions — instant starters</p>
+            <span class='badge badge-accent'>Decision Accelerator</span>
+        </div>
+        """, unsafe_allow_html=True
+    )
+
+st.markdown("<div class='hr' style='margin: 60px 0;'></div>", unsafe_allow_html=True)
+
+# Enhanced CTA with pulse + gradient
+st.markdown(
+    f"""
+    <div class='dev-card' style='text-align:center; background: linear-gradient(135deg, rgba(20,184,166,0.18), rgba(47,91,234,0.14)); animation: pulse 6s infinite;'>
+        <h3 style='font-size: 2.4rem; margin-bottom: 16px;'>Ready to Forge?</h3>
+        <p style='font-size: 1.2rem; margin: 0 0 24px;'>Launch from sidebar — prototype safely in sandboxes — scale to production.</p>
+        <div>
+            <span class='badge badge-accent'>NGSS Power</span>
+            <span class='badge badge-accent2'>UI Mastery</span>
+            <span class='badge badge-accent'>Architecture Clarity</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Retain your quick reference expanders and current state preview below, perhaps in columns for better flow
 
 # ============================================================
 # CONFIG & CONSTANTS
