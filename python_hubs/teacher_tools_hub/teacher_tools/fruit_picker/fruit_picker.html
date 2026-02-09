@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-<title>Citrus Picker — Flash Premium (Offline)</title>
+<title>Citrus Picker — Dual Tray Zenith (V2 • Offline)</title>
 <style>
   :root{
     --bg:#f3f4f6;
@@ -12,10 +12,9 @@
     --muted:#6b7280;
     --border:#d1d5db;
     --shadow: 0 10px 30px rgba(0,0,0,.08);
-    --btn:#111827;
-    --btnInk:#ffffff;
     --good:#16a34a;
     --bad:#dc2626;
+    --warn:#f59e0b;
   }
   *{box-sizing:border-box}
   body{
@@ -30,17 +29,15 @@
   }
   header{
     position:sticky; top:0; z-index:10;
-    background:linear-gradient(#fff, rgba(255,255,255,.9));
+    background:linear-gradient(#fff, rgba(255,255,255,.92));
     border-bottom:1px solid var(--border);
     padding:10px 12px;
   }
-  .wrap{max-width:980px;margin:0 auto;padding:12px;}
+  .wrap{max-width:1040px;margin:0 auto;padding:12px;}
   .row{display:grid;gap:12px;}
-  @media(min-width:860px){
-    .row{grid-template-columns: 1.1fr .9fr;}
+  @media(min-width:900px){
+    .row{grid-template-columns: 1.25fr .75fr;}
   }
-
-  /* B/W spine cards */
   .card{
     background:var(--card);
     border:1px solid var(--border);
@@ -48,22 +45,13 @@
     box-shadow:var(--shadow);
     overflow:hidden;
   }
-  .card .hd{
+  .hd{
     padding:10px 12px;
     border-bottom:1px solid var(--border);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
   }
-  .title{
-    font-weight:800;
-    letter-spacing:.2px;
-  }
-  .sub{
-    color:var(--muted);
-    font-size:12px;
-  }
+  .title{font-weight:950;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:12px;line-height:1.25}
   .pill{
     font-size:12px;
     padding:6px 10px;
@@ -73,9 +61,8 @@
     color:var(--ink);
     white-space:nowrap;
   }
-  .pill b{font-weight:800}
+  .pill b{font-weight:950}
   .body{padding:12px}
-
   .btns{display:flex;flex-wrap:wrap;gap:8px}
   button{
     appearance:none;
@@ -84,21 +71,27 @@
     color:var(--ink);
     border-radius:12px;
     padding:10px 12px;
-    font-weight:700;
+    font-weight:900;
     cursor:pointer;
   }
   button.primary{
-    background:var(--btn);
-    color:var(--btnInk);
-    border-color:var(--btn);
+    background:#111827;
+    color:#fff;
+    border-color:#111827;
   }
   button:active{transform:translateY(1px)}
-  .hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:10px}
+  select{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 12px;
+    background:#fff;
+    font-weight:900;
+  }
 
-  /* Game area */
+  /* Game */
   .game{
     position:relative;
-    height:420px;
+    height:560px;
     border:1px dashed var(--border);
     border-radius:16px;
     background:
@@ -106,64 +99,186 @@
       radial-gradient(circle at 80% 30%, rgba(0,0,0,.03), transparent 50%),
       linear-gradient(#fff, #fafafa);
     overflow:hidden;
-    touch-action:none; /* allow drag without scrolling */
+    touch-action:none; /* allow dragging without scrolling */
   }
 
+  /* Abort X (triple tap) */
+  .abort{
+    position:absolute;
+    top:10px; right:10px;
+    width:44px;height:44px;
+    border-radius:14px;
+    border:2px solid rgba(0,0,0,.25);
+    background:#fff;
+    display:grid;place-items:center;
+    font-weight:950;
+    color:#111827;
+    cursor:pointer;
+    z-index:6;
+    box-shadow:0 8px 18px rgba(0,0,0,.10);
+  }
+  .abort small{
+    position:absolute;
+    bottom:-18px; right:0;
+    font-size:11px;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .abort.hot{
+    border-color:var(--bad);
+    box-shadow:0 0 0 3px rgba(220,38,38,.18), 0 10px 22px rgba(0,0,0,.12);
+  }
+
+  /* Fruit */
   .fruit{
     position:absolute;
-    width:64px;height:64px;
+    width:66px;height:66px;
     display:grid;place-items:center;
     font-size:40px;
     filter: drop-shadow(0 8px 10px rgba(0,0,0,.18));
     border-radius:16px;
-    background:rgba(255,255,255,.92);
-    border:1px solid rgba(0,0,0,.08);
+    background:rgba(255,255,255,.96);
+    border:1px solid rgba(0,0,0,.10);
     transform:translate(-50%,-50%);
     cursor:grab;
+    will-change:left, top;
   }
   .fruit:active{cursor:grabbing}
-
-  /* Basket */
-  .basket{
-    position:absolute;
-    left:50%; bottom:14px;
-    transform:translateX(-50%);
-    width:min(360px, 92%);
-    height:92px;
-    border-radius:18px;
-    border:2px solid var(--ink);
-    background:
-      linear-gradient(135deg, rgba(0,0,0,.06), rgba(0,0,0,.02));
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:12px 14px;
-    gap:10px;
+  .fruit.pepper{
+    border-color: rgba(220,38,38,.35);
+    box-shadow: 0 0 0 3px rgba(220,38,38,.10);
   }
-  .basket .label{
+
+  /* Bottom zones container */
+  .zones{
+    position:absolute;
+    left:50%;
+    bottom:14px;
+    transform:translateX(-50%);
+    width:min(980px, 96%);
+    display:grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap:10px;
+    z-index:3;
+    pointer-events:none;
+  }
+
+  .match, .drop{
+    pointer-events:auto;
+    height:152px;
+    border-radius:20px;
+    border:3px solid #111827;
+    background: linear-gradient(135deg, rgba(0,0,0,.06), rgba(0,0,0,.02));
+    padding:10px 12px;
     display:flex;
     flex-direction:column;
-    gap:2px;
+    gap:8px;
   }
-  .basket .label b{font-size:14px}
-  .basket .label span{font-size:12px;color:var(--muted)}
-  .basket .zone{
+
+  .match .top, .drop .top{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .match .top b, .drop .top b{font-size:13px}
+  .match .top span, .drop .top span{font-size:12px;color:var(--muted)}
+
+  .slots{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:8px;
     flex:1;
-    height:100%;
-    border-radius:14px;
-    border:1px dashed rgba(0,0,0,.35);
-    background:rgba(255,255,255,.65);
-    display:grid;place-items:center;
-    color:rgba(0,0,0,.45);
-    font-weight:800;
-    letter-spacing:.6px;
   }
-  .basket.hot{
-    border-color: var(--good);
+  .mslot{
+    border-radius:16px;
+    border:2px dashed rgba(0,0,0,.35);
+    background:rgba(255,255,255,.80);
+    display:grid;
+    place-items:center;
+    text-align:center;
+    overflow:hidden;
+    position:relative;
+    min-height:84px;
+  }
+  .mslot .need{
+    font-size:24px;
+    line-height:1;
+  }
+  .mslot .needLbl{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:4px;
+    font-weight:900;
+    letter-spacing:.5px;
+  }
+  .mslot .fill{
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    font-size:32px;
+    background:rgba(255,255,255,.92);
+    border-radius:14px;
+    opacity:0;
+    transform:scale(.98);
+    transition:opacity .12s ease;
+  }
+  .mslot.filled .fill{opacity:1}
+  .mslot.hot{
+    border-color:var(--good);
     box-shadow:0 0 0 3px rgba(22,163,74,.18);
   }
 
-  /* 10-slot tray (“table space before 10 fruit”) */
+  .dropZone{
+    flex:1;
+    border-radius:18px;
+    border:3px dashed rgba(0,0,0,.35);
+    background:rgba(255,255,255,.80);
+    display:grid;place-items:center;
+    font-weight:950;
+    letter-spacing:1px;
+    color:rgba(0,0,0,.50);
+    text-transform:uppercase;
+  }
+  .drop.hot{
+    border-color:var(--good);
+    box-shadow:0 0 0 4px rgba(22,163,74,.18);
+  }
+
+  /* HUD */
+  .hud{
+    position:absolute;
+    left:10px; top:10px;
+    z-index:5;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    pointer-events:none;
+  }
+  .hud .line{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,.90);
+    border:1px solid rgba(0,0,0,.10);
+    border-radius:999px;
+    padding:6px 10px;
+    font-size:12px;
+    color:var(--muted);
+    box-shadow:0 10px 18px rgba(0,0,0,.06);
+  }
+  .hud .line b{color:var(--ink)}
+  .zenBadge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-weight:950;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(22,163,74,.35);
+    background:rgba(22,163,74,.10);
+    color:var(--good);
+  }
+
+  /* 10-slot visual tray */
   .tray{
     display:grid;
     grid-template-columns: repeat(10, 1fr);
@@ -180,12 +295,8 @@
     background:#fafafa;
     font-size:18px;
   }
-  .slot.filled{
-    background:#fff;
-    border-color:#cbd5e1;
-  }
+  .slot.filled{background:#fff;border-color:#cbd5e1}
 
-  /* Status line */
   .status{
     display:flex;
     align-items:center;
@@ -198,6 +309,7 @@
     color:var(--muted);
   }
   .status b{color:var(--ink)}
+
   .toast{
     margin-top:10px;
     padding:10px 12px;
@@ -206,21 +318,62 @@
     background:#fff;
     font-size:13px;
     color:var(--muted);
+    line-height:1.35;
   }
   .toast.good{border-color:rgba(22,163,74,.35)}
   .toast.bad{border-color:rgba(220,38,38,.35)}
+  .toast.warn{border-color:rgba(245,158,11,.35)}
+
+  .miniGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:10px;
+  }
+  .mini{
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#fff;
+    padding:10px 12px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.35;
+  }
+  .mini b{color:var(--ink);font-weight:950}
+  .bigScore{
+    font-size:28px;
+    font-weight:950;
+    letter-spacing:.4px;
+    color:var(--ink);
+  }
+
+  pre{
+    margin:0;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:#0b1020;
+    color:#dbeafe;
+    overflow:auto;
+    font-size:12px;
+    line-height:1.35;
+  }
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap" style="padding:0 12px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
       <div>
-        <div class="title">Citrus Picker <span class="sub">— Flash Premium (Offline)</span></div>
-        <div class="sub">B/W spine UI • Fruits stay colored • Tap or drag into basket</div>
+        <div class="title">Citrus Picker <span class="sub">— Dual Tray Zenith (V2 • Offline)</span></div>
+        <div class="sub">Swipe LEFT on Match tray (+2), swipe RIGHT on Drop tray (+1). Swipe DOWN for risky bonus (+4 if both filled).</div>
       </div>
-      <div class="pill"><b>Easy Mode AI:</b> ON</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span class="pill">Session: <b id="sessNum">1</b>/5</span>
+        <span class="pill">Zenith: <b id="zenState">Locked</b></span>
+        <span class="pill">Sound: <b id="soundState">Locked</b></span>
+      </div>
     </div>
   </div>
 </header>
@@ -232,62 +385,108 @@
       <div class="hd">
         <div>
           <div class="title">Playfield</div>
-          <div class="sub">Fill the tray (10 slots) before overflow. Drag to basket or tap to collect.</div>
+          <div class="sub">Wrong drops, wrong swipes, or tapping fruit counts as mistakes (accuracy down).</div>
         </div>
-        <div class="pill">Score: <b id="score">0</b> • Tray: <b id="trayCount">0</b>/10</div>
+        <div class="pill">Score: <b id="scoreOut">0</b>/100 • Points: <b id="ptsOut">0</b></div>
       </div>
 
       <div class="body">
         <div id="game" class="game" aria-label="Game Area">
-          <div id="basket" class="basket" aria-label="Basket Drop Zone">
-            <div class="label">
-              <b>Basket</b>
-              <span>Drop fruit here</span>
+          <div class="hud">
+            <div class="line">Accuracy: <b id="accPct">100</b>% • Mistakes: <b id="mistakes">0</b></div>
+            <div class="line">Match: <b id="matchProg">0</b>/4 • Drop: <b id="dropProg">0</b>/10</div>
+            <div class="line">Points: <b id="ptsHud">0</b></div>
+            <div class="line" id="zenLine" style="display:none;"><span class="zenBadge">◇ ZENITH ACHIEVED</span></div>
+          </div>
+
+          <div id="abortBtn" class="abort" title="Abort (triple tap)">✕<small><span id="abortTaps">0</span>/3 taps</small></div>
+
+          <div class="zones">
+            <!-- MATCH TRAY -->
+            <div id="matchTray" class="match" aria-label="Match Tray">
+              <div class="top">
+                <b>Match Tray (Exact 4)</b>
+                <span>Swipe LEFT to clear (+2)</span>
+              </div>
+              <div id="matchSlots" class="slots"></div>
             </div>
-            <div class="zone">DROP</div>
+
+            <!-- DROP TRAY -->
+            <div id="dropTray" class="drop" aria-label="Drop Tray">
+              <div class="top">
+                <b>Drop Tray (Goal 10)</b>
+                <span>Swipe RIGHT to clear (+1)</span>
+              </div>
+              <div id="dropZone" class="dropZone">DROP</div>
+            </div>
           </div>
         </div>
 
         <div class="toast" id="toast">
-          Tip: Your first tap unlocks sound on mobile. Then try <b>tap</b> and <b>drag</b> both.
+          Start, then drag fruit into the correct area. Hard mode adds 🌶️ (double-tap to remove).
+        </div>
+
+        <div class="miniGrid">
+          <div class="mini">
+            <div><b>Attempts</b>: <span id="attempts">0</span></div>
+            <div><b>Correct</b>: <span id="correct">0</span></div>
+            <div><b>Wrong</b>: <span id="wrong">0</span></div>
+            <div style="margin-top:6px;"><b>Swipe Down</b>: +4 only when BOTH trays full (risk).</div>
+          </div>
+          <div class="mini">
+            <div class="bigScore"><span id="scoreBig">0</span><span style="font-size:14px;color:var(--muted);font-weight:950;">/100</span></div>
+            <div style="margin-top:6px;" id="zenBadgeWrap"></div>
+            <div style="margin-top:6px;color:var(--muted);font-size:12px;">
+              Leftover fruit on screen: <b id="leftovers">0</b>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="tray" id="tray" aria-label="10-slot Tray"></div>
+      <div class="tray" id="tray10" aria-label="10-slot Visual Tray"></div>
 
       <div class="status">
-        <div>Spawn: <b id="spawnRate">Medium</b> • Sound: <b id="soundState">Locked</b></div>
-        <div>Fruits: 🍊 🍋 🍍 🍒 🍈</div>
+        <div>Difficulty: <b id="diffLabel">2</b> • Spawn: <b id="spawnLabel">Medium</b> • Max fruit: <b id="capLabel">10</b></div>
+        <div>Pineapple is extra. Hard mode adds 🌶️ (double-tap remove).</div>
       </div>
     </div>
 
-    <!-- RIGHT: CONTROLS / B/W SPINE -->
+    <!-- RIGHT: CONTROLS / EXPORT -->
     <div class="card">
       <div class="hd">
         <div>
           <div class="title">Controls</div>
-          <div class="sub">Offline single-file • Safari-friendly</div>
+          <div class="sub">Game ends only on Zenith or Abort. Export appears after 5 sessions.</div>
         </div>
-        <div class="pill">Mode: <b>Tap + Drag</b></div>
+        <div class="pill">User: <b>you</b></div>
       </div>
       <div class="body">
         <div class="btns">
           <button class="primary" id="startBtn">Start</button>
-          <button id="spawnBtn">Spawn Fruit</button>
-          <button id="clearBtn">Clear Board</button>
+          <button id="pauseBtn">Pause</button>
           <button id="resetBtn">Reset</button>
         </div>
 
-        <div class="hint">
-          <b>B/W spine</b> means the UI stays clean and neutral. Fruits remain colored emojis for clarity.
-          <br><br>
-          <b>Tray rule:</b> each collected fruit fills a slot (up to 10). If tray is full, further collects become “overflow” (we block and warn).
-          <br><br>
-          <b>Easy Mode AI:</b> the game auto-adjusts spawn timing if you start overflowing or missing drops.
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center;">
+          <label class="pill">Difficulty
+            <select id="diffSel" aria-label="Difficulty select">
+              <option value="1">1 (Very Slow)</option>
+              <option value="2" selected>2 (Slow)</option>
+              <option value="3">3 (Medium • Hard)</option>
+              <option value="4">4 (Fast • Hard)</option>
+            </select>
+          </label>
         </div>
 
-        <div style="margin-top:12px;font-size:13px;color:var(--muted);line-height:1.4">
-          <b>Sound note:</b> On iOS Safari, audio requires a user gesture. Press <b>Start</b> once to unlock pops.
+        <div class="hint" style="margin-top:10px">
+          <b>Zenith condition:</b> Score ≥ <b>85</b> AND Match is <b>4/4</b> AND Drop is <b>10/10</b>.<br><br>
+          <b>Tray clearing:</b> Match tray swipe LEFT (+2). Drop tray swipe RIGHT (+1).<br>
+          <b>Risk:</b> Swipe DOWN (+4) only if both filled. Otherwise it’s a mistake.
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="sub" style="margin-bottom:6px;">Export Block (simple text)</div>
+          <pre id="exportBox">Complete 5 sessions to unlock export…</pre>
         </div>
       </div>
     </div>
@@ -296,64 +495,94 @@
 
 <script>
 (() => {
-  // ========= BASIC STATE =========
-  const game = document.getElementById('game');
-  const basket = document.getElementById('basket');
-  const scoreEl = document.getElementById('score');
-  const trayCountEl = document.getElementById('trayCount');
-  const trayEl = document.getElementById('tray');
-  const toast = document.getElementById('toast');
-  const soundStateEl = document.getElementById('soundState');
-  const spawnRateEl = document.getElementById('spawnRate');
-
-  const startBtn = document.getElementById('startBtn');
-  const spawnBtn = document.getElementById('spawnBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const resetBtn = document.getElementById('resetBtn');
-
-  const FRUITS = [
+  // =========================
+  // CONFIG
+  // =========================
+  const FRUITS_5 = [
     {key:'orange', emoji:'🍊'},
     {key:'lemon', emoji:'🍋'},
-    {key:'pineapple', emoji:'🍍'},
+    {key:'pineapple', emoji:'🍍'}, // extra
     {key:'cherry', emoji:'🍒'},
     {key:'lime', emoji:'🍈'}
   ];
+  const PEPPER = {key:'pepper', emoji:'🌶️'};
+  const MATCH_KEYS = ['orange','lemon','cherry','lime'];
 
-  let score = 0;
-  let tray = []; // holds emojis
-  let running = false;
+  // Slower spawn (scaled back)
+  const DIFF_TO_MS = { 1: 2600, 2: 2000, 3: 1500, 4: 1200 };
 
-  // Easy Mode AI controls
-  let spawnIntervalMs = 1100; // medium
-  let spawnTimer = null;
+  // Cap fruit on screen so it never snowballs
+  const DIFF_TO_CAP = { 1: 8, 2: 10, 3: 12, 4: 14 };
 
-  // ========= TRAY =========
-  function renderTray(){
-    trayEl.innerHTML = '';
-    for(let i=0;i<10;i++){
-      const slot = document.createElement('div');
-      slot.className = 'slot' + (tray[i] ? ' filled' : '');
-      slot.textContent = tray[i] || '';
-      trayEl.appendChild(slot);
-    }
-    trayCountEl.textContent = tray.length;
-  }
+  // Pepper probability in hard modes
+  const PEPPER_PROB = { 3: 0.14, 4: 0.18 }; // per spawn tick
 
-  function setToast(msg, kind=''){
-    toast.className = 'toast' + (kind ? (' ' + kind) : '');
-    toast.innerHTML = msg;
-  }
+  // Score model: accuracy-first + completion + leftover penalty
+  const W_ACC = 60;
+  const W_DROP = 25;
+  const W_MATCH = 15;
+  const LEFTOVER_PENALTY_MAX = 15;
 
-  function updateScore(delta){
-    score += delta;
-    scoreEl.textContent = score;
-  }
+  // Points system (new)
+  const PTS_MATCH_CLEAR = 2; // swipe left match tray
+  const PTS_DROP_CLEAR  = 1; // swipe right drop tray
+  const PTS_RISK_BONUS  = 4; // swipe down when both full
+  const PTS_PEPPER_REMOVE = 1; // double tap
 
-  function trayFull(){
-    return tray.length >= 10;
-  }
+  const EXPORT_AFTER = 5;
+  const USER_ID = "me";
+  const STORAGE_KEY = "cp_dualtray_sessions_v2";
 
-  // ========= SOUND (WebAudio “pops”) =========
+  // =========================
+  // ELEMENTS
+  // =========================
+  const game = document.getElementById('game');
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const diffSel = document.getElementById('diffSel');
+
+  const scoreOut = document.getElementById('scoreOut');
+  const scoreBig = document.getElementById('scoreBig');
+  const ptsOut = document.getElementById('ptsOut');
+  const ptsHud = document.getElementById('ptsHud');
+
+  const accPctEl = document.getElementById('accPct');
+  const mistakesEl = document.getElementById('mistakes');
+  const matchProgEl = document.getElementById('matchProg');
+  const dropProgEl = document.getElementById('dropProg');
+
+  const attemptsEl = document.getElementById('attempts');
+  const correctEl = document.getElementById('correct');
+  const wrongEl = document.getElementById('wrong');
+  const leftoversEl = document.getElementById('leftovers');
+
+  const diffLabel = document.getElementById('diffLabel');
+  const spawnLabel = document.getElementById('spawnLabel');
+  const capLabel = document.getElementById('capLabel');
+  const toast = document.getElementById('toast');
+
+  const matchTrayEl = document.getElementById('matchTray');
+  const dropTrayEl = document.getElementById('dropTray');
+  const matchSlotsEl = document.getElementById('matchSlots');
+
+  const tray10El = document.getElementById('tray10');
+
+  const zenState = document.getElementById('zenState');
+  const zenLine = document.getElementById('zenLine');
+  const zenBadgeWrap = document.getElementById('zenBadgeWrap');
+
+  const sessNumEl = document.getElementById('sessNum');
+  const exportBox = document.getElementById('exportBox');
+
+  const abortBtn = document.getElementById('abortBtn');
+  const abortTapsEl = document.getElementById('abortTaps');
+
+  const soundState = document.getElementById('soundState');
+
+  // =========================
+  // SOUND (boosted: 4 tone types)
+  // =========================
   let audioCtx = null;
   let soundUnlocked = false;
 
@@ -361,78 +590,292 @@
     if(soundUnlocked) return;
     try{
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      // Resume in case iOS started it suspended
       if(audioCtx.state === 'suspended') audioCtx.resume();
       soundUnlocked = true;
-      soundStateEl.textContent = 'On';
-      setToast('Sound unlocked. Try collecting fruit — you’ll hear cute pops.', 'good');
+      soundState.textContent = 'On';
     }catch(e){
-      soundStateEl.textContent = 'Off';
-      setToast('Audio not available in this browser. Game still works.', 'bad');
+      soundState.textContent = 'Off';
     }
   }
 
-  function popSound(){
+  function tone({base=240, up=2.1, peak=0.18, dur=0.10, type='sine'}){
     if(!soundUnlocked || !audioCtx) return;
     const t = audioCtx.currentTime;
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
-
-    // "Cute pop": short rising chirp + quick decay
-    const base = 220 + Math.random()*220;
-    o.type = 'sine';
+    o.type = type;
     o.frequency.setValueAtTime(base, t);
-    o.frequency.exponentialRampToValueAtTime(base*2.2, t+0.04);
+    o.frequency.exponentialRampToValueAtTime(base*up, t+dur*0.55);
 
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.18, t+0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, t+0.08);
+    g.gain.exponentialRampToValueAtTime(peak, t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
 
-    o.connect(g);
-    g.connect(audioCtx.destination);
-    o.start(t);
-    o.stop(t+0.09);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t+dur+0.02);
   }
 
-  // ========= SPAWN =========
-  function setSpawnRateLabel(){
-    if(spawnIntervalMs <= 850) spawnRateEl.textContent = 'Fast';
-    else if(spawnIntervalMs <= 1200) spawnRateEl.textContent = 'Medium';
-    else spawnRateEl.textContent = 'Slow';
-  }
+  const sfx = {
+    ok(){ tone({base:280+Math.random()*160, up:2.2, peak:0.18, dur:0.11, type:'sine'}); },
+    bad(){ tone({base:160+Math.random()*60, up:0.82, peak:0.14, dur:0.12, type:'triangle'}); },
+    swipe(){ tone({base:220+Math.random()*100, up:1.6, peak:0.16, dur:0.10, type:'square'}); },
+    zen(){ tone({base:260, up:2.6, peak:0.20, dur:0.16, type:'sine'}); tone({base:390, up:2.2, peak:0.16, dur:0.12, type:'sine'}); }
+  };
 
+  // =========================
+  // UTIL
+  // =========================
+  function setToast(msg, kind=''){
+    toast.className = 'toast' + (kind ? (' ' + kind) : '');
+    toast.innerHTML = msg;
+  }
+  function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+  function nowISO(){
+    const d = new Date();
+    const pad = (x) => String(x).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
   function rand(min,max){ return Math.random()*(max-min)+min; }
+  function leftoversOnScreen(){ return game.querySelectorAll('.fruit').length; }
+
+  function setSpawnLabel(ms){
+    if(ms <= 1300) spawnLabel.textContent = 'Medium';
+    else if(ms <= 1700) spawnLabel.textContent = 'Slow+';
+    else if(ms <= 2200) spawnLabel.textContent = 'Slow';
+    else spawnLabel.textContent = 'Very Slow';
+  }
+
+  // =========================
+  // STORAGE
+  // =========================
+  function loadSessions(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){ return []; }
+  }
+  function saveSessions(arr){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  }
+
+  // =========================
+  // STATE
+  // =========================
+  let running = false;
+  let paused = false;
+  let spawnTimer = null;
+
+  let diff = Number(diffSel.value);
+  let spawnIntervalMs = DIFF_TO_MS[diff];
+  let fruitCap = DIFF_TO_CAP[diff];
+
+  // accuracy metrics
+  let attempts = 0;
+  let correct = 0;
+  let wrong = 0;
+
+  // progress
+  let dropCount = 0;
+  let tray10 = [];
+  let matchState = {};
+  MATCH_KEYS.forEach(k => matchState[k] = false);
+
+  // points
+  let points = 0;
+
+  // abort
+  let abortTaps = 0;
+  let abortTapTimer = null;
+
+  // run meta
+  let sessionIndex = 1;
+  let runStartISO = null;
+  let ended = false;
+  let aborted = false;
+
+  // drag guard (so swipes don’t fire during dragging)
+  let isDraggingFruit = false;
+
+  // =========================
+  // RENDER
+  // =========================
+  function renderMatchSlots(){
+    matchSlotsEl.innerHTML = '';
+    for(const key of MATCH_KEYS){
+      const fruit = FRUITS_5.find(f => f.key === key);
+      const slot = document.createElement('div');
+      slot.className = 'mslot';
+      slot.dataset.need = key;
+
+      slot.innerHTML = `
+        <div>
+          <div class="need">${fruit ? fruit.emoji : '❓'}</div>
+          <div class="needLbl">NEED</div>
+        </div>
+        <div class="fill">✅</div>
+      `;
+      if(matchState[key]){
+        slot.classList.add('filled');
+        slot.querySelector('.fill').textContent = fruit ? fruit.emoji : '✅';
+      }
+      matchSlotsEl.appendChild(slot);
+    }
+  }
+
+  function matchFilledCount(){
+    return MATCH_KEYS.reduce((acc,k)=> acc + (matchState[k] ? 1 : 0), 0);
+  }
+
+  function renderTray10(){
+    tray10El.innerHTML = '';
+    for(let i=0;i<10;i++){
+      const slot = document.createElement('div');
+      slot.className = 'slot' + (tray10[i] ? ' filled' : '');
+      slot.textContent = tray10[i] || '';
+      tray10El.appendChild(slot);
+    }
+  }
+
+  // =========================
+  // SCORING
+  // =========================
+  function computeScore(){
+    const acc = attempts <= 0 ? 1 : (correct / attempts);
+    const accScore = clamp(acc, 0, 1) * W_ACC;
+
+    const dropScore = clamp(dropCount / 10, 0, 1) * W_DROP;
+    const matchScore = clamp(matchFilledCount() / 4, 0, 1) * W_MATCH;
+
+    const left = leftoversOnScreen();
+    const pen = clamp(left / 10, 0, 1) * LEFTOVER_PENALTY_MAX;
+
+    const raw = accScore + dropScore + matchScore - pen;
+    const score = clamp(raw, 0, 100);
+
+    return {score, accPct: Math.round(acc*100), left};
+  }
+
+  function isZenith(){
+    const {score} = computeScore();
+    return (score >= 85) && (matchFilledCount() === 4) && (dropCount >= 10);
+  }
+
+  function updateHUD(){
+    const {score, accPct, left} = computeScore();
+
+    scoreOut.textContent = String(Math.round(score));
+    scoreBig.textContent = String(Math.round(score));
+
+    ptsOut.textContent = String(points);
+    ptsHud.textContent = String(points);
+
+    accPctEl.textContent = String(accPct);
+    mistakesEl.textContent = String(wrong);
+
+    matchProgEl.textContent = String(matchFilledCount());
+    dropProgEl.textContent = String(dropCount);
+
+    attemptsEl.textContent = String(attempts);
+    correctEl.textContent = String(correct);
+    wrongEl.textContent = String(wrong);
+    leftoversEl.textContent = String(left);
+
+    const zen = isZenith();
+    zenState.textContent = zen ? "Unlocked" : "Locked";
+    zenLine.style.display = zen ? "" : "none";
+    zenBadgeWrap.innerHTML = zen
+      ? `<span class="pill" style="border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.10);color:var(--good)"><b>◇ ZENITH</b> ${Math.round(score)}/100</span>`
+      : "";
+  }
+
+  // =========================
+  // ATTEMPTS
+  // =========================
+  function registerAttempt(ok){
+    attempts += 1;
+    if(ok) correct += 1;
+    else wrong += 1;
+  }
+
+  // =========================
+  // SPAWN / DRAG / DROP
+  // =========================
+  function shouldSpawnPepper(){
+    if(diff < 3) return false;
+    const p = PEPPER_PROB[String(diff)] ?? 0.0;
+    return Math.random() < p;
+  }
 
   function spawnFruit(){
-    if(!running) return;
+    if(!running || paused || ended) return;
+
+    // Cap fruit so it doesn't pile up
+    const current = leftoversOnScreen();
+    if(current >= fruitCap) return;
 
     const rect = game.getBoundingClientRect();
-    const f = FRUITS[Math.floor(Math.random()*FRUITS.length)];
+
+    let obj;
+    if(shouldSpawnPepper()){
+      obj = PEPPER;
+    }else{
+      obj = FRUITS_5[Math.floor(Math.random()*FRUITS_5.length)];
+    }
 
     const el = document.createElement('div');
-    el.className = 'fruit';
-    el.textContent = f.emoji;
-    el.dataset.kind = f.key;
+    el.className = 'fruit' + (obj.key === 'pepper' ? ' pepper' : '');
+    el.textContent = obj.emoji;
+    el.dataset.kind = obj.key;
 
-    // spawn away from basket region
-    const x = rand(10, rect.width-10);
-    const y = rand(30, rect.height-140);
-
+    // spawn away from trays
+    const x = rand(30, rect.width - 30);
+    const y = rand(50, rect.height - 220);
     el.style.left = x + 'px';
     el.style.top  = y + 'px';
 
-    // Tap-to-collect
+    // Tap handling:
+    // - Normal fruit tap = mistake (forces drag)
+    // - Pepper requires DOUBLE TAP to remove (+1)
+    let lastTap = 0;
     el.addEventListener('click', (ev) => {
       ev.stopPropagation();
-      collectFruit(el, 'tap');
+      unlockSound();
+      const now = Date.now();
+
+      if(el.dataset.kind === 'pepper'){
+        if(now - lastTap < 300){
+          // double tap remove
+          points += PTS_PEPPER_REMOVE;
+          sfx.swipe();
+          setToast(`🌶️ removed (+${PTS_PEPPER_REMOVE} pt).`, 'good');
+          el.remove();
+          updateHUD();
+          lastTap = 0;
+        }else{
+          lastTap = now;
+          setToast(`🌶️ requires DOUBLE TAP to remove.`, 'warn');
+          sfx.bad();
+        }
+        return;
+      }
+
+      // normal fruit tap = mistake
+      registerAttempt(false);
+      setToast('Tap = mistake. Drag to trays for accuracy.', 'warn');
+      sfx.bad();
+      updateHUD();
     });
 
-    // Drag-to-basket (pointer events)
+    // Pointer drag
     let dragging = false;
     let offsetX = 0, offsetY = 0;
 
     el.addEventListener('pointerdown', (ev) => {
+      unlockSound();
       dragging = true;
+      isDraggingFruit = true;
       el.setPointerCapture(ev.pointerId);
       const r = el.getBoundingClientRect();
       offsetX = ev.clientX - r.left;
@@ -448,140 +891,487 @@
       el.style.left = nx + 'px';
       el.style.top  = ny + 'px';
 
-      // basket hot state if overlapping
-      const br = basket.getBoundingClientRect();
       const er = el.getBoundingClientRect();
-      const overlap = !(er.right < br.left || er.left > br.right || er.bottom < br.top || er.top > br.bottom);
-      basket.classList.toggle('hot', overlap);
+
+      // Drop tray highlight
+      const dr = dropTrayEl.getBoundingClientRect();
+      const overDrop = !(er.right < dr.left || er.left > dr.right || er.bottom < dr.top || er.top > dr.bottom);
+      dropTrayEl.classList.toggle('hot', overDrop);
+
+      // Match slot highlights
+      const slots = [...matchSlotsEl.querySelectorAll('.mslot')];
+      slots.forEach(s => {
+        const sr = s.getBoundingClientRect();
+        const over = !(er.right < sr.left || er.left > sr.right || er.bottom < sr.top || er.top > sr.bottom);
+        s.classList.toggle('hot', over);
+      });
     });
 
-    el.addEventListener('pointerup', (ev) => {
+    el.addEventListener('pointerup', () => {
       if(!dragging) return;
       dragging = false;
-      basket.classList.remove('hot');
+      isDraggingFruit = false;
 
-      // if dropped onto basket, collect
-      const br = basket.getBoundingClientRect();
+      dropTrayEl.classList.remove('hot');
+      [...matchSlotsEl.querySelectorAll('.mslot')].forEach(s => s.classList.remove('hot'));
+
       const er = el.getBoundingClientRect();
-      const overlap = !(er.right < br.left || er.left > br.right || er.bottom < br.top || er.top > br.bottom);
-      if(overlap){
-        collectFruit(el, 'drop');
-      }else{
-        // snap back a bit (small easing)
-        el.style.transition = 'transform .08s ease';
+
+      // Match slots first
+      let placed = false;
+      const slots = [...matchSlotsEl.querySelectorAll('.mslot')];
+      for(const s of slots){
+        const sr = s.getBoundingClientRect();
+        const over = !(er.right < sr.left || er.left > sr.right || er.bottom < sr.top || er.top > sr.bottom);
+        if(over){
+          placed = true;
+          const need = s.dataset.need;
+
+          // Pepper cannot be placed
+          if(el.dataset.kind === 'pepper'){
+            registerAttempt(false);
+            sfx.bad();
+            setToast('❌ 🌶️ cannot be placed. Double-tap to remove.', 'bad');
+            updateHUD();
+            return;
+          }
+
+          const ok = (el.dataset.kind === need) && !matchState[need];
+          registerAttempt(ok);
+
+          if(ok){
+            matchState[need] = true;
+            sfx.ok();
+            setToast('✅ Correct match!', 'good');
+            el.remove();
+            renderMatchSlots();
+          }else{
+            sfx.bad();
+            setToast('❌ Wrong match (or already filled). Accuracy down.', 'bad');
+          }
+          break;
+        }
       }
+      if(placed){
+        updateHUD();
+        checkEndConditions();
+        return;
+      }
+
+      // Drop tray
+      const dr = dropTrayEl.getBoundingClientRect();
+      const overDrop = !(er.right < dr.left || er.left > dr.right || er.bottom < dr.top || er.top > dr.bottom);
+      if(overDrop){
+        if(el.dataset.kind === 'pepper'){
+          registerAttempt(false);
+          sfx.bad();
+          setToast('❌ 🌶️ cannot be dropped. Double-tap to remove.', 'bad');
+          updateHUD();
+          return;
+        }
+
+        // Tray full no longer blocks play: it just counts as mistake
+        if(dropCount >= 10){
+          registerAttempt(false);
+          sfx.bad();
+          setToast('❌ Drop tray is full (10/10). Swipe RIGHT to clear (+1).', 'bad');
+          updateHUD();
+          return;
+        }
+
+        // Accept drop
+        registerAttempt(true);
+        dropCount += 1;
+        tray10.push(el.textContent);
+        if(tray10.length > 10) tray10 = tray10.slice(0,10);
+        renderTray10();
+        sfx.ok();
+        setToast('✅ Drop tray +1', 'good');
+        el.remove();
+
+        updateHUD();
+        checkEndConditions();
+        return;
+      }
+
+      // Missed all targets
+      registerAttempt(false);
+      sfx.bad();
+      setToast('❌ Missed trays. Accuracy down.', 'bad');
+      updateHUD();
+      checkEndConditions();
     });
 
     game.appendChild(el);
   }
 
-  // ========= COLLECT =========
-  function collectFruit(el, method){
-    unlockSound(); // first gesture -> unlock audio
-    if(trayFull()){
-      // Easy Mode AI: slow spawns when tray is full to reduce frustration
-      spawnIntervalMs = Math.min(1500, spawnIntervalMs + 150);
-      setSpawnRateLabel();
-      restartSpawner();
+  // =========================
+  // TRAY CLEARING (SWIPES)
+  // =========================
+  function clearMatchTray(){
+    // clear filled states
+    MATCH_KEYS.forEach(k => matchState[k] = false);
+    renderMatchSlots();
+    points += PTS_MATCH_CLEAR;
+    sfx.swipe();
+    setToast(`Match tray cleared (+${PTS_MATCH_CLEAR} pts).`, 'good');
+    updateHUD();
+  }
 
-      setToast('Tray is full (10/10). Clear or reset to collect more.', 'bad');
-      popSound(); // still pop, but no score
-      // little shake
-      el.style.animation = 'shake .18s';
-      setTimeout(()=> el.style.animation = '', 200);
+  function clearDropTray(){
+    dropCount = 0;
+    tray10 = [];
+    renderTray10();
+    points += PTS_DROP_CLEAR;
+    sfx.swipe();
+    setToast(`Drop tray cleared (+${PTS_DROP_CLEAR} pt).`, 'good');
+    updateHUD();
+  }
+
+  function swipeDownRisk(){
+    // Swipe down is an attempt (risk)
+    const bothFull = (matchFilledCount() === 4) && (dropCount >= 10);
+
+    if(!bothFull){
+      registerAttempt(false);
+      sfx.bad();
+      setToast('❌ Swipe DOWN failed: both trays must be full. Accuracy down.', 'bad');
+      updateHUD();
       return;
     }
 
-    tray.push(el.textContent);
-    renderTray();
+    // both full: award points
+    points += PTS_RISK_BONUS;
+    sfx.swipe();
 
-    updateScore(1);
-    popSound();
-
-    // Easy Mode AI: if you’re doing well, nudge speed up slightly
-    if(tray.length <= 6 && spawnIntervalMs > 900){
-      spawnIntervalMs -= 35;
-      setSpawnRateLabel();
-      restartSpawner();
+    // If zenith achieved right now, end session.
+    updateHUD();
+    if(isZenith()){
+      sfx.zen();
+      endSession("zenith");
+      return;
     }
 
-    // feedback
-    const verb = method === 'drop' ? 'Dropped' : 'Tapped';
-    setToast(`${verb} collected: <b>${el.textContent}</b> • Slot <b>${tray.length}</b>/10 • <span style="color:var(--muted)">pop</span>`, 'good');
-
-    el.remove();
+    // Otherwise: it is risky — clears both trays and continues
+    clearMatchTray();
+    clearDropTray();
+    setToast(`✅ Risk bonus (+${PTS_RISK_BONUS} pts) but score < 85 → trays cleared. Keep going.`, 'warn');
+    updateHUD();
   }
 
-  // ========= SPAWNER CONTROL =========
-  function restartSpawner(){
-    if(!running) return;
-    if(spawnTimer) clearInterval(spawnTimer);
-    spawnTimer = setInterval(spawnFruit, spawnIntervalMs);
+  // Swipe detection helpers
+  function attachSwipe(el, {onLeft, onRight, onDown, threshold=45}){
+    let sx=0, sy=0, st=0;
+    el.addEventListener('touchstart', (e) => {
+      if(isDraggingFruit) return;
+      const t = e.changedTouches[0];
+      sx = t.clientX; sy = t.clientY; st = Date.now();
+    }, {passive:true});
+    el.addEventListener('touchend', (e) => {
+      if(isDraggingFruit) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - sx;
+      const dy = t.clientY - sy;
+      const adx = Math.abs(dx), ady = Math.abs(dy);
+      if(adx < threshold && ady < threshold) return;
+
+      // horizontal
+      if(adx > ady){
+        if(dx < -threshold && onLeft) onLeft();
+        if(dx > threshold && onRight) onRight();
+      }else{
+        // vertical
+        if(dy > threshold && onDown) onDown();
+      }
+    }, {passive:true});
   }
 
-  function startGame(){
-    running = true;
-    unlockSound();
-    setToast('Game started. Tap fruit to collect or drag into the basket.', 'good');
-    setSpawnRateLabel();
-    restartSpawner();
-  }
+  // Attach: left swipe on match tray, right swipe on drop tray
+  attachSwipe(matchTrayEl, {onLeft: () => { if(running && !ended && !paused) clearMatchTray(); }});
+  attachSwipe(dropTrayEl,  {onRight: () => { if(running && !ended && !paused) clearDropTray(); }});
 
-  function stopGame(){
-    running = false;
+  // Swipe down anywhere on game (risk)
+  attachSwipe(game, {onDown: () => { if(running && !ended && !paused) swipeDownRisk(); }});
+
+  // Also allow mouse swipes (simple) for desktop testing
+  function attachMouseSwipe(el, {onLeft, onRight, onDown, threshold=70}){
+    let down=false, sx=0, sy=0;
+    el.addEventListener('pointerdown', (e) => {
+      if(e.pointerType === 'touch') return;
+      if(isDraggingFruit) return;
+      down=true; sx=e.clientX; sy=e.clientY;
+    });
+    el.addEventListener('pointerup', (e) => {
+      if(e.pointerType === 'touch') return;
+      if(!down) return;
+      down=false;
+      const dx=e.clientX-sx, dy=e.clientY-sy;
+      const adx=Math.abs(dx), ady=Math.abs(dy);
+      if(adx < threshold && ady < threshold) return;
+      if(adx > ady){
+        if(dx < -threshold && onLeft) onLeft();
+        if(dx > threshold && onRight) onRight();
+      }else{
+        if(dy > threshold && onDown) onDown();
+      }
+    });
+  }
+  attachMouseSwipe(matchTrayEl, {onLeft: () => { if(running && !ended && !paused) clearMatchTray(); }});
+  attachMouseSwipe(dropTrayEl,  {onRight: () => { if(running && !ended && !paused) clearDropTray(); }});
+  attachMouseSwipe(game,        {onDown: () => { if(running && !ended && !paused) swipeDownRisk(); }});
+
+  // =========================
+  // SPAWNER CONTROL
+  // =========================
+  function stopSpawner(){
     if(spawnTimer) clearInterval(spawnTimer);
     spawnTimer = null;
   }
 
-  function clearBoard(){
-    [...game.querySelectorAll('.fruit')].forEach(el => el.remove());
-    basket.classList.remove('hot');
+  function startSpawner(){
+    stopSpawner();
+    spawnTimer = setInterval(spawnFruit, spawnIntervalMs);
   }
 
-  function resetAll(){
-    stopGame();
-    clearBoard();
-    score = 0;
-    tray = [];
-    spawnIntervalMs = 1100;
-    scoreEl.textContent = '0';
-    renderTray();
-    setSpawnRateLabel();
+  // =========================
+  // ABORT (TRIPLE TAP)
+  // =========================
+  function resetAbortTaps(){
+    abortTaps = 0;
+    abortTapsEl.textContent = "0";
+    abortBtn.classList.remove('hot');
+    if(abortTapTimer) clearTimeout(abortTapTimer);
+    abortTapTimer = null;
+  }
+
+  abortBtn.addEventListener('click', () => {
+    unlockSound();
+    if(!running || ended) return;
+    abortTaps += 1;
+    abortTapsEl.textContent = String(abortTaps);
+    abortBtn.classList.add('hot');
+    sfx.bad();
+
+    if(abortTapTimer) clearTimeout(abortTapTimer);
+    abortTapTimer = setTimeout(() => resetAbortTaps(), 1200);
+
+    if(abortTaps >= 3){
+      aborted = true;
+      endSession("abort");
+      resetAbortTaps();
+    }
+  });
+
+  // =========================
+  // EXPORT BLOCK
+  // =========================
+  function buildExportBlock(lastSessions){
+    const lines = [];
+    lines.push("DATA BLOCK — Citrus Picker Dual Tray");
+    lines.push("format: v2");
+    lines.push(`user_id: ${USER_ID}`);
+    lines.push(`generated: ${nowISO()}`);
+    lines.push("");
+
+    lastSessions.forEach((s, i) => {
+      lines.push(`SESSION ${i+1}/${lastSessions.length}`);
+      lines.push(`- started_at: ${s.started_at}`);
+      lines.push(`- ended_at: ${s.ended_at}`);
+      lines.push(`- ended_reason: ${s.ended_reason}`);
+      lines.push(`- difficulty: ${s.difficulty} (spawn_ms=${s.spawn_ms}, cap=${s.cap})`);
+      lines.push(`- score_100: ${s.metrics.score_100}`);
+      lines.push(`- zenith: ${s.metrics.zenith}`);
+      lines.push(`- accuracy_pct: ${s.metrics.accuracy_pct}`);
+      lines.push(`- attempts: ${s.metrics.attempts} (correct=${s.metrics.correct} wrong=${s.metrics.wrong})`);
+      lines.push(`- match_filled: ${s.metrics.match_filled}/4`);
+      lines.push(`- drop_count: ${s.metrics.drop_count}/10`);
+      lines.push(`- leftovers: ${s.metrics.leftovers}`);
+      lines.push(`- points: ${s.metrics.points}`);
+      lines.push("");
+    });
+
+    lines.push("REQUEST");
+    lines.push("Analyze accuracy + mistakes, recommend tuning: spawn_ms, cap, pepper_prob, and zenith threshold if needed.");
+    return lines.join("\n");
+  }
+
+  // =========================
+  // END SESSION (ZENITH / ABORT)
+  // =========================
+  function endSession(reason){
+    ended = true;
+    stopSpawner();
+    paused = false;
+    pauseBtn.textContent = 'Pause';
+
+    const {score, accPct, left} = computeScore();
+    const zen = isZenith();
+
+    const sessions = loadSessions();
+    const record = {
+      app: "citrus_picker_dual_tray",
+      version: "2.0",
+      user_id: USER_ID,
+      session_num: sessions.length + 1,
+      started_at: runStartISO,
+      ended_at: nowISO(),
+      ended_reason: reason,
+      difficulty: diff,
+      spawn_ms: spawnIntervalMs,
+      cap: fruitCap,
+      metrics: {
+        score_100: Math.round(score),
+        zenith: zen,
+        accuracy_pct: accPct,
+        attempts,
+        correct,
+        wrong,
+        match_filled: matchFilledCount(),
+        drop_count: dropCount,
+        leftovers: left,
+        points
+      }
+    };
+    sessions.push(record);
+    saveSessions(sessions);
+
+    // export after 5 sessions (rolling last 5)
+    if(sessions.length >= EXPORT_AFTER){
+      exportBox.textContent = buildExportBlock(sessions.slice(-EXPORT_AFTER));
+      sessNumEl.textContent = String(EXPORT_AFTER);
+    }else{
+      exportBox.textContent = `Complete ${EXPORT_AFTER - sessions.length} more session(s) to unlock export…`;
+      sessNumEl.textContent = String(sessions.length + 1);
+    }
+
+    if(reason === "zenith"){
+      sfx.zen();
+      setToast(`◇ ZENITH achieved! Score ${Math.round(score)}/100 • Accuracy ${accPct}% • Points ${points}`, 'good');
+    }else{
+      setToast(`Aborted. Score ${Math.round(score)}/100 • Accuracy ${accPct}% • Points ${points}`, 'warn');
+    }
+
+    startBtn.textContent = 'Start Next';
+    updateHUD();
+  }
+
+  function checkEndConditions(){
+    if(ended || aborted) return;
+    if(isZenith()){
+      endSession("zenith");
+    }
+  }
+
+  // =========================
+  // RESET / START / PAUSE
+  // =========================
+  function setDifficultyFromUI(){
+    diff = Number(diffSel.value);
+    spawnIntervalMs = DIFF_TO_MS[diff];
+    fruitCap = DIFF_TO_CAP[diff];
+    diffLabel.textContent = String(diff);
+    setSpawnLabel(spawnIntervalMs);
+    capLabel.textContent = String(fruitCap);
+  }
+
+  function clearAllFruits(){
+    [...game.querySelectorAll('.fruit')].forEach(el => el.remove());
+    dropTrayEl.classList.remove('hot');
+    [...matchSlotsEl.querySelectorAll('.mslot')].forEach(s => s.classList.remove('hot'));
+  }
+
+  function resetRunState(){
+    attempts = 0; correct = 0; wrong = 0;
+    dropCount = 0;
+    tray10 = [];
+    MATCH_KEYS.forEach(k => matchState[k] = false);
+
+    points = 0;
+
+    ended = false;
+    aborted = false;
+    running = false;
+    paused = false;
+
+    isDraggingFruit = false;
+
+    resetAbortTaps();
+    clearAllFruits();
+    renderMatchSlots();
+    renderTray10();
+    updateHUD();
+    zenLine.style.display = "none";
+  }
+
+  function startRun(){
+    unlockSound();
+    setDifficultyFromUI();
+
+    if(running && !ended) return;
+
+    resetRunState();
+    runStartISO = nowISO();
+    running = true;
+    ended = false;
+    paused = false;
+
+    startBtn.textContent = 'Running';
+    pauseBtn.textContent = 'Pause';
+
+    const hardNote = (diff >= 3) ? ' Hard mode ON: 🌶️ spawns. Double-tap to remove (+1).' : '';
+    setToast(`Run started. Fill both trays with high accuracy (≥85).${hardNote}`, 'good');
+
+    startSpawner();
+  }
+
+  function togglePause(){
+    if(!running || ended) return;
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+    setToast(paused ? 'Paused.' : 'Resumed.', '');
+  }
+
+  function fullResetAll(){
+    // true reset: stop spawner + clear all fruit + reset counters
+    stopSpawner();
+    resetRunState();
+    startBtn.textContent = 'Start';
+    pauseBtn.textContent = 'Pause';
     setToast('Reset complete. Press Start.', '');
   }
 
-  // ========= EVENTS =========
-  startBtn.addEventListener('click', () => {
-    if(!running) startGame();
-    else { stopGame(); setToast('Paused. Press Start to resume.', ''); }
-    startBtn.textContent = running ? 'Pause' : 'Start';
+  // =========================
+  // EVENTS
+  // =========================
+  startBtn.addEventListener('click', startRun);
+  pauseBtn.addEventListener('click', togglePause);
+  resetBtn.addEventListener('click', fullResetAll);
+
+  diffSel.addEventListener('change', () => {
+    setDifficultyFromUI();
+    updateHUD();
   });
 
-  spawnBtn.addEventListener('click', () => {
-    unlockSound();
-    running = true; // allow manual spawn even if paused
-    spawnFruit();
-    setToast('Spawned a fruit (manual).', '');
-  });
+  document.addEventListener('pointerdown', unlockSound, {passive:true, once:true});
 
-  clearBtn.addEventListener('click', () => {
-    unlockSound();
-    clearBoard();
-    setToast('Cleared fruit from board.', '');
-  });
+  // =========================
+  // INIT
+  // =========================
+  const existing = loadSessions();
+  const count = existing.length;
+  const within = (count % EXPORT_AFTER) + 1;
+  sessNumEl.textContent = String(Math.min(EXPORT_AFTER, within));
 
-  resetBtn.addEventListener('click', () => {
-    unlockSound();
-    resetAll();
-    startBtn.textContent = 'Start';
-  });
+  if(count >= EXPORT_AFTER){
+    exportBox.textContent = buildExportBlock(existing.slice(-EXPORT_AFTER));
+  }else{
+    exportBox.textContent = `Complete ${EXPORT_AFTER - count} more session(s) to unlock export…`;
+  }
 
-  // unlock sound on any first interaction with playfield
-  game.addEventListener('pointerdown', unlockSound, {passive:true});
-
-  // init tray
-  renderTray();
-  setSpawnRateLabel();
+  setDifficultyFromUI();
+  renderMatchSlots();
+  renderTray10();
+  updateHUD();
 })();
 </script>
 
