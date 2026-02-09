@@ -664,7 +664,7 @@ with tabs[2]:
 # ---------------------
 with tabs[3]:
     st.subheader("🛠️ Admin Controls")
-    st.caption("Delete bad tools safely. (Viewing is always available; destructive actions are locked.)")
+    st.caption("VIP bubble menu: delete, recover source, and gate controls.")
 
     if not st.session_state.get("admin_unlocked"):
         st.info("Palm ID required. Tap 🌴 3x in the sidebar, then enter admin code.")
@@ -672,27 +672,61 @@ with tabs[3]:
         st.success("Admin unlocked.")
         tools = list_tools()
 
-        st.markdown("### 🧹 Cleanup")
-        if not tools:
-            st.info("No tools to manage yet.")
-        else:
-            pick = st.selectbox("Select a tool to delete", options=["(choose)"] + tools)
-            if pick != "(choose)":
-                st.warning("Deleting removes the .html file from teacher_tools/. Your repo backup is your safety net.")
-                colA, colB = st.columns(2)
-                with colA:
-                    if st.button("✖ Delete Selected", type="primary", use_container_width=True):
-                        delete_tool(pick)
-                        st.success(f"Deleted: {pick}")
-                        st.rerun()
-                with colB:
-                    if st.button("Reset Palm Gate", use_container_width=True):
-                        st.session_state["palm_taps"] = 0
-                        st.session_state["show_admin_box"] = False
-                        st.session_state["admin_unlocked"] = False
-                        st.session_state["admin_code_try"] = ""
-                        st.success("Palm gate reset.")
-                        st.rerun()
+        # Bubble 1: Source Recovery (read-only)
+        with st.expander("📜 Source Recovery (Read-only)", expanded=True):
+            if not tools:
+                st.info("No tools yet.")
+            else:
+                pick_src = st.selectbox(
+                    "Select a tool to view source",
+                    options=["(choose)"] + tools,
+                    key="src_pick",
+                )
+                if pick_src != "(choose)":
+                    src = load_tool(pick_src)
+                    st.caption("This is the exact saved HTML. Read-only display + optional download.")
+                    st.download_button(
+                        "⬇️ Download HTML Backup",
+                        data=src.encode("utf-8"),
+                        file_name=f"{pick_src}.html",
+                        mime="text/html",
+                        use_container_width=True,
+                    )
+                    st.text_area("HTML Source (copy/paste)", value=src, height=320)
+
+        # Bubble 2: Cleanup (Delete)
+        with st.expander("🧹 Cleanup (Delete tool)", expanded=False):
+            if not tools:
+                st.info("No tools to manage yet.")
+            else:
+                pick = st.selectbox(
+                    "Select a tool to delete",
+                    options=["(choose)"] + tools,
+                    key="del_pick",
+                )
+                if pick != "(choose)":
+                    st.warning("Deleting removes the .html file from teacher_tools/. Repo backup = safety net.")
+                    colA, colB = st.columns(2)
+                    with colA:
+                        if st.button("✖ Delete Selected", type="primary", use_container_width=True):
+                            delete_tool(pick)
+                            st.success(f"Deleted: {pick}")
+                            st.rerun()
+                    with colB:
+                        if st.button("Cancel", use_container_width=True):
+                            st.session_state["del_pick"] = "(choose)"
+                            st.rerun()
+
+        # Bubble 3: Gate Controls
+        with st.expander("🔐 Gate Controls", expanded=False):
+            st.caption("Use if you want to lock admin back down.")
+            if st.button("Reset Palm Gate (Lock Admin)", use_container_width=True):
+                st.session_state["palm_taps"] = 0
+                st.session_state["show_admin_box"] = False
+                st.session_state["admin_unlocked"] = False
+                st.session_state["admin_code_try"] = ""
+                st.success("Palm gate reset.")
+                st.rerun()
 
 # Bottom padding so ticker doesn't cover content
 st.markdown("<div style='height:70px'></div>", unsafe_allow_html=True)
