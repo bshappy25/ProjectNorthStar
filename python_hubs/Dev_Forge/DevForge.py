@@ -1,105 +1,6 @@
 from __future__ import annotations
-
 from datetime import date
-# pages/home.py  (drop-in replacement for main content area)
-
 import streamlit as st
-
-# Assume T (theme dict) and other shared vars are accessible via session_state or import
-# For standalone testing, you can re-define minimal T here if needed
-
-st.markdown(
-    """
-    <div style="text-align: center; padding: 80px 20px 60px; background: linear-gradient(135deg, var(--bg), rgba(20,184,166,0.08)); border-radius: 0 0 32px 32px; margin: -20px -40px 40px;">
-        <h1 style="font-size: 4.2rem; margin: 0; letter-spacing: -0.02em; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            🔧 DevForge
-        </h1>
-        <p class="kicker" style="font-size: 1.5rem; margin: 16px 0 32px; opacity: 0.95;">
-            Your Personal Streamlit Forge — Build Faster, Smarter, Beautifully
-        </p>
-        <div style="animation: pulse 4s infinite ease-in-out;">
-            <span class="badge badge-accent" style="font-size: 1.1rem; padding: 10px 24px;">We are L.E.A.D.</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# Add subtle load animation to CSS if not already present (extend your <style> block in entry file)
-st.markdown(
-    """
-    <style>
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-    .animate-fade { animation: fadeInUp 1.2s ease-out forwards; }
-    .glow-hover:hover { box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.4); transition: box-shadow 0.4s; }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Feature showcase — staggered cards with animation delay
-cols = st.columns([1, 1.2, 1])
-with cols[0]:
-    st.markdown(
-        f"""
-        <div class='dev-card glow-hover animate-fade' style='animation-delay: 0.2s;'>
-            <h3>🔬 Science Forge</h3>
-            <p>NGSS + New Visions lessons • 5E builder • SCI-BLOCK exports</p>
-            <span class='badge badge-accent'>Core Production</span>
-        </div>
-        """, unsafe_allow_html=True
-    )
-
-with cols[1]:
-    st.markdown(
-        f"""
-        <div class='dev-card glow-hover animate-fade' style='animation-delay: 0.5s; transform: translateY(-12px);'>
-            <h3>📚 Code Arsenal</h3>
-            <p>Glassy components • Export patterns • Session mastery</p>
-            <span class='badge badge-accent'>Canonical Snippets</span>
-        </div>
-        """, unsafe_allow_html=True
-    )
-
-with cols[2]:
-    st.markdown(
-        f"""
-        <div class='dev-card glow-hover animate-fade' style='animation-delay: 0.8s;'>
-            <h3>⚡ ABC Engine</h3>
-            <p>Architecture • Build • Code • Style decisions — instant starters</p>
-            <span class='badge badge-accent'>Decision Accelerator</span>
-        </div>
-        """, unsafe_allow_html=True
-    )
-
-st.markdown("<div class='hr' style='margin: 60px 0;'></div>", unsafe_allow_html=True)
-
-# Enhanced CTA with pulse + gradient
-st.markdown(
-    f"""
-    <div class='dev-card' style='text-align:center; background: linear-gradient(135deg, rgba(20,184,166,0.18), rgba(47,91,234,0.14)); animation: pulse 6s infinite;'>
-        <h3 style='font-size: 2.4rem; margin-bottom: 16px;'>Ready to Forge?</h3>
-        <p style='font-size: 1.2rem; margin: 0 0 24px;'>Launch from sidebar — prototype safely in sandboxes — scale to production.</p>
-        <div>
-            <span class='badge badge-accent'>NGSS Power</span>
-            <span class='badge badge-accent2'>UI Mastery</span>
-            <span class='badge badge-accent'>Architecture Clarity</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# Retain your quick reference expanders and current state preview below, perhaps in columns for better flow
-
-# ============================================================
-# CONFIG & CONSTANTS
-# ============================================================
-
-APP_TITLE = "DevForge - Developer Hub"
-APP_ICON = "🔧"
-ADMIN_CODE = "Bshapp"  # PALM ID admin gate code
 
 # ============================================================
 # SESSION STATE INITIALIZATION
@@ -109,12 +10,15 @@ def ss_init(key: str, default):
     if key not in st.session_state:
         st.session_state[key] = default
 
-ss_init("dev_theme", "science")    # science | neutral | pink
-ss_init("signature", "")
-ss_init("notes", "")
+ss_init("dev_theme", "science")   # science | neutral | pink
+ss_init("signature", "")          # developer name / signature
+ss_init("notes", "")              # quick scratch notes
 ss_init("palm_taps", 0)
 ss_init("show_admin_box", False)
 ss_init("admin_unlocked", False)
+ss_init("custom_css", "")         # For CSS Editor: stores user-edited CSS overrides
+
+ADMIN_CODE = "Bshapp"  # PALM ID admin gate code
 
 # ============================================================
 # THEME DEFINITIONS
@@ -145,8 +49,8 @@ def get_theme_dict(theme_key: str) -> dict:
 # ============================================================
 
 st.set_page_config(
-    page_title=APP_TITLE,
-    page_icon=APP_ICON,
+    page_title="DevForge - Developer Hub",
+    page_icon="🔧",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -154,11 +58,10 @@ st.set_page_config(
 T = get_theme_dict(st.session_state["dev_theme"])
 
 # ============================================================
-# CUSTOM CSS (Glassmorphism + Ticker)
+# CUSTOM CSS (Base + User Overrides from CSS Editor)
 # ============================================================
 
-st.markdown(
-    f"""
+base_css = f"""
 <style>
 :root {{
   --bg: {T["BG"]};
@@ -168,6 +71,7 @@ st.markdown(
   --muted: {T["MUTED"]};
   --accent: {T["ACCENT"]};
   --accent2: {T["ACCENT2"]};
+  --accent-rgb: 20,184,166;  /* For glow effects; adjust per theme if needed */
 }}
 div[data-testid="stAppViewContainer"] {{ background-color: var(--bg) !important; }}
 .block-container {{ padding-top: 1.15rem; padding-bottom: 4.5rem; }}
@@ -200,15 +104,22 @@ button[kind="primary"] {{ border: 2px solid var(--accent) !important; font-weigh
 .kicker {{ font-size: 0.95rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.9; }}
 .callout {{ border-left: 4px solid var(--accent); padding: 10px 14px; margin: 10px 0;
   background: rgba(0,0,0,0.06); border-radius: 10px; }}
+/* Animation Keyframes for Wow Factor */
+@keyframes fadeInUp {{ from {{ opacity: 0; transform: translateY(20px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+@keyframes pulse {{ 0%, 100% {{ transform: scale(1); }} 50% {{ transform: scale(1.05); }} }}
+.animate-fade {{ animation: fadeInUp 1.2s ease-out forwards; }}
+.glow-hover:hover {{ box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.4); transition: box-shadow 0.4s; }}
 </style>
-""",
-    unsafe_allow_html=True,
-)
+"""
+
+# Append user-custom CSS from session state (from CSS Editor)
+custom_css = st.session_state.get("custom_css", "")
+st.markdown(base_css + custom_css, unsafe_allow_html=True)
 
 st.markdown("<div class='ticker'>DEVFORGE • Developer Productivity Hub • We are L.E.A.D. 🔧</div>", unsafe_allow_html=True)
 
 # ============================================================
-# PALM ID ADMIN GATE
+# SIDEBAR (PALM ID, Theme, Notes, Admin Tools)
 # ============================================================
 
 with st.sidebar:
@@ -216,30 +127,30 @@ with st.sidebar:
     st.caption("Developer Productivity Hub")
     st.divider()
 
-    # PALM ID trigger
-    left, right = st.columns([0.86, 0.14], vertical_alignment="center")
+    # PALM ID Gate
+    left, right = st.columns([0.86, 0.14])
     with left:
         st.markdown("#### PALM ID")
         st.caption("Tap the palm 3× to open admin gate.")
     with right:
-        if st.button("🤚", help="Palm ID (tap 3x)", key="palm_btn"):
+        if st.button("🤚", help="Palm ID (tap 3x)"):
             st.session_state["palm_taps"] += 1
             if st.session_state["palm_taps"] >= 3:
                 st.session_state["show_admin_box"] = True
 
     if st.session_state["show_admin_box"] and not st.session_state["admin_unlocked"]:
         st.markdown("**Palm ID:** enter admin code")
-        code_try = st.text_input("Admin Code", type="password", placeholder="Enter code...", key="admin_code_try")
+        code_try = st.text_input("Admin Code", type="password", placeholder="Enter code...")
         cA, cB = st.columns([0.6, 0.4])
         with cA:
-            if st.button("Unlock", key="unlock_btn", use_container_width=True):
+            if st.button("Unlock", use_container_width=True):
                 if code_try == ADMIN_CODE:
                     st.session_state["admin_unlocked"] = True
                     st.success("Admin override unlocked.")
                 else:
                     st.error("Incorrect code.")
         with cB:
-            if st.button("Reset", key="reset_palm_btn", use_container_width=True):
+            if st.button("Reset", use_container_width=True):
                 st.session_state["palm_taps"] = 0
                 st.session_state["show_admin_box"] = False
 
@@ -248,32 +159,28 @@ with st.sidebar:
 
     st.divider()
 
-    # Theme selector (Pink only visible when unlocked)
+    # Theme Toggle
     theme_options = ["Science", "Neutral"]
     if st.session_state["admin_unlocked"]:
         theme_options.append("Pink")
-
-    current = st.session_state.get("dev_theme", "science")
+    current = st.session_state["dev_theme"]
     idx = {"science": 0, "neutral": 1, "pink": 2}.get(current, 0)
-
-    theme_choice = st.radio("Dev Theme", theme_options, index=idx, horizontal=True, key="theme_radio")
+    theme_choice = st.radio("Dev Theme", theme_options, index=idx, horizontal=True)
     choice_map = {"Science": "science", "Neutral": "neutral", "Pink": "pink"}
-    selected = choice_map[theme_choice]
-    if selected != st.session_state["dev_theme"]:
-        st.session_state["dev_theme"] = selected
+    if choice_map[theme_choice] != current:
+        st.session_state["dev_theme"] = choice_map[theme_choice]
         st.rerun()
 
     st.divider()
 
-    # Quick session info
+    # Session Info
     st.subheader("📊 Session Info")
     st.write(f"**Date:** {date.today().isoformat()}")
-    sig = st.session_state.get("signature", "")
-    st.write(f"**Dev:** {sig or 'Not set'}")
+    st.write(f"**Dev:** {st.session_state.get('signature', 'Not set')}")
 
     st.divider()
 
-    # Scratch notes
+    # Scratch Notes
     st.subheader("📝 Scratch Notes")
     st.session_state["notes"] = st.text_area(
         "Notes", value=st.session_state["notes"], height=110,
@@ -282,18 +189,15 @@ with st.sidebar:
 
     st.divider()
 
-    # Admin tools (only when unlocked)
+    # Admin Tools
     if st.session_state["admin_unlocked"]:
         st.subheader("🧰 Admin Tools")
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("Reset Theme", use_container_width=True):
-                st.session_state["dev_theme"] = "science"
-                st.rerun()
-        with c2:
-            if st.button("Clear Notes", use_container_width=True):
-                st.session_state["notes"] = ""
-                st.rerun()
+        if st.button("Reset Theme to Science", use_container_width=True):
+            st.session_state["dev_theme"] = "science"
+            st.rerun()
+        if st.button("Clear Scratch Notes", use_container_width=True):
+            st.session_state["notes"] = ""
+            st.rerun()
         if st.button("Lock Admin Gate", use_container_width=True):
             st.session_state["admin_unlocked"] = False
             st.session_state["palm_taps"] = 0
@@ -301,15 +205,15 @@ with st.sidebar:
             st.rerun()
 
 # ============================================================
-# DYNAMIC NAVIGATION (core improvement)
+# DYNAMIC NAVIGATION
 # ============================================================
 
-home = st.Page(__file__, title="DevForge Home", icon="🔧", default=True)  # self-reference for home
+home_page = st.Page("pages/home.py", title="DevForge Home", icon="🔧", default=True)
 
 core_pages = [
     st.Page("pages/Ms_Piluso_Science.py", title="Ms. Piluso Science", icon="🔬"),
-    st.Page("pages/Code_Library.py",      title="Code Library",      icon="📚"),
-    st.Page("pages/ABC_Generator.py",     title="ABC Generator",     icon="⚡"),
+    st.Page("pages/Code_Library.py", title="Code Library", icon="📚"),
+    st.Page("pages/ABC_Generator.py", title="ABC Generator", icon="⚡"),
 ]
 
 sandbox_pages = [
@@ -317,20 +221,19 @@ sandbox_pages = [
     st.Page("pages/my_app2.py", title="Sandbox 2", icon="🧪"),
 ]
 
-admin_pages = []
-if st.session_state.get("admin_unlocked", False):
-    admin_pages = [
-        st.Page("pages/Teacher_Tools.py", title="Teacher Tools (Extended)", icon="🧰"),
-        # Add future admin-only pages here — no core file edits required
-    ]
+admin_pages = [
+    st.Page("pages/Teacher_Tools.py", title="Teacher Tools", icon="🧰"),
+    st.Page("pages/CSS_Editor.py", title="CSS Editor", icon="🎨"),
+]
 
 sections = {
-    "Home": [home],
+    "Home": [home_page],
     "Core Tools": core_pages,
     "Sandboxes": sandbox_pages,
 }
-if admin_pages:
+
+if st.session_state.get("admin_unlocked", False):
     sections["Admin Extras"] = admin_pages
 
-pg = st.navigation(sections, position="sidebar")
+pg = st.navigation(sections)
 pg.run()
