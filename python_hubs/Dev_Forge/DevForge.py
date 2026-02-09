@@ -1,6 +1,7 @@
 from __future__ import annotations
 from datetime import date
 import streamlit as st
+from pathlib import Path
 
 # ============================================================
 # SESSION STATE INITIALIZATION
@@ -112,14 +113,53 @@ button[kind="primary"] {{ border: 2px solid var(--accent) !important; font-weigh
 </style>
 """
 
-# Append user-custom CSS from session state (from CSS Editor)
 custom_css = st.session_state.get("custom_css", "")
 st.markdown(base_css + custom_css, unsafe_allow_html=True)
 
 st.markdown("<div class='ticker'>DEVFORGE • Developer Productivity Hub • We are L.E.A.D. 🔧</div>", unsafe_allow_html=True)
 
 # ============================================================
-# SIDEBAR (PALM ID, Theme, Notes, Admin Tools)
+# DYNAMIC NAVIGATION (moved early so menu renders at top of sidebar)
+# ============================================================
+
+APP_DIR = Path(__file__).resolve().parent
+PAGES_DIR = APP_DIR / "pages"
+
+def P(name: str) -> str:
+    return str(PAGES_DIR / name)
+
+home_page = st.Page(P("home.py"), title="DevForge Home", icon="🔧", default=True)
+
+core_pages = [
+    st.Page(P("Ms_Piluso_Science.py"), title="Ms. Piluso Science", icon="🔬"),
+    st.Page(P("Code_Library.py"), title="Code Library", icon="📚"),
+    st.Page(P("ABC_Generator.py"), title="ABC Generator", icon="⚡"),
+]
+
+sandbox_pages = [
+    st.Page(P("my_app1.py"), title="Sandbox 1", icon="🧪"),
+    st.Page(P("my_app2.py"), title="Sandbox 2", icon="🧪"),
+]
+
+admin_pages = []
+if st.session_state.get("admin_unlocked", False):
+    admin_pages = [
+        st.Page(P("Teacher_Tools.py"), title="Teacher Tools", icon="🧰"),
+        st.Page(P("CSS_Editor.py"), title="CSS Editor", icon="🎨"),
+    ]
+
+sections = {
+    "Home": [home_page],
+    "Core Tools": core_pages,
+    "Sandboxes": sandbox_pages,
+}
+if admin_pages:
+    sections["Admin Extras"] = admin_pages
+
+pg = st.navigation(sections, position="sidebar", expanded=True)
+
+# ============================================================
+# SIDEBAR CUSTOM CONTENT (now after navigation, so it appears below menu)
 # ============================================================
 
 with st.sidebar:
@@ -204,32 +244,14 @@ with st.sidebar:
             st.session_state["show_admin_box"] = False
             st.rerun()
 
+    # Optional debug (uncomment temporarily to verify pages are registered)
+    # st.divider()
+    # st.caption("Debug: Registered sections")
+    # for sec, pgs in sections.items():
+    #     st.caption(f"{sec}: {len(pgs)} pages")
+
 # ============================================================
-# DYNAMIC NAVIGATION
+# RUN THE SELECTED PAGE
 # ============================================================
 
-from pathlib import Path
-
-APP_DIR = Path(__file__).resolve().parent
-PAGES_DIR = APP_DIR / "pages"
-
-def P(name: str) -> str:
-    return str(PAGES_DIR / name)
-
-home_page = st.Page(P("home.py"), title="DevForge Home", icon="🔧", default=True)
-
-core_pages = [
-    st.Page(P("Ms_Piluso_Science.py"), title="Ms. Piluso Science", icon="🔬"),
-    st.Page(P("Code_Library.py"), title="Code Library", icon="📚"),
-    st.Page(P("ABC_Generator.py"), title="ABC Generator", icon="⚡"),
-]
-
-sandbox_pages = [
-    st.Page(P("my_app1.py"), title="Sandbox 1", icon="🧪"),
-    st.Page(P("my_app2.py"), title="Sandbox 2", icon="🧪"),
-]
-
-admin_pages = [
-    st.Page(P("Teacher_Tools.py"), title="Teacher Tools", icon="🧰"),
-    st.Page(P("CSS_Editor.py"), title="CSS Editor", icon="🎨"),
-]
+pg.run()
