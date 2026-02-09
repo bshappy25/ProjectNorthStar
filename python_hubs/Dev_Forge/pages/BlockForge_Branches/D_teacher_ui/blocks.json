@@ -1,0 +1,13 @@
+{
+  "version": "D_teacher_ui",
+  "blocks": [
+    {
+      "id": "df_header_card",
+      "title": "Header Card",
+      "category": "UI",
+      "tags": ["header", "card", "devforge"],
+      "description": "Simple title + caption header card.",
+      "code": "st.title(\"🧱 Tool\")\nst.caption(\"Short description here\")\n"
+    }
+  ]
+}
