@@ -1,10 +1,12 @@
+```python
 # ngss_ms_research_vault_app.py
 # ============================================================
-# NGSS MS Research Vault (App 2)
-# - SQLite-backed standards database browser
-# - Search (FTS if available) + tag filters
-# - Export selected rows to CSV/JSON
-# - Universal Gray signature theme + "tool-only refresh"
+# NGSS MS Research Vault (DEMO SANDBOX)
+# - SQLite-backed mini database (AUTO-SEEDS 2 standards if empty)
+# - Standards: MS-ESS1-1 + MS-LS1-1
+# - Includes demo "activity variables" (5E ideas + materials + accom)
+# - Search + Export (JSON/CSV)
+# - Universal Gray signature theme + tool-only refresh
 # ============================================================
 
 from __future__ import annotations
@@ -14,6 +16,7 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
+from pathlib import Path
 import streamlit as st
 
 
@@ -99,7 +102,7 @@ def apply_signature_theme(
 
 
 # -----------------------------
-# 1) DB: condensed schema (from your v1)
+# 1) DB: schema (adds demo_activities)
 # -----------------------------
 SCHEMA_SQL = """
 PRAGMA foreign_keys = ON;
@@ -115,9 +118,7 @@ CREATE TABLE IF NOT EXISTS standards (
   clarification_statement TEXT,
   assessment_boundary TEXT,
   connections TEXT,
-  source_doc TEXT,
-  source_page_start INTEGER,
-  source_page_end INTEGER
+  source_url TEXT
 );
 
 CREATE TABLE IF NOT EXISTS tags (
@@ -138,10 +139,26 @@ CREATE TABLE IF NOT EXISTS standard_tags (
   FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
+-- Demo activities (variables) for sandbox use
+CREATE TABLE IF NOT EXISTS demo_activities (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  standard_id INTEGER NOT NULL,
+  phase TEXT NOT NULL,                 -- Engage/Explore/Explain/Elaborate/Evaluate
+  activity_title TEXT NOT NULL,
+  activity_text TEXT NOT NULL,
+  materials TEXT,
+  accommodations TEXT,
+  sentence_starters TEXT,
+  links TEXT,
+  FOREIGN KEY (standard_id) REFERENCES standards(id) ON DELETE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS idx_standards_pe ON standards(pe_code);
 CREATE INDEX IF NOT EXISTS idx_tags_type_label ON tags(tag_type, label);
 CREATE INDEX IF NOT EXISTS idx_join_tag ON standard_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_join_std ON standard_tags(standard_id);
+CREATE INDEX IF NOT EXISTS idx_demo_std ON demo_activities(standard_id);
+CREATE INDEX IF NOT EXISTS idx_demo_phase ON demo_activities(phase);
 
 -- Optional FTS (if FTS5 exists)
 CREATE VIRTUAL TABLE IF NOT EXISTS standards_fts
@@ -194,6 +211,237 @@ def db_has_data(con: sqlite3.Connection) -> bool:
     return int(cur.fetchone()["n"]) > 0
 
 
+def _upsert_tag(con: sqlite3.Connection, tag_type: str, code: str | None, label: str) -> int:
+    con.execute(
+        "INSERT OR IGNORE INTO tags(tag_type, code, label) VALUES (?,?,?)",
+        (tag_type, code, label),
+    )
+    r = con.execute("SELECT id FROM tags WHERE tag_type=? AND label=?", (tag_type, label)).fetchone()
+    return int(r["id"])
+
+
+def _attach_tag(con: sqlite3.Connection, pe_code: str, tag_id: int, excerpt: str | None = None) -> None:
+    sid_row = con.execute("SELECT id FROM standards WHERE pe_code=?", (pe_code,)).fetchone()
+    if not sid_row:
+        return
+    con.execute(
+        "INSERT OR IGNORE INTO standard_tags(standard_id, tag_id, excerpt) VALUES (?,?,?)",
+        (int(sid_row["id"]), int(tag_id), excerpt),
+    )
+
+
+def _insert_demo_activity(
+    con: sqlite3.Connection,
+    pe_code: str,
+    phase: str,
+    title: str,
+    text: str,
+    materials: str = "",
+    accommodations: str = "",
+    sentence_starters: str = "",
+    links: str = "",
+) -> None:
+    sid_row = con.execute("SELECT id FROM standards WHERE pe_code=?", (pe_code,)).fetchone()
+    if not sid_row:
+        return
+    con.execute(
+        """
+        INSERT INTO demo_activities(standard_id, phase, activity_title, activity_text, materials, accommodations, sentence_starters, links)
+        VALUES (?,?,?,?,?,?,?,?)
+        """,
+        (int(sid_row["id"]), phase, title, text, materials, accommodations, sentence_starters, links),
+    )
+
+
+def db_seed_demo_if_empty(con: sqlite3.Connection) -> bool:
+    """
+    Seeds 2 standards + demo activities (5E) if DB is empty.
+    Returns True if seeded.
+    """
+    if db_has_data(con):
+        return False
+
+    # --- Standards (from NGSS pages)
+    # MS-LS1-1 PE statement + clarification (no assessment boundary shown on page)
+    con.execute(
+        """
+        INSERT INTO standards(pe_code, grade_band, topic_area, domain_code, domain_title,
+                              pe_statement, clarification_statement, assessment_boundary, connections, source_url)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            "MS-LS1-1",
+            "MS",
+            "Life Science",
+            "MS-LS1",
+            "From Molecules to Organisms: Structures and Processes",
+            "Conduct an investigation to provide evidence that living things are made of cells; either one cell or many different numbers and types of cells.",
+            "Emphasis is on developing evidence that living things are made of cells, distinguishing between living and non-living things, and understanding that living things may be made of one cell or many and varied cells.",
+            None,
+            "Connections to engineering/technology and CCSS are available on the NGSS page.",
+            "https://www.nextgenscience.org/pe/ms-ls1-1-molecules-organisms-structures-and-processes",
+        ),
+    )
+
+    # MS-ESS1-1 PE statement + clarification (no assessment boundary shown on page)
+    con.execute(
+        """
+        INSERT INTO standards(pe_code, grade_band, topic_area, domain_code, domain_title,
+                              pe_statement, clarification_statement, assessment_boundary, connections, source_url)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            "MS-ESS1-1",
+            "MS",
+            "Earth & Space Science",
+            "MS-ESS1",
+            "Earth's Place in the Universe",
+            "Develop and use a model of the Earth-sun-moon system to describe the cyclic patterns of lunar phases, eclipses of the sun and moon, and seasons.",
+            "Examples of models can be physical, graphical, or conceptual.",
+            None,
+            "Connections to other DCIs and CCSS are available on the NGSS page.",
+            "https://www.nextgenscience.org/pe/ms-ess1-1-earths-place-universe",
+        ),
+    )
+
+    # --- Minimal tags (nice for demo filtering)
+    # SEP
+    sep_models = _upsert_tag(con, "SEP", "SEP-MODEL", "Developing and Using Models")
+    sep_invest = _upsert_tag(con, "SEP", "SEP-INV", "Planning and Carrying Out Investigations")
+    # CCC
+    ccc_patterns = _upsert_tag(con, "CCC", "CCC-PAT", "Patterns")
+    ccc_scale = _upsert_tag(con, "CCC", "CCC-SCALE", "Scale, Proportion, and Quantity")
+    # DCI (broad)
+    dci_ls1a = _upsert_tag(con, "DCI", "LS1.A", "LS1.A: Structure and Function")
+    dci_ess1b = _upsert_tag(con, "DCI", "ESS1.B", "ESS1.B: Earth and the Solar System")
+
+    _attach_tag(con, "MS-LS1-1", sep_invest)
+    _attach_tag(con, "MS-LS1-1", ccc_scale)
+    _attach_tag(con, "MS-LS1-1", dci_ls1a)
+
+    _attach_tag(con, "MS-ESS1-1", sep_models)
+    _attach_tag(con, "MS-ESS1-1", ccc_patterns)
+    _attach_tag(con, "MS-ESS1-1", dci_ess1b)
+
+    # --- Demo activities (variables) — lightweight, editable in-app
+    # MS-LS1-1
+    _insert_demo_activity(
+        con,
+        "MS-LS1-1",
+        "Engage",
+        "Living vs Nonliving: Evidence Wall",
+        "Show 6 images (e.g., plant, rock, mushroom, flame, bacteria, robot). Students sort: living / nonliving and write ONE piece of evidence for each choice. Class builds an “evidence wall.”",
+        materials="Image set (slides/print), sticky notes, marker, optional magnifiers.",
+        accommodations="Provide 2-choice cards (living/nonliving). Allow oral responses. Use sentence starters.",
+        sentence_starters="I think it is living because ____. / My evidence is ____. / I noticed ____.",
+        links="",
+    )
+    _insert_demo_activity(
+        con,
+        "MS-LS1-1",
+        "Explore",
+        "Microscope / Model Cell Hunt",
+        "Stations: (A) microscope slides (onion, cheek, pond water) OR photos; (B) LEGO/bead ‘cell’ models. Students collect 3 observations per station to support the claim that living things are made of cells.",
+        materials="Slides/images, microscopes or photo cards, station sheets.",
+        accommodations="Pre-labeled diagrams, paired reading, reduced station count (2).",
+        sentence_starters="At station __ I observed ____. / This supports the claim because ____.",
+        links="",
+    )
+    _insert_demo_activity(
+        con,
+        "MS-LS1-1",
+        "Explain",
+        "CER Mini-Write: Cells are the Unit of Life",
+        "Students write a short CER: Claim = living things are made of cells; Evidence = station data; Reasoning = connect evidence to the definition of cell as smallest unit of life.",
+        materials="CER template, exemplar, word bank (cell, organism, unicellular, multicellular).",
+        accommodations="Fill-in-the-blank CER, speech-to-text, allow bullet points.",
+        sentence_starters="Claim: ____. Evidence: ____. Reasoning: ____.",
+        links="",
+    )
+    _insert_demo_activity(
+        con,
+        "MS-LS1-1",
+        "Elaborate",
+        "Unicellular vs Multicellular Case Cards",
+        "Give organism cards (amoeba, yeast, human, oak tree). Students categorize and explain how cell number/type supports the category. Extend: why specialization matters.",
+        materials="Case cards, T-chart, optional short readings.",
+        accommodations="Color-coded cards, fewer cases, partner talk.",
+        sentence_starters="____ is (uni/multi)cellular because ____. / One advantage is ____.",
+        links="",
+    )
+    _insert_demo_activity(
+        con,
+        "MS-LS1-1",
+        "Evaluate",
+        "Exit Ticket: Evidence Snapshot",
+        "Prompt: “Write one piece of evidence that something is made of cells and one question you still have.” Optional: quick 4-question check.",
+        materials="Exit ticket slips or Google Form.",
+        accommodations="Multiple choice option, allow drawing + label.",
+        sentence_starters="My evidence is ____. / I still wonder ____.",
+        links="",
+    )
+
+    # MS-ESS1-1
+    _insert_demo_activity(
+        con,
+        "MS-ESS1-1",
+        "Engage",
+        "Moon Mystery: What’s Changing?",
+        "Show a 10–15 sec montage of moon photos across a month. Students predict: what changes, what stays the same, and what could cause the pattern.",
+        materials="Moon photo set, projector.",
+        accommodations="Provide 3-word choices: shape/position/brightness. Allow pointing.",
+        sentence_starters="I notice ____. / The pattern might be caused by ____.",
+        links="",
+    )
+    _insert_demo_activity(
+        con,
+        "MS-ESS1-1",
+        "Explore",
+        "Lamp + Ball Model Lab",
+        "Groups model Sun (lamp), Earth (ball), Moon (ping pong). Students generate the sequence of phases and capture 4 ‘data’ sketches (positions) to explain phases and eclipses.",
+        materials="Lamp, balls, ping-pong, darkened room, lab sheet.",
+        accommodations="Provide labeled diagram frames. Assign roles (holder/recorder).",
+        sentence_starters="When the Moon is here, we see ____. / This happens because ____.",
+        links="",
+    )
+    _insert_demo_activity(
+        con,
+        "MS-ESS1-1",
+        "Explain",
+        "Model-to-Claim: Phases, Eclipses, Seasons",
+        "Students use their model data to write 3 claims: (1) phases pattern, (2) eclipse condition, (3) seasons cause (tilt + sunlight intensity), each with a diagram.",
+        materials="Claim/diagram template, vocab bank (orbit, rotation, tilt, axis).",
+        accommodations="Provide sentence frames and diagram stickers/arrows.",
+        sentence_starters="My claim is ____. / My model shows ____. / Therefore ____.",
+        links="",
+    )
+    _insert_demo_activity(
+        con,
+        "MS-ESS1-1",
+        "Elaborate",
+        "Predict the Sky: Calendar Challenge",
+        "Given a date and a ‘new moon’ reference, students predict approximate phase and justify using cycle length. Extend: connect to tides or cultural calendars.",
+        materials="Calendar, reference phase chart.",
+        accommodations="Use phase wheel, allow approximate answers.",
+        sentence_starters="I predict ____ because ____. / The cycle repeats about every ____ days.",
+        links="",
+    )
+    _insert_demo_activity(
+        con,
+        "MS-ESS1-1",
+        "Evaluate",
+        "Two-Tier Check",
+        "Tier 1: choose the correct phase/eclipses diagram. Tier 2: explain why the chosen model matches the phenomenon.",
+        materials="2-tier quiz (paper/form).",
+        accommodations="Read-aloud, reduced items, picture choices.",
+        sentence_starters="I chose __ because in the diagram ____.",
+        links="",
+    )
+
+    con.commit()
+    return True
+
+
 def list_tags(con: sqlite3.Connection, tag_type: str) -> List[Tuple[int, str]]:
     cur = con.execute(
         "SELECT id, label FROM tags WHERE tag_type=? ORDER BY label COLLATE NOCASE;",
@@ -216,15 +464,12 @@ def query_standards(
     params: List[Any] = []
     where: List[str] = []
 
-    # FTS
     use_fts = bool(q.strip())
     if use_fts:
         where.append("s.id IN (SELECT rowid FROM standards_fts WHERE standards_fts MATCH ?)")
         params.append(q.strip())
 
-    # Tags: require ALL selected tags
     if tag_ids:
-        # join on standard_tags and count distinct matches
         placeholders = ",".join(["?"] * len(tag_ids))
         where.append(
             f"""s.id IN (
@@ -265,13 +510,29 @@ def get_standard_tags(con: sqlite3.Connection, standard_id: int) -> List[sqlite3
     return cur.fetchall()
 
 
+def get_demo_activities(con: sqlite3.Connection, standard_id: int) -> List[sqlite3.Row]:
+    cur = con.execute(
+        """
+        SELECT phase, activity_title, activity_text, materials, accommodations, sentence_starters, links
+        FROM demo_activities
+        WHERE standard_id=?
+        ORDER BY CASE phase
+          WHEN 'Engage' THEN 1
+          WHEN 'Explore' THEN 2
+          WHEN 'Explain' THEN 3
+          WHEN 'Elaborate' THEN 4
+          WHEN 'Evaluate' THEN 5
+          ELSE 99 END, activity_title COLLATE NOCASE;
+        """,
+        (standard_id,),
+    )
+    return cur.fetchall()
+
+
 # -----------------------------
 # 2) Tool-only Refresh (for this app)
 # -----------------------------
 def refresh_view(prefix: str = "vault") -> None:
-    """
-    Clears only this app's UI keys (filters/search/selection), not the DB.
-    """
     wipe = [
         f"{prefix}_q",
         f"{prefix}_limit",
@@ -282,6 +543,7 @@ def refresh_view(prefix: str = "vault") -> None:
         f"{prefix}_sel_conn",
         f"{prefix}_sel_ela",
         f"{prefix}_sel_math",
+        f"{prefix}_phase_pick",
     ]
     for k in wipe:
         if k in st.session_state:
@@ -294,7 +556,7 @@ def refresh_view(prefix: str = "vault") -> None:
 # -----------------------------
 st.set_page_config(page_title="NGSS MS Research Vault", layout="wide")
 apply_signature_theme(
-    ticker_text="NGSS MS Research Vault • Universal Gray • Search + Filter + Export",
+    ticker_text="NGSS MS Research Vault • DEMO (2 Standards) • Search + Filter + Export",
     show_ticker=True,
 )
 
@@ -303,9 +565,9 @@ st.markdown(
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
         <div>
-          <div style="font-weight:900; font-size:1.05rem;">NGSS MS Research Vault</div>
+          <div style="font-weight:900; font-size:1.05rem;">NGSS MS Research Vault (Sandbox Demo)</div>
           <div class="muted" style="margin-top:4px;">
-            App 2: browse NGSS performance expectations with tag filters + keyword search.
+            Demo DB auto-seeds MS-ESS1-1 + MS-LS1-1 with simple 5E activity variables for a quick Piluso walkthrough.
           </div>
         </div>
         <span class="badge">APP 2</span>
@@ -319,7 +581,9 @@ st.markdown(
 with st.sidebar:
     st.title("Vault Controls")
 
-    db_path = st.text_input("DB path", value="ngss_ms.db", help="SQLite file in your repo (same folder is fine).")
+    # Put DB next to this file by default (more reliable than CWD)
+    DEFAULT_DB = str(Path(__file__).with_name("ngss_ms_demo.db"))
+    db_path = st.text_input("DB path", value=DEFAULT_DB, help="SQLite file path. Default is next to this app file.")
 
     colA, colB = st.columns([0.6, 0.4])
     with colA:
@@ -335,9 +599,9 @@ with st.sidebar:
 con = db_connect(db_path)
 db_init(con)
 
-if not db_has_data(con):
-    st.warning("Database is empty. Step 3 (ingestion) will populate it from your NGSS PDF.")
-    st.stop()
+seeded = db_seed_demo_if_empty(con)
+if seeded:
+    st.success("Seeded demo database with 2 standards + 5E activity variables.")
 
 # Load tags
 seps = list_tags(con, "SEP")
@@ -354,7 +618,7 @@ with left:
     st.subheader("Search + Filter")
 
     q = st.text_input("Keyword search (FTS)", value=st.session_state.get("vault_q", ""), key="vault_q")
-    st.caption("Tip: try codes like MS-ESS2-4 or terms like 'energy', 'forces', 'cycles'.")
+    st.caption("Tip: try MS-ESS1-1 or MS-LS1-1, or search 'cells' / 'moon' / 'seasons'.")
 
     # Tag filters (multi-select by label)
     sel_sep = st.multiselect("SEPs", options=seps, format_func=lambda x: x[1], key="vault_sel_sep")
@@ -379,11 +643,9 @@ with left:
         unsafe_allow_html=True,
     )
 
-    # Results list
     if not rows:
-        st.info("No matches. Loosen tags or search term.")
+        st.info("No matches. Clear tags or search term.")
     else:
-        # Simple selector list
         options = [(int(r["id"]), f'{r["pe_code"]} — {r["domain_title"] or ""}'.strip(" —")) for r in rows]
         selected = st.selectbox(
             "Select a standard",
@@ -393,7 +655,7 @@ with left:
         )
         st.session_state["vault_sel_standard_id"] = int(selected[0])
 
-        # Export selection
+        # Export selection (rows list)
         export_rows = [
             {
                 "pe_code": r["pe_code"],
@@ -404,9 +666,7 @@ with left:
                 "clarification_statement": r["clarification_statement"],
                 "assessment_boundary": r["assessment_boundary"],
                 "connections": r["connections"],
-                "source_doc": r["source_doc"],
-                "source_page_start": r["source_page_start"],
-                "source_page_end": r["source_page_end"],
+                "source_url": r["source_url"],
             }
             for r in rows
         ]
@@ -414,8 +674,6 @@ with left:
         export_json = json.dumps(export_rows, indent=2, ensure_ascii=False)
         st.download_button("⬇️ Export results (JSON)", data=export_json, file_name="ngss_results.json", mime="application/json")
 
-        # lightweight CSV
-        # (manual to avoid pandas dependency assumptions)
         if export_rows:
             headers = list(export_rows[0].keys())
             csv_lines = [",".join(headers)]
@@ -454,41 +712,95 @@ with right:
                 unsafe_allow_html=True,
             )
 
-            st.markdown("#### Performance Expectation")
-            st.write(r["pe_statement"] or "—")
+            tabs = st.tabs(["Standard", "5E Demo Variables", "Tags"])
 
-            if r["clarification_statement"]:
-                st.markdown("#### Clarification Statement")
-                st.write(r["clarification_statement"])
+            with tabs[0]:
+                st.markdown("#### Performance Expectation")
+                st.write(r["pe_statement"] or "—")
 
-            if r["assessment_boundary"]:
-                st.markdown("#### Assessment Boundary")
-                st.write(r["assessment_boundary"])
+                if r["clarification_statement"]:
+                    st.markdown("#### Clarification Statement")
+                    st.write(r["clarification_statement"])
 
-            if r["connections"]:
-                st.markdown("#### Connections")
-                st.write(r["connections"])
+                if r["assessment_boundary"]:
+                    st.markdown("#### Assessment Boundary")
+                    st.write(r["assessment_boundary"])
+                else:
+                    st.caption("Assessment boundary: (not provided in this demo seed)")
 
-            st.markdown("#### Tags")
-            tags_rows = get_standard_tags(con, int(r["id"]))
-            if not tags_rows:
-                st.caption("No tags attached yet (will appear after ingestion).")
-            else:
-                # Grouped display
-                grouped: Dict[str, List[str]] = {}
-                for tr in tags_rows:
-                    ttype = str(tr["tag_type"])
-                    label = str(tr["label"])
-                    code = tr["code"]
-                    grouped.setdefault(ttype, []).append(f"{label}" + (f" ({code})" if code else ""))
+                if r["connections"]:
+                    st.markdown("#### Connections (demo)")
+                    st.write(r["connections"])
 
-                for ttype, items in grouped.items():
-                    st.markdown(f"**{ttype}**")
-                    st.write(" • ".join(items))
+                if r["source_url"]:
+                    st.markdown("#### Source")
+                    st.link_button("Open NGSS page", r["source_url"])
 
-            # Provenance
-            if r["source_doc"] or r["source_page_start"] is not None:
-                st.markdown("#### Source")
-                st.caption(
-                    f'{r["source_doc"] or "unknown"} • pages {r["source_page_start"] or "?"}–{r["source_page_end"] or "?"}'
-                )
+            with tabs[1]:
+                st.markdown("#### 5E activity variables (demo)")
+                st.caption("Pick a phase → copy/paste ideas into Ms. Piluso Science or a lesson doc.")
+
+                acts = get_demo_activities(con, int(r["id"]))
+                if not acts:
+                    st.info("No demo activities for this standard.")
+                else:
+                    phases = ["Engage", "Explore", "Explain", "Elaborate", "Evaluate"]
+                    phase_pick = st.radio("Phase", phases, horizontal=True, key="vault_phase_pick")
+
+                    phase_acts = [a for a in acts if str(a["phase"]) == phase_pick]
+                    if not phase_acts:
+                        st.info("No items for this phase.")
+                    else:
+                        for a in phase_acts:
+                            with st.expander(f"{a['phase']} • {a['activity_title']}", expanded=True):
+                                st.write(a["activity_text"])
+
+                                if a["sentence_starters"]:
+                                    st.markdown("**Sentence starters**")
+                                    st.code(a["sentence_starters"], language=None)
+
+                                colm, cola = st.columns(2)
+                                with colm:
+                                    st.markdown("**Materials**")
+                                    st.write(a["materials"] or "—")
+                                with cola:
+                                    st.markdown("**Accommodations**")
+                                    st.write(a["accommodations"] or "—")
+
+                                # quick copy block
+                                copy_block = (
+                                    f"{a['phase']} — {a['activity_title']}\n\n"
+                                    f"{a['activity_text']}\n\n"
+                                    f"Sentence starters: {a['sentence_starters'] or '—'}\n"
+                                    f"Materials: {a['materials'] or '—'}\n"
+                                    f"Accommodations: {a['accommodations'] or '—'}\n"
+                                )
+                                st.text_area("Copy block", value=copy_block, height=180)
+
+            with tabs[2]:
+                st.markdown("#### Tags")
+                tags_rows = get_standard_tags(con, int(r["id"]))
+                if not tags_rows:
+                    st.caption("No tags attached yet (demo is minimal).")
+                else:
+                    grouped: Dict[str, List[str]] = {}
+                    for tr in tags_rows:
+                        ttype = str(tr["tag_type"])
+                        label = str(tr["label"])
+                        code = tr["code"]
+                        grouped.setdefault(ttype, []).append(f"{label}" + (f" ({code})" if code else ""))
+
+                    for ttype, items in grouped.items():
+                        st.markdown(f"**{ttype}**")
+                        st.write(" • ".join(items))
+
+st.divider()
+st.markdown(
+    """
+**Demo scope (for Piluso walkthrough):**
+- Only **2** NGSS standards are seeded.
+- Each standard has **5E activity variables** you can copy/paste.
+- Later, we’ll swap seeding → real ingestion pipeline + full database build.
+"""
+)
+```
