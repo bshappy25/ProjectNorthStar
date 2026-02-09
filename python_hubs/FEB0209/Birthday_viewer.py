@@ -1,14 +1,9 @@
 # python_hubs/Dev_Forge/pages/Birthday_viewer.py
 # ============================================================
-# 🎂 Birthday Viewer — Fail-Proof HTML Viewer + Paste Uploader
-# - Any user can add HTML (paste)
-# - Admin (Palm ID) can delete HTML tools
-# - Palette-based "CSS editor" that generates a polished birthday HTML
-# - Abort/Reset button to clear draft + restore locked view
-#
-# NOTE:
-# This app focuses on RELIABLE viewing inside Streamlit iframe.
-# External images can fail due to iframe/CORS; this uses a link-first hero.
+# 🎂 Birthday Viewer — Universal Viewer + Admin Editor
+# Mode A: Viewer (anyone)
+# Mode B: Editor (admin unlock)
+# Mode C: Coming Soon (no cards yet)
 # ============================================================
 
 from __future__ import annotations
@@ -23,12 +18,10 @@ import streamlit.components.v1 as components
 # -----------------------------
 # CONFIG
 # -----------------------------
-APP_TITLE = "🎂 Birthday Viewer"
+APP_TITLE = "🎂 BSChapp"
 PAGE_ICON = "🎂"
-ADMIN_CODE = "Bshapp"  # your Palm ID code
+ADMIN_CODE = "Bshapp"
 
-# Store birthday HTMLs here
-# (This keeps the page self-contained inside DevForge/pages)
 TOOLS_DIR = Path(__file__).resolve().parent / "teacher_tools" / "birthdays"
 TOOLS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -83,61 +76,45 @@ def delete_html(filename: str) -> bool:
     return False
 
 
-def reset_all():
-    for k in [
-        "selected_tool",
-        "viewer_height",
-        "safe_mode",
-        "draft_mode",
-        "draft_title",
-        "draft_subtitle",
-        "draft_date",
-        "draft_link",
-        "draft_emoji",
-        "draft_button_text",
-        "draft_note",
-        "draft_filename",
-        "palette_key",
-        "draft_html_custom",
-        "confirm_delete",
-        "palm_taps",
-        "show_admin_box",
-        "admin_unlocked",
-    ]:
-        if k in st.session_state:
-            del st.session_state[k]
-    st.rerun()
+# -----------------------------
+# SESSION STATE
+# -----------------------------
+if "palm_taps" not in st.session_state:
+    st.session_state["palm_taps"] = 0
+if "show_admin_box" not in st.session_state:
+    st.session_state["show_admin_box"] = False
+if "admin_unlocked" not in st.session_state:
+    st.session_state["admin_unlocked"] = False
+if "selected_tool" not in st.session_state:
+    st.session_state["selected_tool"] = None
+if "viewer_height" not in st.session_state:
+    st.session_state["viewer_height"] = 900
+if "safe_mode" not in st.session_state:
+    st.session_state["safe_mode"] = True
+
+# Editor defaults
+if "draft_title" not in st.session_state:
+    st.session_state["draft_title"] = "Happy Birthday! 🎂"
+if "draft_subtitle" not in st.session_state:
+    st.session_state["draft_subtitle"] = "A special day"
+if "draft_link" not in st.session_state:
+    st.session_state["draft_link"] = "https://imgur.com/a/9IqbQtd"
+if "draft_emoji" not in st.session_state:
+    st.session_state["draft_emoji"] = "✨🎉✨"
+if "draft_button_text" not in st.session_state:
+    st.session_state["draft_button_text"] = "VIEW GALLERY ↗"
+if "draft_note" not in st.session_state:
+    st.session_state["draft_note"] = "Opens in a new tab"
+if "draft_filename" not in st.session_state:
+    st.session_state["draft_filename"] = "Birthday_Card.html"
+if "palette_key" not in st.session_state:
+    st.session_state["palette_key"] = "Frosty Lavender (White/Purple)"
+if "draft_html_custom" not in st.session_state:
+    st.session_state["draft_html_custom"] = ""
 
 
 # -----------------------------
-# SESSION STATE DEFAULTS
-# -----------------------------
-defaults = {
-    "selected_tool": None,
-    "viewer_height": 900,
-    "safe_mode": True,
-    "draft_mode": "Template",
-    "draft_title": "Ariel: The People’s Princess. 02.09.1990",
-    "draft_subtitle": "A People’s Princess",
-    "draft_date": "02.09.1990",
-    "draft_link": "https://imgur.com/a/9IqbQtd",
-    "draft_emoji": "✨👸🏻✨",
-    "draft_button_text": "RAW ↗",
-    "draft_note": "Opens Imgur in a new tab",
-    "draft_filename": "Birthday_Card.html",
-    "palette_key": "Frosty Lavender (White/Purple)",
-    "draft_html_custom": "",
-    "confirm_delete": False,
-    "palm_taps": 0,
-    "show_admin_box": False,
-    "admin_unlocked": False,
-}
-for k, v in defaults.items():
-    st.session_state.setdefault(k, v)
-
-
-# -----------------------------
-# PALETTES (template generator)
+# PALETTES
 # -----------------------------
 PALETTES = {
     "Frosty Lavender (White/Purple)": {
@@ -195,7 +172,6 @@ def render_birthday_template(
 ) -> str:
     pal = PALETTES.get(palette_key, PALETTES["Frosty Lavender (White/Purple)"])
 
-    # Link-first hero: reliable inside Streamlit iframe
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -342,22 +318,6 @@ def render_birthday_template(
       .sparkle{{animation:none}}
       .image-hero::before{{animation:none}}
     }}
-    /* Optional content area (kept minimal + safe) */
-    .content{{
-      padding: 0 18px 22px;
-      max-width: 980px;
-      margin: 0 auto;
-    }}
-    .mini{{
-      margin-top: 14px;
-      padding: 14px 14px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.65);
-      border: 1px solid rgba(90,80,130,0.10);
-      color: rgba(30,30,40,0.70);
-      line-height: 1.6;
-      font-size: 15px;
-    }}
   </style>
 </head>
 <body>
@@ -378,197 +338,229 @@ def render_birthday_template(
         </div>
       </div>
     </div>
-
-    <div class="content">
-      <div class="mini">
-        Tip: This layout is <b>iframe-safe</b> inside Streamlit. If you want images, prefer hosting that returns a direct
-        <code>.png/.jpg</code> URL (or keep it link-first like this).
-      </div>
-    </div>
   </div>
 </body>
 </html>
 """
 
 
-# -----------------------------
-# HEADER
-# -----------------------------
-st.title(APP_TITLE)
-st.caption(f"Reading birthday HTML cards from: `{TOOLS_DIR}`")
+# ============================================================
+# PALM ID (Admin Gate)
+# ============================================================
+# Top row: title left, Palm ID right
+left, right = st.columns([0.88, 0.12], vertical_alignment="center")
 
-# -----------------------------
-# SIDEBAR CONTROLS
-# -----------------------------
-with st.sidebar:
-    st.header("Controls")
+with left:
+    st.title(f"🎂 {APP_TITLE}")
 
-    # Abort / Reset (prevents your “editor overlapping/bleeding” feeling)
-    if st.button("🧯 Abort / Reset View", use_container_width=True):
-        reset_all()
+with right:
+    if st.button("🌴", help="Palm ID (tap 3x)"):
+        st.session_state["palm_taps"] += 1
+        if st.session_state["palm_taps"] >= 3:
+            st.session_state["show_admin_box"] = True
 
-    st.divider()
+# Gate UI (only appears after 3 taps)
+if st.session_state["show_admin_box"] and not st.session_state["admin_unlocked"]:
+    st.markdown("**✨ Palm ID:** enter admin code")
+    code_try = st.text_input("Admin Code", type="password", placeholder="Enter code...")
+    colA, colB = st.columns([0.6, 0.4])
+    with colA:
+        if st.button("Unlock"):
+            if code_try == ADMIN_CODE:
+                st.session_state["admin_unlocked"] = True
+                st.success("Admin override unlocked.")
+                st.rerun()
+            else:
+                st.error("Incorrect code.")
+    with colB:
+        if st.button("Reset"):
+            st.session_state["palm_taps"] = 0
+            st.session_state["show_admin_box"] = False
 
-    # Tool selection + viewer config
-    tools = list_html_tools()
-    if tools:
-        # Keep selection stable
-        default_index = 0
-        if st.session_state.selected_tool in tools:
-            default_index = tools.index(st.session_state.selected_tool)
+# Optional tiny badge if unlocked
+if st.session_state["admin_unlocked"]:
+    st.caption("🌴 Palm ID: unlocked")
 
-        picked = st.selectbox("Choose a card", tools, index=default_index)
-        st.session_state.selected_tool = picked
-    else:
-        st.info("No birthday .html cards yet. Add one below.")
 
-    st.session_state.viewer_height = st.slider("Viewer height", 520, 1400, st.session_state.viewer_height, 20)
-
-    st.divider()
-    st.subheader("Safety mode")
-    st.session_state.safe_mode = st.toggle("Safe mode (recommended)", value=st.session_state.safe_mode)
-    st.caption("Safe mode blocks scripts/forms/popups in the iframe.")
-
-    st.divider()
-    st.subheader("➕ Add HTML (paste)")
-    with st.expander("Open paste uploader", expanded=False):
-        st.session_state.draft_filename = st.text_input("Filename (e.g., Benji_1994.html)", st.session_state.draft_filename)
-        st.session_state.draft_html_custom = st.text_area(
-            "Paste full HTML here",
-            st.session_state.draft_html_custom,
-            height=220,
-            placeholder="<!DOCTYPE html> ...",
-        )
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("💾 Save pasted HTML", use_container_width=True, disabled=not st.session_state.draft_html_custom.strip()):
-                dest = save_html(st.session_state.draft_filename, st.session_state.draft_html_custom)
+# ============================================================
+# MODE C: COMING SOON (no cards yet)
+# ============================================================
+tools = list_html_tools()
+if not tools:
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align:center; padding:60px 20px; max-width:700px; margin:0 auto;">
+        <div style="font-size:80px; margin-bottom:20px;">🎂✨</div>
+        <h2 style="color:#6b5cff; font-family:Georgia,serif; margin-bottom:16px;">
+            Coming Soon!
+        </h2>
+        <p style="font-size:18px; color:rgba(40,40,60,0.70); line-height:1.6; margin-bottom:24px;">
+            Birthday cards will appear here when they're ready. 
+            Check back soon for something special! 🎉
+        </p>
+        <div style="font-size:14px; color:rgba(40,40,60,0.50); font-style:italic;">
+            (Admin can add cards from the sidebar when unlocked)
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Admin can still add in sidebar if unlocked
+    if st.session_state["admin_unlocked"]:
+        st.sidebar.header("➕ Admin: Add Cards")
+        with st.sidebar.expander("Paste HTML", expanded=False):
+            st.session_state["draft_filename"] = st.text_input("Filename", st.session_state["draft_filename"])
+            st.session_state["draft_html_custom"] = st.text_area(
+                "Paste full HTML",
+                st.session_state["draft_html_custom"],
+                height=200,
+                placeholder="<!DOCTYPE html> ..."
+            )
+            if st.button("💾 Save", disabled=not st.session_state["draft_html_custom"].strip()):
+                dest = save_html(st.session_state["draft_filename"], st.session_state["draft_html_custom"])
                 st.success(f"Saved: {dest.name}")
-                st.session_state.selected_tool = dest.name
-                st.session_state.draft_html_custom = ""
+                st.session_state["draft_html_custom"] = ""
                 st.rerun()
-        with c2:
-            if st.button("🧹 Clear paste box", use_container_width=True):
-                st.session_state.draft_html_custom = ""
+        
+        with st.sidebar.expander("Template Generator", expanded=False):
+            st.session_state["palette_key"] = st.selectbox("Palette", list(PALETTES.keys()))
+            st.session_state["draft_title"] = st.text_input("Title", st.session_state["draft_title"])
+            st.session_state["draft_subtitle"] = st.text_input("Subtitle", st.session_state["draft_subtitle"])
+            st.session_state["draft_link"] = st.text_input("Link", st.session_state["draft_link"])
+            st.session_state["draft_emoji"] = st.text_input("Emoji", st.session_state["draft_emoji"])
+            st.session_state["draft_button_text"] = st.text_input("Button", st.session_state["draft_button_text"])
+            st.session_state["draft_note"] = st.text_input("Note", st.session_state["draft_note"])
+            st.session_state["draft_filename"] = st.text_input("Filename", st.session_state["draft_filename"], key="gen_fn")
+            
+            if st.button("✨ Generate"):
+                gen_html = render_birthday_template(
+                    title=st.session_state["draft_title"],
+                    subtitle=st.session_state["draft_subtitle"],
+                    link=st.session_state["draft_link"],
+                    emoji=st.session_state["draft_emoji"],
+                    button_text=st.session_state["draft_button_text"],
+                    note=st.session_state["draft_note"],
+                    palette_key=st.session_state["palette_key"],
+                )
+                dest = save_html(st.session_state["draft_filename"], gen_html)
+                st.success(f"Generated: {dest.name}")
                 st.rerun()
-
-    st.divider()
-    st.subheader("🎨 Palette Generator (glassy polish)")
-    st.caption("This does NOT change the Streamlit app UI. It generates a new birthday HTML card.")
-    st.session_state.palette_key = st.selectbox("Choose a palette", list(PALETTES.keys()), index=list(PALETTES.keys()).index(st.session_state.palette_key))
-
-    with st.expander("Build a new Birthday Card (template)", expanded=False):
-        st.session_state.draft_title = st.text_input("Title (top)", st.session_state.draft_title)
-        st.session_state.draft_subtitle = st.text_input("Subtitle (top)", st.session_state.draft_subtitle)
-        st.session_state.draft_link = st.text_input("Link (Imgur/Drive/etc.)", st.session_state.draft_link)
-        st.session_state.draft_emoji = st.text_input("Emoji (center link)", st.session_state.draft_emoji)
-        st.session_state.draft_button_text = st.text_input("Button text", st.session_state.draft_button_text)
-        st.session_state.draft_note = st.text_input("Small note", st.session_state.draft_note)
-        st.session_state.draft_filename = st.text_input("Save as (filename)", st.session_state.draft_filename)
-
-        gen_html = render_birthday_template(
-            title=st.session_state.draft_title,
-            subtitle=st.session_state.draft_subtitle,
-            link=st.session_state.draft_link,
-            emoji=st.session_state.draft_emoji,
-            button_text=st.session_state.draft_button_text,
-            note=st.session_state.draft_note,
-            palette_key=st.session_state.palette_key,
-        )
-
-        st.code(gen_html[:1500] + ("\n...\n" if len(gen_html) > 1500 else ""), language="html")
-
-        if st.button("✨ Generate & Save Card", use_container_width=True):
-            dest = save_html(st.session_state.draft_filename, gen_html)
-            st.success(f"Generated: {dest.name}")
-            st.session_state.selected_tool = dest.name
-            st.rerun()
-
-    # -------------------------
-    # ADMIN: PALM ID + DELETE
-    # -------------------------
-    st.divider()
-    st.subheader("🔒 Admin (Delete cards)")
-
-    # Palm tap gate
-    colL, colR = st.columns([0.82, 0.18])
-    with colR:
-        if st.button("🌴", help="Palm ID (tap 3x)"):
-            st.session_state.palm_taps += 1
-            if st.session_state.palm_taps >= 3:
-                st.session_state.show_admin_box = True
-
-    if st.session_state.show_admin_box and not st.session_state.admin_unlocked:
-        st.write("**Palm ID:** enter admin code")
-        code_try = st.text_input("Admin Code", type="password", placeholder="Enter code…")
-        a, b = st.columns(2)
-        with a:
-            if st.button("Unlock", use_container_width=True):
-                if code_try == ADMIN_CODE:
-                    st.session_state.admin_unlocked = True
-                    st.success("Admin unlocked.")
-                    st.rerun()
-                else:
-                    st.error("Incorrect code.")
-        with b:
-            if st.button("Reset", use_container_width=True):
-                st.session_state.palm_taps = 0
-                st.session_state.show_admin_box = False
-                st.session_state.admin_unlocked = False
-                st.rerun()
-
-    if st.session_state.admin_unlocked:
-        st.caption("Palm ID: unlocked")
-        admin_tools = list_html_tools()
-        if not admin_tools:
-            st.info("Nothing to delete yet.")
-        else:
-            pick_del = st.selectbox("Select a card to delete", ["(choose)"] + admin_tools)
-            if pick_del != "(choose)":
-                st.warning("Deleting removes the .html file from the birthdays folder.")
-                if st.button("🗑️ Delete Selected", type="primary", use_container_width=True):
-                    ok = delete_html(pick_del)
-                    if ok:
-                        st.success(f"Deleted: {pick_del}")
-                        # If you deleted the currently viewed tool, clear selection
-                        if st.session_state.selected_tool == pick_del:
-                            st.session_state.selected_tool = None
-                        st.rerun()
-                    else:
-                        st.error("File not found.")
-
-
-# -----------------------------
-# MAIN VIEWER
-# -----------------------------
-tools_now = list_html_tools()
-if not tools_now:
-    st.info("Add a birthday card from the sidebar: **Add HTML (paste)** or **Palette Generator**.")
+    
     st.stop()
 
-selected = st.session_state.selected_tool or tools_now[0]
-if selected not in tools_now:
-    selected = tools_now[0]
-    st.session_state.selected_tool = selected
 
-# Load HTML
+# ============================================================
+# MODE A: VIEWER (default for everyone)
+# MODE B: EDITOR (only if admin unlocked)
+# ============================================================
+
+# SIDEBAR CONTROLS
+with st.sidebar:
+    st.header("📖 Viewer Controls")
+    
+    # Tool selection
+    default_index = 0
+    if st.session_state["selected_tool"] in tools:
+        default_index = tools.index(st.session_state["selected_tool"])
+    
+    picked = st.selectbox("Choose a card", tools, index=default_index)
+    st.session_state["selected_tool"] = picked
+    
+    st.session_state["viewer_height"] = st.slider("Height", 520, 1400, st.session_state["viewer_height"], 20)
+    
+    st.divider()
+    st.session_state["safe_mode"] = st.toggle("Safe mode", value=st.session_state["safe_mode"])
+    st.caption("Blocks scripts/forms in iframe")
+    
+    # MODE B: EDITOR (Admin only)
+    if st.session_state["admin_unlocked"]:
+        st.divider()
+        st.header("✏️ Editor (Admin)")
+        
+        with st.expander("➕ Paste HTML", expanded=False):
+            st.session_state["draft_filename"] = st.text_input("Filename", st.session_state["draft_filename"], key="paste_fn")
+            st.session_state["draft_html_custom"] = st.text_area(
+                "Paste HTML",
+                st.session_state["draft_html_custom"],
+                height=180,
+                placeholder="<!DOCTYPE html> ..."
+            )
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("💾 Save", disabled=not st.session_state["draft_html_custom"].strip()):
+                    dest = save_html(st.session_state["draft_filename"], st.session_state["draft_html_custom"])
+                    st.success(f"Saved: {dest.name}")
+                    st.session_state["selected_tool"] = dest.name
+                    st.session_state["draft_html_custom"] = ""
+                    st.rerun()
+            with c2:
+                if st.button("🧹 Clear"):
+                    st.session_state["draft_html_custom"] = ""
+                    st.rerun()
+        
+        with st.expander("🎨 Template Generator", expanded=False):
+            st.session_state["palette_key"] = st.selectbox("Palette", list(PALETTES.keys()), key="gen_pal")
+            st.session_state["draft_title"] = st.text_input("Title", st.session_state["draft_title"], key="gen_title")
+            st.session_state["draft_subtitle"] = st.text_input("Subtitle", st.session_state["draft_subtitle"], key="gen_sub")
+            st.session_state["draft_link"] = st.text_input("Link", st.session_state["draft_link"], key="gen_link")
+            st.session_state["draft_emoji"] = st.text_input("Emoji", st.session_state["draft_emoji"], key="gen_emoji")
+            st.session_state["draft_button_text"] = st.text_input("Button", st.session_state["draft_button_text"], key="gen_btn")
+            st.session_state["draft_note"] = st.text_input("Note", st.session_state["draft_note"], key="gen_note")
+            st.session_state["draft_filename"] = st.text_input("Filename", st.session_state["draft_filename"], key="gen_fn2")
+            
+            if st.button("✨ Generate & Save"):
+                gen_html = render_birthday_template(
+                    title=st.session_state["draft_title"],
+                    subtitle=st.session_state["draft_subtitle"],
+                    link=st.session_state["draft_link"],
+                    emoji=st.session_state["draft_emoji"],
+                    button_text=st.session_state["draft_button_text"],
+                    note=st.session_state["draft_note"],
+                    palette_key=st.session_state["palette_key"],
+                )
+                dest = save_html(st.session_state["draft_filename"], gen_html)
+                st.success(f"Generated: {dest.name}")
+                st.session_state["selected_tool"] = dest.name
+                st.rerun()
+        
+        st.divider()
+        st.subheader("🗑️ Delete Cards")
+        admin_tools = list_html_tools()
+        pick_del = st.selectbox("Select card", ["(choose)"] + admin_tools)
+        if pick_del != "(choose)":
+            st.warning("This removes the .html file permanently")
+            if st.button("Delete Selected", type="primary", use_container_width=True):
+                ok = delete_html(pick_del)
+                if ok:
+                    st.success(f"Deleted: {pick_del}")
+                    if st.session_state["selected_tool"] == pick_del:
+                        st.session_state["selected_tool"] = None
+                    st.rerun()
+                else:
+                    st.error("File not found")
+
+
+# ============================================================
+# MAIN VIEWER
+# ============================================================
+selected = st.session_state["selected_tool"] or tools[0]
+if selected not in tools:
+    selected = tools[0]
+    st.session_state["selected_tool"] = selected
+
 try:
     raw_html = load_html(selected)
 except Exception as e:
-    st.error(f"Could not read file: `{selected}`")
+    st.error(f"Could not read: `{selected}`")
     st.exception(e)
     st.stop()
 
 escaped = _html.escape(raw_html, quote=True)
 
 # Sandbox
-if st.session_state.safe_mode:
-    sandbox = "allow-same-origin"  # locked down
-else:
-    sandbox = "allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-same-origin"
+sandbox = "allow-same-origin" if st.session_state["safe_mode"] else "allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-same-origin"
 
-# Viewer wrapper (glassy)
-height = st.session_state.viewer_height
+# Glassy viewer wrapper
+height = st.session_state["viewer_height"]
 viewer_doc = f"""<!doctype html>
 <html>
 <head>
@@ -612,5 +604,7 @@ viewer_doc = f"""<!doctype html>
 
 components.html(viewer_doc, height=height + 40, scrolling=False)
 
-with st.expander("🔎 Debug: show raw HTML (read-only)", expanded=False):
-    st.code(raw_html, language="html")
+# Debug (admin only)
+if st.session_state["admin_unlocked"]:
+    with st.expander("🔎 Debug: Raw HTML", expanded=False):
+        st.code(raw_html, language="html")
