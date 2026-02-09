@@ -1,20 +1,75 @@
-# --- PALETTES GUARANTEE ---
-if "PALETTES" not in globals():
+# ============================================================
+# my_app2.py — SAFE TOP SECTION (ORDER MATTERS)
+# ============================================================
+
+import streamlit as st
+from pathlib import Path
+from textwrap import dedent
+import json
+import re
+
+st.set_page_config(
+    page_title="UI Theme Builder — Palettes + Overlay",
+    layout="wide"
+)
+
+# ============================================================
+# GUARDED GLOBALS (must exist before use)
+# ============================================================
+
+# Always guarantee PALETTES exists before any .update()
+PALETTES = globals().get("PALETTES")
+if not isinstance(PALETTES, dict):
     PALETTES = {}
 
+# Session-safe storage key names
+CUSTOM_PALETTES_KEY = "custom_palettes_app2"
+CUSTOM_PALETTES_PATH = Path("custom_palettes_app2.json")
 
 # ============================================================
-# ADD-ON BLOCK: Extended Palettes + Aggressive Overlays + Custom Palette Save/Load
-# Paste this block INTO your file:
-# 1) Add imports near top:  from pathlib import Path; import re
-# 2) Replace OVERLAY_TYPES / OVERLAY_LEVELS with the ones below
-# 3) Replace overlay_params() with the one below
-# 4) Add the Custom Palette Maker UI block inside your sidebar (exact spot shown)
-# 5) Add "merge_custom_palettes_into_PALETTES()" right after PALETTES definition
+# CUSTOM PALETTE STORAGE HELPERS (NO session_state YET)
 # ============================================================
 
-from pathlib import Path
-import re
+def _slug(name: str) -> str:
+    s = name.strip().lower()
+    s = re.sub(r"\s+", " ", s)
+    s = re.sub(r"[^a-z0-9 _-]", "", s)
+    return s[:48].strip() or "custom"
+
+def _load_custom_palettes() -> dict:
+    if CUSTOM_PALETTES_PATH.exists():
+        try:
+            data = json.loads(CUSTOM_PALETTES_PATH.read_text(encoding="utf-8"))
+            return data if isinstance(data, dict) else {}
+        except Exception:
+            return {}
+    return {}
+
+def _save_custom_palettes(palettes: dict) -> None:
+    CUSTOM_PALETTES_PATH.write_text(
+        json.dumps(palettes, indent=2),
+        encoding="utf-8"
+    )
+
+# ============================================================
+# STREAMLIT-SAFE MERGE (CALL ONLY AFTER FIRST RENDER)
+# ============================================================
+
+def merge_custom_palettes_into_PALETTES():
+    """
+    Safe to call AFTER Streamlit has initialized.
+    Never call this at import time.
+    """
+    if CUSTOM_PALETTES_KEY not in st.session_state:
+        st.session_state[CUSTOM_PALETTES_KEY] = _load_custom_palettes()
+
+    for k, v in st.session_state[CUSTOM_PALETTES_KEY].items():
+        if isinstance(v, dict):
+            PALETTES.setdefault(k, v)
+
+# ============================================================
+# 🚨 DO NOT CALL merge_custom_palettes_into_PALETTES() HERE
+# ============================================================
 
 # ----------------------------
 # 1) EXTEND PALETTES
