@@ -1,54 +1,59 @@
 # pages/CSS_Editor.py
 """
-DevForge — CSS Editor (Hybrid, Simple)
+DevForge — CSS Editor (Bulletproof Hybrid)
 
-Keeps v1 functionality:
-- Edit + apply Streamlit CSS overrides via st.session_state["custom_css"]
+Preserves:
+1) Override editor (session_state["custom_css"]) with Apply / Reset
+2) Theme maker with premade palettes + minimal customization
+   -> generates a safe :root variable block compatible with DevForge base CSS
 
-Adds v2 ease-of-use:
-- Premade palettes (CSS variables)
-- Light customization (tweak a few key colors)
-- One-click "Add to Overrides" or "Replace Overrides"
+No files. No exports. No JSON. No overlays. Commit-safe.
 """
 
 from __future__ import annotations
-
 import streamlit as st
 
+
 # ---------------------------
-# Premade Palettes (simple)
+# Session defaults (safe)
+# ---------------------------
+st.session_state.setdefault("custom_css", "")
+
+
+# ---------------------------
+# Simple palettes (hex only = bulletproof)
 # ---------------------------
 PALETTES = {
     "Universal Gray": {
         "bg": "#f3f4f6",
-        "card": "rgba(255,255,255,0.92)",
+        "card": "#ffffff",
         "border": "#d1d5db",
         "text": "#111827",
         "muted": "#6b7280",
         "accent": "#2563eb",
         "accent2": "#16a34a",
     },
-    "Science Glass": {
+    "Science": {
         "bg": "#061B15",
-        "card": "rgba(255,255,255,0.08)",
-        "border": "rgba(120,255,220,0.30)",
-        "text": "rgba(255,255,255,0.92)",
-        "muted": "rgba(255,255,255,0.74)",
+        "card": "#0b2a22",
+        "border": "#2bd4b7",
+        "text": "#f9fafb",
+        "muted": "#b6e7dd",
         "accent": "#14B8A6",
         "accent2": "#2F5BEA",
     },
     "Ink Violet": {
         "bg": "#0b0f19",
-        "card": "rgba(255,255,255,0.07)",
-        "border": "rgba(139,92,246,0.35)",
-        "text": "rgba(255,255,255,0.92)",
-        "muted": "rgba(255,255,255,0.72)",
+        "card": "#111a2b",
+        "border": "#334a7a",
+        "text": "#eef2ff",
+        "muted": "#97a6c7",
         "accent": "#8b5cf6",
         "accent2": "#22d3ee",
     },
     "Blush": {
         "bg": "#fff4f6",
-        "card": "rgba(255,255,255,0.92)",
+        "card": "#ffffff",
         "border": "#f2c7d2",
         "text": "#2a1020",
         "muted": "#7b4b61",
@@ -57,19 +62,39 @@ PALETTES = {
     },
     "Bold": {
         "bg": "#0b0b0b",
-        "card": "rgba(255,255,255,0.06)",
-        "border": "rgba(255,255,255,0.14)",
-        "text": "rgba(255,255,255,0.92)",
-        "muted": "rgba(255,255,255,0.65)",
+        "card": "#111111",
+        "border": "#2a2a2a",
+        "text": "#f9fafb",
+        "muted": "#a3a3a3",
         "accent": "#3b82f6",
         "accent2": "#f59e0b",
     },
 }
 
-def css_vars_block(p: dict) -> str:
-    """Returns a small :root variable block compatible with DevForge base CSS."""
+
+# ---------------------------
+# Helpers (defined BEFORE UI)
+# ---------------------------
+def _hex_to_rgb(h: str) -> tuple[int, int, int]:
+    h = (h or "").strip().lstrip("#")
+    if len(h) == 3:  # #abc -> #aabbcc
+        h = "".join([c * 2 for c in h])
+    if len(h) != 6:
+        return (17, 24, 39)  # fallback
+    try:
+        return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    except Exception:
+        return (17, 24, 39)
+
+def _is_dark(hex_bg: str) -> bool:
+    r, g, b = _hex_to_rgb(hex_bg)
+    lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    return lum < 130
+
+def _vars_block(p: dict) -> str:
+    # Keep this strictly to DevForge variables you already use
     return f"""
-/* --- DevForge Palette Variables (generated) --- */
+/* --- DevForge Theme Maker (generated) --- */
 :root {{
   --bg: {p["bg"]};
   --card: {p["card"]};
@@ -79,57 +104,56 @@ def css_vars_block(p: dict) -> str:
   --accent: {p["accent"]};
   --accent2: {p["accent2"]};
 }}
-/* Optional: quick emphasis tweaks */
-.dev-card h3 {{ color: var(--accent) !important; }}
-.badge-accent {{ border-color: var(--accent) !important; color: var(--accent) !important; }}
-.badge-accent2 {{ border-color: var(--accent2) !important; color: var(--accent2) !important; }}
 """.strip()
 
-# ---------------------------
-# Page UI
-# ---------------------------
-st.title("🎨 CSS Editor (Hybrid)")
-st.caption("Simple palettes + customization → writes into DevForge custom_css overrides.")
-
-tab_quick, tab_palette = st.tabs(["✍️ Quick Overrides", "🎛️ Palette Builder"])
 
 # ---------------------------
-# TAB 1: Quick Overrides (v1 functionality)
+# UI
 # ---------------------------
-with tab_quick:
+st.title("🎨 CSS Editor")
+st.caption("Overrides + Theme Maker (simple, commit-safe).")
+
+tab_overrides, tab_theme = st.tabs(["✍️ Overrides", "🎛️ Theme Maker"])
+
+
+# ---------------------------
+# Tab 1: Overrides (preserved behavior)
+# ---------------------------
+with tab_overrides:
     st.subheader("App-wide CSS Overrides")
-    st.caption("This is the active override text DevForge injects after the base theme.")
+    st.caption("This writes to `st.session_state['custom_css']` (DevForge injects it after base CSS).")
 
-    current_css = st.session_state.get("custom_css", "")
-    edited_css = st.text_area(
+    current = st.session_state.get("custom_css", "")
+
+    edited = st.text_area(
         "Custom CSS",
-        value=current_css,
+        value=current,
         height=360,
-        placeholder="/* Paste overrides here. */\n.dev-card { border-color: var(--accent) !important; }\n",
-        key="css_editor_text",
+        placeholder="/* Paste overrides here */\n.dev-card{ border-color: var(--accent) !important; }\n",
+        key="css_editor_override_text",
     )
 
-    c1, c2, c3 = st.columns([1, 1, 2.5])
+    c1, c2, c3 = st.columns([1, 1, 2.6])
 
     with c1:
         if st.button("Apply", type="primary", use_container_width=True):
-            st.session_state["custom_css"] = (edited_css or "").strip()
-            st.success("Applied to session_state['custom_css'].")
+            st.session_state["custom_css"] = (edited or "").strip()
+            st.success("Applied.")
             st.rerun()
 
     with c2:
         if st.button("Reset", use_container_width=True):
-            st.session_state.pop("custom_css", None)
-            st.success("Removed custom_css.")
+            st.session_state["custom_css"] = ""
+            st.success("Reset.")
             st.rerun()
 
     with c3:
-        st.caption("Preview block")
+        st.caption("Preview")
         st.markdown(
             """
             <div class="dev-card">
               <h3>Preview Card</h3>
-              <p class="muted">If your overrides target <code>.dev-card</code>, buttons, badges, etc. you'll see changes.</p>
+              <p class="muted">If your overrides affect <code>.dev-card</code>, badges, buttons, you’ll see it here.</p>
               <span class="badge badge-accent">Accent</span>
               <span class="badge badge-accent2">Accent2</span>
             </div>
@@ -137,60 +161,75 @@ with tab_quick:
             unsafe_allow_html=True,
         )
 
-# ---------------------------
-# TAB 2: Palette Builder (easy mode)
-# ---------------------------
-with tab_palette:
-    st.subheader("Premade Palettes + Simple Customization")
-    st.caption("Pick a palette → optionally tweak a few colors → add into your overrides.")
 
-    # Choose palette
+# ---------------------------
+# Tab 2: Theme Maker (premade palettes + minimal customization)
+# ---------------------------
+with tab_theme:
+    st.subheader("Theme Maker (Premade Palettes)")
+    st.caption("Pick a palette, optionally tweak a few colors, then Replace or Append into overrides.")
+
     pal_name = st.selectbox("Palette", list(PALETTES.keys()), index=0)
     base = PALETTES[pal_name].copy()
 
-    # Light customization
-    st.markdown("**Optional tweaks** (keep it simple):")
-    colA, colB, colC = st.columns(3)
+    # Minimal customization: just BG + Accent (and auto text/muted if you want)
+    colA, colB, colC = st.columns([1, 1, 1])
 
     with colA:
-        base["bg"] = st.color_picker("BG", value=_safe_hex(base["bg"]) if isinstance(base["bg"], str) and base["bg"].startswith("#") else "#111111")
-        base["accent"] = st.color_picker("Accent", value=_safe_hex(base["accent"]))
+        bg = st.color_picker("Background (bg)", base["bg"])
     with colB:
-        base["text"] = st.color_picker("Text", value=_safe_hex(base["text"]) if isinstance(base["text"], str) and base["text"].startswith("#") else "#ffffff")
-        base["accent2"] = st.color_picker("Accent2", value=_safe_hex(base["accent2"]))
+        accent = st.color_picker("Accent", base["accent"])
     with colC:
-        # border/card may be rgba; keep as text edits (simple + flexible)
-        base["card"] = st.text_input("Card (rgba or hex)", value=str(base["card"]))
-        base["border"] = st.text_input("Border (rgba or hex)", value=str(base["border"]))
+        accent2 = st.color_picker("Accent2", base["accent2"])
 
-    palette_css = css_vars_block(base)
+    auto = st.toggle("Auto text/muted for readability", value=True)
 
-    st.markdown("**Generated CSS**")
-    st.code(palette_css, language="css")
+    # Build final palette (hex-only)
+    out = base
+    out["bg"] = bg
+    out["accent"] = accent
+    out["accent2"] = accent2
 
-    b1, b2, b3 = st.columns([1, 1, 2.5])
+    if auto:
+        if _is_dark(out["bg"]):
+            out["text"] = "#f9fafb"
+            out["muted"] = "#a3a3a3"
+            out["card"] = "#111827"   # safe dark surface
+            out["border"] = "#334155" # safe dark border
+        else:
+            out["text"] = "#111827"
+            out["muted"] = "#6b7280"
+            out["card"] = "#ffffff"
+            out["border"] = "#d1d5db"
+
+    theme_css = _vars_block(out)
+
+    st.markdown("**Generated CSS (copy/paste if you want):**")
+    st.code(theme_css, language="css")
+
+    b1, b2, b3 = st.columns([1, 1, 2.6])
 
     with b1:
-        if st.button("Replace Overrides with Palette", type="primary", use_container_width=True):
-            st.session_state["custom_css"] = palette_css
-            st.success("custom_css replaced with generated palette CSS.")
+        if st.button("Replace Overrides", type="primary", use_container_width=True):
+            st.session_state["custom_css"] = theme_css
+            st.success("Overrides replaced with theme variables.")
             st.rerun()
 
     with b2:
-        if st.button("Append Palette to Overrides", use_container_width=True):
-            current = st.session_state.get("custom_css", "").strip()
-            joiner = "\n\n" if current else ""
-            st.session_state["custom_css"] = current + joiner + palette_css
-            st.success("Palette CSS appended to custom_css.")
+        if st.button("Append to Overrides", use_container_width=True):
+            cur = (st.session_state.get("custom_css", "") or "").strip()
+            joiner = "\n\n" if cur else ""
+            st.session_state["custom_css"] = cur + joiner + theme_css
+            st.success("Theme variables appended.")
             st.rerun()
 
     with b3:
-        st.caption("Preview block")
+        st.caption("Preview")
         st.markdown(
             """
             <div class="dev-card">
-              <h3>Palette Preview</h3>
-              <p class="muted">This uses DevForge variables: <code>--bg</code>, <code>--card</code>, <code>--accent</code>.</p>
+              <h3>Theme Preview</h3>
+              <p class="muted">This preview uses your DevForge variables: <code>--bg</code>, <code>--card</code>, <code>--accent</code>.</p>
               <span class="badge badge-accent">Accent</span>
               <span class="badge badge-accent2">Accent2</span>
             </div>
@@ -198,14 +237,6 @@ with tab_palette:
             unsafe_allow_html=True,
         )
 
-# bottom spacing so ticker doesn't overlap
-st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
 
-# ---------------------------
-# Helpers
-# ---------------------------
-def _safe_hex(x: str) -> str:
-    """Return a safe hex string for color_picker; fallback if input is rgba."""
-    if isinstance(x, str) and x.startswith("#") and len(x) in (4, 7):
-        return x
-    return "#2563eb"
+# Bottom spacer so DevForge ticker doesn’t overlap
+st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
