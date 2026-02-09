@@ -2,23 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dr. Janine Tubiolo: Our L.E.A.D.er</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Dr. Tubiolo — L.E.A.D.er of 469X</title>
 
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-
     :root{
-      --bg1: rgba(255,255,255,0.95);
-      --lav: rgba(225,214,255,0.55);
-      --ice: rgba(186,225,255,0.45);
-      --ink: rgba(40,40,60,0.74);
-      --muted: rgba(40,40,60,0.50);
-      --glass: rgba(255,255,255,0.70);
-      --border: rgba(90,80,130,0.10);
-      --shadow: 0 18px 60px rgba(0,0,0,0.18);
-      --heroShadow: 0 20px 70px rgba(60, 40, 110, 0.14);
-      --btn: linear-gradient(135deg, #6b5cff, #7b3ff2);
+      --bg1:#fbfbff;
+      --bg2:#eef2ff;
+      --bg3:#f3f4ff;
+      --ink:rgba(20,20,28,.86);
+      --muted:rgba(40,40,60,.56);
+      --glass:rgba(255,255,255,.72);
+      --border:rgba(90,80,130,.12);
+      --shadow:0 18px 60px rgba(0,0,0,.18);
+      --btn1:#6b5cff;
+      --btn2:#7b3ff2;
     }
 
     body{
@@ -26,10 +25,11 @@
       min-height:100vh;
       padding:16px;
       background:
-        radial-gradient(circle at 20% 20%, var(--bg1), rgba(255,255,255,0) 55%),
-        radial-gradient(circle at 80% 10%, var(--lav), rgba(255,255,255,0) 60%),
-        radial-gradient(circle at 60% 90%, var(--ice), rgba(255,255,255,0) 55%),
-        linear-gradient(135deg, #f7f8ff 0%, #eef2ff 40%, #f3f4ff 100%);
+        radial-gradient(circle at 18% 18%, rgba(255,255,255,.95), rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 82% 10%, rgba(225,214,255,.55), rgba(255,255,255,0) 60%),
+        radial-gradient(circle at 60% 92%, rgba(186,225,255,.42), rgba(255,255,255,0) 55%),
+        linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 42%, var(--bg3) 100%);
+      color:var(--ink);
     }
 
     .container{
@@ -38,49 +38,81 @@
       border-radius:22px;
       overflow:hidden;
       background:var(--glass);
-      box-shadow: var(--shadow);
+      box-shadow:var(--shadow);
       border:1px solid var(--border);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
 
+    /* ===== Header (Top Card) ===== */
     .header{
-      padding:28px 18px;
+      padding:22px 16px 18px;
       text-align:center;
-      background:linear-gradient(135deg, rgba(245,247,255,0.95) 0%, rgba(232,225,255,0.92) 55%, rgba(214,232,255,0.88) 100%);
+      background:linear-gradient(135deg, rgba(245,247,255,.98) 0%, rgba(232,225,255,.94) 55%, rgba(214,232,255,.92) 100%);
       position:relative;
       overflow:hidden;
     }
-
     .header::before{
       content:'⭐';
       position:absolute;
-      top:-18px; right:-12px;
-      font-size:96px;
-      opacity:0.14;
-      transform: rotate(8deg);
+      top:-18px; right:-10px;
+      font-size:86px;
+      opacity:.10;
+      transform: rotate(10deg);
+      pointer-events:none;
+    }
+
+    .topline{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+      padding: 4px 4px 10px;
+    }
+
+    .badge{
+      width:56px;height:56px;
+      border-radius:999px;
+      background: rgba(255,255,255,.75);
+      border:1px solid var(--border);
+      box-shadow: 0 10px 26px rgba(60,40,110,.12);
+      display:grid;place-items:center;
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    /* Put your logo file next to this HTML as: lead_badge.webp (or .png) */
+    .badge img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
     h1{
-      font-size: clamp(24px, 5.6vw, 44px);
+      font-size: clamp(22px, 5.6vw, 44px);
+      letter-spacing:.2px;
       color:#ffffff;
-      letter-spacing:0.2px;
-      text-shadow: 0 2px 10px rgba(88, 66, 140, 0.25), 0 10px 35px rgba(120, 90, 190, 0.18);
-      margin-bottom:8px;
-      padding: 0 8px;
+      text-shadow:
+        0 2px 10px rgba(88,66,140,.20),
+        0 12px 40px rgba(120,90,190,.16);
+      padding:0 8px;
+      line-height:1.08;
     }
 
     .sparkle{display:inline-block; animation:sparkle 2s infinite}
     @keyframes sparkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(1.16)}}
 
     .subtitle{
-      font-size: clamp(14px, 3.6vw, 18px);
-      color: rgba(255,255,255,0.92);
+      font-size: clamp(13px, 3.6vw, 18px);
+      color: rgba(255,255,255,.92);
       font-style: italic;
+      margin-top:6px;
     }
 
+    /* ===== Hero (Link Block) ===== */
     .image-section{
-      padding:22px 14px 30px;
+      padding:20px 14px 24px;
       background: linear-gradient(to bottom, #fbfbff, #ffffff);
     }
 
@@ -89,14 +121,14 @@
       width:min(100%, 980px);
       margin: 0 auto;
       border-radius:26px;
-      padding: 26px 16px;
+      padding: 24px 16px;
       background:
-        radial-gradient(circle at 20% 25%, rgba(255,255,255,0.92), rgba(255,255,255,0) 55%),
-        radial-gradient(circle at 85% 20%, rgba(214,201,255,0.35), rgba(255,255,255,0) 60%),
-        radial-gradient(circle at 60% 90%, rgba(186,225,255,0.30), rgba(255,255,255,0) 58%),
-        linear-gradient(135deg, rgba(255,255,255,0.70), rgba(235,230,255,0.55));
-      box-shadow: var(--heroShadow);
-      border: 1px solid rgba(70, 60, 110, 0.10);
+        radial-gradient(circle at 20% 25%, rgba(255,255,255,.92), rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 85% 20%, rgba(214,201,255,.35), rgba(255,255,255,0) 60%),
+        radial-gradient(circle at 60% 90%, rgba(186,225,255,.28), rgba(255,255,255,0) 58%),
+        linear-gradient(135deg, rgba(255,255,255,.70), rgba(235,230,255,.56));
+      box-shadow: 0 20px 70px rgba(60,40,110,.14);
+      border: 1px solid rgba(70,60,110,.10);
       overflow:hidden;
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
@@ -107,17 +139,16 @@
       position:absolute;
       inset:-40px;
       background: radial-gradient(circle at 50% 45%,
-        rgba(255,255,255,0.85) 0%,
-        rgba(210,195,255,0.35) 40%,
-        rgba(180,220,255,0.22) 62%,
-        rgba(120, 90, 190, 0.10) 78%,
+        rgba(255,255,255,.85) 0%,
+        rgba(210,195,255,.34) 40%,
+        rgba(180,220,255,.22) 62%,
+        rgba(120,90,190,.10) 78%,
         rgba(0,0,0,0) 100%);
       filter: blur(26px);
-      opacity: 0.85;
+      opacity:.85;
       pointer-events:none;
       animation: glowPulse 3.5s ease-in-out infinite;
     }
-
     @keyframes glowPulse{0%,100%{opacity:.70;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
 
     .link-stack{
@@ -130,95 +161,28 @@
       padding: 6px 8px;
     }
 
-    /* TOP CARD AREA (requested) */
-    .lead-card{
-      width: min(780px, 96%);
-      display:grid;
-      grid-template-columns: 120px 1fr;
-      gap: 16px;
-      align-items:center;
-      padding: 14px 14px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.72);
-      border: 1px solid rgba(90,80,130,0.12);
-      box-shadow: 0 10px 28px rgba(60, 40, 110, 0.10);
-    }
-
-    .portrait{
-      width: 120px;
-      aspect-ratio: 1 / 1;
-      border-radius: 16px;
-      overflow:hidden;
-      border: 1px solid rgba(70,60,110,0.14);
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(240,235,255,0.55));
-      position:relative;
-    }
-
-    .portrait img{
-      width:100%;
-      height:100%;
-      object-fit: cover;
-      display:block;
-    }
-
-    /* If image fails in iframe, this fallback still looks great */
-    .portrait-fallback{
-      width:100%;
-      height:100%;
-      display:grid;
-      place-items:center;
-      font-size: 44px;
-      color: rgba(70,60,110,0.55);
-    }
-
-    .card-text{
-      text-align:left;
-    }
-
-    .card-kicker{
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 12px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(80,70,120,0.55);
-      margin-bottom: 6px;
-    }
-
-    .card-title{
-      font-size: clamp(18px, 4.2vw, 26px);
-      color: var(--ink);
-      font-weight: 900;
-      letter-spacing: 0.2px;
-      margin-bottom: 4px;
-    }
-
-    .card-sub{
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 14px;
-      color: rgba(40,40,60,0.62);
-      line-height: 1.35;
-    }
-
+    /* TEXT LINK (exact) */
     .princess-link{
       font-size: clamp(44px, 10vw, 70px);
       line-height:1;
       text-decoration:none;
-      filter: drop-shadow(0 10px 22px rgba(0,0,0,0.16));
-      transition: transform .15s ease, filter .15s ease;
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,.14));
+      transition: transform .15s ease;
       -webkit-tap-highlight-color: transparent;
       user-select:none;
     }
-    .princess-link:active{transform:scale(0.96)}
+    .princess-link:active{transform:scale(.96)}
     .princess-link:hover{transform:scale(1.03)}
 
     .link-title{
       font-size: clamp(18px, 4.6vw, 28px);
-      font-weight: 800;
-      color: var(--ink);
-      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
-      letter-spacing: 0.2px;
+      font-weight: 900;
+      color: rgba(40,40,60,.76);
+      text-shadow: 0 1px 0 rgba(255,255,255,.6);
+      letter-spacing:.2px;
     }
 
+    /* BIG TAP BUTTON (keep behavior) */
     .raw-btn{
       display:inline-flex;
       align-items:center;
@@ -229,52 +193,98 @@
       border-radius: 999px;
       font-size: clamp(18px, 4.6vw, 22px);
       font-weight: 900;
-      letter-spacing: 0.6px;
+      letter-spacing: .6px;
       color:#fff;
       text-decoration:none;
-      background: var(--btn);
-      box-shadow: 0 14px 34px rgba(107, 92, 255, 0.28);
+      background: linear-gradient(135deg, var(--btn1), var(--btn2));
+      box-shadow: 0 14px 34px rgba(107,92,255,.28);
       transition: transform .15s ease, box-shadow .15s ease;
       -webkit-tap-highlight-color: transparent;
       user-select:none;
     }
-    .raw-btn:hover{transform: translateY(-1px)}
-    .raw-btn:active{transform: translateY(1px) scale(0.985)}
+    .raw-btn:hover{transform: translateY(-1px); box-shadow: 0 18px 40px rgba(123,63,242,.32);}
+    .raw-btn:active{transform: translateY(1px) scale(.985); box-shadow: 0 10px 26px rgba(107,92,255,.22);}
 
     .link-note{
       font-size: 14px;
-      color: var(--muted);
+      color: rgba(40,40,60,.52);
       font-style: italic;
     }
 
+    /* ===== Content ===== */
+    .content{
+      padding: 0 18px 24px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .section{
+      margin-top: 18px;
+      padding: 16px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(90,80,130,.10);
+    }
+
+    .section h2{
+      font-size: clamp(18px, 4.2vw, 26px);
+      color: rgba(80, 70, 140, .88);
+      margin-bottom: 10px;
+      border-left: 5px solid rgba(123,63,242,.35);
+      padding-left: 12px;
+    }
+
+    .section p{
+      line-height: 1.7;
+      font-size: 16px;
+      color: rgba(30,30,40,.78);
+      margin-bottom: 10px;
+    }
+
+    .qualities{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .quality-card{
+      background: linear-gradient(135deg, rgba(107,92,255,.92), rgba(123,63,242,.92));
+      padding: 16px 14px;
+      border-radius: 16px;
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(90,70,170,.18);
+      border: 1px solid rgba(255,255,255,.16);
+      transition: transform .15s ease;
+      min-height: 122px;
+    }
+    .quality-card:hover{transform: translateY(-2px);}
+    .quality-icon{font-size: 28px; margin-bottom: 8px;}
+    .quality-title{font-weight: 900; margin-bottom: 6px;}
+    .quality-desc{opacity: .92; line-height: 1.45; font-size: 14px;}
+
+    .footer{
+      padding: 18px 16px 22px;
+      text-align:center;
+      color: rgba(40,40,60,.62);
+      font-size: 14px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.55));
+    }
+
+    /* iPhone spacing */
+    @media (max-width: 430px){
+      body{padding:12px;}
+      .badge{width:52px;height:52px;}
+      .image-hero{padding: 20px 12px;}
+      .content{padding: 0 14px 20px;}
+    }
+
+    /* Reduce motion if requested */
     @media (prefers-reduced-motion: reduce){
       .princess-link,.raw-btn{transition:none}
       .sparkle{animation:none}
       .image-hero::before{animation:none}
-    }
-
-    /* Mobile polish */
-    @media (max-width: 520px){
-      .lead-card{grid-template-columns: 92px 1fr}
-      .portrait{width:92px;border-radius:14px}
-      .princess-link{font-size: clamp(40px, 11vw, 64px)}
-      .raw-btn{min-height: 60px}
-    }
-
-    .content{
-      padding: 0 18px 22px;
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    .mini{
-      margin-top: 14px;
-      padding: 14px 14px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.65);
-      border: 1px solid rgba(90,80,130,0.10);
-      color: rgba(30,30,40,0.70);
-      line-height: 1.6;
-      font-size: 15px;
+      .quality-card{transition:none}
     }
   </style>
 </head>
@@ -282,59 +292,111 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1><span class="sparkle">✨</span> Dr. Janine Tubiolo: Our L.E.A.D.er <span class="sparkle">✨</span></h1>
-      <div class="subtitle">Principal of 469X</div>
+      <div class="topline">
+        <div class="badge" aria-label="LEAD badge">
+          <!-- Put your school badge image next to this HTML file:
+               lead_badge.webp  (or change filename below) -->
+          <img src="lead_badge.webp" alt="W L.E.A.D. badge" onerror="this.style.display='none'">
+        </div>
+
+        <div>
+          <h1><span class="sparkle">✨</span> Dr. Tubiolo — L.E.A.D.er of 469X <span class="sparkle">✨</span></h1>
+          <div class="subtitle">L.E.A.D.ing by example — for students, families, and staff</div>
+        </div>
+      </div>
     </div>
 
     <div class="image-section">
       <div class="image-hero">
         <div class="link-stack">
-
-          <!-- CARD AT TOP (requested) -->
-          <div class="lead-card">
-            <div class="portrait" aria-label="Portrait">
-              <!-- Replace the src below with a direct .png/.jpg if you have one -->
-              <img
-                src="REPLACE_WITH_DIRECT_IMAGE_URL.png"
-                alt="Dr. Janine Tubiolo"
-                onerror="this.remove();document.getElementById('pf').style.display='grid';"
-              />
-              <div id="pf" class="portrait-fallback" style="display:none">🎓</div>
-            </div>
-
-            <div class="card-text">
-              <div class="card-kicker">L.E.A.D.er Spotlight</div>
-              <div class="card-title">Dr. Janine Tubiolo</div>
-              <div class="card-sub">
-                Warm, steady leadership — building a positive school culture with clarity and care.
-              </div>
-            </div>
-          </div>
-
-          <!-- LINK HERO (kept the same pattern) -->
+          <!-- TEXT LINK (keep simple + school appropriate) -->
           <a class="princess-link"
-             href="https://imgur.com/a/9IqbQtd"
+             href="https://https://imgur.com/a/dr-tubiolo-l-e-der-of-75x469-69ATzR5"
              target="_blank"
              rel="noopener noreferrer"
-             aria-label="Open gallery link">✨👩‍🏫✨</a>
+             aria-label="Open the gallery link">✨👩🏻‍🏫✨</a>
 
-          <div class="link-title">Open L.E.A.D.er Gallery</div>
+          <div class="link-title">Open Appreciation Gallery</div>
 
+          <!-- BIG TAP BUTTON -->
           <a class="raw-btn"
-             href="https://imgur.com/a/69ATzR5"
+             href="https://imgur.com/a/9IqbQtd"
              target="_blank"
              rel="noopener noreferrer">RAW ↗</a>
 
-          <div class="link-note">Opens Imgur in a new tab</div>
+          <div class="link-note">Opens in a new tab (works well on iPhone)</div>
         </div>
       </div>
     </div>
 
     <div class="content">
-      <div class="mini">
-        Tip: This is <b>iframe-safe</b> inside Streamlit. If the portrait image doesn’t load, use a direct image URL
-        (ends in <code>.png</code> or <code>.jpg</code>) or keep it link-first like this.
+      <div class="section">
+        <h2>Leading With Care</h2>
+        <p>
+          Dr. Tubiolo supports learning across our community by helping teams stay organized, calm, and student-centered.
+          Her leadership strengthens classrooms, builds trust, and keeps the focus on growth.
+        </p>
+        <p>
+          This page is a simple, school-appropriate celebration of a leader who values students, educators, and families.
+        </p>
       </div>
+
+      <div class="section">
+        <h2>What Makes Dr. Tubiolo Extraordinary</h2>
+        <div class="qualities">
+          <div class="quality-card">
+            <div class="quality-icon">🧠</div>
+            <div class="quality-title">Balanced Leadership</div>
+            <div class="quality-desc">Clear decisions, thoughtful follow-through, and steady support for teams.</div>
+          </div>
+
+          <div class="quality-card">
+            <div class="quality-icon">💝</div>
+            <div class="quality-title">Warm Presence</div>
+            <div class="quality-desc">Creates a culture where people feel safe, respected, and encouraged.</div>
+          </div>
+
+          <div class="quality-card">
+            <div class="quality-icon">🧭</div>
+            <div class="quality-title">Guides With Purpose</div>
+            <div class="quality-desc">Keeps priorities focused on learning, routines, and positive outcomes.</div>
+          </div>
+
+          <div class="quality-card">
+            <div class="quality-icon">🏆</div>
+            <div class="quality-title">High Standards</div>
+            <div class="quality-desc">Helps staff aim high while staying realistic, supportive, and consistent.</div>
+          </div>
+
+          <div class="quality-card">
+            <div class="quality-icon">🐞</div>
+            <div class="quality-title">Sees the Best in Others</div>
+            <div class="quality-desc">Recognizes strengths and celebrates effort, progress, and teamwork.</div>
+          </div>
+
+          <div class="quality-card">
+            <div class="quality-icon">💪</div>
+            <div class="quality-title">Steady Under Pressure</div>
+            <div class="quality-desc">Handles challenges with composure and helps others do the same.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>A “We Can Do This” Mindset</h2>
+        <p>
+          Strong leadership helps a school feel stable. Dr. Tubiolo models problem-solving, respectful communication,
+          and a calm approach that keeps students and staff moving forward.
+        </p>
+        <p>
+          Thank you for leading with care, consistency, and heart.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div><b>469X</b> • Appreciation Page</div>
+      <div style="margin-top:6px;">Tip: replace the link + emoji for any new celebration page.</div>
     </div>
   </div>
 </body>
