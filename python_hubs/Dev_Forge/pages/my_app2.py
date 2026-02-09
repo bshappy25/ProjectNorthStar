@@ -8,6 +8,28 @@ import json, re
 from pathlib import Path
 import streamlit as st
 
+
+# ============================================================
+# BASE PALETTES GUARD (required if file runs standalone)
+# ============================================================
+
+if "PALETTES" not in globals():
+    PALETTES = {
+        "universal gray": {
+            "bg": "#f3f4f6",
+            "surface": "#ffffff",
+            "surface2": "#f8fafc",
+            "border": "#d1d5db",
+            "text": "#111827",
+            "muted": "#6b7280",
+            "accent": "#2563eb",
+            "good": "#16a34a",
+            "warn": "#f59e0b",
+            "bad": "#ef4444",
+        }
+    }
+
+
 # ---------- storage ----------
 CUSTOM_PALETTES_PATH = Path("custom_palettes.json")
 
