@@ -323,7 +323,6 @@ st.markdown(
         padding: 18px;
         opacity: 0;
         animation: dfReelFade {total}s infinite ease-in-out;
-        will-change: opacity, transform;
       }}
       .df-reel-slide img {{
         max-height: 100%;
@@ -334,32 +333,23 @@ st.markdown(
         border: 1px solid rgba(255,255,255,0.28);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        box-shadow: 0 14px 28px rgba(0,0,0,0.12);
         padding: 10px;
       }}
-      .df-reel-empty {{
-        width: 100%;
-        height: 100%;
-        border-radius: 18px;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        background: rgba(255,255,255,0.10);
-        border: 1px dashed rgba(255,255,255,0.28);
-      }}
       @keyframes dfReelFade {{
-        0%   {{ opacity: 0; transform: scale(0.996); }}
-        10%  {{ opacity: 1; transform: scale(1.0); }}
-        30%  {{ opacity: 1; transform: scale(1.0); }}
-        45%  {{ opacity: 0; transform: scale(1.004); }}
+        0% {{ opacity: 0; }}
+        10% {{ opacity: 1; }}
+        30% {{ opacity: 1; }}
+        45% {{ opacity: 0; }}
         100% {{ opacity: 0; }}
       }}
     </style>
-    <div class="df-reel-frame">{slides_html}</div>
-    """).strip(),
-    unsafe_allow_html=True
+    <div class="df-reel-frame">
+      {slides_html}
+    </div>
+    """),
+    unsafe_allow_html=True,
 )
+
 
 st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
