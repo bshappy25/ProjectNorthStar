@@ -6,11 +6,7 @@
   <title>Ariel: A People's Princess</title>
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Georgia', serif;
@@ -86,7 +82,6 @@
     }
 
     .image-hero::before {
-      /* soft outer glow */
       content: "";
       position: absolute;
       inset: -40px;
@@ -122,7 +117,6 @@
     }
 
     .sparkles::after {
-      /* a second twinkle layer with different timing */
       content: "";
       position: absolute;
       inset: 0;
@@ -149,9 +143,7 @@
       background: #fff;
     }
 
-    .main-image:hover {
-      transform: scale(1.02);
-    }
+    .main-image:hover { transform: scale(1.02); }
 
     @keyframes glowPulse {
       0%, 100% { opacity: 0.75; transform: scale(1); }
@@ -170,13 +162,9 @@
 
     /* ============================================================ */
 
-    .content {
-      padding: 40px;
-    }
+    .content { padding: 40px; }
 
-    .section {
-      margin-bottom: 40px;
-    }
+    .section { margin-bottom: 40px; }
 
     .section h2 {
       color: #667eea;
@@ -214,21 +202,11 @@
       box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
     }
 
-    .quality-icon {
-      font-size: 3em;
-      margin-bottom: 10px;
-    }
+    .quality-icon { font-size: 3em; margin-bottom: 10px; }
 
-    .quality-title {
-      font-size: 1.3em;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
+    .quality-title { font-size: 1.3em; font-weight: bold; margin-bottom: 10px; }
 
-    .quality-desc {
-      font-size: 0.95em;
-      opacity: 0.9;
-    }
+    .quality-desc { font-size: 0.95em; opacity: 0.9; }
 
     .symbols {
       background: #f8f9fa;
@@ -247,19 +225,11 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    .symbol-emoji {
-      font-size: 2.5em;
-      margin-right: 20px;
-    }
+    .symbol-emoji { font-size: 2.5em; margin-right: 20px; }
 
-    .symbol-text {
-      flex: 1;
-    }
+    .symbol-text { flex: 1; }
 
-    .symbol-text h3 {
-      color: #667eea;
-      margin-bottom: 5px;
-    }
+    .symbol-text h3 { color: #667eea; margin-bottom: 5px; }
 
     .footer {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -269,10 +239,7 @@
       font-size: 1.1em;
     }
 
-    .sparkle {
-      display: inline-block;
-      animation: sparkle 2s infinite;
-    }
+    .sparkle { display: inline-block; animation: sparkle 2s infinite; }
 
     @keyframes sparkle {
       0%, 100% { opacity: 1; transform: scale(1); }
@@ -295,14 +262,19 @@
     </div>
 
     <div class="image-section">
-      <!-- IMPORTANT: path is relative to this HTML file -->
       <div class="image-hero">
         <div class="sparkles"></div>
+
         <img
-  src="https://drive.google.com/uc?export=view&id=1NXHHWnztFwyBapvUETcZ8GeHI9uvUYJZ"
-  alt="Princess Ariel in Winter"
-  class="main-image"
->
+          src="https://drive.google.com/uc?export=view&id=1NXHHWnztFwyBapvUETcZ8GeHI9uvUYJZ"
+          alt="Princess Ariel in Winter"
+          class="main-image"
+          loading="eager"
+          referrerpolicy="no-referrer"
+        >
+
+      </div>
+    </div>
 
     <div class="content">
       <div class="section">
@@ -431,18 +403,13 @@
   </div>
 
   <script>
-    // Add a subtle parallax effect on scroll
     window.addEventListener('scroll', () => {
       const scrolled = window.pageYOffset;
       const header = document.querySelector('.header');
       header.style.transform = `translateY(${scrolled * 0.5}px)`;
     });
 
-    // Animate quality cards on scroll
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px'
-    };
+    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -100px 0px' };
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -452,11 +419,8 @@
       });
     }, observerOptions);
 
-    document.querySelectorAll('.quality-card, .symbol-item').forEach(el => {
-      observer.observe(el);
-    });
+    document.querySelectorAll('.quality-card, .symbol-item').forEach(el => observer.observe(el));
 
-    // Add CSS for fade in animation
     const style = document.createElement('style');
     style.textContent = `
       @keyframes fadeInUp {
