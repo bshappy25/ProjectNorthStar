@@ -1,28 +1,29 @@
 import streamlit as st
 
-st.title("🔬 Ms. Piluso Science")
-st.markdown("### NGSS + New Visions Curriculum Tools")
+st.title("⚡ ABC Generator")
+st.markdown("### Architecture, Build, Code, Style Decisions")
 
-# Placeholder for your core logic (e.g., lesson builder, 5E framework, exports)
-st.subheader("Select NGSS Standard")
-ngss_standard = st.selectbox("Standard", ["HS-LS1-1", "HS-PS2-3", "Other"])  # Extend as needed
+# Placeholder for decision framework
+st.subheader("A - Architecture")
+arch_choice = st.radio("Select Structure", ["Single File", "Multi-Page", "Modular with Utils"])
 
-st.subheader("5E Framework Builder")
-engage = st.text_area("Engage")
-explore = st.text_area("Explore")
-explain = st.text_area("Explain")
-elaborate = st.text_area("Elaborate")
-evaluate = st.text_area("Evaluate")
+st.subheader("B - Build Pattern")
+build_choice = st.radio("Pattern", ["Prototype in Sandbox", "Direct Production", "Iterate with Tests"])
 
-st.subheader("Materials & Accommodations")
-materials = st.text_area("Materials")
-accommodations = st.text_area("Accommodations")
+st.subheader("C - Code Style")
+code_choice = st.radio("Style", ["Minimalist", "Verbose Comments", "Functional"])
 
-if st.button("Export SCI-BLOCK"):
-    # Placeholder export logic (e.g., to JPEG/PDF)
-    st.success("Exported successfully.")
+st.subheader("S - Style Selection")
+style_choice = st.radio("Aesthetic", ["Glassmorphism", "Minimal", "Vibrant"])
 
-# Add more features as required
+if st.button("Generate Recommendation"):
+    st.markdown(f"""
+    **Recommended Structure:** {arch_choice} with {build_choice}.
+    **Code Approach:** {code_choice}.
+    **Visual Style:** {style_choice}.
+    """)
+
+# Add starter code generation if desired
 
 # =====================
 # PAGE CONFIG
