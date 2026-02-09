@@ -1,14 +1,28 @@
-"""
-Ms. Piluso Science - Phase 2 Department Tool
-
-NGSS-aligned lesson planning with New Visions curriculum integration
-5E framework auto-builder
-Science Mode glassy UI
-
-Quick export to BSChapp v2 format
-"""
-
 import streamlit as st
+
+st.title("🔬 Ms. Piluso Science")
+st.markdown("### NGSS + New Visions Curriculum Tools")
+
+# Placeholder for your core logic (e.g., lesson builder, 5E framework, exports)
+st.subheader("Select NGSS Standard")
+ngss_standard = st.selectbox("Standard", ["HS-LS1-1", "HS-PS2-3", "Other"])  # Extend as needed
+
+st.subheader("5E Framework Builder")
+engage = st.text_area("Engage")
+explore = st.text_area("Explore")
+explain = st.text_area("Explain")
+elaborate = st.text_area("Elaborate")
+evaluate = st.text_area("Evaluate")
+
+st.subheader("Materials & Accommodations")
+materials = st.text_area("Materials")
+accommodations = st.text_area("Accommodations")
+
+if st.button("Export SCI-BLOCK"):
+    # Placeholder export logic (e.g., to JPEG/PDF)
+    st.success("Exported successfully.")
+
+# Add more features as required
 from datetime import date
 
 from PIL import Image, ImageDraw, ImageFont
