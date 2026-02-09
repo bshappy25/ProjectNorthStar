@@ -1,10 +1,35 @@
-# -*- coding: utf-8 -*-
-"""
-DevForge – Block Library (Production Grade)
-Universal Gray • Admin Gate • Color-Coded Blocks • Bannered JPEG/PNG Export
-"""
-
 import streamlit as st
+
+st.title("📚 Code Library")
+st.markdown("### Reusable Streamlit Components and Patterns")
+
+# Placeholder for snippets (copy/paste UI)
+with st.expander("Glassy UI Card"):
+    st.code("""
+    st.markdown('<div class="dev-card">Content here</div>', unsafe_allow_html=True)
+    """, language="python")
+
+with st.expander("PDF Export Pattern"):
+    st.code("""
+    import io
+    from reportlab.pdfgen import canvas
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer)
+    p.drawString(100, 100, "Hello World")
+    p.save()
+    buffer.seek(0)
+    st.download_button("Download PDF", buffer, "export.pdf")
+    """, language="python")
+
+with st.expander("Session State Pattern"):
+    st.code("""
+    if "key" not in st.session_state:
+        st.session_state["key"] = default_value
+    """, language="python")
+
+# Extend with more library items
+
+
 from pathlib import Path
 import json, io, zipfile, textwrap, datetime
 from PIL import Image, ImageDraw, ImageFont
