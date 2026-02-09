@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jon: The Thoughtful Educator</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family: Georgia, serif;
+      min-height:100vh;
+      padding:16px;
+      background:radial-gradient(circle at 25% 20%, rgba(255,255,255,0.95), rgba(255,255,255,0) 55%),radial-gradient(circle at 80% 15%, rgba(180,220,255,0.60), rgba(255,255,255,0) 60%),linear-gradient(135deg, #f8fbff 0%, #edf6ff 45%, #f4f8ff 100%);
+    }
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      border-radius:22px;
+      overflow:hidden;
+      background:rgba(255,255,255,0.72);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.18);
+      border:1px solid rgba(90,80,130,0.10);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .header{
+      padding:28px 18px;
+      text-align:center;
+      background:linear-gradient(135deg, rgba(245,252,255,0.98), rgba(220,240,255,0.90));
+      position:relative;
+      overflow:hidden;
+    }
+    .header::before{
+      content:'👑';
+      position:absolute;
+      top:-18px; right:-12px;
+      font-size:96px;
+      opacity:0.12;
+      transform: rotate(8deg);
+    }
+    h1{
+      font-size: clamp(26px, 5.6vw, 46px);
+      color:#fff;
+      letter-spacing:0.2px;
+      text-shadow: 0 2px 10px rgba(88, 66, 140, 0.25), 0 10px 35px rgba(120, 90, 190, 0.18);
+      margin-bottom:8px;
+      padding: 0 8px;
+    }
+    .sparkle{display:inline-block; animation:sparkle 2s infinite}
+    @keyframes sparkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(1.16)}}
+    .subtitle{
+      font-size: clamp(14px, 3.6vw, 18px);
+      color: rgba(255,255,255,0.92);
+      font-style: italic;
+    }
+    .image-section{
+      padding:22px 14px 30px;
+      background: linear-gradient(to bottom, #fbfbff, #ffffff);
+    }
+    .image-hero{
+      position:relative;
+      width:min(100%, 980px);
+      margin: 0 auto;
+      border-radius:26px;
+      padding: 26px 16px;
+      background: radial-gradient(circle at 20% 25%, rgba(255,255,255,0.92), rgba(255,255,255,0) 55%),radial-gradient(circle at 80% 20%, rgba(160,210,255,0.32), rgba(255,255,255,0) 60%),linear-gradient(135deg, rgba(255,255,255,0.70), rgba(220,245,255,0.45));
+      box-shadow: 0 20px 70px rgba(20, 60, 120, 0.14);
+      border: 1px solid rgba(70, 60, 110, 0.10);
+      overflow:hidden;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .image-hero::before{
+      content:"";
+      position:absolute;
+      inset:-40px;
+      background: radial-gradient(circle at 50% 45%,
+        rgba(255,255,255,0.85) 0%,
+        rgba(210,195,255,0.35) 40%,
+        rgba(180,220,255,0.22) 62%,
+        rgba(120, 90, 190, 0.10) 78%,
+        rgba(0,0,0,0) 100%);
+      filter: blur(26px);
+      opacity: 0.85;
+      pointer-events:none;
+      animation: glowPulse 3.5s ease-in-out infinite;
+    }
+    @keyframes glowPulse{0%,100%{opacity:.70;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
+    .link-stack{
+      position:relative;
+      z-index:2;
+      display:grid;
+      gap:14px;
+      justify-items:center;
+      text-align:center;
+      padding: 6px 8px;
+    }
+    .princess-link{
+      font-size: clamp(44px, 10vw, 70px);
+      line-height:1;
+      text-decoration:none;
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,0.16));
+      transition: transform .15s ease, filter .15s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .princess-link:active{transform:scale(0.96)}
+    .princess-link:hover{transform:scale(1.03)}
+    .link-title{
+      font-size: clamp(18px, 4.6vw, 28px);
+      font-weight: 800;
+      color: rgba(20, 25, 35, 0.74);
+      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+      letter-spacing: 0.2px;
+    }
+    .raw-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: min(520px, 92%);
+      min-height: 62px;
+      padding: 16px 22px;
+      border-radius: 999px;
+      font-size: clamp(18px, 4.6vw, 22px);
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      color:#fff;
+      text-decoration:none;
+      background: linear-gradient(135deg, #4f8cff, #3b5bdb);
+      box-shadow: 0 14px 34px rgba(107, 92, 255, 0.28);
+      transition: transform .15s ease, box-shadow .15s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .raw-btn:hover{transform: translateY(-1px)}
+    .raw-btn:active{transform: translateY(1px) scale(0.985)}
+    .link-note{
+      font-size: 14px;
+      color: rgba(20, 25, 35, 0.50);
+      font-style: italic;
+    }
+    @media (prefers-reduced-motion: reduce){
+      .princess-link,.raw-btn{transition:none}
+      .sparkle{animation:none}
+      .image-hero::before{animation:none}
+    }
+    /* Optional content area (kept minimal + safe) */
+    .content{
+      padding: 0 18px 22px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .mini{
+      margin-top: 14px;
+      padding: 14px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.65);
+      border: 1px solid rgba(90,80,130,0.10);
+      color: rgba(30,30,40,0.70);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1><span class="sparkle">✨</span> Jon: The Thoughtful Educator <span class="sparkle">✨</span></h1>
+      <div class="subtitle">Reading and Writing for Scholars</div>
+    </div>
+
+    <div class="image-section">
+      <div class="image-hero">
+        <div class="link-stack">
+          <a class="princess-link" href="https://imgur.com/a/9IqbQtd" target="_blank" rel="noopener noreferrer"
+             aria-label="Open birthday gallery link">✨👨🏻‍🦰✨</a>
+          <div class="link-title">Open Birthday Gallery</div>
+          <a class="raw-btn" href="https://imgur.com/a/9IqbQtd" target="_blank" rel="noopener noreferrer">YAY!</a>
+          <div class="link-note">Opens Imgur in a new tab</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="mini">
+        Tip: This layout is <b>iframe-safe</b> inside Streamlit. If you want images, prefer hosting that returns a direct
+        <code>.png/.jpg</code> URL (or keep it link-first like this).
+      </div>
+    </div>
+  </div>
+</body>
+</html>
