@@ -208,32 +208,28 @@ with st.sidebar:
 # DYNAMIC NAVIGATION
 # ============================================================
 
-home_page = st.Page("pages/home.py", title="DevForge Home", icon="🔧", default=True)
+from pathlib import Path
+
+APP_DIR = Path(__file__).resolve().parent
+PAGES_DIR = APP_DIR / "pages"
+
+def P(name: str) -> str:
+    return str(PAGES_DIR / name)
+
+home_page = st.Page(P("home.py"), title="DevForge Home", icon="🔧", default=True)
 
 core_pages = [
-    st.Page("pages/Ms_Piluso_Science.py", title="Ms. Piluso Science", icon="🔬"),
-    st.Page("pages/Code_Library.py", title="Code Library", icon="📚"),
-    st.Page("pages/ABC_Generator.py", title="ABC Generator", icon="⚡"),
+    st.Page(P("Ms_Piluso_Science.py"), title="Ms. Piluso Science", icon="🔬"),
+    st.Page(P("Code_Library.py"), title="Code Library", icon="📚"),
+    st.Page(P("ABC_Generator.py"), title="ABC Generator", icon="⚡"),
 ]
 
 sandbox_pages = [
-    st.Page("pages/my_app1.py", title="Sandbox 1", icon="🧪"),
-    st.Page("pages/my_app2.py", title="Sandbox 2", icon="🧪"),
+    st.Page(P("my_app1.py"), title="Sandbox 1", icon="🧪"),
+    st.Page(P("my_app2.py"), title="Sandbox 2", icon="🧪"),
 ]
 
 admin_pages = [
-    st.Page("pages/Teacher_Tools.py", title="Teacher Tools", icon="🧰"),
-    st.Page("pages/CSS_Editor.py", title="CSS Editor", icon="🎨"),
+    st.Page(P("Teacher_Tools.py"), title="Teacher Tools", icon="🧰"),
+    st.Page(P("CSS_Editor.py"), title="CSS Editor", icon="🎨"),
 ]
-
-sections = {
-    "Home": [home_page],
-    "Core Tools": core_pages,
-    "Sandboxes": sandbox_pages,
-}
-
-if st.session_state.get("admin_unlocked", False):
-    sections["Admin Extras"] = admin_pages
-
-pg = st.navigation(sections)
-pg.run()
