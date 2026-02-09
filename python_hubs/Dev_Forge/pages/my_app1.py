@@ -23,11 +23,11 @@ import streamlit as st
 # -----------------------------
 # 0) Signature Theme Injector (condensed)
 # -----------------------------
+
 def apply_signature_theme(
-    *,
-    ticker_text: str | None = "NGSS MS Research Vault • Universal Gray",
-    show_ticker: bool = True,
-    palette: dict | None = None,
+    ticker_text=None,
+    show_ticker=True,
+    palette=None,
 ):
     base = {
         "bg": "#f3f4f6",
@@ -57,48 +57,102 @@ def apply_signature_theme(
     if palette:
         base.update(palette)
 
-    css = f"""
+    css = r"""
     :root {{
-      --bg:{base["bg"]}; --surface:{base["surface"]}; --surface2:{base["surface2"]}; --border:{base["border"]};
-      --text:{base["text"]}; --muted:{base["muted"]}; --accent:{base["accent"]};
-      --radius:{base["radius"]}; --pad:{base["pad"]}; --font:{base["font"]}; --font_weight:{base["weight"]};
-      --shadow:{base["shadow"]};
-      --ov_bg:{base["ov_bg"]}; --ov_border:{base["ov_border"]}; --ov_blur:{base["ov_blur"]};
-      --ov_text_opacity:{base["ov_text_opacity"]}; --ov_sheen:{base["ov_sheen"]};
-      --ov_text_color:{base["ov_text_color"]}; --ov_text_shadow:{base["ov_text_shadow"]};
-      --ticker_bg:{base["ticker_bg"]}; --ticker_border:{base["ticker_border"]};
-      --ticker_blur:{base["ticker_blur"]}; --ticker_size:{base["ticker_size"]};
+      --bg:{bg}; --surface:{surface}; --surface2:{surface2}; --border:{border};
+      --text:{text}; --muted:{muted}; --accent:{accent};
+      --radius:{radius}; --pad:{pad}; --font:{font}; --font_weight:{weight};
+      --shadow:{shadow};
+      --ov_bg:{ov_bg}; --ov_border:{ov_border}; --ov_blur:{ov_blur};
+      --ov_text_opacity:{ov_text_opacity}; --ov_sheen:{ov_sheen};
+      --ov_text_color:{ov_text_color}; --ov_text_shadow:{ov_text_shadow};
+      --ticker_bg:{ticker_bg}; --ticker_border:{ticker_border};
+      --ticker_blur:{ticker_blur}; --ticker_size:{ticker_size};
     }}
-    html, body {{ background:var(--bg); color:var(--text); font-family:var(--font); font-weight:var(--font_weight); }}
+
+    html, body {{
+      background:var(--bg);
+      color:var(--text);
+      font-family:var(--font);
+      font-weight:var(--font_weight);
+    }}
     [data-testid="stAppViewContainer"]{{ background:var(--bg); }}
     [data-testid="stHeader"]{{ background:transparent; }}
     .block-container{{ padding-top:1.1rem; padding-bottom:2.6rem; }}
 
-    .card{{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:var(--pad); box-shadow:var(--shadow); }}
+    .card{{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:var(--pad);
+      box-shadow:var(--shadow);
+    }}
     .muted{{ color:var(--muted); font-weight:700; }}
-    .badge{{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
-            border:1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
-            background:color-mix(in srgb, var(--accent) 10%, var(--surface));
-            font-weight:900; font-size:.85rem; white-space:nowrap; }}
-    .overlay-card{{ background:var(--ov_bg); border:1px solid var(--ov_border); border-radius:var(--radius); padding:16px;
-                   backdrop-filter:blur(var(--ov_blur)); -webkit-backdrop-filter:blur(var(--ov_blur));
-                   position:relative; overflow:hidden; }}
-    .overlay-card:before{{ content:""; position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
-                          background:linear-gradient(135deg, rgba(255,255,255,var(--ov_sheen)) 0%, rgba(255,255,255,.05) 35%, rgba(255,255,255,0) 62%); }}
-    .overlay-text{{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:14px;
-                   opacity:var(--ov_text_opacity); color:var(--ov_text_color); letter-spacing:.14em; text-transform:uppercase; font-weight:900;
-                   text-shadow:0 2px 10px var(--ov_text_shadow); pointer-events:none; }}
+    .badge{{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(37,99,235,0.35);
+      background:rgba(37,99,235,0.08);
+      font-weight:900; font-size:.85rem; white-space:nowrap;
+    }}
 
-    .ticker{{ position:fixed; left:0; right:0; bottom:0; z-index:9999; text-align:center; padding:8px 20px;
-             background:var(--ticker_bg); border-top:1px solid var(--ticker_border); font-size:var(--ticker_size);
-             font-weight:900; letter-spacing:.06em; backdrop-filter:blur(var(--ticker_blur)); -webkit-backdrop-filter:blur(var(--ticker_blur)); }}
+    .overlay-card{{
+      background:var(--ov_bg);
+      border:1px solid var(--ov_border);
+      border-radius:var(--radius);
+      padding:16px;
+      backdrop-filter:blur(var(--ov_blur));
+      -webkit-backdrop-filter:blur(var(--ov_blur));
+      position:relative;
+      overflow:hidden;
+    }}
+    .overlay-card:before{{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      mix-blend-mode:screen;
+      background:linear-gradient(135deg,
+        rgba(255,255,255,var(--ov_sheen)) 0%,
+        rgba(255,255,255,.05) 35%,
+        rgba(255,255,255,0) 62%
+      );
+    }}
+    .overlay-text{{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      text-align:center; padding:14px;
+      opacity:var(--ov_text_opacity);
+      color:var(--ov_text_color);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-weight:900;
+      text-shadow:0 2px 10px var(--ov_text_shadow);
+      pointer-events:none;
+    }}
+
+    .ticker{{
+      position:fixed; left:0; right:0; bottom:0;
+      z-index:9999;
+      text-align:center;
+      padding:8px 20px;
+      background:var(--ticker_bg);
+      border-top:1px solid var(--ticker_border);
+      font-size:var(--ticker_size);
+      font-weight:900;
+      letter-spacing:.06em;
+      backdrop-filter:blur(var(--ticker_blur));
+      -webkit-backdrop-filter:blur(var(--ticker_blur));
+    }}
     .ticker-spacer{{ height:64px; }}
-    """.strip()
+    """.strip().format(**base)
 
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    st.markdown("<style>{}</style>".format(css), unsafe_allow_html=True)
 
     if show_ticker and ticker_text:
-        st.markdown(f"<div class='ticker'>{ticker_text}</div><div class='ticker-spacer'></div>", unsafe_allow_html=True)
+        st.markdown(
+            "<div class='ticker'>{}</div><div class='ticker-spacer'></div>".format(ticker_text),
+            unsafe_allow_html=True,
+        )
 
 
 # -----------------------------
