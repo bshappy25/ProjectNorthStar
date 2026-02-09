@@ -1,9 +1,11 @@
-# --- HERO + REEL (1:1 replacement, fixes HTML showing as text) ---
-import base64
+# pages/home.py
+import streamlit as st
+
 from pathlib import Path
 from textwrap import dedent
-import json
-import time
+import base64, json, time, re
+
+
 
 MEDIA_DIR = Path("devforge_media/home_reel")
 MEDIA_DIR.mkdir(parents=True, exist_ok=True)
