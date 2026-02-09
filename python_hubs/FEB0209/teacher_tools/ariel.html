@@ -261,60 +261,115 @@
       <div class="subtitle">A People's Princess</div>
     </div>
 
-    <div class="image-section">
-      <div class="image-hero">
-        <div class="sparkles"></div>
+  <div class="image-section">
+  <div class="image-hero hero-mobile">
+    <div class="link-stack">
+      <!-- TEXT LINK (exact) -->
+      <a
+        class="princess-link"
+        href="https://imgur.com/a/9IqbQtd"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Open Ariel gallery on Imgur"
+      >✨👸🏻✨</a>
 
-        <div class="image-section">
-  <div class="image-hero" style="padding: 40px;">
-    <div style="
-      font-size: 3.2em;
-      margin-bottom: 16px;
-      text-shadow: 0 4px 18px rgba(0,0,0,0.15);
-    ">
-      👸🏽💚
+      <div class="link-title">Open Ariel — A People’s Princess</div>
+
+      <!-- BIG TAP BUTTON -->
+      <a
+        class="raw-btn"
+        href="https://imgur.com/a/9IqbQtd"
+        target="_blank"
+        rel="noopener noreferrer"
+      >RAW ↗</a>
+
+      <div class="link-note">Opens Imgur in a new tab</div>
     </div>
-
-    <p style="
-      font-size: 1.25em;
-      margin-bottom: 14px;
-      color: #444;
-    ">
-      View Ariel — A People’s Princess
-    </p>
-
-    <a
-      href="https://imgur.com/a/9IqbQtd"
-      target="_blank"
-      rel="noopener noreferrer"
-      style="
-        display: inline-block;
-        padding: 14px 28px;
-        border-radius: 999px;
-        font-size: 1.05em;
-        font-weight: 600;
-        text-decoration: none;
-        color: white;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        box-shadow: 0 10px 25px rgba(102,126,234,0.35);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      "
-      onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 14px 30px rgba(102,126,234,0.45)'"
-      onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 10px 25px rgba(102,126,234,0.35)'"
-    >
-      Open Image Gallery ↗
-    </a>
-
-    <p style="
-      margin-top: 18px;
-      font-size: 0.9em;
-      color: #777;
-      font-style: italic;
-    ">
-      (Opens in a new tab — works reliably in Chrome & incognito)
-    </p>
   </div>
 </div>
+
+<style>
+  /* Mobile-first tweaks for iPhone */
+  .hero-mobile{
+    padding: 26px 18px !important;   /* tighter for phones */
+    border-radius: 22px;
+  }
+
+  /* Remove any "foggy" feel: make text crisp + increase contrast */
+  .link-stack{
+    position: relative;
+    z-index: 2;
+    display: grid;
+    gap: 14px;
+    justify-items: center;
+    padding: 10px 6px;
+    text-align: center;
+  }
+
+  .princess-link{
+    font-size: clamp(42px, 9vw, 64px);
+    line-height: 1;
+    text-decoration: none;
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,0.18));
+    transform: translateZ(0);
+    transition: transform .15s ease, filter .15s ease;
+  }
+  .princess-link:active{ transform: scale(0.96); }
+  .princess-link:hover{ transform: scale(1.03); }
+
+  .link-title{
+    font-size: clamp(18px, 4.5vw, 26px);
+    font-weight: 700;
+    color: rgba(20, 20, 24, 0.78);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+  }
+
+  /* Big, thumb-friendly button */
+  .raw-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: min(520px, 92%);
+    min-height: 60px;               /* tappable */
+    padding: 16px 22px;
+    border-radius: 999px;
+    font-size: clamp(18px, 4.5vw, 22px);
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-decoration: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    box-shadow: 0 14px 34px rgba(102,126,234,0.35);
+    transition: transform .15s ease, box-shadow .15s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .raw-btn:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 18px 40px rgba(102,126,234,0.42);
+  }
+  .raw-btn:active{
+    transform: translateY(1px) scale(0.985);
+    box-shadow: 0 10px 26px rgba(102,126,234,0.30);
+  }
+
+  .link-note{
+    font-size: 14px;
+    color: rgba(30, 30, 35, 0.55);
+    font-style: italic;
+  }
+
+  /* Optional: reduce motion on iOS accessibility settings */
+  @media (prefers-reduced-motion: reduce){
+    .princess-link, .raw-btn{ transition: none; }
+  }
+
+  /* Phone-specific spacing */
+  @media (max-width: 430px){
+    .hero-mobile{ padding: 22px 14px !important; }
+    .link-stack{ gap: 12px; }
+  }
+</style>
 
 
 
