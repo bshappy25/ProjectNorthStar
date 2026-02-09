@@ -1,4 +1,53 @@
----
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import streamlit as st
+
+# ─────────────────────────────────────────────────────────────
+# PATHWAYS (repo-aware)
+# ─────────────────────────────────────────────────────────────
+
+HERE = Path(__file__).resolve().parent               # .../pages/BlockForge
+PAGES_DIR = HERE.parent                              # .../pages
+BRANCH_DIR = PAGES_DIR / "BlockForge_Branches"       # .../pages/BlockForge_Branches
+
+DATA_DIR = HERE / "data"
+BLOCKS_JSON = DATA_DIR / "blocks.json"
+PROMPT_TEMPLATE = DATA_DIR / "prompt_template.txt"
+
+
+def find_repo_root(start: Path) -> Path:
+    """
+    Find repo root by walking up until we see a common marker.
+    Works on Streamlit Cloud + local.
+    """
+    markers = [".git", "pyproject.toml", "requirements.txt", "README.md"]
+    cur = start.resolve()
+    for _ in range(12):
+        if any((cur / m).exists() for m in markers):
+            return cur
+        if cur.parent == cur:
+            break
+        cur = cur.parent
+    # fallback
+    return Path.cwd().resolve()
+
+
+REPO_ROOT = find_repo_root(HERE)
+
+# Handy repo pathways (these are what you want "in the sequence")
+PATHWAYS = {
+    "REPO_ROOT": REPO_ROOT,
+    "PYTHON_HUBS": REPO_ROOT / "python_hubs",
+    "DEV_FORGE": REPO_ROOT / "python_hubs" / "Dev_Forge",
+    "PAGES_DIR": PAGES_DIR,
+    "BLOCKFORGE_DIR": HERE,
+    "BRANCH_DIR": BRANCH_DIR,
+}
 
 ## 2) The app (`python_hubs/Dev_Forge/pages/BlockForge/BlockForge.py`)
 
