@@ -7,7 +7,7 @@ Preserves wow-factor styling while adding practical tools
 import streamlit as st
 
 # ─────────────────────────────────────────────────────────────
-# Hero Section (unchanged stylistic core)
+# Hero Section – Consolidated & Fixed
 # ─────────────────────────────────────────────────────────────
 
 st.markdown(
@@ -44,8 +44,15 @@ st.markdown(
             Your Personal Streamlit Development Forge
         </p>
         
-        <div style="animation: pulse 4.5s infinite ease-in-out; display: inline-block;">
-            <span style="font-size: 1.25rem; padding: 0.75rem 2rem; border-radius: 3rem;" class="badge badge-accent">
+        <div style="
+            animation: pulse 4.5s infinite ease-in-out;
+            display: inline-block;
+        ">
+            <span style="
+                font-size: 1.25rem;
+                padding: 0.75rem 2rem;
+                border-radius: 3rem;
+            " class="badge badge-accent">
                 We are L.E.A.D.
             </span>
         </div>
@@ -53,7 +60,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 # ─────────────────────────────────────────────────────────────
 # Quick Launch Section – Core functionality
 # ─────────────────────────────────────────────────────────────
