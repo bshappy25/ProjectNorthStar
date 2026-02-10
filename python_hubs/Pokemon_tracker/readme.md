@@ -1,55 +1,41 @@
-# 🔮 Pokémon Viewer App
+# ⛏️ Nacli PokéApp
 
-A Streamlit-based Pokémon viewing and tracking application with HTML-based storage, theme switching, filtering, randomization, and music support.
+**Clarity and Steadfastness**
 
----
-
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Directory Structure](#directory-structure)
-- [Installation & Setup](#installation--setup)
-- [How to Use](#how-to-use)
-- [Pokémon Entry System](#pokémon-entry-system)
-- [Theme System](#theme-system)
-- [Music System](#music-system)
-- [Screenshot System](#screenshot-system)
-- [Advanced Usage](#advanced-usage)
-- [Troubleshooting](#troubleshooting)
+A Streamlit-based Pokémon viewer with iframe rendering, in-app HTML editing, image management, and Nacli-inspired UI.
 
 ---
 
-## 🎯 Overview
+## 🎯 Philosophy
 
-This app provides a beautiful, interactive way to view and organize your Pokémon collection. Each Pokémon (or evolution line) is stored as a separate HTML file with embedded metadata for filtering and sorting.
-
-### Key Philosophy
-- **One File Per Evolution Line**: Bulbasaur, Ivysaur, and Venusaur share one HTML file
-- **HTML-Based Storage**: Each entry is a self-contained HTML document
-- **Theme Flexibility**: 5 distinct visual themes based on Pokémon type energies
-- **Filter & Randomize**: Sort by type and generation, or get a random Pokémon
+Inspired by the Nacli evolution line (Rock Salt Pokémon), this app embodies:
+- **Clarity**: Clean code, clear purpose, transparent workflow
+- **Steadfastness**: Reliable file storage, solid structure, persistent data
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-### Core Features
-✅ **HTML File Storage** - Each Pokémon/evolution line stored as `.html` file  
-✅ **Metadata System** - Type and generation stored in HTML comments  
-✅ **Filtering** - Filter by Pokémon type (18 types) and generation (Gen 1-9)  
-✅ **Randomization** - Random Pokémon picker respects active filters  
-✅ **5 Theme Variants** - Water, Grass, Fire, Normal, Psychic/Fairy themes  
-✅ **Background Music** - MP3/WAV support with in-app player  
-✅ **Screenshot Markers** - Track when you viewed each Pokémon  
-✅ **HTML Export** - Download any entry as standalone HTML  
-✅ **In-App Creation** - Create new Pokémon entries directly in the sidebar  
+### Core Functionality
+✅ **iframe Preview** - Safely render HTML entries with sandboxing  
+✅ **In-App HTML Editor** - Edit entries without leaving the app  
+✅ **Image Upload & Management** - Upload images and get insertion code  
+✅ **Type & Generation Filtering** - Sort your Pokémon collection  
+✅ **Random Picker** - Get random Pokémon from filtered results  
+✅ **Background Music** - MP3/WAV support with auto-loop  
+✅ **Safe Mode Toggle** - Enable/disable JavaScript in previews  
+✅ **Download & Delete** - Full file management  
 
-### Planned Features
-⏳ **PNG Screenshot Export** (requires Selenium/Playwright)  
-⏳ **Animated Image Support** (GIF, WebP, sprite layers)  
-⏳ **Pokémon Stats Integration**  
-⏳ **Battle Move Lists**  
+### What Makes This Different
+
+**Compared to the old version:**
+- ✅ **Actual iframe rendering** (like your teacher_tools app)
+- ✅ **Direct HTML editing** in the app interface
+- ✅ **Image upload helper** with code generation
+- ✅ **Nacli-themed UI** (warm earth tones, salt crystal aesthetics)
+- ✅ **Better UX** with action buttons and confirmations
+- ✅ **Preview height slider** for custom viewing
+- ✅ **Proper sandbox controls** for security
 
 ---
 
@@ -58,38 +44,25 @@ This app provides a beautiful, interactive way to view and organize your Pokémo
 ```
 Pokemon_tracker/
 │
-├─ Pokeapp.py                 # Main Streamlit application
+├─ Pokeapp.py              # Main Streamlit app
 │
-├─ pokemon_entries/           # HTML files for each Pokémon
-│   ├─ garganacl.html         # Example: Rock-type, Gen 9
-│   ├─ bulbasaur.html         # Example: Grass-type, Gen 1 (full evolution line)
-│   ├─ pikachu.html           # Example: Electric-type, Gen 1
-│   └─ {your_pokemon}.html    # Add more here!
+├─ pokemon_entries/        # HTML files for each Pokémon
+│   └─ nacli.html          # Sample: Nacli evolution line
 │
-├─ themes/                    # CSS theme files
-│   ├─ water.css              # 🌊 Calm, reflective theme
-│   ├─ grass.css              # 🌿 Grounded, natural theme
-│   ├─ fire.css               # 🔥 Intense, powerful theme
-│   ├─ normal.css             # ⚪ Clean, utilitarian theme (default)
-│   └─ psychic_fairy.css      # ✨ Mystical, ethereal theme
+├─ images/                 # Uploaded images for use in HTML
+│   └─ (your images here)
 │
-├─ music/                     # Background music files
-│   ├─ README.md              # Music folder instructions
-│   └─ {your_music}.mp3       # Add .mp3 or .wav files here
+├─ music/                  # Background music files
+│   └─ (your .mp3/.wav files)
 │
-├─ screenshots/               # Screenshot markers (future: PNG exports)
-│   ├─ README.md              # Screenshots folder instructions
-│   └─ {pokemon}_{time}.txt   # Screenshot markers
+├─ screenshots/            # Future: screenshot exports
 │
-├─ assets/                    # Shared assets (images, etc.)
-│   └─ README.txt             # Assets folder instructions
-│
-└─ README.md                  # This file
+└─ README.md               # This file
 ```
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Quick Start
 
 ### 1. Install Dependencies
 
@@ -97,360 +70,361 @@ Pokemon_tracker/
 pip install streamlit
 ```
 
-### 2. Navigate to the App
+### 2. Run the App
 
 ```bash
 cd python_hubs/Pokemon_tracker
-```
-
-### 3. Run the App
-
-```bash
 streamlit run Pokeapp.py
 ```
 
-### 4. Open in Browser
+### 3. First Steps
 
-The app will automatically open at `http://localhost:8501`
+1. Click **"➕ Create New Entry"** in sidebar
+2. Enter a Pokémon name (e.g., "Pikachu")
+3. Select type and generation
+4. Click **"Create"**
+5. View your Pokémon in the iframe!
 
 ---
 
 ## 🎮 How to Use
 
-### Basic Workflow
+### Creating Pokémon Entries
 
-1. **Launch the app** using `streamlit run Pokeapp.py`
-2. **Select a theme** from the sidebar (default: Normal)
-3. **Choose filters** (Type and/or Generation)
-4. **Pick a Pokémon** from the dropdown OR click "🎲 Random Pokémon"
-5. **View the entry** in the main area
-6. **Take actions**: Screenshot, Download HTML, or Refresh
+#### Method 1: Use the Sidebar Tool (Easiest)
+1. Expand **"➕ Create New Entry"**
+2. Fill in:
+   - Pokémon Name
+   - Type
+   - Generation
+   - Evolution Line (comma-separated)
+3. Click **"Create"**
+4. A basic HTML file is generated automatically
+5. Edit it using the **"📝 Edit HTML"** button
 
-### Sidebar Controls
-
-#### 🎵 Background Music
-- Select from available music tracks
-- Control playback with audio player
-- Music loops automatically
-
-#### 🔍 Filters
-- **Type Filter**: All Types, Normal, Fire, Water, etc. (18 types)
-- **Generation Filter**: All Generations, Gen 1-9
-
-#### 🎨 Theme
-- Choose from 5 energy-based themes
-- Theme applies immediately to the current view
-
-#### 📋 Select Pokémon
-- **🎲 Random Pokémon**: Picks random entry from filtered results
-- **Dropdown**: Manual selection from filtered list
-- **Info Display**: Shows "X of Y Pokémon" matching filters
-
-#### ➕ Add New Pokémon
-- Enter Pokémon name
-- Select type and generation
-- Input evolution line (comma-separated)
-- Click "Create Sample Entry" to generate HTML file
-
-### Action Buttons
-
-#### 📸 Screenshot
-- Creates a marker file in `screenshots/` folder
-- Records: Pokémon name, timestamp, active theme
-- (PNG export planned for future)
-
-#### 💾 Download HTML
-- Download the current Pokémon entry as standalone HTML
-- File can be opened in any browser
-- Useful for sharing or backup
-
-#### 🔄 Refresh
-- Reload the current view
-- Useful after editing files manually
+#### Method 2: Manual HTML Creation
+1. Create a file in `pokemon_entries/`
+2. Name it: `{pokemon_name}.html`
+3. Include metadata in HTML comments:
+   ```html
+   <!-- TYPE: Fire -->
+   <!-- GENERATION: Gen 1 -->
+   <!-- EVOLUTION_LINE: Charmander, Charmeleon, Charizard -->
+   ```
+4. Design your HTML however you want!
 
 ---
 
-## 📝 Pokémon Entry System
+### Editing HTML In-App
 
-### HTML File Structure
+1. **Select** a Pokémon from the sidebar
+2. Click **"📝 Edit HTML"** at the top
+3. **Edit** the HTML in the text area
+4. Click **"💾 Save Changes"** or **"❌ Cancel"**
 
-Each Pokémon entry is a self-contained HTML file with embedded metadata.
+The preview updates immediately on save!
 
-#### Required Metadata (in HTML comments)
+---
 
+### Adding Images
+
+#### Upload Images
+1. Click **"📸 Upload Image"** in sidebar
+2. Choose an image file (PNG, JPG, GIF, WebP)
+3. Click **"💾 Save Image"**
+4. Image is saved to `images/` folder
+
+#### Insert Images into HTML
+1. Click **"🖼️ Insert Image"** at the top
+2. Select an image from the dropdown
+3. Copy the generated `<img>` code
+4. Click **"📝 Edit HTML"**
+5. Paste the code where you want the image
+6. Save!
+
+**Generated Code Example:**
 ```html
-<!-- TYPE: Electric -->
-<!-- GENERATION: Gen 1 -->
-<!-- EVOLUTION_LINE: Pichu, Pikachu, Raichu -->
+<img src="../images/pikachu.png" alt="pikachu.png" style="max-width: 100%;">
 ```
 
-#### Metadata Fields
+---
+
+### Filtering & Randomization
+
+#### Filter Pokémon
+- **Type Filter**: Choose from 18 Pokémon types
+- **Generation Filter**: Gen 1 through Gen 9
+- Filters are **additive** (AND logic)
+
+#### Random Pokémon
+1. Set your filters (or leave as "All")
+2. Click **"🎲 Random Pokémon"**
+3. A random entry from filtered results appears
+
+---
+
+### Display Settings
+
+#### Preview Height
+- Adjust the slider: **400px - 1200px**
+- Changes apply immediately to the iframe
+
+#### Safe Mode
+- **ON** (default): Scripts disabled, forms blocked
+  - Sandbox: `allow-same-origin` only
+  - Safe for untrusted HTML
+- **OFF**: Scripts enabled, interactive features work
+  - Sandbox: Full permissions
+  - Use for advanced HTML entries
+
+---
+
+### File Management
+
+#### Download HTML
+1. Select a Pokémon
+2. Click **"💾 Download"**
+3. Save the standalone HTML file
+4. Can be opened in any browser
+
+#### Delete Entry
+1. Select a Pokémon
+2. Click **"🗑️ Delete"**
+3. Confirm deletion
+4. File is permanently removed
+
+---
+
+## 🎨 Nacli UI Theme
+
+The app uses warm earth tones inspired by rock salt and minerals:
+
+### Color Palette
+- **Primary**: `#d4a574` (Sandy brown)
+- **Secondary**: `#8b6f47` (Earth brown)
+- **Accent**: `#f4e4c1` (Salt crystal)
+- **Dark**: `#5c4a2f` (Deep earth)
+- **Light**: `#fef9f0` (White salt)
+
+### Design Elements
+- Gradient backgrounds (earth → salt)
+- Rounded corners (8px-20px)
+- Border accents (2-3px)
+- Hover effects (translateY, shadows)
+- Button gradients (brown → gold)
+
+---
+
+## 📝 HTML Entry Structure
+
+### Required Metadata
+
+Every HTML file needs these comments at the top:
+
+```html
+<!-- TYPE: Fire -->
+<!-- GENERATION: Gen 4 -->
+<!-- EVOLUTION_LINE: Chimchar, Monferno, Infernape -->
+```
+
+### Metadata Fields
 
 | Field | Format | Example |
 |-------|--------|---------|
-| `TYPE` | Single word | `Fire`, `Water`, `Grass` |
-| `GENERATION` | `Gen X` where X is 1-9 | `Gen 1`, `Gen 9` |
-| `EVOLUTION_LINE` | Comma-separated names | `Bulbasaur, Ivysaur, Venusaur` |
+| `TYPE` | Single word | `Water`, `Electric`, `Dragon` |
+| `GENERATION` | `Gen X` (1-9) | `Gen 3`, `Gen 7` |
+| `EVOLUTION_LINE` | Comma-separated | `Squirtle, Wartortle, Blastoise` |
 
-### Creating New Entries
+### Evolution Line Rules
 
-#### Option 1: Use the Sidebar Tool (Easiest)
-1. Click "➕ Add New Pokémon" in sidebar
-2. Fill in the form
-3. Click "Create Sample Entry"
-4. Edit the generated HTML file for customization
-
-#### Option 2: Manually Create HTML File
-
-1. Create a new file in `pokemon_entries/` folder
-2. Name it: `{pokemon_name}.html` (use lowercase, underscores for spaces)
-3. Include required metadata in HTML comments
-4. Design your HTML content however you want!
-
-#### Example Minimal Template
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Charizard</title>
-    <!-- TYPE: Fire -->
-    <!-- GENERATION: Gen 1 -->
-    <!-- EVOLUTION_LINE: Charmander, Charmeleon, Charizard -->
-    <style>
-        body { 
-            background: linear-gradient(135deg, #dc2626, #f97316);
-            color: white;
-            font-family: sans-serif;
-            padding: 2rem;
-        }
-    </style>
-</head>
-<body>
-    <h1>Charizard</h1>
-    <p>The Flame Pokémon</p>
-    <!-- Add your custom content here -->
-</body>
-</html>
-```
-
-### Evolution Lines
-
-**Important Rule**: Different Pokémon of the same evolutionary branch are contained in ONE file.
-
-✅ **Correct**: 
-- `bulbasaur.html` contains Bulbasaur, Ivysaur, AND Venusaur
-- `pikachu.html` contains Pichu, Pikachu, AND Raichu
-
-❌ **Incorrect**:
-- `bulbasaur.html`, `ivysaur.html`, `venusaur.html` as separate files
-
-**Why?** This keeps related Pokémon together and makes the app cleaner.
+**One file per evolution branch:**
+- ✅ `bulbasaur.html` contains: Bulbasaur, Ivysaur, Venusaur
+- ✅ `eevee.html` contains: Eevee, all Eeveelutions
+- ❌ Don't create separate files for each stage
 
 ---
 
-## 🎨 Theme System
-
-### Available Themes
-
-#### 🌊 WATER
-- **Vibe**: Calm, reflective, crystalline
-- **Colors**: Slate → Aqua gradient with cyan accents
-- **Use Case**: Observation mode, studying stats
-- **Layout**: Centered with glass card effect
-- **Typography**: Sans-serif with letter spacing
-
-#### 🌿 GRASS
-- **Vibe**: Stable, grounded, growth
-- **Colors**: Moss green → Sage with stone accents
-- **Use Case**: Daily logs, long-form entries
-- **Layout**: Split (image left, text right on desktop)
-- **Typography**: Serif for subtitles, sans for data
-
-#### 🔥 FIRE
-- **Vibe**: Power, intensity, declaration
-- **Colors**: Charcoal → Ember red with molten orange
-- **Use Case**: Highlights, shinies, legendary Pokémon
-- **Layout**: Large centered with overlay text
-- **Typography**: Heavy sans-serif, all caps titles
-
-#### ⚪ NORMAL
-- **Vibe**: Clean, neutral, utilitarian
-- **Colors**: Light gray / off-white
-- **Use Case**: Baseline testing, debugging, fast loading
-- **Layout**: Simple card (DEFAULT FALLBACK)
-- **Typography**: System default
-
-#### ✨ PSYCHIC/FAIRY
-- **Vibe**: Mythic clarity, higher meaning
-- **Colors**: Lavender → Pale pink with gold accents
-- **Use Case**: Narrative entries, symbolic days
-- **Layout**: Centered with soft halo effect
-- **Typography**: Elegant serif for titles
-
-### Customizing Themes
-
-Edit any CSS file in the `themes/` folder:
-
-```css
-/* themes/fire.css */
-body {
-    background: linear-gradient(135deg, #1c1917 0%, #dc2626 100%);
-}
-
-.pokemon-name {
-    color: #fafaf9;
-    font-size: 3.5rem;
-    text-shadow: 0 0 20px rgba(234, 88, 12, 0.8);
-}
-```
-
-Changes take effect on next refresh (🔄 button).
-
----
-
-## 🎵 Music System
+## 🎵 Background Music
 
 ### Adding Music
 
-1. **Get music files** (.mp3 or .wav format)
-2. **Place them** in the `music/` folder
-3. **Refresh the app**
-4. **Select track** from sidebar dropdown
+1. Get `.mp3` or `.wav` files
+2. Place them in the `music/` folder
+3. Refresh the app
+4. Select from dropdown in sidebar
 
-### Music Player Features
+### Music Player
+- Auto-loop enabled
+- Volume controls
+- Play/pause
+- Works while browsing entries
 
-- ▶️ Play/Pause controls
-- 🔁 Auto-loop enabled
-- 🔊 Volume control
-- 📁 Multiple track support
-
-### Recommended Music Types
-
-- **Pokémon OST**: Route themes, town themes, battle music
-- **Ambient**: Nature sounds, lo-fi beats
-- **Type-based**: Match music to current Pokémon type
-
-### Copyright Notice
-
-⚠️ Only use music you have rights to:
-- Original compositions
-- Royalty-free music
-- Licensed music
-- Creative Commons
-
-See `music/README.md` for royalty-free music sources.
-
----
-
-## 📸 Screenshot System
-
-### Current Functionality: Markers
-
-The app currently creates **screenshot markers** (text files) that record:
-- Pokémon name
-- Timestamp
-- Active theme
-
-Location: `screenshots/{pokemon_name}_{timestamp}.txt`
-
-### Future: PNG Screenshots
-
-To enable PNG export, install:
-
-```bash
-# Option 1: Selenium (recommended)
-pip install selenium webdriver-manager pillow
-
-# Option 2: Playwright
-pip install playwright
-playwright install
-```
-
-Future PNG files will be saved as:
-```
-screenshots/{pokemon_name}_{theme}_{timestamp}.png
-```
+### Recommended Sources
+- Pokémon OST (route themes, town themes)
+- Royalty-free music (YouTube Audio Library)
+- Lo-fi beats
+- Nature sounds
 
 ---
 
 ## 🔧 Advanced Usage
 
-### Filtering Logic
+### Custom Styling
 
-Filters are **additive** (AND logic):
-- Type: Fire + Generation: Gen 1 = Only Gen 1 Fire types
-- Type: All + Generation: Gen 9 = All Gen 9 Pokémon
-- Type: Water + Generation: All = All Water types
+Each HTML entry can have its own CSS:
 
-### Random Pokémon Behavior
+```html
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-family: 'Inter', sans-serif;
+        padding: 2rem;
+    }
+    
+    .pokemon-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 3rem;
+    }
+</style>
+```
 
-The 🎲 Random button:
-1. Applies current filters first
-2. Selects randomly from filtered results
-3. Updates immediately
+### Using JavaScript (Safe Mode OFF)
 
-**Example**: With "Type: Electric" + "Gen 1" filters, random will only pick from Gen 1 Electric types.
+With Safe Mode disabled, you can add interactivity:
 
-### HTML Safe Rendering
+```html
+<script>
+    function evolve() {
+        alert("Your Pokémon is evolving!");
+    }
+</script>
 
-Pokémon HTML is rendered in a **sandboxed iframe** with `allow-same-origin` only. This means:
-- ✅ HTML/CSS works
-- ❌ JavaScript won't execute (security)
-- ❌ Forms won't submit
-- ❌ External links are restricted
+<button onclick="evolve()">Evolve!</button>
+```
 
-To change this, edit the `render_pokemon_html()` function in `Pokeapp.py`.
+**⚠️ Warning:** Only disable Safe Mode for HTML you trust!
 
-### Debugging Tips
+### Responsive Design
 
-#### View Source
-Use the "🔍 Debug: View Source" expander to:
-- See the raw HTML of current Pokémon
-- Check metadata is formatted correctly
-- Debug CSS issues
+Make entries mobile-friendly:
 
-#### File Naming
-- Use lowercase for filenames
-- Replace spaces with underscores
-- Keep names under 50 characters
-- Example: `mega_charizard_x.html`
+```html
+<style>
+    @media (max-width: 768px) {
+        .pokemon-card {
+            padding: 1rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+```
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+### "No Pokémon entries found"
+- **Cause**: Empty `pokemon_entries/` folder
+- **Fix**: Create an entry using sidebar tool
 
-#### "No Pokémon entries found"
-- **Cause**: No `.html` files in `pokemon_entries/` folder
-- **Fix**: Use "➕ Add New Pokémon" or manually add HTML files
+### Image not showing in HTML
+- **Cause**: Wrong file path
+- **Fix**: Use `../images/{filename}` as the path
+- **Example**: `<img src="../images/pikachu.png">`
 
-#### "No Pokémon match your filters"
-- **Cause**: Filters exclude all entries
-- **Fix**: Change Type or Generation to "All"
-
-#### Music not playing
+### Music not playing
 - **Cause**: No music files or wrong format
-- **Fix**: Add `.mp3` or `.wav` files to `music/` folder
+- **Fix**: Add `.mp3` or `.wav` to `music/` folder
 
-#### Theme not changing
-- **Cause**: CSS file missing or incorrectly named
-- **Fix**: Check `themes/` folder for corresponding `.css` file
+### Preview looks broken
+- **Cause**: HTML syntax error
+- **Fix**: Use "🔍 Debug" expander to check raw HTML
 
-#### Pokémon not appearing in list
-- **Cause**: Missing or incorrect metadata
-- **Fix**: Check HTML comments have correct format:
-  ```html
-  <!-- TYPE: Fire -->
-  <!-- GENERATION: Gen 1 -->
-  <!-- EVOLUTION_LINE: Charmander, Charmeleon, Charizard -->
-  ```
+### Can't delete Pokémon
+- **Cause**: File permissions
+- **Fix**: Check file isn't open in another app
 
 ---
 
-## 📚 Quick Reference
+## 📚 Example: Nacli Line
+
+The app includes a **flagship example**: `nacli.html`
+
+Features demonstrated:
+- Evolution grid (3 stages)
+- Custom gradients (earth tones)
+- Stats section
+- Story/lore section
+- Responsive cards
+- Hover effects
+- Typography hierarchy
+
+**View it to see best practices!**
+
+---
+
+## 🎯 Best Practices
+
+### File Naming
+- Use lowercase: `pikachu.html` not `Pikachu.html`
+- Replace spaces with underscores: `mega_charizard_x.html`
+- Keep under 50 characters
+- Be descriptive: `bulbasaur_line.html`
+
+### HTML Structure
+1. Start with metadata comments
+2. Include `<style>` for custom CSS
+3. Use semantic HTML (`<header>`, `<section>`, etc.)
+4. Make it responsive
+5. Add alt text to images
+
+### Image Management
+- Use web-friendly formats (PNG, JPG, WebP)
+- Optimize file sizes (< 2MB recommended)
+- Use descriptive filenames: `charizard_flying.png`
+- Include alt text for accessibility
+
+### Evolution Lines
+- Put all stages in ONE file
+- Use grid/flex layouts to show progression
+- Include evolution methods (level, stone, trade)
+- Show visual differences between stages
+
+---
+
+## 🚀 Future Features
+
+Planned enhancements:
+- ⏳ PNG screenshot export (Selenium/Playwright)
+- ⏳ Batch image upload
+- ⏳ Template library (pre-made HTML templates)
+- ⏳ Stats calculator integration
+- ⏳ Move list database
+- ⏳ Type matchup calculator
+- ⏳ Shiny variant toggle
+
+---
+
+## 🙏 Credits
+
+**Inspired by:**
+- Your `teacher_tools` app (iframe pattern, Palm ID gate)
+- Nacli evolution line (Gen 9 Pokémon)
+- Rock salt aesthetics (earth tones, mineral textures)
+
+**Pokémon** is a trademark of Nintendo/Game Freak/Creatures Inc.
+
+This is a fan-made tool for personal collection management.
+
+---
+
+## 📖 Quick Reference
 
 ### Supported Types
 Normal, Fire, Water, Electric, Grass, Ice, Fighting, Poison, Ground, Flying, Psychic, Bug, Rock, Ghost, Dragon, Dark, Steel, Fairy
@@ -459,30 +433,16 @@ Normal, Fire, Water, Electric, Grass, Ice, Fighting, Poison, Ground, Flying, Psy
 Gen 1 (Kanto), Gen 2 (Johto), Gen 3 (Hoenn), Gen 4 (Sinnoh), Gen 5 (Unova), Gen 6 (Kalos), Gen 7 (Alola), Gen 8 (Galar), Gen 9 (Paldea)
 
 ### File Formats
-- Pokémon Entries: `.html`
-- Music: `.mp3`, `.wav`
-- Themes: `.css`
-- Screenshots: `.txt` (markers), `.png` (future)
+- **Pokémon Entries**: `.html`
+- **Music**: `.mp3`, `.wav`
+- **Images**: `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`
+
+### Keyboard Shortcuts
+- None yet (future feature)
 
 ---
 
-## 🎯 Next Steps
+**"Under pressure, we do not break—we crystallize into something greater."**  
+*— The Nacli Philosophy*
 
-1. **Add more Pokémon**: Create HTML files for your favorites
-2. **Customize themes**: Edit CSS to match your style
-3. **Add music**: Drop in your favorite Pokémon soundtracks
-4. **Share entries**: Export HTML files to share with friends
-
----
-
-## 📄 License & Credits
-
-Created for tracking and viewing Pokémon collections.
-
-**Pokémon** is a trademark of Nintendo/Game Freak/Creatures Inc.
-
-This is a fan-made tool for personal use.
-
----
-
-**Happy Pokémon viewing! 🔮⚡🌟**
+⛏️ **Happy Pokémon collecting!** ⛏️
