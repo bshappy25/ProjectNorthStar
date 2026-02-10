@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pokémon Line Showcase — Garganacl (Template)</title>
+  <style>
+    /* =========================================================
+       TCG TYPE SCHEMA — quick theming by swapping type classes
+       Add a new type block by copying a .type-xxx section.
+       ========================================================= */
+
+    :root{
+      --bg0:#0b1220;
+      --bg1:#0f172a;
+      --card:#0b1326cc;
+      --stroke:#223153;
+      --text:#e6eefc;
+      --muted:#b4c0da;
+      --chip:#111c33;
+      --good:#34d399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+
+      --radius:18px;
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    /* Base layout */
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background: radial-gradient(1200px 700px at 15% 10%, #1a2a55 0%, transparent 55%),
+                  radial-gradient(1100px 700px at 90% 15%, #2a1555 0%, transparent 50%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1));
+    }
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:22px 18px 40px;
+    }
+    header{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    h1{
+      font-size:1.25rem;
+      margin:0;
+      letter-spacing:.3px;
+    }
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:.95rem;
+      line-height:1.25rem;
+    }
+    .toolbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .pill{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      padding:8px 10px;
+      border-radius:999px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    }
+    .pill label{font-size:.9rem; color:var(--muted);}
+    .btn{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--text);
+      padding:9px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      transition:transform .05s ease, background .2s ease;
+      user-select:none;
+    }
+    .btn:hover{background:rgba(255,255,255,.12);}
+    .btn:active{transform:translateY(1px);}
+    .btn.primary{
+      background:rgba(52,211,153,.18);
+      border-color: rgba(52,211,153,.35);
+    }
+    .btn.danger{
+      background:rgba(251,113,133,.16);
+      border-color: rgba(251,113,133,.30);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media(min-width:900px){
+      .grid{grid-template-columns: 1fr 1fr 1fr;}
+    }
+
+    /* Card core */
+    .card{
+      position:relative;
+      border-radius:var(--radius);
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      min-height: 520px;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-120px -160px auto auto;
+      width:340px;
+      height:340px;
+      filter: blur(14px);
+      opacity:.75;
+      transform: rotate(15deg);
+      pointer-events:none;
+    }
+    .cardHeader{
+      padding:14px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .nameBlock{display:flex; flex-direction:column; gap:4px;}
+    .monName{
+      font-weight:800;
+      letter-spacing:.3px;
+      font-size:1.05rem;
+      margin:0;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .stage{
+      font-size:.8rem;
+      color:rgba(255,255,255,.78);
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .tagRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:2px;
+    }
+    .chip{
+      font-size:.78rem;
+      color:rgba(255,255,255,.86);
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+    }
+
+    /* Image area */
+    .art{
+      margin: 8px 14px 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      height: 220px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      position:relative;
+    }
+    .art img{
+      max-width: 88%;
+      max-height: 88%;
+      object-fit:contain;
+      image-rendering:auto;
+      filter: drop-shadow(0 18px 28px rgba(0,0,0,.45));
+    }
+    .art .placeholder{
+      font-family:var(--mono);
+      color:rgba(255,255,255,.65);
+      font-size:.85rem;
+      padding:12px;
+      text-align:center;
+    }
+
+    /* Traits */
+    .body{
+      padding: 0 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .headline{
+      font-size:.95rem;
+      font-weight:750;
+      margin:0;
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.25rem;
+    }
+    .traitList{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:6px;
+    }
+    .trait{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      border-radius: 14px;
+      padding:10px 10px;
+    }
+    .traitTop{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .traitName{
+      margin:0;
+      font-weight:800;
+      font-size:.92rem;
+      letter-spacing:.2px;
+    }
+    .traitHint{
+      font-size:.78rem;
+      color:rgba(255,255,255,.70);
+      font-family:var(--mono);
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      padding:3px 7px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .traitText{
+      margin:6px 0 0;
+      color:rgba(255,255,255,.83);
+      font-size:.9rem;
+      line-height:1.25rem;
+    }
+
+    /* Footer actions */
+    .cardFooter{
+      margin-top:auto;
+      padding:12px 14px 14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      border-top:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.18));
+    }
+    .small{
+      font-size:.82rem;
+      color:rgba(255,255,255,.70);
+    }
+
+    /* Lock overlay */
+    .locked .veil{
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(6px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .lockBox{
+      width:min(340px, 92%);
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(10,15,25,.78);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      padding:14px;
+      text-align:center;
+    }
+    .lockIcon{
+      font-size:2rem;
+      margin: 2px 0 8px;
+    }
+    .lockTitle{
+      margin:0;
+      font-weight:900;
+      letter-spacing:.4px;
+    }
+    .lockText{
+      margin:8px 0 12px;
+      color:rgba(255,255,255,.78);
+      line-height:1.25rem;
+      font-size:.92rem;
+    }
+
+    /* Debug area */
+    .debugPanel{
+      margin-top:16px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.24);
+      padding:14px;
+      display:none;
+      box-shadow: var(--shadow);
+    }
+    .debugPanel.show{display:block;}
+    .debugTop{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .debugTop h2{
+      margin:0;
+      font-size:1rem;
+      letter-spacing:.3px;
+    }
+    textarea.code{
+      width:100%;
+      min-height:220px;
+      resize:vertical;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(5,8,15,.60);
+      color: rgba(255,255,255,.92);
+      font-family: var(--mono);
+      font-size:.85rem;
+      line-height:1.2rem;
+      padding:12px;
+      box-sizing:border-box;
+      outline:none;
+    }
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    @media(min-width:900px){
+      .twoCol{grid-template-columns: 1fr 1fr;}
+    }
+    .builder{
+      margin-top:12px;
+      padding-top:12px;
+      border-top:1px solid rgba(255,255,255,.10);
+    }
+    .builder h3{
+      margin:0 0 8px 0;
+      font-size:.98rem;
+      letter-spacing:.2px;
+    }
+    .builder .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin:8px 0;
+    }
+    input[type="text"], select{
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      color: var(--text);
+      border-radius: 12px;
+      padding:9px 10px;
+      outline:none;
+      min-width: 220px;
+    }
+    select{min-width: 240px;}
+    .note{
+      color:rgba(255,255,255,.72);
+      font-size:.88rem;
+      line-height:1.25rem;
+      margin:8px 0 0;
+    }
+
+    /* ===============================
+       TYPE THEMES (TCG-ish)
+       Change card theme by adding:
+       class="card type-rock" etc.
+       =============================== */
+
+    .type-water{
+      --stroke:#1b4b78;
+    }
+    .type-water::before{ background: radial-gradient(circle at 30% 30%, rgba(56,189,248,.70), transparent 60%); }
+
+    .type-grass{
+      --stroke:#245a3a;
+    }
+    .type-grass::before{ background: radial-gradient(circle at 30% 30%, rgba(34,197,94,.65), transparent 60%); }
+
+    .type-fire{
+      --stroke:#7a2d2d;
+    }
+    .type-fire::before{ background: radial-gradient(circle at 30% 30%, rgba(251,146,60,.70), transparent 60%); }
+
+    .type-normal{
+      --stroke:#4b5563;
+    }
+    .type-normal::before{ background: radial-gradient(circle at 30% 30%, rgba(148,163,184,.55), transparent 60%); }
+
+    .type-psychic{
+      --stroke:#6b2d6c;
+    }
+    .type-psychic::before{ background: radial-gradient(circle at 30% 30%, rgba(232,121,249,.65), transparent 60%); }
+
+    .type-fairy{
+      --stroke:#6b3b58;
+    }
+    .type-fairy::before{ background: radial-gradient(circle at 30% 30%, rgba(251,113,133,.55), transparent 60%); }
+
+    /* Rock (needed for Garganacl line) */
+    .type-rock{
+      --stroke:#5b4a2a;
+    }
+    .type-rock::before{ background: radial-gradient(circle at 30% 30%, rgba(245,158,11,.55), transparent 60%); }
+
+    /* Optional: dual type feel (example) */
+    .type-psychic-fairy{
+      --stroke:#62345d;
+    }
+    .type-psychic-fairy::before{
+      background:
+        radial-gradient(circle at 25% 35%, rgba(232,121,249,.55), transparent 60%),
+        radial-gradient(circle at 65% 25%, rgba(251,113,133,.45), transparent 60%);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Pokémon Line Showcase — Garganacl</h1>
+        <p class="sub">
+          Intro: <strong>Garganacl</strong> • Title: <strong>Clarity and Steadfastness</strong><br/>
+          This page is both a showcase <em>and</em> a reusable template for new TCG-style HTML cards.
+        </p>
+      </div>
+
+      <div class="toolbar">
+        <div class="pill">
+          <label for="debugToggle">Debug Mode</label>
+          <input id="debugToggle" type="checkbox" />
+        </div>
+
+        <button class="btn" id="copyFull">📋 Copy Full HTML</button>
+        <button class="btn danger" id="resetUnlocks">🔓 Reset Unlocks</button>
+      </div>
+    </header>
+
+    <div class="grid" id="cardGrid">
+      <!-- Cards injected by JS -->
+    </div>
+
+    <section class="debugPanel" id="debugPanel">
+      <div class="debugTop">
+        <h2>🔎 Debug Mode — Copy/Paste Templates</h2>
+        <div class="row">
+          <button class="btn" id="copySelectedCard">📋 Copy Selected Card HTML</button>
+          <button class="btn" id="copySelectedData">📋 Copy Selected Card Data (JSON)</button>
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <p class="note"><strong>Selected card HTML</strong> (ready to paste into another project):</p>
+          <textarea class="code" id="selectedCardHtml" spellcheck="false"></textarea>
+        </div>
+        <div>
+          <p class="note"><strong>Selected card data</strong> (edit values; builder can regenerate):</p>
+          <textarea class="code" id="selectedCardJson" spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div class="builder">
+        <h3>🧱 Template Builder (make a new card fast)</h3>
+
+        <div class="row">
+          <label class="note" for="typePick">Type class</label>
+          <select id="typePick">
+            <option value="type-rock">rock</option>
+            <option value="type-water">water</option>
+            <option value="type-grass">grass</option>
+            <option value="type-fire">fire</option>
+            <option value="type-normal">normal</option>
+            <option value="type-psychic">psychic</option>
+            <option value="type-fairy">fairy</option>
+            <option value="type-psychic-fairy">psychic/fairy</option>
+          </select>
+
+          <label class="note" for="stagePick">Stage</label>
+          <select id="stagePick">
+            <option value="Basic">Basic</option>
+            <option value="Stage 1">Stage 1</option>
+            <option value="Stage 2">Stage 2</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <input id="nameIn" type="text" placeholder="Name (e.g., Pikachu)" />
+          <input id="subtitleIn" type="text" placeholder='Subtitle (e.g., "Bright Spark")' />
+          <input id="imgIn" type="text" placeholder="Image URL (optional)" />
+        </div>
+
+        <p class="note">
+          Traits are simple blocks. Add more by editing the JSON after generation.
+        </p>
+
+        <div class="row">
+          <button class="btn primary" id="generateCard">✨ Generate Card HTML</button>
+          <button class="btn" id="addToPage">➕ Add Generated Card to Page</button>
+        </div>
+
+        <textarea class="code" id="generatedOut" spellcheck="false"></textarea>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* =========================================================
+       DATA MODEL — Edit here for new Pokémon lines
+       Each card uses:
+       - typeClass: maps to CSS theme (TCG schema)
+       - stage: Basic / Stage 1 / Stage 2
+       - name, subtitle, tags[], traits[]
+       - img: optional URL (can be blank)
+       ========================================================= */
+
+    const STORAGE_KEY = "kq_unlocks_garganacl_line_v1";
+
+    const lineData = [
+      {
+        id: "nacli",
+        typeClass: "type-rock",
+        stage: "Basic",
+        name: "Nacli",
+        subtitle: "Salt Seed • Quiet Potential",
+        tags: ["Rock", "Pre-evolution", "Foundational"],
+        img: "", // put URL here if you want
+        intro: "A small, mineral-strong beginning. The first block in a line built on patience.",
+        traits: [
+          { name: "Clarity", hint: "Trait A", text: "Keeps things simple. Learns by clean patterns and small wins." },
+          { name: "Steadfastness", hint: "Trait B", text: "Doesn’t rush. Holds position, builds consistency." },
+          { name: "Salt Core", hint: "Trait C", text: "Symbolic purification—filters noise, keeps what matters." }
+        ],
+        lockText: "Unlock Nacli to start the line."
+      },
+      {
+        id: "naclstack",
+        typeClass: "type-rock",
+        stage: "Stage 1",
+        name: "Naclstack",
+        subtitle: "Stacked Resolve • Fortified Focus",
+        tags: ["Rock", "Mid-stage", "Guarding"],
+        img: "", // put URL here if you want
+        intro: "The line thickens—more structure, more responsibility, more defensive presence.",
+        traits: [
+          { name: "Clarity", hint: "Trait A", text: "Turns confusion into structure—one block at a time." },
+          { name: "Steadfastness", hint: "Trait B", text: "Reliable under pressure; doesn’t fold when challenged." },
+          { name: "Fortification", hint: "Trait C", text: "Builds layers of safety: routines, systems, boundaries." }
+        ],
+        lockText: "Unlock Stage 1 to see the middle form."
+      },
+      {
+        id: "garganacl",
+        typeClass: "type-rock",
+        stage: "Stage 2",
+        name: "Garganacl",
+        subtitle: "Clarity and Steadfastness",
+        tags: ["Rock", "Final stage", "Pillar"],
+        img: "", // add your Garganacl image URL here (or leave blank)
+        intro: "A pillar-form guardian: grounded, cleansing, unwavering. A true ‘hold the line’ archetype.",
+        traits: [
+          { name: "Clarity", hint: "Trait A", text: "Cuts through chaos. Prioritizes truth, patterns, and clean decisions." },
+          { name: "Steadfastness", hint: "Trait B", text: "Doesn’t break posture—holds the plan and protects the team." },
+          { name: "Purifying Salt", hint: "Trait C", text: "Removes what’s harmful. Supports resilience and recovery." }
+        ],
+        lockText: "Unlock the final form to complete the trio."
+      }
+    ];
+
+    /* =========================================================
+       UNLOCK LOGIC
+       Default: only Nacli unlocked
+       Unlock buttons reveal next cards, stored in localStorage.
+       ========================================================= */
+
+    function getUnlockState(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { nacli: true, naclstack: false, garganacl: false };
+      try{
+        const parsed = JSON.parse(raw);
+        return {
+          nacli: !!parsed.nacli,
+          naclstack: !!parsed.naclstack,
+          garganacl: !!parsed.garganacl
+        };
+      }catch{
+        return { nacli: true, naclstack: false, garganacl: false };
+      }
+    }
+    function setUnlockState(state){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    function resetUnlocks(){
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    /* =========================================================
+       CARD TEMPLATE — This is the core reusable HTML block.
+       You can copy it from Debug Mode and paste elsewhere.
+       ========================================================= */
+
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function cardToHtml(card, locked){
+      const tags = (card.tags || []).map(t => `<span class="chip">${escapeHtml(t)}</span>`).join("");
+      const traits = (card.traits || []).map(tr => `
+        <div class="trait">
+          <div class="traitTop">
+            <p class="traitName">${escapeHtml(tr.name)}</p>
+            <span class="traitHint">${escapeHtml(tr.hint || "")}</span>
+          </div>
+          <p class="traitText">${escapeHtml(tr.text)}</p>
+        </div>
+      `).join("");
+
+      const imgBlock = card.img
+        ? `<img alt="${escapeHtml(card.name)} art" src="${escapeHtml(card.img)}" />`
+        : `<div class="placeholder">IMAGE SLOT<br/>Paste a URL into <span style="opacity:.8;">img</span> or use your own local file path in a hosted environment.</div>`;
+
+      return `
+      <article class="card ${escapeHtml(card.typeClass)} ${locked ? "locked" : ""}" data-card-id="${escapeHtml(card.id)}">
+        <div class="cardHeader">
+          <div class="nameBlock">
+            <p class="monName">${escapeHtml(card.name)} <span class="stage">${escapeHtml(card.stage)}</span></p>
+            <div class="tagRow">${tags}</div>
+          </div>
+          <button class="btn" data-action="select">Select</button>
+        </div>
+
+        <div class="art">${imgBlock}</div>
+
+        <div class="body">
+          <p class="headline">${escapeHtml(card.subtitle)}</p>
+          <p class="subtitle">${escapeHtml(card.intro)}</p>
+          <div class="traitList">
+            ${traits}
+          </div>
+        </div>
+
+        <div class="cardFooter">
+          <span class="small">TCG Theme: <code style="font-family:var(--mono); opacity:.85;">${escapeHtml(card.typeClass)}</code></span>
+          <span class="small">ID: <code style="font-family:var(--mono); opacity:.85;">${escapeHtml(card.id)}</code></span>
+        </div>
+
+        ${locked ? `
+          <div class="veil">
+            <div class="lockBox">
+              <div class="lockIcon">🔒</div>
+              <p class="lockTitle">Locked</p>
+              <p class="lockText">${escapeHtml(card.lockText || "Unlock to reveal this card.")}</p>
+              <button class="btn primary" data-action="unlock" data-unlock-id="${escapeHtml(card.id)}">Unlock</button>
+            </div>
+          </div>
+        ` : ``}
+      </article>
+      `;
+    }
+
+    /* =========================================================
+       RENDER
+       ========================================================= */
+
+    let selectedCardId = "garganacl"; // default selection for debug
+
+    function render(){
+      const grid = document.getElementById("cardGrid");
+      const state = getUnlockState();
+
+      const htmlOut = lineData.map(card => {
+        const isUnlocked = !!state[card.id];
+        return cardToHtml(card, !isUnlocked);
+      }).join("");
+
+      grid.innerHTML = htmlOut;
+
+      // Wire buttons
+      grid.querySelectorAll("[data-action='unlock']").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const id = e.currentTarget.getAttribute("data-unlock-id");
+          const st = getUnlockState();
+          st[id] = true;
+
+          // Optional: auto-unlock in order (if you unlock naclstack, keep nacli true)
+          if (id === "naclstack") st.nacli = true;
+          if (id === "garganacl") { st.nacli = true; st.naclstack = true; }
+
+          setUnlockState(st);
+          render();
+          selectCard(id);
+        });
+      });
+
+      grid.querySelectorAll("[data-action='select']").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const cardEl = e.currentTarget.closest(".card");
+          const id = cardEl?.getAttribute("data-card-id");
+          if (id) selectCard(id);
+        });
+      });
+
+      // Refresh debug area content
+      refreshDebug();
+    }
+
+    function selectCard(id){
+      selectedCardId = id;
+      // Visual cue
+      document.querySelectorAll(".card").forEach(c => c.style.outline = "none");
+      const el = document.querySelector(`.card[data-card-id="${CSS.escape(id)}"]`);
+      if (el){
+        el.style.outline = "2px solid rgba(52,211,153,.55)";
+        el.scrollIntoView({behavior:"smooth", block:"nearest"});
+      }
+      refreshDebug();
+    }
+
+    /* =========================================================
+       DEBUG PANEL
+       ========================================================= */
+
+    function refreshDebug(){
+      const panel = document.getElementById("debugPanel");
+      const isDebug = document.getElementById("debugToggle").checked;
+      panel.classList.toggle("show", isDebug);
+
+      if (!isDebug) return;
+
+      const card = lineData.find(c => c.id === selectedCardId) || lineData[0];
+      const state = getUnlockState();
+      const locked = !state[card.id];
+
+      const selectedCardHtml = cardToHtml(card, locked).trim();
+      document.getElementById("selectedCardHtml").value = selectedCardHtml;
+      document.getElementById("selectedCardJson").value = JSON.stringify(card, null, 2);
+    }
+
+    async function copyText(str){
+      try{
+        await navigator.clipboard.writeText(str);
+        return true;
+      }catch(e){
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = str;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        return true;
+      }
+    }
+
+    /* =========================================================
+       BUILDER — Generate new card HTML from simple fields
+       ========================================================= */
+
+    function buildCardDataFromInputs(){
+      const typeClass = document.getElementById("typePick").value;
+      const stage = document.getElementById("stagePick").value;
+      const name = document.getElementById("nameIn").value.trim() || "NewMon";
+      const subtitle = document.getElementById("subtitleIn").value.trim() || "Subtitle goes here";
+      const img = document.getElementById("imgIn").value.trim();
+
+      const id = name.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"").slice(0,50) || "newmon";
+
+      return {
+        id,
+        typeClass,
+        stage,
+        name,
+        subtitle,
+        tags: ["Template", "Edit-me"],
+        img,
+        intro: "Write a 1–2 sentence intro here.",
+        traits: [
+          { name:"Trait One", hint:"A", text:"Describe a key trait." },
+          { name:"Trait Two", hint:"B", text:"Describe a second trait." },
+          { name:"Trait Three", hint:"C", text:"Describe a third trait." }
+        ],
+        lockText: "Unlock to reveal this card."
+      };
+    }
+
+    function generateCardHtml(){
+      const data = buildCardDataFromInputs();
+      const html = cardToHtml(data, false).trim();
+      document.getElementById("generatedOut").value = html;
+      return { data, html };
+    }
+
+    /* =========================================================
+       UI WIRING
+       ========================================================= */
+
+    document.getElementById("debugToggle").addEventListener("change", refreshDebug);
+
+    document.getElementById("resetUnlocks").addEventListener("click", () => {
+      resetUnlocks();
+      render();
+      selectCard("nacli");
+    });
+
+    document.getElementById("copyFull").addEventListener("click", async () => {
+      const full = document.documentElement.outerHTML;
+      await copyText(full);
+      alert("Copied full HTML to clipboard.");
+    });
+
+    document.getElementById("copySelectedCard").addEventListener("click", async () => {
+      const val = document.getElementById("selectedCardHtml").value;
+      await copyText(val);
+      alert("Copied selected card HTML.");
+    });
+
+    document.getElementById("copySelectedData").addEventListener("click", async () => {
+      const val = document.getElementById("selectedCardJson").value;
+      await copyText(val);
+      alert("Copied selected card JSON.");
+    });
+
+    document.getElementById("generateCard").addEventListener("click", () => {
+      const { html } = generateCardHtml();
+      // auto-copy is annoying; keep it manual
+    });
+
+    document.getElementById("addToPage").addEventListener("click", () => {
+      const { data } = generateCardHtml();
+      // Add to the end of lineData for demo purposes (not persisted)
+      lineData.push(data);
+      // Auto-unlock added templates
+      const st = getUnlockState();
+      st[data.id] = true;
+      setUnlockState(st);
+
+      render();
+      selectCard(data.id);
+    });
+
+    // Initial render + auto-select Garganacl (even if locked)
+    render();
+    selectCard("garganacl");
+  </script>
+</body>
+</html>
