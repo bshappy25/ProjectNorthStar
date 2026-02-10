@@ -2,6 +2,8 @@
 # KQ Logic — READ-ONLY DB HOOK (RINGS)
 # Purpose: prove DB access works without writing anything
 
+from kq_db import get_rings, DB_PATH
+
 import streamlit as st
 import sqlite3
 from pathlib import Path
