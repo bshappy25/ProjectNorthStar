@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>✨ Shiny Snivy ✨</title>
+
+  <!-- TYPE: Grass -->
+  <!-- GENERATION: Gen 5 -->
+  <!-- EVOLUTION_LINE: Snivy, Servine, Serperior -->
+  <!-- VARIANT: Sparkle -->
+  <!-- NOTE: This file is self-contained. No external image links required. -->
+
+  <style>
+    :root{
+      --bg0:#091a13;
+      --bg1:#0b2b1f;
+      --card: rgba(255,255,255,.92);
+      --stroke: rgba(120, 255, 201, .38);
+      --ink:#163127;
+      --muted:#2e6b58;
+
+      --lime:#7CFFB2;
+      --mint:#6EF0D4;
+      --gold:#FFD56A;
+
+      --radius:18px;
+      --shadow: 0 18px 55px rgba(0,0,0,.35);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color: var(--ink);
+      background:
+        radial-gradient(900px 520px at 15% 12%, rgba(124,255,178,.20), transparent 58%),
+        radial-gradient(900px 620px at 85% 18%, rgba(110,240,212,.18), transparent 60%),
+        radial-gradient(760px 520px at 50% 90%, rgba(255,213,106,.10), transparent 62%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      padding: 22px 14px 44px;
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .shell{
+      position:relative;
+      border-radius: 22px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    /* glowing background */
+    .shell::before{
+      content:"";
+      position:absolute;
+      inset:-120px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(124,255,178,.20), transparent 55%),
+        radial-gradient(circle at 80% 25%, rgba(110,240,212,.16), transparent 58%),
+        radial-gradient(circle at 55% 70%, rgba(255,213,106,.10), transparent 60%);
+      filter: blur(10px);
+      opacity:.95;
+      pointer-events:none;
+    }
+
+    .topbar{
+      position:relative;
+      z-index:1;
+      padding: 16px 16px 12px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    h1{
+      margin:0;
+      font-size: 1.55rem;
+      letter-spacing:.3px;
+      color: rgba(255,255,255,.95);
+    }
+    .sub{
+      margin:0;
+      color: rgba(255,255,255,.75);
+      line-height:1.3rem;
+      font-size:.95rem;
+    }
+
+    .sparkTag{
+      font-family: var(--mono);
+      font-size:.85rem;
+      color: rgba(255,255,255,.85);
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.22);
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space:nowrap;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .tabs{
+      position:relative;
+      z-index:1;
+      display:flex;
+      gap:8px;
+      padding: 0 16px 14px;
+      flex-wrap:wrap;
+    }
+
+    .tabBtn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      letter-spacing:.2px;
+      color: rgba(255,255,255,.88);
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      transition: transform .05s ease, background .2s ease;
+      user-select:none;
+    }
+    .tabBtn:hover{ background: rgba(255,255,255,.14); }
+    .tabBtn:active{ transform: translateY(1px); }
+    .tabBtn.active{
+      background: rgba(124,255,178,.18);
+      border-color: rgba(124,255,178,.30);
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    }
+
+    .panel{
+      position:relative;
+      z-index:1;
+      background: var(--card);
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding: 16px;
+    }
+
+    .tabPanel{ display:none; }
+    .tabPanel.show{ display:block; }
+
+    /* If scripts are blocked, show all panels stacked */
+    .nojs .tabPanel{ display:block; margin-bottom: 14px; }
+    .nojs .tabs{ display:none; }
+
+    .card{
+      border: 2px solid rgba(22,49,39,.18);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.88);
+      overflow:hidden;
+    }
+
+    .cardHead{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(22,49,39,.12);
+      background:
+        radial-gradient(650px 120px at 10% 20%, rgba(124,255,178,.18), transparent 70%),
+        radial-gradient(650px 120px at 90% 20%, rgba(110,240,212,.14), transparent 70%),
+        rgba(255,255,255,.70);
+    }
+
+    .monLine{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .monName{
+      margin:0;
+      font-size: 2.1rem;
+      letter-spacing:.2px;
+    }
+    .monName .shine{
+      color: #2c6b54;
+      font-weight: 950;
+    }
+    .badgeRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(22,49,39,.18);
+      background: rgba(255,255,255,.78);
+      font-size: .9rem;
+      color: rgba(22,49,39,.90);
+      white-space:nowrap;
+    }
+    .badge strong{ letter-spacing:.2px; }
+    .badge .pill{
+      font-family: var(--mono);
+      font-size: .86rem;
+      opacity:.85;
+    }
+
+    .hero{
+      padding: 14px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media(min-width: 860px){
+      .hero{ grid-template-columns: 1.1fr .9fr; }
+    }
+
+    .artSlot{
+      border-radius: 16px;
+      border: 2px dashed rgba(46,107,88,.40);
+      background: rgba(124,255,178,.08);
+      min-height: 280px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      overflow:hidden;
+      position:relative;
+    }
+
+    /* sparkle overlay for the art slot */
+    .artSlot::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(255,255,255,.8) 0 2px, transparent 3px),
+        radial-gradient(circle at 60% 30%, rgba(255,255,255,.7) 0 1.5px, transparent 3px),
+        radial-gradient(circle at 78% 58%, rgba(255,255,255,.75) 0 2px, transparent 3px),
+        radial-gradient(circle at 35% 72%, rgba(255,255,255,.7) 0 1.6px, transparent 3px),
+        radial-gradient(circle at 90% 25%, rgba(255,255,255,.6) 0 1.4px, transparent 3px);
+      opacity:.55;
+      pointer-events:none;
+      animation: twinkle 2.6s ease-in-out infinite;
+    }
+    @keyframes twinkle{
+      0%,100%{ opacity:.40; }
+      50%{ opacity:.80; }
+    }
+
+    .artInner{
+      position:relative;
+      z-index:1;
+      padding: 14px;
+    }
+
+    .pickaxe{
+      font-size: 4.8rem;
+      margin: 0;
+      line-height: 1;
+    }
+    .slotHint{
+      margin: 10px 0 0;
+      font-family: var(--mono);
+      font-size: .88rem;
+      color: rgba(22,49,39,.72);
+    }
+
+    .about{
+      border-radius: 16px;
+      border: 1px solid rgba(22,49,39,.16);
+      background: rgba(255,255,255,.78);
+      padding: 12px 12px 10px;
+    }
+    .about h3{
+      margin:0 0 8px;
+      font-size: 1.05rem;
+      letter-spacing:.2px;
+    }
+    .about p{
+      margin:0;
+      line-height:1.45rem;
+      color: rgba(22,49,39,.88);
+    }
+
+    .kv{
+      margin-top: 10px;
+      display:grid;
+      grid-template-columns: 150px 1fr;
+      gap: 8px 12px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(22,49,39,.16);
+      font-size: .95rem;
+    }
+    .k{ font-weight: 900; color: rgba(22,49,39,.78); }
+    .v{ color: rgba(22,49,39,.92); }
+    .v code{ font-family: var(--mono); opacity:.85; }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media(min-width: 860px){
+      .grid2{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .panelBox{
+      border-radius: 16px;
+      border: 1px solid rgba(22,49,39,.16);
+      background: rgba(255,255,255,.78);
+      padding: 12px;
+    }
+    .panelBox h3{
+      margin:0 0 8px;
+      font-size: 1.05rem;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      font-size:.95rem;
+    }
+    .stat{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom: 1px dashed rgba(22,49,39,.14);
+      padding-bottom: 6px;
+    }
+    .stat b{ color: rgba(22,49,39,.80); }
+    .stat span{ font-family: var(--mono); font-weight: 800; }
+
+    .moves{ display:flex; flex-direction:column; gap:8px; }
+    .move{
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(22,49,39,.14);
+      background: rgba(255,255,255,.82);
+    }
+    .move b{ letter-spacing:.2px; }
+    .move .t{
+      font-family: var(--mono);
+      font-size: .85rem;
+      opacity: .85;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(124,255,178,.35);
+      background: rgba(124,255,178,.10);
+      white-space:nowrap;
+    }
+
+    .galleryIntro{
+      margin: 0 0 10px;
+      line-height: 1.45rem;
+      color: rgba(22,49,39,.90);
+    }
+
+    .galleryGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media(min-width: 860px){
+      .galleryGrid{ grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    .shot{
+      border-radius: 16px;
+      border: 1px solid rgba(22,49,39,.16);
+      background: rgba(255,255,255,.82);
+      overflow:hidden;
+      min-height: 130px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+    }
+
+    .shot img{
+      width:100%;
+      height: 170px;
+      object-fit: cover;
+      display:block;
+    }
+
+    .shot .ph{
+      padding: 10px;
+      text-align:center;
+      font-family: var(--mono);
+      font-size: .85rem;
+      opacity:.75;
+    }
+
+    .howto{
+      margin-top: 12px;
+      border-radius: 16px;
+      border: 1px dashed rgba(22,49,39,.22);
+      background: rgba(124,255,178,.08);
+      padding: 10px 12px;
+      font-family: var(--mono);
+      font-size: .85rem;
+      line-height: 1.35rem;
+    }
+
+    .foot{
+      margin-top: 10px;
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap:wrap;
+      color: rgba(255,255,255,.75);
+      font-size: .9rem;
+      padding: 0 16px 16px;
+      position:relative;
+      z-index:1;
+    }
+    .foot code{ font-family: var(--mono); opacity:.85; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="shell" id="shell">
+      <div class="topbar">
+        <div class="title">
+          <h1>✨ Shiny Snivy ✨</h1>
+          <p class="sub">
+            Daily Pokémon Entry • A calm, collector-grade shine — not loud, just premium.
+          </p>
+        </div>
+
+        <div class="sparkTag" aria-label="status">
+          <span>🟩 Grass</span>
+          <span style="opacity:.55;">•</span>
+          <span>Gen 5</span>
+          <span style="opacity:.55;">•</span>
+          <span>Variant: ✨ Sparkle</span>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Entry tabs">
+        <button class="tabBtn active" data-tab="a" role="tab" aria-selected="true">Tab A — Card</button>
+        <button class="tabBtn" data-tab="b" role="tab" aria-selected="false">Tab B — Stats</button>
+        <button class="tabBtn" data-tab="c" role="tab" aria-selected="false">Tab C — Gallery</button>
+      </div>
+
+      <div class="panel">
+        <!-- TAB A -->
+        <section class="tabPanel show" id="tab-a" role="tabpanel">
+          <div class="card">
+            <div class="cardHead">
+              <div class="monLine">
+                <p class="monName"><span class="shine">Snivy</span> <span style="font-size:1rem; font-weight:950; opacity:.75;">✨ SHINY ✨</span></p>
+                <span class="badge"><strong>Theme</strong> <span class="pill">sparkle / mint / lime</span></span>
+              </div>
+
+              <div class="badgeRow">
+                <span class="badge"><strong>Type:</strong> <span class="pill">Grass</span></span>
+                <span class="badge"><strong>Gen:</strong> <span class="pill">Gen 5</span></span>
+                <span class="badge"><strong>Evolution:</strong> <span class="pill">Snivy → Servine → Serperior</span></span>
+              </div>
+            </div>
+
+            <div class="hero">
+              <div class="artSlot">
+                <div class="artInner">
+                  <div class="pickaxe">⛏️</div>
+                  <p class="slotHint">IMAGE SLOT — no link needed right now.</p>
+                  <p class="slotHint">When ready: paste a base64 image into Tab C and it will display here later (same file).</p>
+                </div>
+              </div>
+
+              <div class="about">
+                <h3>Entry Summary</h3>
+                <p>
+                  Shiny Snivy reads like “quiet luxury.” The glow is controlled — clean lines, collector energy,
+                  and a calm personality that still feels rare.
+                </p>
+
+                <div class="kv">
+                  <div class="k">OT</div><div class="v"><code>Filippo</code></div>
+                  <div class="k">ID No.</div><div class="v"><code>404039</code></div>
+                  <div class="k">First Met</div><div class="v">Galar region — <code>09/17/2020</code></div>
+                  <div class="k">Nature</div><div class="v"><code>Brave</code></div>
+                  <div class="k">Ability</div><div class="v"><code>Overgrow</code></div>
+                  <div class="k">Characteristic</div><div class="v">Takes plenty of siestas</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB B -->
+        <section class="tabPanel" id="tab-b" role="tabpanel">
+          <div class="grid2">
+            <div class="panelBox">
+              <h3>Stats (Bulbasaur baseline)</h3>
+              <div class="stats">
+                <div class="stat"><b>HP</b><span>21</span></div>
+                <div class="stat"><b>Attack</b><span>11</span></div>
+                <div class="stat"><b>Defense</b><span>11</span></div>
+                <div class="stat"><b>Sp. Atk</b><span>12</span></div>
+                <div class="stat"><b>Sp. Def</b><span>13</span></div>
+                <div class="stat"><b>Speed</b><span>9</span></div>
+              </div>
+              <p style="margin:10px 0 0; color: rgba(22,49,39,.80); line-height:1.4rem;">
+                This entry intentionally uses Bulbasaur’s numbers as a stable template while you build the system.
+              </p>
+            </div>
+
+            <div class="panelBox">
+              <h3>Moves</h3>
+              <div class="moves">
+                <div class="move"><b>Tackle</b><span class="t">Normal</span></div>
+                <div class="move"><b>Growl</b><span class="t">Normal</span></div>
+                <div class="move"><b>Vine Whip</b><span class="t">Grass</span></div>
+              </div>
+
+              <h3 style="margin-top:14px;">Traits (3-block shape)</h3>
+              <div class="moves">
+                <div class="move"><b>Composure</b><span class="t">Trait A</span></div>
+                <div class="move"><b>Selective Sparkle</b><span class="t">Trait B</span></div>
+                <div class="move"><b>Quiet Momentum</b><span class="t">Trait C</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB C -->
+        <section class="tabPanel" id="tab-c" role="tabpanel">
+          <div class="panelBox">
+            <h3>Gallery (editable inside this HTML)</h3>
+            <p class="galleryIntro">
+              This is where you paste additional pictures (Switch screenshots, HOME screenshots, etc.)
+              <strong>inside the HTML</strong> so nothing breaks from file paths.
+            </p>
+
+            <div class="galleryGrid">
+              <!-- Replace the placeholders with <img src="data:image/png;base64,...."> -->
+              <div class="shot"><div class="ph">Slot 1<br/>Paste base64 image</div></div>
+              <div class="shot"><div class="ph">Slot 2<br/>Paste base64 image</div></div>
+              <div class="shot"><div class="ph">Slot 3<br/>Paste base64 image</div></div>
+              <div class="shot"><div class="ph">Slot 4<br/>Paste base64 image</div></div>
+              <div class="shot"><div class="ph">Slot 5<br/>Paste base64 image</div></div>
+              <div class="shot"><div class="ph">Slot 6<br/>Paste base64 image</div></div>
+            </div>
+
+            <div class="howto">
+              HOW TO ADD A PIC (no app patches):<br/>
+              1) Convert an image to base64 (any online converter).<br/>
+              2) Replace a Slot with:<br/>
+              &lt;img src="data:image/png;base64,PASTE_BASE64_HERE" alt="Snivy screenshot"&gt;<br/>
+              3) Save the HTML. Done. No file paths.
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="foot">
+        <span>Theme: <code>shiny_snivy_tabs_v1</code></span>
+        <span>Safe mode: renders fine; tabs need scripts (optional).</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Minimal tabs. If scripts are blocked, content still renders (stacked mode if you add .nojs manually).
+    (function(){
+      const btns = document.querySelectorAll(".tabBtn");
+      const panels = {
+        a: document.getElementById("tab-a"),
+        b: document.getElementById("tab-b"),
+        c: document.getElementById("tab-c"),
+      };
+
+      function setTab(key){
+        btns.forEach(b => b.classList.toggle("active", b.dataset.tab === key));
+        Object.entries(panels).forEach(([k, el]) => el.classList.toggle("show", k === key));
+      }
+
+      btns.forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
+      setTab("a");
+    })();
+  </script>
+</body>
+</html>
