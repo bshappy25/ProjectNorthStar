@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ms. Melanie’s Coloring Studio</title>
+
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  body{
+    font-family:'Comic Sans MS','Chalkboard SE','Comic Neue',cursive,sans-serif;
+    background: linear-gradient(135deg,#ffd6e8,#f9a8d4);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+  }
+
+  .container{
+    width:100%;
+    max-width:1200px;
+    background:#fff;
+    border-radius:24px;
+    padding:32px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    border:6px solid #f472b6;
+  }
+
+  h1{
+    text-align:center;
+    font-size:3em;
+    color:#db2777;
+    margin-bottom:10px;
+  }
+
+  .subtitle{
+    text-align:center;
+    color:#9d174d;
+    font-size:1.3em;
+    margin-bottom:30px;
+  }
+
+  /* ---------- HUB ---------- */
+  .hub{ text-align:center; }
+
+  .tiles{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+    max-width:900px;
+    margin:0 auto 30px;
+  }
+
+  .tile{
+    border:4px dashed #f9a8d4;
+    border-radius:18px;
+    padding:40px 20px;
+    font-size:1.2em;
+    font-weight:bold;
+    color:#9d174d;
+    background:#fff0f6;
+    cursor:pointer;
+    transition:.25s;
+  }
+
+  .tile:hover{
+    transform:translateY(-6px);
+    box-shadow:0 8px 20px rgba(219,39,119,.25);
+    border-color:#db2777;
+  }
+
+  .start-btn{
+    padding:16px 48px;
+    font-size:1.4em;
+    border-radius:999px;
+    border:none;
+    background:linear-gradient(135deg,#f472b6,#ec4899);
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.25s;
+  }
+
+  .start-btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 25px rgba(219,39,119,.4);
+  }
+
+  /* ---------- APP ---------- */
+  .app{
+    display:none;
+    margin-top:20px;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+
+  .tool-btn{
+    padding:10px 16px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:1em;
+  }
+
+  /* Rainbow Pepper button */
+  .spicy{
+    background:linear-gradient(135deg,#ff6b6b,#ff8fab);
+    color:white;
+  }
+
+  .spicy.active{
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.25);
+    filter:saturate(1.15);
+  }
+
+  .clear{
+    background:#fde68a;
+    color:#78350f;
+  }
+
+  canvas{
+    display:block;
+    margin:0 auto;
+    border:4px solid #f472b6;
+    border-radius:18px;
+    background:white;
+    touch-action:none;
+  }
+
+  /* We switch cursor via JS:
+     - normal: crosshair
+     - rainbow pepper: custom pepper cursor (flash-game vibe) */
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>🎨 Ms. Melanie’s Coloring Studio</h1>
+  <div class="subtitle">Create • Color • Rainbow Pepper 🌈🌶️</div>
+
+  <!-- HUB -->
+  <div class="hub" id="hub">
+    <div class="tiles">
+      <div class="tile" onclick="comingSoon()">🌸 Coming Soon</div>
+      <div class="tile" onclick="comingSoon()">🦄 Coming Soon</div>
+      <div class="tile" onclick="comingSoon()">🌈 Coming Soon</div>
+      <div class="tile" onclick="comingSoon()">✨ Coming Soon</div>
+    </div>
+
+    <button class="start-btn" onclick="start()">Start Coloring</button>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+    <div class="toolbar">
+      <button class="tool-btn spicy" id="spicyBtn" onclick="toggleRainbowPepper()">🌈🌶️ Rainbow Pepper</button>
+      <button class="tool-btn clear" onclick="clearCanvas()">🧼 Clear</button>
+    </div>
+
+    <canvas id="canvas" width="900" height="600"></canvas>
+  </div>
+
+</div>
+
+<script>
+  const hub = document.getElementById("hub");
+  const app = document.getElementById("app");
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const spicyBtn = document.getElementById("spicyBtn");
+
+  // --- State ---
+  let drawing = false;
+  let rainbowPepper = false;
+
+  // Base pen settings (smooth ink)
+  const PEN = {
+    width: 7,
+    shadowBlur: 0,   // keep crisp; raise later if you want glow
+    shadowColor: "rgba(0,0,0,0)"
+  };
+
+  // Rainbow palette (per-stroke color)
+  const rainbowPalette = [
+    "#ff3b30", // red
+    "#ff9500", // orange
+    "#ffcc00", // yellow
+    "#34c759", // green
+    "#00c7be", // teal
+    "#007aff", // blue
+    "#5856d6", // indigo
+    "#af52de"  // violet
+  ];
+
+  // Stroke color chosen once per stroke (no seizure-y mid-stroke flicker)
+  let strokeColor = "#db2777";
+  let rainbowIndex = 0;
+
+  // Pointer tracking for smoother lines (quadratic curve)
+  let last = null;      // last point
+  let prev = null;      // point before last
+
+  // Custom "Rainbow Pepper" cursor as inline SVG data-uri
+  // Hotspot near the pepper "tip" so it feels like ink comes from the point.
+  const rainbowPepperCursor = (() => {
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+        <defs>
+          <linearGradient id="pep" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ff3b30"/>
+            <stop offset="20%" stop-color="#ff9500"/>
+            <stop offset="40%" stop-color="#ffcc00"/>
+            <stop offset="60%" stop-color="#34c759"/>
+            <stop offset="80%" stop-color="#007aff"/>
+            <stop offset="100%" stop-color="#af52de"/>
+          </linearGradient>
+        </defs>
+
+        <!-- subtle outline -->
+        <path d="M22 16 C28 10, 36 10, 42 16" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+        <!-- stem -->
+        <path d="M34 14 C34 10, 30 8, 28 8" fill="none" stroke="#2f7d32" stroke-width="4" stroke-linecap="round"/>
+
+        <!-- pepper body -->
+        <path d="M24 18
+                 C16 26, 14 44, 28 54
+                 C40 62, 54 48, 48 34
+                 C44 24, 34 18, 24 18 Z"
+              fill="url(#pep)" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+
+        <!-- shine -->
+        <path d="M26 24 C20 30, 20 42, 28 48"
+              fill="none" stroke="rgba(255,255,255,.65)" stroke-width="4" stroke-linecap="round"/>
+
+        <!-- little spark -->
+        <path d="M52 16 L56 18 L52 20 L50 24 L48 20 L44 18 L48 16 L50 12 Z"
+              fill="#ffd1ff" stroke="#111" stroke-width="2" />
+      </svg>
+    `.trim();
+
+    const uri = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    // x,y hotspot: 14,50 (near lower left / tip area)
+    return `url("${uri}") 14 50, crosshair`;
+  })();
+
+  function comingSoon(){
+    alert("✨ This page is coming soon!\nWe’ll add designs here later.");
+  }
+
+  function start(){
+    hub.style.display = "none";
+    app.style.display = "block";
+    canvas.style.cursor = "crosshair";
+  }
+
+  function toggleRainbowPepper(){
+    rainbowPepper = !rainbowPepper;
+    spicyBtn.classList.toggle("active", rainbowPepper);
+
+    // Only show pepper cursor when inside the canvas (we manage that in enter/leave too)
+    if (rainbowPepper) {
+      // cursor applies when you're over the canvas (also set on enter)
+      canvas.style.cursor = rainbowPepperCursor;
+    } else {
+      canvas.style.cursor = "crosshair";
+    }
+  }
+
+  function clearCanvas(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+
+  // --- Helpers ---
+  function pickStrokeColor(){
+    if (!rainbowPepper) return "#db2777"; // Ms. Melanie pink
+    // cycle smoothly through palette (predictable, pleasant)
+    const c = rainbowPalette[rainbowIndex % rainbowPalette.length];
+    rainbowIndex++;
+    return c;
+  }
+
+  function setInkStyle(color){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = PEN.width;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // Smoothness
+    ctx.imageSmoothingEnabled = true;
+
+    // optional softness/glow (keep subtle by default)
+    ctx.shadowBlur = PEN.shadowBlur;
+    ctx.shadowColor = PEN.shadowColor;
+  }
+
+  function getCanvasPoint(e){
+    // offsetX/offsetY are fine for this simple build; pointer events give us smooth cross-device behavior.
+    return { x: e.offsetX, y: e.offsetY };
+  }
+
+  function drawSmooth(p){
+    // Quadratic smoothing using midpoints:
+    // prev -> mid(prev,last) -> mid(last,current)
+    if (!last) {
+      last = p;
+      prev = p;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      return;
+    }
+
+    const mid1 = { x: (prev.x + last.x) / 2, y: (prev.y + last.y) / 2 };
+    const mid2 = { x: (last.x + p.x) / 2, y: (last.y + p.y) / 2 };
+
+    ctx.beginPath();
+    ctx.moveTo(mid1.x, mid1.y);
+    ctx.quadraticCurveTo(last.x, last.y, mid2.x, mid2.y);
+    ctx.stroke();
+
+    prev = last;
+    last = p;
+  }
+
+  // --- Pointer Events ---
+  canvas.addEventListener("pointerdown", (e)=>{
+    drawing = true;
+    canvas.setPointerCapture(e.pointerId);
+
+    // choose color ONCE per stroke
+    strokeColor = pickStrokeColor();
+    setInkStyle(strokeColor);
+
+    // reset smoothing buffers
+    const p = getCanvasPoint(e);
+    last = null;
+    prev = null;
+
+    // start with a dot
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, PEN.width/2.2, 0, Math.PI*2);
+    ctx.fillStyle = strokeColor;
+    ctx.fill();
+
+    // seed curve
+    last = p;
+    prev = p;
+  });
+
+  canvas.addEventListener("pointermove", (e)=>{
+    if(!drawing) return;
+    const p = getCanvasPoint(e);
+    drawSmooth(p);
+  });
+
+  function endStroke(){
+    drawing = false;
+    last = null;
+    prev = null;
+  }
+
+  canvas.addEventListener("pointerup", endStroke);
+  canvas.addEventListener("pointercancel", endStroke);
+  canvas.addEventListener("pointerleave", ()=>{
+    // cursor behavior: pepper only while inside canvas
+    canvas.style.cursor = rainbowPepper ? "default" : "default";
+    // don't forcibly end if they drag out; but in practice pointer capture keeps it consistent
+  });
+
+  canvas.addEventListener("mouseenter", ()=>{
+    canvas.style.cursor = rainbowPepper ? rainbowPepperCursor : "crosshair";
+  });
+
+  canvas.addEventListener("mouseleave", ()=>{
+    canvas.style.cursor = "default";
+  });
+</script>
+</body>
+</html>
