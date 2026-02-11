@@ -1,12 +1,9 @@
-Here you go, KQ — **the entire updated `index.html` file** with the **Polar Bear + Grizzly Bear** images already added. Copy/paste this whole thing into a new `index.html`.
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mr. Benji's Coloring App</title>
+  <title>Mr. Benji's Coloring App (V2)</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body{
@@ -15,6 +12,21 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px;
     }
     .container{ max-width:1400px; width:100%; }
+
+    /* Error Banner (NEW) */
+    .error-banner{
+      position:fixed; left:50%; transform:translateX(-50%);
+      top:12px; z-index:10002;
+      background:#fff; color:#b00020;
+      border:3px solid rgba(176,0,32,.25);
+      border-radius:14px; padding:10px 14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.2);
+      display:none;
+      max-width:92vw;
+    }
+    .error-banner.active{ display:block; }
+    .error-banner b{ color:#b00020; }
+    .error-banner .mini{ color:#444; font-size:.92em; margin-top:6px; line-height:1.35; }
 
     /* Loading */
     .loading-progress{ position:fixed; top:0; left:0; width:100%; height:4px; background:rgba(255,255,255,.3); z-index:10000; display:none; }
@@ -94,15 +106,10 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     .admin-header h2{ color:#667eea; font-size:2em; margin-bottom:6px; }
     .admin-section{ margin-bottom:18px; padding:16px; background:#f8f9fa; border-radius:12px; }
     .admin-section h3{ color:#333; margin-bottom:10px; font-size:1.25em; }
-    .admin-input{
-      width:100%; padding:12px; border:2px solid #ddd; border-radius:10px; font-size:1em; font-family:inherit; margin-bottom:10px;
-    }
     .admin-button{
       padding:12px 18px; border:none; border-radius:10px; font-size:1em; cursor:pointer; font-family:inherit; font-weight:bold;
       transition: all .2s; margin-right:10px; margin-bottom:10px;
     }
-    .admin-button.primary{ background:#667eea; color:#fff; }
-    .admin-button.primary:hover{ background:#5568d3; }
     .admin-button.danger{ background:#ff6b6b; color:#fff; }
     .admin-button.danger:hover{ background:#ff5252; }
     .admin-button.secondary{ background:#868e96; color:#fff; }
@@ -168,7 +175,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       font-family:inherit; transition: all .2s; font-weight:bold;
     }
 
-    /* NEW: separate Fill + Spicy */
     .fill-button{
       background: linear-gradient(135deg, #45B7D1 0%, #4ECDC4 100%);
       color:#fff;
@@ -204,8 +210,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     #coloringCanvas{
       border:3px solid #ddd; border-radius:12px; cursor:crosshair;
       display:block; margin:0 auto; max-width:100%; height:auto; background:#fff;
-
-      /* IMPORTANT for multitouch pointer events */
       touch-action: none;
     }
     .loading-indicator{
@@ -214,7 +218,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     }
     .loading-indicator.active{ display:block; }
 
-    /* Quote + Education */
     .quote-section{
       background: linear-gradient(135deg,#ffd43b 0%,#fcc419 100%);
       border-radius:15px; padding:20px; text-align:center;
@@ -246,7 +249,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       display:inline-block; padding:2px 8px; border-radius:8px; background:#fff; border:1px solid #ddd; font-weight:bold; font-size:.9em; color:#333;
     }
 
-    /* Signature Modal */
     .signature-modal{
       display:none; position:fixed; top:0; left:0; width:100%; height:100%;
       background:rgba(0,0,0,.8); z-index:9998; justify-content:center; align-items:center;
@@ -293,14 +295,17 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
   </style>
 </head>
 <body>
-  <!-- Loading Progress Bar -->
+  <div class="error-banner" id="errorBanner">
+    <div><b>App Error:</b> <span id="errorMsg">Unknown</span></div>
+    <div class="mini">Open DevTools → Console for details. (This banner appears if a script error prevents images/loading.)</div>
+  </div>
+
   <div class="loading-progress" id="loadingProgress">
     <div class="loading-progress-bar" id="loadingProgressBar"></div>
   </div>
   <div class="loading-text" id="loadingText">Loading your canvas...</div>
 
   <div class="container">
-    <!-- User Hub -->
     <div class="user-hub" id="userHub">
       <h1 class="hub-title" id="hubTitle" onclick="handleTitleClick()">🎨 Welcome to Mr. Benji's Coloring Studio! 🌴</h1>
       <p class="hub-subtitle">Draw, fill, and spice it up — now with true multi-touch fill!</p>
@@ -315,10 +320,10 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
         <div class="image-grid" id="imageGrid"></div>
       </div>
 
+      <!-- V2: Start is enabled as long as we have >= 1 image -->
       <button class="start-button" id="startButton" onclick="startColoring()" disabled>Start Coloring! 🖍️</button>
     </div>
 
-    <!-- Admin Modal -->
     <div class="admin-modal" id="adminModal">
       <div class="admin-content">
         <button class="admin-close" onclick="closeAdminPanel()">✕ Close</button>
@@ -332,7 +337,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
           <div class="admin-list" id="adminImageList"></div>
           <p class="mini">
             Tip: You can store your own images by editing the <span class="kbd">coloringImages</span> array.
-            (Your original “Drive import” is removed here because it was a placeholder and confused users.)
           </p>
         </div>
 
@@ -350,7 +354,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       </div>
     </div>
 
-    <!-- Signature Modal -->
     <div class="signature-modal" id="signatureModal">
       <div class="signature-content">
         <h2>✍️ Sign Your Masterpiece!</h2>
@@ -363,7 +366,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       </div>
     </div>
 
-    <!-- Coloring App -->
     <div class="coloring-app" id="coloringApp" style="position:relative;">
       <button class="back-button" onclick="goBackToHub()">← Back to Hub</button>
 
@@ -378,7 +380,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       </div>
 
       <div class="main-content">
-        <!-- Tools -->
         <div class="tools-panel">
           <div class="tools-section">
             <h3>🎨 Colors</h3>
@@ -404,18 +405,10 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
           <div class="tools-section">
             <h3>🛠️ Tools</h3>
             <div class="action-buttons">
-              <!-- NEW: separate Fill + Spicy -->
-              <button class="tool-button fill-button" id="fillButton" onclick="toggleFillMode()">
-                🪣 Fill (Multi-touch)
-              </button>
-              <button class="tool-button spicy-button" id="spicyButton" onclick="toggleSpiceMode()">
-                🌶️ Make it Spicy (Random Fill Colors)
-              </button>
-
+              <button class="tool-button fill-button" id="fillButton" onclick="toggleFillMode()">🪣 Fill (Multi-touch)</button>
+              <button class="tool-button spicy-button" id="spicyButton" onclick="toggleSpiceMode()">🌶️ Make it Spicy (Random Fill Colors)</button>
               <button class="tool-button eraser-button" id="eraserButton" onclick="toggleEraser()">Eraser Mode</button>
-
               <button class="tool-button undo-button" onclick="undo()">Undo</button>
-
               <button class="tool-button clear-button" onclick="clearCanvas()">Clear All</button>
               <button class="tool-button save-button" onclick="initiateSignature()">Save Drawing</button>
             </div>
@@ -425,7 +418,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
           </div>
         </div>
 
-        <!-- Canvas -->
         <div class="canvas-container">
           <div class="loading-indicator" id="loadingIndicator">Loading canvas...</div>
           <canvas id="coloringCanvas"></canvas>
@@ -436,7 +428,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
         <p class="quote-text">Keep life Spicy 🌶️</p>
       </div>
 
-      <!-- Educational Section -->
       <details class="education">
         <summary>📚 Educational Section (tap to open) — color smarter, not harder</summary>
         <div class="edu-grid">
@@ -467,11 +458,10 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
           <div class="edu-card">
             <h4>Included Improvements</h4>
             <ul>
-              <li>✅ <b>Fill</b> is its own button (no more mixed behavior).</li>
-              <li>✅ <b>Multi-touch Fill</b> (tap multiple areas fast, even with two fingers).</li>
-              <li>✅ <b>Spicy</b> randomizes from themed palettes + new color each fill tap.</li>
-              <li>✅ <b>Undo</b> added for easy recovery.</li>
-              <li>✅ <b>Clear All</b> re-draws the original page reliably.</li>
+              <li>✅ <b>V2</b>: Start Coloring always works (auto-selects image #0).</li>
+              <li>✅ <b>Error banner</b> if any JS error blocks loading.</li>
+              <li>✅ <b>Fill</b> + <b>Spicy</b> are separate persistent toggles.</li>
+              <li>✅ <b>Undo</b> + reliable Clear All.</li>
             </ul>
           </div>
         </div>
@@ -480,6 +470,25 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
   </div>
 
   <script>
+    /* ====================== V2 ERROR HANDLING (NEW) ====================== */
+    function showErrorBanner(msg) {
+      const b = document.getElementById("errorBanner");
+      const m = document.getElementById("errorMsg");
+      if (!b || !m) return;
+      m.textContent = msg || "Unknown error";
+      b.classList.add("active");
+    }
+
+    window.addEventListener("error", (e) => {
+      console.error("APP ERROR:", e.error || e.message, e);
+      showErrorBanner((e && e.message) ? e.message : "Script error");
+    });
+
+    window.addEventListener("unhandledrejection", (e) => {
+      console.error("APP PROMISE ERROR:", e.reason);
+      showErrorBanner("Unhandled promise rejection (see console)");
+    });
+
     /* =========================================================================
        IMAGE LIBRARY
     ========================================================================= */
@@ -549,38 +558,28 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
           <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
             <rect width="100%" height="100%" fill="white"/>
             <g stroke="#111" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <!-- head -->
               <path d="M500,150
                        C620,150 700,240 700,360
                        C700,520 610,590 500,590
                        C390,590 300,520 300,360
                        C300,240 380,150 500,150 Z"/>
-              <!-- hair -->
               <path d="M320,320 C340,210 420,150 500,150 C585,150 665,210 680,330"/>
               <path d="M340,280 C390,210 450,185 500,185 C560,185 625,215 660,285"/>
-              <!-- ears -->
               <path d="M300,360 C260,360 260,440 300,440"/>
               <path d="M700,360 C740,360 740,440 700,440"/>
-              <!-- eyes -->
               <path d="M410,360 C440,335 480,335 510,360"/>
               <path d="M490,360 C520,335 560,335 590,360"/>
               <circle cx="460" cy="378" r="10"/>
               <circle cx="540" cy="378" r="10"/>
-              <!-- eyebrows -->
               <path d="M395,335 C435,310 485,310 525,335"/>
               <path d="M475,335 C515,310 565,310 605,335"/>
-              <!-- nose -->
               <path d="M505,395 C495,430 495,450 510,470"/>
               <path d="M510,470 C525,480 540,475 550,465"/>
-              <!-- moustache -->
               <path d="M430,490 C470,465 530,465 570,490"/>
               <path d="M430,490 C460,515 490,520 500,515"/>
               <path d="M570,490 C540,515 510,520 500,515"/>
-              <!-- mouth -->
               <path d="M440,545 C480,575 520,575 560,545"/>
-              <!-- neck -->
               <path d="M420,590 C420,650 580,650 580,590"/>
-              <!-- shoulders -->
               <path d="M240,690 C290,625 370,610 420,610"/>
               <path d="M760,690 C710,625 630,610 580,610"/>
             </g>
@@ -594,7 +593,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
           <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
             <rect width="100%" height="100%" fill="white"/>
             <g stroke="#111" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <!-- hair outline (long) -->
               <path d="M280,360
                        C280,200 400,120 500,120
                        C600,120 720,200 720,360
@@ -602,45 +600,34 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
                        C590,680 560,690 500,690
                        C440,690 410,680 380,650
                        C340,610 280,520 280,360 Z"/>
-              <!-- face -->
               <path d="M500,170
                        C620,170 690,255 690,360
                        C690,515 600,585 500,585
                        C400,585 310,515 310,360
                        C310,255 380,170 500,170 Z"/>
-              <!-- hair part + waves -->
               <path d="M500,120 C445,130 400,160 365,205"/>
               <path d="M500,120 C555,130 600,160 635,205"/>
               <path d="M320,430 C300,520 320,590 360,640"/>
               <path d="M680,430 C700,520 680,590 640,640"/>
-              <!-- ears -->
               <path d="M310,360 C280,360 280,435 310,435"/>
               <path d="M690,360 C720,360 720,435 690,435"/>
-              <!-- eyes -->
               <path d="M410,360 C440,335 480,335 510,360"/>
               <path d="M490,360 C520,335 560,335 590,360"/>
               <circle cx="460" cy="378" r="10"/>
               <circle cx="540" cy="378" r="10"/>
-              <!-- lashes -->
               <path d="M405,350 L385,338"/>
               <path d="M430,340 L410,325"/>
               <path d="M595,350 L615,338"/>
               <path d="M570,340 L590,325"/>
-              <!-- eyebrows -->
               <path d="M395,335 C435,315 485,315 525,335"/>
               <path d="M475,335 C515,315 565,315 605,335"/>
-              <!-- nose -->
               <path d="M505,395 C495,430 500,450 515,468"/>
               <path d="M515,468 C530,478 545,472 555,462"/>
-              <!-- mouth -->
               <path d="M440,525 C480,555 520,555 560,525"/>
               <path d="M455,535 C485,555 515,555 545,535"/>
-              <!-- cheeks (light hint) -->
               <path d="M360,460 C375,475 395,485 415,492"/>
               <path d="M640,460 C625,475 605,485 585,492"/>
-              <!-- neck -->
               <path d="M420,585 C420,650 580,650 580,585"/>
-              <!-- shoulders -->
               <path d="M220,690 C280,620 350,610 420,610"/>
               <path d="M780,690 C720,620 650,610 580,610"/>
             </g>
@@ -648,45 +635,34 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
           </svg>
         `)
       },
-
-      /* ===================== ADDED TWO NEW IMAGES (POLAR + GRIZZLY) ===================== */
       {
         title: "Bear - Polar Bear (Face)",
         data: svgData(`
           <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
             <rect width="100%" height="100%" fill="white"/>
             <g stroke="#111" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <!-- head -->
               <path d="M500,160
                        C640,160 740,265 740,400
                        C740,560 630,620 500,620
                        C370,620 260,560 260,400
                        C260,265 360,160 500,160 Z"/>
-              <!-- ears -->
               <path d="M325,235 C295,200 295,170 330,160 C365,150 390,185 385,225"/>
               <path d="M675,235 C705,200 705,170 670,160 C635,150 610,185 615,225"/>
-              <!-- snout -->
               <path d="M360,410
                        C390,340 445,320 500,320
                        C555,320 610,340 640,410
                        C670,480 615,535 500,535
                        C385,535 330,480 360,410 Z"/>
-              <!-- nose -->
               <path d="M470,395 C485,375 515,375 530,395 C535,420 520,435 500,435 C480,435 465,420 470,395 Z"/>
-              <!-- mouth -->
               <path d="M500,435 C490,460 470,470 450,465"/>
               <path d="M500,435 C510,460 530,470 550,465"/>
-              <!-- eyes -->
               <path d="M390,350 C420,330 455,330 485,350"/>
               <path d="M515,350 C545,330 580,330 610,350"/>
               <circle cx="440" cy="370" r="10"/>
               <circle cx="560" cy="370" r="10"/>
-              <!-- cheeks -->
               <path d="M320,460 C345,485 375,500 410,510"/>
               <path d="M680,460 C655,485 625,500 590,510"/>
-              <!-- neck -->
               <path d="M410,620 C410,670 590,670 590,620"/>
-              <!-- shoulders -->
               <path d="M230,690 C285,635 350,620 410,630"/>
               <path d="M770,690 C715,635 650,620 590,630"/>
             </g>
@@ -700,46 +676,36 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
           <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
             <rect width="100%" height="100%" fill="white"/>
             <g stroke="#111" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <!-- head (chunkier) -->
               <path d="M500,150
                        C660,150 780,270 780,420
                        C780,585 650,645 500,645
                        C350,645 220,585 220,420
                        C220,270 340,150 500,150 Z"/>
-              <!-- ears -->
               <path d="M310,250 C285,215 290,185 325,175 C360,165 385,200 375,235"/>
               <path d="M690,250 C715,215 710,185 675,175 C640,165 615,200 625,235"/>
-              <!-- brow ridge -->
               <path d="M300,330 C360,280 440,260 500,260 C560,260 640,280 700,330"/>
-              <!-- snout -->
               <path d="M345,435
                        C375,360 440,335 500,335
                        C560,335 625,360 655,435
                        C685,510 625,565 500,565
                        C375,565 315,510 345,435 Z"/>
-              <!-- nose -->
               <path d="M465,405 C485,380 515,380 535,405 C540,435 520,455 500,455 C480,455 460,435 465,405 Z"/>
-              <!-- mouth -->
               <path d="M500,455 C490,485 465,500 440,492"/>
               <path d="M500,455 C510,485 535,500 560,492"/>
-              <!-- eyes (smaller, tougher) -->
               <path d="M385,360 C420,335 455,335 490,360"/>
               <path d="M510,360 C545,335 580,335 615,360"/>
               <circle cx="440" cy="380" r="9"/>
               <circle cx="560" cy="380" r="9"/>
-              <!-- fur hints -->
               <path d="M255,420 C240,470 250,520 285,565"/>
               <path d="M745,420 C760,470 750,520 715,565"/>
               <path d="M315,585 C350,610 400,625 455,632"/>
               <path d="M685,585 C650,610 600,625 545,632"/>
-              <!-- neck -->
               <path d="M410,645 C410,690 590,690 590,645"/>
             </g>
             <text x="500" y="660" text-anchor="middle" font-size="34" font-family="Comic Sans MS, cursive" fill="#111">Grizzly Bear</text>
           </svg>
         `)
       }
-      /* ===================== END ADDED IMAGES ===================== */
     ];
 
     // Load images from localStorage if available
@@ -764,8 +730,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       isEraserMode: false,
       isFillMode: false,
       isSpiceMode: false,
-      lastX: 0,
-      lastY: 0,
       selectedImageIndex: 0,
       adminClickCount: 0,
       adminClickTimeout: null,
@@ -776,9 +740,7 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
 
     let canvas, ctx;
     let backgroundImage = new Image();
-
-    // Track multiple pointers for drawing
-    const pointerMap = new Map(); // pointerId -> {x,y,isDown}
+    const pointerMap = new Map();
 
     /* =========================================================================
        PALETTES
@@ -813,19 +775,20 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
         "#0B1220","#FFFFFF","#0F172A","#64748B"
       ]}
     ];
-
-    // Current palette reference
     let currentPalette = PALETTES[0].colors;
 
     /* =========================================================================
-       INIT
+       INIT (V2 hardened)
     ========================================================================= */
     function initializeApp() {
       canvas = document.getElementById("coloringCanvas");
+      if (!canvas) throw new Error("Canvas element not found (#coloringCanvas).");
+
       ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) throw new Error("Canvas 2D context failed to initialize.");
 
       generateColorPalette();
-      loadImageSelection();
+      loadImageSelection_V2();
       setupCanvasEventListeners();
 
       document.getElementById("customColorPicker").addEventListener("input", (e) => setColor(e.target.value));
@@ -839,14 +802,14 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       });
 
       canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+      updateBadges();
     }
 
     /* =========================================================================
-       ADMIN (title 3 clicks + password)
+       ADMIN
     ========================================================================= */
     function handleTitleClick() {
       appState.adminClickCount++;
-
       if (appState.adminClickTimeout) clearTimeout(appState.adminClickTimeout);
       appState.adminClickTimeout = setTimeout(() => (appState.adminClickCount = 0), 2000);
 
@@ -888,11 +851,11 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     }
 
     function deleteImage(index) {
-      if (confirm(\`Delete "\${coloringImages[index].title}"?\`)) {
+      if (confirm(`Delete "${coloringImages[index].title}"?`)) {
         coloringImages.splice(index, 1);
         localStorage.setItem("coloringImages", JSON.stringify(coloringImages));
         updateAdminImageList();
-        loadImageSelection();
+        loadImageSelection_V2();
       }
     }
 
@@ -909,7 +872,7 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       studentNames.forEach((name, index) => {
         const item = document.createElement("div");
         item.className = "admin-list-item";
-        item.innerHTML = \`<span>\${index + 1}. \${name}</span>\`;
+        item.innerHTML = `<span>${index + 1}. ${name}</span>`;
         listContainer.appendChild(item);
       });
     }
@@ -923,7 +886,7 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = \`student_names_\${Date.now()}.txt\`;
+      a.download = `student_names_${Date.now()}.txt`;
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -956,27 +919,30 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     }
 
     /* =========================================================================
-       HUB IMAGE GRID
+       HUB IMAGE GRID (V2)
+       - Always selects image #0 if nothing selected
+       - Enables Start whenever images exist
     ========================================================================= */
-    function loadImageSelection() {
+    function loadImageSelection_V2() {
       const imageGrid = document.getElementById("imageGrid");
+      const startBtn = document.getElementById("startButton");
       imageGrid.innerHTML = "";
 
-      if (coloringImages.length === 0) {
+      if (!Array.isArray(coloringImages) || coloringImages.length === 0) {
         imageGrid.innerHTML = '<p style="color:#999;">No images available. Contact admin.</p>';
-        document.getElementById("startButton").disabled = true;
+        startBtn.disabled = true;
         return;
+      }
+
+      // Auto-fix selected index
+      if (typeof appState.selectedImageIndex !== "number" || appState.selectedImageIndex < 0 || appState.selectedImageIndex >= coloringImages.length) {
+        appState.selectedImageIndex = 0;
       }
 
       coloringImages.forEach((imageData, index) => {
         const imageOption = document.createElement("div");
         imageOption.className = "image-option";
-        if (index === 0) {
-          imageOption.classList.add("selected");
-          appState.selectedImageIndex = 0;
-          document.getElementById("startButton").disabled = false;
-        }
-
+        imageOption.classList.toggle("selected", index === appState.selectedImageIndex);
         imageOption.onclick = () => selectImage(index);
 
         const img = document.createElement("img");
@@ -991,6 +957,9 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
         imageOption.appendChild(title);
         imageGrid.appendChild(imageOption);
       });
+
+      // V2: enable Start because we ALWAYS have something to load
+      startBtn.disabled = false;
     }
 
     function selectImage(index) {
@@ -1022,7 +991,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
 
     function setColor(color) {
       appState.currentColor = color;
-
       if (appState.isEraserMode) toggleEraser(false);
 
       document.querySelectorAll(".color-option").forEach((option) => {
@@ -1038,15 +1006,10 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     function rgbToHex(rgb) {
       const result = rgb.match(/\d+/g);
       if (!result) return rgb;
-      return (
-        "#" +
-        result
-          .map((x) => {
-            const hex = parseInt(x).toString(16);
-            return hex.length === 1 ? "0" + hex : hex;
-          })
-          .join("")
-      );
+      return "#" + result.map((x) => {
+        const hex = parseInt(x).toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+      }).join("");
     }
 
     function setBrushSize(size, element) {
@@ -1066,13 +1029,10 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
 
     function toggleFillMode(force) {
       appState.isFillMode = typeof force === "boolean" ? force : !appState.isFillMode;
-
       const btn = document.getElementById("fillButton");
       btn.classList.toggle("active", appState.isFillMode);
       canvas.style.cursor = appState.isFillMode ? "pointer" : "crosshair";
-
       if (appState.isEraserMode) toggleEraser(false);
-
       updateBadges();
     }
 
@@ -1084,13 +1044,11 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
         currentPalette = theme.colors;
         appState.paletteName = theme.name;
         generateColorPalette();
-
         if (!appState.isFillMode) toggleFillMode(true);
       }
 
       const btn = document.getElementById("spicyButton");
       btn.classList.toggle("active", appState.isSpiceMode);
-
       updateBadges();
     }
 
@@ -1116,12 +1074,11 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
         eraserButton.textContent = "Eraser Mode";
         canvas.style.cursor = appState.isFillMode ? "pointer" : "crosshair";
       }
-
       updateBadges();
     }
 
     /* =========================================================================
-       UNDO STACK
+       UNDO
     ========================================================================= */
     function pushUndo() {
       try {
@@ -1156,7 +1113,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
 
       const targetColor = getPixelColor(pixels, startX, startY, width);
       const fillRGB = hexToRgb(fillColor);
-
       const tolerance = 28;
 
       if (colorsMatch(targetColor, fillRGB, 12)) return;
@@ -1176,7 +1132,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
           stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
         }
       }
-
       ctx.putImageData(imageData, 0, 0);
     }
 
@@ -1200,13 +1155,11 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     }
     function hexToRgb(hex) {
       const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return m
-        ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) }
-        : { r: 0, g: 0, b: 0 };
+      return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : { r: 0, g: 0, b: 0 };
     }
 
     /* =========================================================================
-       BACKGROUND IMAGE LOAD
+       BACKGROUND LOAD
     ========================================================================= */
     function loadBackgroundImage() {
       const loadingProgress = document.getElementById("loadingProgress");
@@ -1264,13 +1217,18 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
         alert("Error loading image. Please try again.");
       };
 
+      // V2: if no selection, force 0
+      if (typeof appState.selectedImageIndex !== "number" || appState.selectedImageIndex < 0 || appState.selectedImageIndex >= coloringImages.length) {
+        appState.selectedImageIndex = 0;
+      }
+
       const selectedImage = coloringImages[appState.selectedImageIndex];
       document.getElementById("currentImageTitle").textContent = selectedImage.title;
       backgroundImage.src = selectedImage.data;
     }
 
     /* =========================================================================
-       POINTER EVENTS (best for multi-touch)
+       POINTER EVENTS
     ========================================================================= */
     function setupCanvasEventListeners() {
       canvas.addEventListener("pointerdown", onPointerDown);
@@ -1294,18 +1252,15 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     function onPointerDown(e) {
       e.preventDefault();
       canvas.setPointerCapture(e.pointerId);
-
       const pos = getPosFromEvent(e);
 
       if (appState.isFillMode) {
         pushUndo();
-
         let fillColor = appState.currentColor;
         if (appState.isSpiceMode) {
           fillColor = pickSpicyColor();
           setColor(fillColor);
         }
-
         floodFill(Math.floor(pos.x), Math.floor(pos.y), fillColor);
         return;
       }
@@ -1323,9 +1278,7 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
 
       e.preventDefault();
       const pos = getPosFromEvent(e);
-
       drawLine(data.x, data.y, pos.x, pos.y);
-
       data.x = pos.x;
       data.y = pos.y;
       pointerMap.set(e.pointerId, data);
@@ -1361,16 +1314,14 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     }
 
     /* =========================================================================
-       CLEAR (reliable)
+       CLEAR
     ========================================================================= */
     function clearCanvas() {
       if (!confirm("Are you sure you want to clear your drawing? This cannot be undone!")) return;
-
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalCompositeOperation = "source-over";
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-
       appState.undoStack = [];
       alert("Canvas cleared! ✨");
     }
@@ -1405,7 +1356,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       ctx.fillStyle = "#333";
       ctx.textAlign = "right";
       ctx.textBaseline = "bottom";
-
       const pad = 15;
       ctx.fillText(signature, canvas.width - pad, canvas.height - pad);
 
@@ -1417,7 +1367,7 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       try {
         const dataURL = canvas.toDataURL("image/png");
         const link = document.createElement("a");
-        const selectedImage = coloringImages[appState.selectedImageIndex];
+        const selectedImage = coloringImages[appState.selectedImageIndex] || { title: "ColoringPage" };
 
         const fileName = appState.userName
           ? `${appState.userName}_${selectedImage.title.replace(/\s+/g, "_")}_${Date.now()}.png`
@@ -1426,7 +1376,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
         link.download = fileName;
         link.href = dataURL;
         link.click();
-
         alert("Your masterpiece has been saved! 🎨");
       } catch (error) {
         alert("Oops! There was an error saving your drawing. Please try again.");
@@ -1435,11 +1384,19 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
     }
 
     /* =========================================================================
-       START / BACK
+       START / BACK (V2: always works)
     ========================================================================= */
     function startColoring() {
-      const nameInput = document.getElementById("userName").value.trim();
+      // V2: Always ensure image index valid
+      if (!Array.isArray(coloringImages) || coloringImages.length === 0) {
+        alert("No images are loaded. Open Admin Panel or check your coloringImages array.");
+        return;
+      }
+      if (typeof appState.selectedImageIndex !== "number" || appState.selectedImageIndex < 0 || appState.selectedImageIndex >= coloringImages.length) {
+        appState.selectedImageIndex = 0;
+      }
 
+      const nameInput = document.getElementById("userName").value.trim();
       if (nameInput) {
         appState.userName = nameInput;
         saveStudentName(nameInput);
@@ -1463,7 +1420,6 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
 
       document.getElementById("userHub").classList.add("hidden");
       document.getElementById("coloringApp").classList.add("active");
-
       loadBackgroundImage();
     }
 
@@ -1474,11 +1430,17 @@ Here you go, KQ — **the entire updated `index.html` file** with the **Polar Be
       document.getElementById("userName").value = "";
     }
 
+    /* =========================================================================
+       BOOT
+    ========================================================================= */
     window.addEventListener("load", () => {
-      initializeApp();
-      updateBadges();
+      try {
+        initializeApp();
+      } catch (err) {
+        console.error(err);
+        showErrorBanner(err.message || "Initialization failed");
+      }
     });
   </script>
 </body>
 </html>
-```
