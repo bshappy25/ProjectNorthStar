@@ -924,6 +924,10 @@
        - Enables Start whenever images exist
     ========================================================================= */
     function loadImageSelection_V2() {
+      
+      function comingSoonMessage(title) {
+  alert(`⏳ ${title} is coming soon!\n\nFor now, pick one of the available pages and start coloring. 🎨`);
+}
       const imageGrid = document.getElementById("imageGrid");
       const startBtn = document.getElementById("startButton");
       imageGrid.innerHTML = "";
@@ -940,6 +944,43 @@
       }
 
       coloringImages.forEach((imageData, index) => {
+ 			
+        	/* Coming Soon tiles */
+.image-option.coming-soon{
+  border: 4px dashed #c7c7c7;
+  background: #fafafa;
+  cursor: pointer;
+  opacity: 0.95;
+}
+.image-option.coming-soon:hover{
+  border-color:#ff6b6b;
+  transform:translateY(-5px);
+  box-shadow:0 8px 20px rgba(255,107,107,.20);
+}
+.image-option.coming-soon .coming-soon-badge{
+  position:absolute;
+  top:10px; left:10px;
+  background: rgba(255,107,107,.15);
+  border: 2px solid rgba(255,107,107,.35);
+  color:#b00020;
+  font-weight:900;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:.9em;
+}
+.image-option.coming-soon .coming-soon-text{
+  text-align:center;
+  margin-top:10px;
+  font-size:1.05em;
+  color:#555;
+  font-weight:900;
+}
+.image-option.coming-soon img{
+  filter: grayscale(100%);
+  opacity: 0.75;
+}
+
+
         const imageOption = document.createElement("div");
         imageOption.className = "image-option";
         imageOption.classList.toggle("selected", index === appState.selectedImageIndex);
