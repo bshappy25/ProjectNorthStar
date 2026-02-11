@@ -73,53 +73,6 @@
       border:4px solid #ddd; border-radius:15px; padding:10px; cursor:pointer;
       transition: all .25s; background:#fff;
     }
-    
-    /* ===================== COMING SOON APPEND (2 tiles) ===================== */
-const comingSoonItems = [
-  { title: "Coming Soon: Mr. Benji + Friends", emoji: "✨" },
-  { title: "Coming Soon: Space Adventure Pack", emoji: "🚀" }
-];
-
-comingSoonItems.forEach((item) => {
-  const imageOption = document.createElement("div");
-  imageOption.className = "image-option coming-soon";
-  imageOption.style.position = "relative";
-  imageOption.onclick = () => comingSoonMessage(item.title);
-
-  const badge = document.createElement("div");
-  badge.className = "coming-soon-badge";
-  badge.textContent = "COMING SOON";
-
-  // simple placeholder preview image (inline SVG)
-  const img = document.createElement("img");
-  img.alt = item.title;
-  img.src =
-    "data:image/svg+xml;charset=utf-8," +
-    encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
-        <rect width="100%" height="100%" fill="white"/>
-        <g stroke="#111" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="170" y="150" width="660" height="420" rx="30"/>
-          <path d="M260,470 C350,360 430,520 520,410 C610,300 690,520 770,380"/>
-          <circle cx="320" cy="260" r="35"/>
-        </g>
-        <text x="500" y="625" text-anchor="middle" font-size="44" font-family="Comic Sans MS, cursive" fill="#111">
-          ${item.emoji} Coming Soon ${item.emoji}
-        </text>
-      </svg>
-    `);
-
-  const title = document.createElement("div");
-  title.className = "coming-soon-text";
-  title.textContent = item.title;
-
-  imageOption.appendChild(badge);
-  imageOption.appendChild(img);
-  imageOption.appendChild(title);
-
-  imageGrid.appendChild(imageOption);
-});
-/* =================== END COMING SOON APPEND =================== */
     .image-option:hover{
       border-color:#667eea; transform:translateY(-5px); box-shadow:0 8px 20px rgba(102,126,234,.3);
     }
@@ -971,10 +924,6 @@ comingSoonItems.forEach((item) => {
        - Enables Start whenever images exist
     ========================================================================= */
     function loadImageSelection_V2() {
-      
-      function comingSoonMessage(title) {
-  alert(`⏳ ${title} is coming soon!\n\nFor now, pick one of the available pages and start coloring. 🎨`);
-}
       const imageGrid = document.getElementById("imageGrid");
       const startBtn = document.getElementById("startButton");
       imageGrid.innerHTML = "";
@@ -991,43 +940,6 @@ comingSoonItems.forEach((item) => {
       }
 
       coloringImages.forEach((imageData, index) => {
- 			
-        	/* Coming Soon tiles */
-.image-option.coming-soon{
-  border: 4px dashed #c7c7c7;
-  background: #fafafa;
-  cursor: pointer;
-  opacity: 0.95;
-}
-.image-option.coming-soon:hover{
-  border-color:#ff6b6b;
-  transform:translateY(-5px);
-  box-shadow:0 8px 20px rgba(255,107,107,.20);
-}
-.image-option.coming-soon .coming-soon-badge{
-  position:absolute;
-  top:10px; left:10px;
-  background: rgba(255,107,107,.15);
-  border: 2px solid rgba(255,107,107,.35);
-  color:#b00020;
-  font-weight:900;
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:.9em;
-}
-.image-option.coming-soon .coming-soon-text{
-  text-align:center;
-  margin-top:10px;
-  font-size:1.05em;
-  color:#555;
-  font-weight:900;
-}
-.image-option.coming-soon img{
-  filter: grayscale(100%);
-  opacity: 0.75;
-}
-
-
         const imageOption = document.createElement("div");
         imageOption.className = "image-option";
         imageOption.classList.toggle("selected", index === appState.selectedImageIndex);
