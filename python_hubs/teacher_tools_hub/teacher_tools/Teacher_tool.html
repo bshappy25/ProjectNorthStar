@@ -1,1 +1,202 @@
+<!-- =========================
+     DOE SECURITY SHELL (UNIVERSAL)
+     - 3 taps reveals gate
+     - 7 shared codes => ED STAFF (fake admin)
+     - Bshapp => REAL ADMIN (full control)
+========================= -->
+
+<style>
+  .secTray{ display:none; margin:12px 0; gap:10px; flex-wrap:wrap; align-items:stretch; }
+  .secTray.active{ display:flex; }
+
+  .secCard{
+    flex:1 1 280px;
+    background: rgba(255,255,255,.92);
+    border:2px solid rgba(17,17,17,.14);
+    border-radius:16px;
+    padding:12px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.08);
+    position:relative;
+  }
+  .secCard::before{
+    content:"";
+    position:absolute;
+    left:12px; right:12px; top:12px;
+    height:6px;
+    border-radius:999px;
+    background: linear-gradient(90deg, #14b854, #eadb2f);
+    opacity:.9;
+  }
+  .secCard h3{ margin-top:16px; font-size:1rem; font-weight:950; display:flex; gap:10px; align-items:center; }
+  .secHint{ margin-top:8px; color:#444; font-weight:700; font-size:.92rem; line-height:1.3; }
+
+  .secRow{ display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+  .secInput{
+    flex:1 1 220px;
+    border-radius:12px;
+    border:2px solid rgba(201,193,181,.95);
+    padding:10px 12px;
+    font-size:1rem;
+    font-weight:800;
+    outline:none;
+  }
+  .secBtn{
+    border:0;
+    padding:10px 14px;
+    border-radius:999px;
+    font-weight:950;
+    cursor:pointer;
+    background: linear-gradient(135deg, #14b854, #eadb2f);
+    color:#0a1a12;
+  }
+  .secPill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:999px;
+    border:2px solid rgba(17,17,17,.12);
+    font-weight:950;
+    background:#fff;
+  }
+  .secPill.locked{ color:#b00020; border-color: rgba(176,0,32,.25); background: rgba(176,0,32,.06); }
+  .secPill.ok{ color:#0a1a12; border-color: rgba(20,184,84,.25); background: rgba(20,184,84,.10); }
+
+  .secErr{ margin-top:10px; color:#b00020; font-weight:900; display:none; }
+  .secErr.active{ display:block; }
+</style>
+
+<!-- Your hidden tap target (put anywhere). Example: tiny palm in header -->
+<button id="secTapTarget" title=" " style="width:46px;height:46px;border-radius:14px;border:2px solid rgba(17,17,17,.14);background:rgba(255,255,255,.85);font-size:22px;cursor:pointer;">🖐️</button>
+
+<div class="secTray" id="secTray">
+  <!-- ED STAFF (fake admin) -->
+  <div class="secCard">
+    <h3>ED STAFF <span aria-hidden="true">🌴</span></h3>
+    <div class="secHint">Enter staff access code.</div>
+    <div class="secRow">
+      <input class="secInput" id="secCodeInput" type="password" placeholder="Code..." autocomplete="off" />
+      <button class="secBtn" id="secUnlockBtn" type="button">Unlock</button>
+      <span class="secPill locked" id="secStatusPill">Locked</span>
+    </div>
+    <div class="secErr" id="secErr">Incorrect code.</div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   SECURITY CONFIG (EDIT ONCE)
+========================= */
+
+// 7 universal codes shared across apps (teachers/admin can use these)
+const ED_STAFF_CODES = [
+  "WE-LEAD-0-1",
+  "WE-LEAD-0-2",
+  "WE-LEAD-0-3",
+  "WE-LEAD-0-4",
+  "WE-LEAD-0-5",
+  "WE-LEAD-0-6",
+  "WE-LEAD-0-7"
+];
+
+// Your real admin override (ONLY you)
+const REAL_ADMIN_CODE = "Bshapp";
+
+// Optional: remember unlocks for the session only (not localStorage)
+let isEdStaffUnlocked = false;      // fake admin
+let isRealAdminUnlocked = false;    // real admin
+
+/* =========================
+   3-TAP REVEAL
+========================= */
+const tray = document.getElementById("secTray");
+const tapTarget = document.getElementById("secTapTarget");
+
+const tapState = { taps: 0, timer: null };
+
+tapTarget.addEventListener("click", () => {
+  tapState.taps++;
+  if (tapState.timer) clearTimeout(tapState.timer);
+  tapState.timer = setTimeout(() => tapState.taps = 0, 1500);
+
+  if (tapState.taps >= 3) {
+    tapState.taps = 0;
+    tray.classList.toggle("active");
+  }
+});
+
+/* =========================
+   UNLOCK LOGIC
+   - ED STAFF codes => ED STAFF mode (fake admin)
+   - REAL_ADMIN_CODE => REAL ADMIN (full control)
+========================= */
+const input = document.getElementById("secCodeInput");
+const btn = document.getElementById("secUnlockBtn");
+const pill = document.getElementById("secStatusPill");
+const err = document.getElementById("secErr");
+
+function setPill(mode) {
+  err.classList.remove("active");
+
+  if (mode === "real") {
+    pill.textContent = "REAL ADMIN ✓";
+    pill.classList.remove("locked");
+    pill.classList.add("ok");
+    return;
+  }
+  if (mode === "staff") {
+    pill.textContent = "ED STAFF ✓";
+    pill.classList.remove("locked");
+    pill.classList.add("ok");
+    return;
+  }
+  pill.textContent = "Locked";
+  pill.classList.add("locked");
+  pill.classList.remove("ok");
+}
+
+function unlockWith(codeRaw) {
+  const code = (codeRaw || "").trim();
+
+  // 1) Real admin always wins
+  if (code === REAL_ADMIN_CODE) {
+    isRealAdminUnlocked = true;
+    isEdStaffUnlocked = true; // real admin implies staff
+    setPill("real");
+    input.value = "";
+    return;
+  }
+
+  // 2) ED STAFF (fake admin)
+  if (ED_STAFF_CODES.includes(code)) {
+    isEdStaffUnlocked = true;
+    isRealAdminUnlocked = false;
+    setPill("staff");
+    input.value = "";
+    return;
+  }
+
+  // 3) Fail
+  isEdStaffUnlocked = false;
+  isRealAdminUnlocked = false;
+  setPill("locked");
+  err.classList.add("active");
+  setTimeout(() => err.classList.remove("active"), 1200);
+}
+
+btn.addEventListener("click", () => unlockWith(input.value));
+input.addEventListener("keypress", (e) => { if (e.key === "Enter") unlockWith(input.value); });
+
+// Expose flags for your app logic:
+window.SECURITY = {
+  get isEdStaffUnlocked(){ return isEdStaffUnlocked; },
+  get isRealAdminUnlocked(){ return isRealAdminUnlocked; }
+};
+
+// Example usage (delete this):
+// if (window.SECURITY.isEdStaffUnlocked) { /* show staff tools */ }
+// if (window.SECURITY.isRealAdminUnlocked) { /* show real admin tools */ }
+
+setPill("locked");
+</script>
 
