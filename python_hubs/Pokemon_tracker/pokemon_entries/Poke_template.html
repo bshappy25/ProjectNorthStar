@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{TITLE}}</title>
+
+  <!-- TYPE: {{TYPE}} -->
+  <!-- GENERATION: {{GENERATION}} -->
+  <!-- EVOLUTION_LINE: {{EVOLUTION_LINE}} -->
+  <!-- VARIANT: {{VARIANT}} -->
+  <!-- IMAGE: {{IMAGE_REF}} -->
+
+  <style>
+    /* =========================================================
+      DOMINANT TEMPLATE (Nacli-app aligned)
+      - Minimal styling
+      - Token-injection friendly
+      - Keeps ⛏️ marker for "image slot"
+      ========================================================= */
+
+    :root{
+      --page-bg: #f4e4c1;
+      --page-bg2:#d4a574;
+      --ink:#5c4a2f;
+      --muted:#8b6f47;
+      --card:#ffffff;
+      --stroke:#8b6f47;
+      --soft: rgba(92,74,47,.10);
+      --radius: 18px;
+      --shadow: 0 14px 40px rgba(92,74,47,.22);
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+      /* Theme hooks (set by builder) */
+      --type-accent: {{TYPE_ACCENT}};          /* e.g. #F8D030 */
+      --type-accent-soft: {{TYPE_ACCENT_SOFT}};/* e.g. rgba(...) */
+      --bg-gradient: {{BG_GRADIENT}};          /* e.g. linear-gradient(...) */
+    }
+
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--bg-gradient);
+      padding: 2rem 1rem 3rem;
+    }
+
+    .wrap{
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card{
+      background: rgba(255,255,255,.95);
+      border: 3px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .header{
+      padding: 1.25rem 1.25rem 0.5rem;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .titleBlock{ display:flex; flex-direction:column; gap: 0.35rem; }
+    h1{
+      margin:0;
+      font-size: 2.25rem;
+      letter-spacing: 0.2px;
+    }
+    .subtitle{
+      margin:0;
+      color: var(--muted);
+      font-size: 1.1rem;
+      line-height: 1.35rem;
+    }
+
+    .badgeRow{
+      display:flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items:center;
+      padding: 0.25rem 1.25rem 0.75rem;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--soft);
+      background: rgba(255,255,255,.70);
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+    .badge.type{
+      border-color: var(--type-accent);
+      background: var(--type-accent-soft);
+      font-weight: 700;
+    }
+    .badge code{
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      opacity: 0.85;
+    }
+
+    .hero{
+      margin: 0.5rem 1.25rem 0.75rem;
+      border-radius: 16px;
+      border: 2px dashed rgba(139,111,71,.55);
+      background: rgba(244,228,193,.35);
+      min-height: 220px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      overflow:hidden;
+      position: relative;
+    }
+    .hero img{
+      max-width: 92%;
+      max-height: 92%;
+      object-fit: contain;
+      display:block;
+    }
+    .hero .pickaxe{
+      font-size: 5rem;
+      line-height: 1;
+      margin: 0.25rem 0;
+      opacity: 0.9;
+    }
+    .hero .hint{
+      margin: 0.25rem 0 0;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: rgba(92,74,47,.75);
+    }
+
+    .body{
+      padding: 0.5rem 1.25rem 1.25rem;
+      display:flex;
+      flex-direction:column;
+      gap: 0.85rem;
+    }
+
+    .sectionTitle{
+      margin: 0.25rem 0 0;
+      font-size: 1rem;
+      letter-spacing: 0.2px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .kv{
+      display:grid;
+      grid-template-columns: 160px 1fr;
+      gap: 0.5rem 0.85rem;
+      padding: 0.85rem;
+      border-radius: 14px;
+      border: 1px solid rgba(92,74,47,.18);
+      background: rgba(255,255,255,.75);
+    }
+    .k{ color: rgba(92,74,47,.85); font-weight: 800; }
+    .v{ color: var(--ink); }
+
+    .desc{
+      padding: 0.85rem;
+      border-radius: 14px;
+      border: 1px solid rgba(92,74,47,.18);
+      background: rgba(255,255,255,.75);
+      line-height: 1.45rem;
+    }
+
+    .traits{
+      display:flex;
+      flex-direction:column;
+      gap: 0.65rem;
+    }
+    .trait{
+      padding: 0.75rem 0.85rem;
+      border-radius: 14px;
+      border: 1px solid rgba(92,74,47,.18);
+      background: rgba(255,255,255,.75);
+    }
+    .traitTop{
+      display:flex;
+      gap: 0.5rem;
+      align-items:baseline;
+      justify-content:space-between;
+      flex-wrap: wrap;
+    }
+    .traitName{
+      margin:0;
+      font-weight: 900;
+    }
+    .traitHint{
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      opacity: 0.8;
+    }
+    .traitText{
+      margin: 0.35rem 0 0;
+      line-height: 1.45rem;
+    }
+
+    .footer{
+      padding: 0.85rem 1.25rem 1.15rem;
+      border-top: 1px solid rgba(92,74,47,.18);
+      background: rgba(244,228,193,.30);
+      display:flex;
+      justify-content:space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      color: rgba(92,74,47,.85);
+    }
+    .footer code{ font-family: var(--mono); opacity: 0.85; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <!-- HEADER -->
+      <div class="header">
+        <div class="titleBlock">
+          <h1>{{NAME}}</h1>
+          <p class="subtitle">{{SUBTITLE}}</p>
+        </div>
+      </div>
+
+      <!-- BADGES / QUICK META -->
+      <div class="badgeRow">
+        <span class="badge type">Type: {{TYPE}}</span>
+        <span class="badge">Gen: <code>{{GENERATION}}</code></span>
+        <span class="badge">Variant: <code>{{VARIANT}}</code></span>
+      </div>
+
+      <!-- HERO / IMAGE SLOT (KEEP THE ⛏️ AX) -->
+      <div class="hero">
+        <!-- If your builder has an image, inject an <img> tag into {{HERO_MEDIA}}.
+             If not, keep the ⛏️ placeholder so the slot is obvious. -->
+        <div><div class="pickaxe">⛏️</div><p class="hint">IMAGE SLOT — builder injects &lt;img src="../images/..."&gt;</p></div>
+
+      </div>
+
+      <!-- BODY -->
+      <div class="body">
+
+        <div class="kv">
+          <div class="k">Evolution Line</div>
+          <div class="v">{{EVOLUTION_LINE}}</div>
+
+          <div class="k">Image Ref</div>
+          <div class="v"><code>{{IMAGE_REF}}</code></div>
+        </div>
+
+        <div>
+          <p class="sectionTitle">Description</p>
+          <div class="desc">{{DESCRIPTION}}</div>
+        </div>
+
+        <div>
+          <p class="sectionTitle">Traits</p>
+          <div class="traits">
+            <!-- Keep 3 blocks as a stable “PokéCard” shape.
+                 Builder can replace these, or extend later. -->
+            <div class="trait">
+              <div class="traitTop">
+                <p class="traitName">{{TRAIT_1_NAME}}</p>
+                <span class="traitHint">{{TRAIT_1_HINT}}</span>
+              </div>
+              <p class="traitText">{{TRAIT_1_TEXT}}</p>
+            </div>
+
+            <div class="trait">
+              <div class="traitTop">
+                <p class="traitName">{{TRAIT_2_NAME}}</p>
+                <span class="traitHint">{{TRAIT_2_HINT}}</span>
+              </div>
+              <p class="traitText">{{TRAIT_2_TEXT}}</p>
+            </div>
+
+            <div class="trait">
+              <div class="traitTop">
+                <p class="traitName">{{TRAIT_3_NAME}}</p>
+                <span class="traitHint">{{TRAIT_3_HINT}}</span>
+              </div>
+              <p class="traitText">{{TRAIT_3_TEXT}}</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+        <span>TCG Theme Hook: <code>{{TYPE_THEME_CLASS}}</code></span>
+        <span>Entry: <code>{{FILE_STEM}}</code></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================================
+    DEFAULTS (so the file looks “complete” even before builder)
+    Your Streamlit builder can overwrite these tokens.
+    If you want, you can remove this block and keep tokens only.
+  ========================================================== -->
+  <!--
+    Suggested HERO_MEDIA default to keep the pickaxe visible:
+    <div>
+      <div class="pickaxe">⛏️</div>
+      <p class="hint">IMAGE SLOT — builder injects &lt;img src="../images/..."&gt;</p>
+    </div>
+  -->
+</body>
+</html>
