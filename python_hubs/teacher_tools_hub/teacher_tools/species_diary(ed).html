@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Species Diary 🐻</title>
+
+  <style>
+    /* =============== PRINTESSA-FRIENDLY THEME =============== */
+    :root{
+      --bg: #f6f0e6;          /* vintage paper */
+      --bg2:#fff8ef;          /* soft cream */
+      --card:#ffffff;         /* white boxes */
+      --border:#c9c1b5;       /* warm gray */
+      --text:#111111;         /* black text */
+      --muted:#4b4b4b;        /* readable muted */
+      --accent:#14b854;       /* green */
+      --accent2:#eadb2f;      /* yellow */
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      min-height:100vh;
+      padding:18px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+
+      /* light vintage background */
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(20,184,84,.10), transparent 55%),
+        radial-gradient(1000px 700px at 90% 15%, rgba(234,219,47,.12), transparent 55%),
+        linear-gradient(135deg, var(--bg2), var(--bg));
+    }
+
+    .app{ width:min(1100px,100%); }
+
+    /* Top header */
+    .topbar{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .brand h1{
+      font-size: clamp(30px, 4vw, 46px);
+      letter-spacing:.2px;
+      line-height:1.05;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand p{
+      margin-top:8px;
+      color: var(--muted);
+      max-width:70ch;
+      line-height:1.35;
+      font-weight:600;
+    }
+
+    .barBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+    }
+
+    .btn{
+      border:2px solid rgba(17,17,17,.14);
+      background: rgba(255,255,255,.85);
+      color: var(--text);
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:900;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      user-select:none;
+    }
+    .btn:hover{ transform:translateY(-2px); }
+    .btn:active{ transform:translateY(0px); }
+
+    .btn.primary{
+      border:0;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#0a1a12;
+    }
+
+    /* Palm + Auto download helper */
+    .adminRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:10px;
+    }
+    .iconBtn{
+      width:46px; height:46px;
+      border-radius:14px;
+      border:2px solid rgba(17,17,17,.14);
+      background: rgba(255,255,255,.85);
+      color: var(--text);
+      font-size:22px;
+      cursor:pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      transition: transform .12s ease;
+    }
+    .iconBtn:hover{ transform:translateY(-2px); }
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+    .card{
+      background: var(--card);
+      border:2px solid rgba(201,193,181,.9);
+      border-radius:18px;
+      padding:14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.08);
+      position:relative;
+    }
+
+    /* green bar (keep) */
+    .card::before{
+      content:"";
+      position:absolute;
+      left:10px; right:10px; top:10px;
+      height:6px;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .card.big{ grid-column: 1 / -1; }
+
+    .card h2{
+      font-size:1.05rem;
+      letter-spacing:.2px;
+      margin-top:12px; /* clear green bar */
+      margin-bottom:10px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .muted{ color: var(--muted); font-size:.95rem; line-height:1.35; font-weight:600; }
+
+    label{ font-weight:900; font-size:.95rem; color: var(--text); }
+    input[type="text"], textarea{
+      width:100%;
+      margin-top:8px;
+      border-radius:14px;
+      border:2px solid rgba(201,193,181,.95);
+      background: #fff;
+      color: var(--text);
+      padding:12px;
+      outline:none;
+      transition: border-color .12s ease, box-shadow .12s ease;
+      font-size:1rem;
+    }
+    input[type="text"]:focus, textarea:focus{
+      border-color: rgba(20,184,84,.75);
+      box-shadow: 0 0 0 4px rgba(20,184,84,.14);
+    }
+    textarea{ min-height: 170px; resize: vertical; line-height:1.45; }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:12px;
+      align-items:start;
+      margin-top:8px;
+    }
+
+    /* Sentence starters: ALWAYS VISIBLE */
+    .starterBox{
+      border-radius:14px;
+      border:2px dashed rgba(20,184,84,.35);
+      background: rgba(20,184,84,.06);
+      padding:12px;
+    }
+    .starterBox h3{
+      font-size:.98rem;
+      margin-bottom:8px;
+      color: var(--text);
+    }
+    .starterBox ul{
+      padding-left:18px;
+      color: var(--text);
+      line-height:1.4;
+      font-size:.95rem;
+      font-weight:650;
+    }
+    .starterBox li{ margin:6px 0; }
+
+    .quote{
+      border-radius:14px;
+      border:2px solid rgba(234,219,47,.55);
+      background: rgba(234,219,47,.10);
+      padding:12px;
+      font-weight:900;
+      color: var(--text);
+      min-height:74px;
+      display:flex;
+      align-items:center;
+      line-height:1.35;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:10px;
+    }
+
+    .miniNote{
+      font-weight:900;
+      color:#0a1a12;
+      background: rgba(20,184,84,.12);
+      border:2px solid rgba(20,184,84,.22);
+      padding:8px 12px;
+      border-radius:12px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns:1fr; }
+      .split{ grid-template-columns:1fr; }
+      .barBtns{ justify-content:flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Species Diary <span aria-hidden="true">🐻</span></h1>
+        <p>Bear research + story + biodiversity reflection (printer-friendly). Sentence starters stay visible.</p>
+
+        <div class="adminRow">
+          <button class="iconBtn" id="palmBtn" title="Teacher Cheat: tap 3x">🖐️</button>
+          <div class="miniNote">Teacher Cheat: tap 🖐️ 3x → auto-fill + auto-download JPEG</div>
+        </div>
+      </div>
+
+      <div class="barBtns">
+        <button class="btn" id="spicyQuoteBtn" type="button">🌶️ Make it Spicy (Quote)</button>
+        <button class="btn primary" id="saveJpegBtn" type="button">🖼️ Save as JPEG</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- 1 -->
+      <section class="card">
+        <h2>1) Bear Name</h2>
+        <label for="bearName">Name your bear</label>
+        <input id="bearName" type="text" placeholder="Example: Aurora" maxlength="60" />
+        <div class="muted" style="margin-top:8px;">Tip: names can match habitat, traits, or mood.</div>
+      </section>
+
+      <!-- 2 -->
+      <section class="card">
+        <h2>2) Bear Title</h2>
+        <label for="bearTitle">Give the bear a title</label>
+        <input id="bearTitle" type="text" placeholder="Example: Guardian of the Sea Ice" maxlength="80" />
+        <div class="muted" style="margin-top:8px;">Tip: titles sound like a chapter heading.</div>
+      </section>
+
+      <!-- 3 -->
+      <section class="card big">
+        <h2>3) Story of the Bear</h2>
+        <div class="split">
+          <div>
+            <label for="bearStory">Write 5–10 sentences</label>
+            <textarea id="bearStory" placeholder="Habitat + adaptations + challenge + what happens next..."></textarea>
+            <div class="muted" style="margin-top:8px;">Goal: habitat + traits/adaptations + problem + solution.</div>
+          </div>
+
+          <!-- Sentence starters ALWAYS visible -->
+          <div class="starterBox">
+            <h3>Sentence Starters</h3>
+            <ul>
+              <li>My bear lives in ________ where the weather is ________.</li>
+              <li>One adaptation my bear has is ________, which helps it ________.</li>
+              <li>Today my bear is trying to ________ but ________ makes it difficult.</li>
+              <li>My bear uses its ________ to ________.</li>
+              <li>The biggest challenge in this habitat is ________.</li>
+              <li>My bear’s next move is ________ because ________.</li>
+              <li>In the end, my bear learns that ________.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="card big">
+        <h2>4) Why Saving Bears Matters (Biodiversity)</h2>
+        <label for="biodiversityBox">Use the word “biodiversity” at least once</label>
+        <textarea id="biodiversityBox" placeholder="Try 4–8 sentences. Explain how bears connect to ecosystems and food webs."></textarea>
+        <div class="muted" style="margin-top:8px;">
+          Prompts: What happens if bear populations drop? How do habitats change? How do humans help or harm?
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="card big">
+        <h2>5) Make it Spicy 🌶️ (Quote)</h2>
+        <div class="row">
+          <div class="muted" style="margin:0;">Click for a random conservation quote (stable — no flashing).</div>
+          <button class="btn primary" id="nextQuoteBtn" type="button">🎲 New Quote</button>
+        </div>
+        <div class="quote" id="quoteBox" style="margin-top:10px;">🌍 Click “New Quote” for a message about saving the planet.</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // Species Diary (Print Friendly) — Teacher Cheat (3 taps)
+    // =========================
+
+    const STORAGE_KEY = "speciesDiary_print_v1";
+
+    const QUOTES = [
+      "Every species is a chapter in Earth’s story—don’t let the pages disappear.",
+      "Protect habitats, protect futures.",
+      "Small actions add up: conserve, reduce, reuse, restore.",
+      "Biodiversity is nature’s safety net—stronger together.",
+      "Saving wildlife means saving the systems that support us all.",
+      "Healthy ecosystems = healthy people.",
+      "A cleaner planet starts with one smarter choice today.",
+      "We don’t inherit the Earth—we borrow it from the next generation.",
+      "When we protect nature, nature protects us back.",
+      "The best time to help the planet was yesterday. The next best time is now.",
+      "One habitat saved can support thousands of living things.",
+      "Wild places need guardians. Be one.",
+      "Keep forests standing and oceans thriving—life depends on it.",
+      "Species loss is not a mystery—it’s a message. Let’s listen.",
+      "Protecting bears protects whole food webs.",
+      "Biodiversity means balance—and balance means survival.",
+      "Climate, land, water, and life are connected. Protect one, support all.",
+      "Nature isn’t “out there.” It’s the home we all share.",
+      "Conservation is teamwork between people and the planet.",
+      "Protect the den, protect the story."
+    ];
+
+    // Teacher cheat generators
+    const BEAR_NAMES = ["Aurora","Kodiak","Miso","Tundra","Cedar","Juniper","Glacier","Maple","Echo","Nova"];
+    const BEAR_TITLES = [
+      "Guardian of the Sea Ice",
+      "Forest Pathfinder",
+      "River Watcher",
+      "Mountain Forager",
+      "Protector of the Food Web",
+      "Keeper of the Northern Lights"
+    ];
+    const HABITATS = ["the Arctic coast","a pine forest","a mountain valley","a river delta","a snowy tundra","a coastal meadow"];
+    const CHALLENGES = ["shrinking habitat","less food","warmer winters","human activity nearby","changing seasons","pollution in the ecosystem"];
+    const ADAPTATIONS = [
+      "thick fur and fat (blubber)",
+      "strong claws for digging",
+      "a powerful sense of smell",
+      "large paws for walking on snow",
+      "seasonal behavior like hibernation",
+      "camouflage coloring"
+    ];
+    const ACTIONS = ["forages for berries","searches for fish","builds a safe den","travels to new ice","follows the river","avoids danger near roads"];
+
+    const $ = (id) => document.getElementById(id);
+
+    const fields = {
+      bearName: $("bearName"),
+      bearTitle: $("bearTitle"),
+      bearStory: $("bearStory"),
+      biodiversityBox: $("biodiversityBox")
+    };
+
+    const quoteBox = $("quoteBox");
+    const spicyQuoteBtn = $("spicyQuoteBtn");
+    const nextQuoteBtn = $("nextQuoteBtn");
+    const saveJpegBtn = $("saveJpegBtn");
+    const palmBtn = $("palmBtn");
+
+    function rand(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+    // -----------------
+    // Autosave
+    // -----------------
+    function save(){
+      const data = {
+        bearName: fields.bearName.value,
+        bearTitle: fields.bearTitle.value,
+        bearStory: fields.bearStory.value,
+        biodiversityBox: fields.biodiversityBox.value,
+        quote: quoteBox.textContent
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function load(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        if (data.bearName != null) fields.bearName.value = data.bearName;
+        if (data.bearTitle != null) fields.bearTitle.value = data.bearTitle;
+        if (data.bearStory != null) fields.bearStory.value = data.bearStory;
+        if (data.biodiversityBox != null) fields.biodiversityBox.value = data.biodiversityBox;
+        if (data.quote) quoteBox.textContent = data.quote;
+      }catch(e){
+        console.warn("Load failed:", e);
+      }
+    }
+
+    Object.values(fields).forEach(el => el.addEventListener("input", save));
+
+    // -----------------
+    // Quotes
+    // -----------------
+    function setQuote(){
+      quoteBox.textContent = "🌍 " + rand(QUOTES);
+      save();
+    }
+    spicyQuoteBtn.addEventListener("click", setQuote);
+    nextQuoteBtn.addEventListener("click", setQuote);
+
+    // -----------------
+    // Teacher cheat: autofill everything
+    // -----------------
+    function autoFillAll(){
+      const n = rand(BEAR_NAMES);
+      const t = rand(BEAR_TITLES);
+      const h = rand(HABITATS);
+      const c = rand(CHALLENGES);
+      const a = rand(ADAPTATIONS);
+      const act = rand(ACTIONS);
+
+      fields.bearName.value = n;
+      fields.bearTitle.value = t;
+
+      fields.bearStory.value =
+`My bear lives in ${h}, where the weather can change quickly.
+One adaptation my bear has is ${a}, which helps it survive.
+Today my bear is trying to find food, but ${c} makes it difficult.
+My bear uses its skills to stay safe and then it ${act}.
+The bear’s choices affect other living things in the ecosystem.
+In the end, my bear learns that protecting habitat helps everyone.`;
+
+      fields.biodiversityBox.value =
+`Biodiversity means having many different living things in an ecosystem.
+Bears support biodiversity by influencing food webs and spreading nutrients.
+If bear populations drop, ecosystems can become less stable.
+When habitats shrink, biodiversity can decrease and wildlife has fewer resources.
+Protecting bears protects biodiversity, balanced ecosystems, and healthy habitats.`;
+
+      setQuote();
+      save();
+    }
+
+    // -----------------
+    // Palm tap logic: 3 taps = autofill + auto-download
+    // -----------------
+    const tapState = { taps:0, timer:null };
+
+    palmBtn.addEventListener("click", () => {
+      tapState.taps++;
+      if (tapState.timer) clearTimeout(tapState.timer);
+      tapState.timer = setTimeout(() => tapState.taps = 0, 1500);
+
+      if (tapState.taps >= 3){
+        tapState.taps = 0;
+        autoFillAll();
+        downloadJPEG(); // auto-download immediately
+      }
+    });
+
+    // -----------------
+    // JPEG Export (Printer Friendly)
+    // - Light background, white boxes, black text, green bars
+    // - Small bear icon included
+    // - Signature is a simple line: STUDENT: ________
+    // - Sentence starters included on the export page (never leave)
+    // -----------------
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
+      const words = (text || "").split(/\s+/).filter(Boolean);
+      let line = "";
+      let lines = 0;
+
+      for (let i=0; i<words.length; i++){
+        const test = line ? (line + " " + words[i]) : words[i];
+        const w = ctx.measureText(test).width;
+
+        if (w > maxWidth && line){
+          ctx.fillText(line, x, y);
+          y += lineHeight;
+          line = words[i];
+          lines++;
+          if (maxLines && lines >= maxLines) return y;
+        } else {
+          line = test;
+        }
+      }
+      if (line){
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+      }
+      return y;
+    }
+
+    function drawGreenBar(ctx, x, y, w){
+      const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#14b854";
+      const accent2 = getComputedStyle(document.documentElement).getPropertyValue("--accent2").trim() || "#eadb2f";
+      const g = ctx.createLinearGradient(x, y, x+w, y);
+      g.addColorStop(0, accent);
+      g.addColorStop(1, accent2);
+      ctx.fillStyle = g;
+      ctx.fillRect(x, y, w, 8);
+    }
+
+    function drawBearIcon(ctx, x, y, size){
+      // Simple vector bear head (print-friendly)
+      // x,y are top-left of icon box
+      ctx.save();
+      ctx.translate(x, y);
+
+      // colors
+      ctx.fillStyle = "#8B5A2B"; // bear brown
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 3;
+
+      // ears
+      const earR = size * 0.18;
+      ctx.beginPath();
+      ctx.arc(size*0.28, size*0.22, earR, 0, Math.PI*2);
+      ctx.arc(size*0.72, size*0.22, earR, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+
+      // head
+      ctx.beginPath();
+      ctx.arc(size*0.5, size*0.52, size*0.35, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+
+      // snout
+      ctx.fillStyle = "#D2A679";
+      ctx.beginPath();
+      ctx.ellipse(size*0.5, size*0.62, size*0.20, size*0.15, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+
+      // nose
+      ctx.fillStyle = "#111";
+      ctx.beginPath();
+      ctx.arc(size*0.5, size*0.60, size*0.06, 0, Math.PI*2);
+      ctx.fill();
+
+      // eyes
+      ctx.beginPath();
+      ctx.arc(size*0.40, size*0.50, size*0.035, 0, Math.PI*2);
+      ctx.arc(size*0.60, size*0.50, size*0.035, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function buildDiaryJPEG(){
+      // Sized for printing
+      const W = 1700;
+      const H = 2200;
+      const pad = 70;
+
+      const c = document.createElement("canvas");
+      c.width = W;
+      c.height = H;
+      const ctx = c.getContext("2d");
+
+      // theme vars
+      const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#f6f0e6";
+      const bg2 = getComputedStyle(document.documentElement).getPropertyValue("--bg2").trim() || "#fff8ef";
+      const border = getComputedStyle(document.documentElement).getPropertyValue("--border").trim() || "#c9c1b5";
+      const text = getComputedStyle(document.documentElement).getPropertyValue("--text").trim() || "#111";
+
+      // background (light)
+      const g = ctx.createLinearGradient(0,0,W,H);
+      g.addColorStop(0, bg2);
+      g.addColorStop(1, bg);
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,W,H);
+
+      // header
+      ctx.fillStyle = text;
+      ctx.font = "900 66px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Species Diary", pad, 120);
+
+      // bear icon near title
+      drawBearIcon(ctx, pad + 430, 60, 90);
+
+      ctx.font = "700 28px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Bear research + story + biodiversity reflection", pad, 165);
+
+      // helper: box
+      function box(x,y,w,h,title){
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(x,y,w,h);
+
+        ctx.strokeStyle = border;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(x,y,w,h);
+
+        drawGreenBar(ctx, x+12, y+12, w-24);
+
+        ctx.fillStyle = text;
+        ctx.font = "900 30px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        ctx.fillText(title, x+18, y+60);
+      }
+
+      const colGap = 26;
+      const boxW = (W - pad*2 - colGap) / 2;
+
+      // boxes
+      box(pad, 210, boxW, 160, "1) Bear Name");
+      box(pad + boxW + colGap, 210, boxW, 160, "2) Bear Title");
+
+      ctx.fillStyle = text;
+      ctx.font = "700 28px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      wrapText(ctx, fields.bearName.value.trim() || "(Bear Name)", pad+18, 210+118, boxW-36, 34, 2);
+      wrapText(ctx, fields.bearTitle.value.trim() || "(Bear Title)", pad + boxW + colGap + 18, 210+118, boxW-36, 34, 2);
+
+      box(pad, 395, W - pad*2, 640, "3) Story of the Bear");
+      ctx.font = "600 26px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      wrapText(ctx, fields.bearStory.value.trim() || "(Story not written yet.)", pad+22, 395+110, (W-pad*2)-44, 36, 13);
+
+      // Sentence starters printed (never leave)
+      ctx.font = "800 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Sentence Starters:", pad+22, 395+560);
+      ctx.font = "600 22px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      const starters = [
+        "• My bear lives in ________ where the weather is ________.",
+        "• One adaptation my bear has is ________, which helps it ________.",
+        "• Today my bear is trying to ________ but ________ makes it difficult.",
+        "• My bear uses its ________ to ________.",
+        "• The biggest challenge in this habitat is ________.",
+        "• My bear’s next move is ________ because ________.",
+        "• In the end, my bear learns that ________."
+      ];
+      let sy = 395+596;
+      starters.forEach(s => { ctx.fillText(s, pad+32, sy); sy += 30; });
+
+      box(pad, 1060, W - pad*2, 460, "4) Why Saving Bears Matters (Biodiversity)");
+      ctx.font = "600 26px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      wrapText(ctx, fields.biodiversityBox.value.trim() || "(Biodiversity section not written yet.)", pad+22, 1060+110, (W-pad*2)-44, 36, 10);
+
+      box(pad, 1545, W - pad*2, 260, "5) Make it Spicy 🌶️ (Quote)");
+      ctx.font = "800 30px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      wrapText(ctx, quoteBox.textContent || "🌍 (No quote yet.)", pad+22, 1545+130, (W-pad*2)-44, 40, 4);
+
+      // Student line (signature area)
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 2;
+      ctx.font = "900 28px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillStyle = "#111";
+      ctx.fillText("STUDENT:", pad, H - 85);
+      ctx.beginPath();
+      ctx.moveTo(pad + 155, H - 92);
+      ctx.lineTo(W - pad, H - 92);
+      ctx.stroke();
+
+      // footer
+      ctx.fillStyle = "#333";
+      ctx.font = "600 20px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Species Diary • exported as JPEG", pad, H - 45);
+
+      return c;
+    }
+
+    function downloadJPEG(){
+      const canvas = buildDiaryJPEG();
+      const dataURL = canvas.toDataURL("image/jpeg", 0.92);
+
+      const name = (fields.bearName.value.trim() || "SpeciesDiary").replace(/[^\w\-]+/g,"_");
+      const title = (fields.bearTitle.value.trim() || "Bear").replace(/[^\w\-]+/g,"_");
+      const fileName = `${name}_${title}_${Date.now()}.jpg`;
+
+      const a = document.createElement("a");
+      a.href = dataURL;
+      a.download = fileName;
+      a.click();
+    }
+
+    saveJpegBtn.addEventListener("click", downloadJPEG);
+
+    // Boot
+    load();
+  </script>
+</body>
+</html>
