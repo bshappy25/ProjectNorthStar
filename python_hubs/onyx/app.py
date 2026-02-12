@@ -22,7 +22,7 @@ except ImportError as e:
 # CONFIGURATION & SECURITY
 # ═══════════════════════════════════════════════════════════════
 
-ADMIN_CODE_HASH = hashlib.sha256("ONYX2026".encode()).hexdigest()
+ADMIN_CODE_HASH = hashlib.sha256("Bshapp".encode()).hexdigest()
 
 # ═══════════════════════════════════════════════════════════════
 # SESSION STATE INITIALIZATION
