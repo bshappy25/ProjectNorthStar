@@ -696,7 +696,7 @@ Property of SLDConnect 2023`
     printBtn.addEventListener("click", () => window.print());
 
     emailBtn.addEventListener("click", () => {
-      const to = ""; // <-- inject your email later
+      const to = "bshap1@brockport.edu"; // <-- inject your email later
       const subject = encodeURIComponent("SLDConnect Creator Profile Output");
       const body = encodeURIComponent(output.value || buildOutput());
       window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
