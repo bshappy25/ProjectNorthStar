@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>My First Resume 🐻</title>
+
+  <style>
+    /* =============== PRINTESSA-FRIENDLY THEME =============== */
+    :root{
+      --bg: #f6f0e6;          /* vintage paper */
+      --bg2:#fff8ef;          /* soft cream */
+      --card:#ffffff;         /* white boxes */
+      --border:#c9c1b5;       /* warm gray */
+      --text:#111111;         /* black text */
+      --muted:#4b4b4b;        /* readable muted */
+      --accent:#14b854;       /* green */
+      --accent2:#eadb2f;      /* yellow */
+      --danger:#b00020;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      min-height:100vh;
+      padding:18px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+
+      /* light vintage background */
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(20,184,84,.10), transparent 55%),
+        radial-gradient(1000px 700px at 90% 15%, rgba(234,219,47,.12), transparent 55%),
+        linear-gradient(135deg, var(--bg2), var(--bg));
+    }
+
+    .app{ width:min(1100px,100%); }
+
+    /* Top header */
+    .topbar{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .brand h1{
+      font-size: clamp(30px, 4vw, 46px);
+      letter-spacing:.2px;
+      line-height:1.05;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand p{
+      margin-top:8px;
+      color: var(--muted);
+      max-width:70ch;
+      line-height:1.35;
+      font-weight:600;
+    }
+
+    .barBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+    }
+
+    .btn{
+      border:2px solid rgba(17,17,17,.14);
+      background: rgba(255,255,255,.85);
+      color: var(--text);
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:900;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      user-select:none;
+    }
+    .btn:hover{ transform:translateY(-2px); }
+    .btn:active{ transform:translateY(0px); }
+
+    .btn.primary{
+      border:0;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#0a1a12;
+    }
+
+    /* Palm button (secret trigger only; no hint text) */
+    .adminRow{
+      margin-top:10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .iconBtn{
+      width:46px; height:46px;
+      border-radius:14px;
+      border:2px solid rgba(17,17,17,.14);
+      background: rgba(255,255,255,.85);
+      color: var(--text);
+      font-size:22px;
+      cursor:pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      transition: transform .12s ease;
+    }
+    .iconBtn:hover{ transform:translateY(-2px); }
+
+    /* SECRET TRAY (hidden until 3 taps) */
+    .secretTray{
+      display:none;
+      margin-top:10px;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:stretch;
+    }
+    .secretTray.active{ display:flex; }
+
+    .secretBlock{
+      flex: 1 1 280px;
+      background: rgba(255,255,255,.92);
+      border:2px solid rgba(17,17,17,.14);
+      border-radius:16px;
+      padding:12px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      position:relative;
+    }
+    .secretBlock::before{
+      content:"";
+      position:absolute;
+      left:12px; right:12px; top:12px;
+      height:6px;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity:.9;
+    }
+    .secretBlock h3{
+      margin-top:16px;
+      font-size:1rem;
+      font-weight:1000;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .secretHint{
+      margin-top:8px;
+      color: var(--muted);
+      font-weight:700;
+      font-size:.92rem;
+      line-height:1.3;
+    }
+    .codeRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    .codeInput{
+      flex:1 1 220px;
+      border-radius:12px;
+      border:2px solid rgba(201,193,181,.95);
+      padding:10px 12px;
+      font-size:1rem;
+      font-weight:800;
+      outline:none;
+    }
+    .codeInput:focus{
+      border-color: rgba(20,184,84,.75);
+      box-shadow: 0 0 0 4px rgba(20,184,84,.14);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:2px solid rgba(17,17,17,.12);
+      font-weight:950;
+      background:#fff;
+    }
+    .pill.locked{ color: var(--danger); border-color: rgba(176,0,32,.25); background: rgba(176,0,32,.06); }
+    .pill.ok{ color: #0a1a12; border-color: rgba(20,184,84,.25); background: rgba(20,184,84,.10); }
+
+    .dangerNote{
+      margin-top:10px;
+      color: var(--danger);
+      font-weight:900;
+      display:none;
+    }
+    .dangerNote.active{ display:block; }
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+    .card{
+      background: var(--card);
+      border:2px solid rgba(201,193,181,.9);
+      border-radius:18px;
+      padding:14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.08);
+      position:relative;
+    }
+
+    /* green bar */
+    .card::before{
+      content:"";
+      position:absolute;
+      left:10px; right:10px; top:10px;
+      height:6px;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .card.big{ grid-column: 1 / -1; }
+
+    .card h2{
+      font-size:1.05rem;
+      letter-spacing:.2px;
+      margin-top:12px;
+      margin-bottom:10px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .muted{ color: var(--muted); font-size:.95rem; line-height:1.35; font-weight:600; }
+
+    label{ font-weight:900; font-size:.95rem; color: var(--text); }
+    input[type="text"], input[type="email"], input[type="tel"], textarea{
+      width:100%;
+      margin-top:8px;
+      border-radius:14px;
+      border:2px solid rgba(201,193,181,.95);
+      background: #fff;
+      color: var(--text);
+      padding:12px;
+      outline:none;
+      transition: border-color .12s ease, box-shadow .12s ease;
+      font-size:1rem;
+    }
+    input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus, textarea:focus{
+      border-color: rgba(20,184,84,.75);
+      box-shadow: 0 0 0 4px rgba(20,184,84,.14);
+    }
+    textarea{ min-height: 140px; resize: vertical; line-height:1.45; }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      align-items:start;
+      margin-top:8px;
+    }
+
+    /* Tips box */
+    .tipsBox{
+      border-radius:14px;
+      border:2px dashed rgba(20,184,84,.35);
+      background: rgba(20,184,84,.06);
+      padding:12px;
+      margin-top:10px;
+    }
+    .tipsBox h3{
+      font-size:.98rem;
+      margin-bottom:8px;
+      color: var(--text);
+    }
+    .tipsBox ul{
+      padding-left:18px;
+      color: var(--text);
+      line-height:1.4;
+      font-size:.95rem;
+      font-weight:650;
+    }
+    .tipsBox li{ margin:6px 0; }
+
+    .skillsGrid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .skillItem{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:2px solid rgba(201,193,181,.9);
+      background:#fff;
+      font-weight:800;
+      cursor:pointer;
+      transition: all .12s ease;
+    }
+    .skillItem:hover{ transform:translateY(-2px); }
+    .skillItem.selected{
+      border-color: rgba(20,184,84,.75);
+      background: rgba(20,184,84,.10);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:10px;
+    }
+
+    .itemList{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .itemEntry{
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+    }
+    .itemEntry input{
+      flex:1;
+    }
+    .removeBtn{
+      padding:10px 14px;
+      border-radius:12px;
+      border:2px solid rgba(176,0,32,.25);
+      background: rgba(176,0,32,.08);
+      color: var(--danger);
+      font-weight:900;
+      cursor:pointer;
+      transition: transform .12s ease;
+    }
+    .removeBtn:hover{ transform:translateY(-2px); }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns:1fr; }
+      .split{ grid-template-columns:1fr; }
+      .barBtns{ justify-content:flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <h1>My First Resume <span aria-hidden="true">🐻</span></h1>
+        <p>Build a professional resume with help from Resume Bear! Save as PDF or print when ready.</p>
+
+        <!-- Palm button exists but NO helper text -->
+        <div class="adminRow">
+          <button class="iconBtn" id="palmBtn" title="🖐️">🖐️</button>
+        </div>
+
+        <!-- SECRET TRAY (appears only after 3 taps) -->
+        <div class="secretTray" id="secretTray">
+          <!-- Block 1: TEACHER MODE -->
+          <div class="secretBlock">
+            <h3>TEACHER MODE <span aria-hidden="true">📚</span></h3>
+            <div class="secretHint">Unlock example templates and student guidance tools.</div>
+
+            <div class="codeRow">
+              <input class="codeInput" id="teacherCode" type="password" placeholder="Teacher code..." autocomplete="off" />
+              <button class="btn" id="unlockTeacherBtn" type="button">Unlock</button>
+              <span class="pill locked" id="teacherStatus">Locked</span>
+            </div>
+            <div class="dangerNote" id="teacherErr">Incorrect code.</div>
+          </div>
+
+          <!-- Block 2: ADMIN MODE -->
+          <div class="secretBlock">
+            <h3>ADMIN MODE <span aria-hidden="true">🔑</span></h3>
+            <div class="secretHint">Bulk export all student resumes as a ZIP file.</div>
+
+            <div class="codeRow">
+              <input class="codeInput" id="adminCode" type="password" placeholder="Admin code..." autocomplete="off" />
+              <button class="btn" id="unlockAdminBtn" type="button">Unlock</button>
+              <span class="pill locked" id="adminStatus">Locked</span>
+            </div>
+            <div class="dangerNote" id="adminErr">Incorrect code.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="barBtns">
+        <button class="btn" id="exampleBtn" type="button" style="display:none;">✨ Load Example</button>
+        <button class="btn" id="exportAllBtn" type="button" style="display:none;">📦 Export All (ZIP)</button>
+        <button class="btn primary" id="savePdfBtn" type="button">📄 Save as PDF</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- 1 -->
+      <section class="card">
+        <h2>📝 Contact Info</h2>
+        <label for="fullName">Full Name</label>
+        <input id="fullName" type="text" placeholder="Jane Smith" maxlength="60" />
+        
+        <label for="email" style="margin-top:10px;">Email</label>
+        <input id="email" type="email" placeholder="jane.smith@email.com" maxlength="60" />
+        
+        <label for="phone" style="margin-top:10px;">Phone (optional)</label>
+        <input id="phone" type="tel" placeholder="(555) 123-4567" maxlength="20" />
+      </section>
+
+      <!-- 2 -->
+      <section class="card">
+        <h2>🎯 Career Objective</h2>
+        <label for="objective">What job or field interests you?</label>
+        <textarea id="objective" placeholder="Example: I'm interested in graphic design and want to learn more about creating visual content for social media and marketing."></textarea>
+      </section>
+
+      <!-- 3 -->
+      <section class="card big">
+        <h2>🎓 Education</h2>
+        <label for="schoolName">School Name</label>
+        <input id="schoolName" type="text" placeholder="Lincoln High School" maxlength="80" />
+        
+        <div class="split">
+          <div>
+            <label for="gradYear">Expected Graduation</label>
+            <input id="gradYear" type="text" placeholder="2026" maxlength="20" />
+          </div>
+          <div>
+            <label for="gpa">GPA (optional)</label>
+            <input id="gpa" type="text" placeholder="3.8" maxlength="10" />
+          </div>
+        </div>
+
+        <label for="honors" style="margin-top:10px;">Honors & Achievements (optional)</label>
+        <textarea id="honors" placeholder="Example: Honor Roll, Student of the Month, Perfect Attendance" style="min-height:80px;"></textarea>
+      </section>
+
+      <!-- 4 -->
+      <section class="card big">
+        <h2>💼 Experience</h2>
+        <div class="muted">Add jobs, internships, or volunteer work. Click "Add Experience" to add more.</div>
+        
+        <div class="itemList" id="experienceList"></div>
+        
+        <button class="btn" id="addExpBtn" type="button" style="margin-top:10px;">+ Add Experience</button>
+
+        <div class="tipsBox">
+          <h3>💡 Tips for Experience</h3>
+          <ul>
+            <li>Include volunteer work, babysitting, tutoring, or helping with family business</li>
+            <li>Use action verbs: "Organized," "Led," "Assisted," "Created"</li>
+            <li>Focus on what you learned and accomplished</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="card big">
+        <h2>⭐ Skills</h2>
+        <div class="muted">Select skills that apply to you. Click to toggle.</div>
+        
+        <div class="skillsGrid" id="skillsGrid"></div>
+
+        <div class="tipsBox">
+          <h3>💡 About Skills</h3>
+          <ul>
+            <li>Technical skills: Software, tools, languages you know</li>
+            <li>Soft skills: Communication, teamwork, problem-solving</li>
+            <li>Be honest—only select skills you actually have!</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section class="card big">
+        <h2>🏆 Activities & Interests</h2>
+        <label for="activities">Clubs, sports, hobbies, or community involvement</label>
+        <textarea id="activities" placeholder="Example: Robotics Club, Soccer Team, Volunteer at Animal Shelter, Photography"></textarea>
+        
+        <div class="muted" style="margin-top:8px;">This shows what you're passionate about outside of school!</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // My First Resume — Student Resume Builder
+    // =========================
+
+    const STORAGE_KEY = "studentResume_v1";
+    const TEACHER_CODE = "teach2024";
+    const ADMIN_CODE = "admin2024";
+
+    const SKILLS_LIST = [
+      "Microsoft Word", "Microsoft Excel", "PowerPoint", "Google Docs",
+      "Social Media", "Video Editing", "Photo Editing", "Coding/Programming",
+      "Spanish", "French", "Mandarin", "Sign Language",
+      "Public Speaking", "Teamwork", "Leadership", "Organization",
+      "Time Management", "Problem Solving", "Communication", "Customer Service",
+      "Creative Writing", "Research", "Data Entry", "Music"
+    ];
+
+    const $ = (id) => document.getElementById(id);
+
+    const fields = {
+      fullName: $("fullName"),
+      email: $("email"),
+      phone: $("phone"),
+      objective: $("objective"),
+      schoolName: $("schoolName"),
+      gradYear: $("gradYear"),
+      gpa: $("gpa"),
+      honors: $("honors"),
+      activities: $("activities")
+    };
+
+    const savePdfBtn = $("savePdfBtn");
+    const exampleBtn = $("exampleBtn");
+    const exportAllBtn = $("exportAllBtn");
+
+    // Secret / Admin
+    const palmBtn = $("palmBtn");
+    const secretTray = $("secretTray");
+    
+    const teacherCodeInput = $("teacherCode");
+    const unlockTeacherBtn = $("unlockTeacherBtn");
+    const teacherStatus = $("teacherStatus");
+    const teacherErr = $("teacherErr");
+    
+    const adminCodeInput = $("adminCode");
+    const unlockAdminBtn = $("unlockAdminBtn");
+    const adminStatus = $("adminStatus");
+    const adminErr = $("adminErr");
+
+    let isTeacherMode = false;
+    let isAdminMode = false;
+
+    let experiences = [];
+    let selectedSkills = new Set();
+
+    // -----------------
+    // Experience management
+    // -----------------
+    const experienceList = $("experienceList");
+    const addExpBtn = $("addExpBtn");
+
+    function renderExperiences(){
+      experienceList.innerHTML = "";
+      experiences.forEach((exp, idx) => {
+        const div = document.createElement("div");
+        div.className = "itemEntry";
+        div.innerHTML = `
+          <input type="text" value="${exp.title}" placeholder="Job Title" data-idx="${idx}" data-field="title" />
+          <input type="text" value="${exp.place}" placeholder="Company/Organization" data-idx="${idx}" data-field="place" />
+          <input type="text" value="${exp.dates}" placeholder="Dates (e.g., Summer 2023)" data-idx="${idx}" data-field="dates" />
+          <button class="removeBtn" data-idx="${idx}">✕</button>
+        `;
+        experienceList.appendChild(div);
+      });
+
+      // Attach listeners
+      experienceList.querySelectorAll("input").forEach(inp => {
+        inp.addEventListener("input", (e) => {
+          const idx = parseInt(e.target.dataset.idx);
+          const field = e.target.dataset.field;
+          experiences[idx][field] = e.target.value;
+          save();
+        });
+      });
+
+      experienceList.querySelectorAll(".removeBtn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const idx = parseInt(e.target.dataset.idx);
+          experiences.splice(idx, 1);
+          renderExperiences();
+          save();
+        });
+      });
+    }
+
+    addExpBtn.addEventListener("click", () => {
+      experiences.push({ title: "", place: "", dates: "" });
+      renderExperiences();
+      save();
+    });
+
+    // -----------------
+    // Skills management
+    // -----------------
+    const skillsGrid = $("skillsGrid");
+
+    function renderSkills(){
+      skillsGrid.innerHTML = "";
+      SKILLS_LIST.forEach(skill => {
+        const div = document.createElement("div");
+        div.className = "skillItem";
+        if (selectedSkills.has(skill)) div.classList.add("selected");
+        div.textContent = skill;
+        div.addEventListener("click", () => {
+          if (selectedSkills.has(skill)){
+            selectedSkills.delete(skill);
+          } else {
+            selectedSkills.add(skill);
+          }
+          renderSkills();
+          save();
+        });
+        skillsGrid.appendChild(div);
+      });
+    }
+
+    // -----------------
+    // Autosave
+    // -----------------
+    function save(){
+      const data = {
+        fullName: fields.fullName.value,
+        email: fields.email.value,
+        phone: fields.phone.value,
+        objective: fields.objective.value,
+        schoolName: fields.schoolName.value,
+        gradYear: fields.gradYear.value,
+        gpa: fields.gpa.value,
+        honors: fields.honors.value,
+        activities: fields.activities.value,
+        experiences: experiences,
+        skills: Array.from(selectedSkills),
+        teacherMode: isTeacherMode ? 1 : 0,
+        adminMode: isAdminMode ? 1 : 0
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function load(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        if (data.fullName != null) fields.fullName.value = data.fullName;
+        if (data.email != null) fields.email.value = data.email;
+        if (data.phone != null) fields.phone.value = data.phone;
+        if (data.objective != null) fields.objective.value = data.objective;
+        if (data.schoolName != null) fields.schoolName.value = data.schoolName;
+        if (data.gradYear != null) fields.gradYear.value = data.gradYear;
+        if (data.gpa != null) fields.gpa.value = data.gpa;
+        if (data.honors != null) fields.honors.value = data.honors;
+        if (data.activities != null) fields.activities.value = data.activities;
+        
+        if (data.experiences) experiences = data.experiences;
+        if (data.skills) selectedSkills = new Set(data.skills);
+
+        if (data.teacherMode === 1) {
+          isTeacherMode = true;
+          setTeacherUI(true);
+        }
+        if (data.adminMode === 1) {
+          isAdminMode = true;
+          setAdminUI(true);
+        }
+
+        renderExperiences();
+        renderSkills();
+      }catch(e){
+        console.warn("Load failed:", e);
+      }
+    }
+
+    Object.values(fields).forEach(el => el.addEventListener("input", save));
+
+    // -----------------
+    // Secret: Palm tap logic (3 taps reveals tray)
+    // -----------------
+    const tapState = { taps:0, timer:null };
+
+    palmBtn.addEventListener("click", () => {
+      tapState.taps++;
+      if (tapState.timer) clearTimeout(tapState.timer);
+      tapState.timer = setTimeout(() => tapState.taps = 0, 1500);
+
+      if (tapState.taps >= 3){
+        tapState.taps = 0;
+        secretTray.classList.toggle("active");
+      }
+    });
+
+    // -----------------
+    // Teacher mode unlock
+    // -----------------
+    function setTeacherUI(unlocked){
+      isTeacherMode = !!unlocked;
+
+      teacherErr.classList.remove("active");
+      if (isTeacherMode){
+        teacherStatus.textContent = "Unlocked";
+        teacherStatus.classList.remove("locked");
+        teacherStatus.classList.add("ok");
+        exampleBtn.style.display = "inline-block";
+      } else {
+        teacherStatus.textContent = "Locked";
+        teacherStatus.classList.add("locked");
+        teacherStatus.classList.remove("ok");
+        exampleBtn.style.display = "none";
+      }
+
+      save();
+    }
+
+    unlockTeacherBtn.addEventListener("click", () => {
+      const code = (teacherCodeInput.value || "").trim();
+      if (code === TEACHER_CODE){
+        setTeacherUI(true);
+        teacherCodeInput.value = "";
+      } else {
+        teacherErr.classList.add("active");
+        setTeacherUI(false);
+        setTimeout(() => teacherErr.classList.remove("active"), 1200);
+      }
+    });
+
+    teacherCodeInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") unlockTeacherBtn.click();
+    });
+
+    // -----------------
+    // Admin mode unlock
+    // -----------------
+    function setAdminUI(unlocked){
+      isAdminMode = !!unlocked;
+
+      adminErr.classList.remove("active");
+      if (isAdminMode){
+        adminStatus.textContent = "Unlocked";
+        adminStatus.classList.remove("locked");
+        adminStatus.classList.add("ok");
+        exportAllBtn.style.display = "inline-block";
+      } else {
+        adminStatus.textContent = "Locked";
+        adminStatus.classList.add("locked");
+        adminStatus.classList.remove("ok");
+        exportAllBtn.style.display = "none";
+      }
+
+      save();
+    }
+
+    unlockAdminBtn.addEventListener("click", () => {
+      const code = (adminCodeInput.value || "").trim();
+      if (code === ADMIN_CODE){
+        setAdminUI(true);
+        adminCodeInput.value = "";
+      } else {
+        adminErr.classList.add("active");
+        setAdminUI(false);
+        setTimeout(() => adminErr.classList.remove("active"), 1200);
+      }
+    });
+
+    adminCodeInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") unlockAdminBtn.click();
+    });
+
+    // -----------------
+    // Teacher: Load Example
+    // -----------------
+    exampleBtn.addEventListener("click", () => {
+      if (!isTeacherMode) return;
+
+      fields.fullName.value = "Alex Rivera";
+      fields.email.value = "alex.rivera@email.com";
+      fields.phone.value = "(555) 234-5678";
+      fields.objective.value = "I'm passionate about environmental science and want to pursue a career helping communities develop sustainable practices and protect natural resources.";
+      fields.schoolName.value = "Washington High School";
+      fields.gradYear.value = "2025";
+      fields.gpa.value = "3.7";
+      fields.honors.value = "Honor Roll, Science Fair Winner, Environmental Club President";
+      fields.activities.value = "Environmental Club (President), Track & Field, Volunteer at Local Food Bank, Photography";
+
+      experiences = [
+        { title: "Junior Camp Counselor", place: "Summer Nature Camp", dates: "June-Aug 2023" },
+        { title: "Volunteer", place: "Community Garden Project", dates: "Spring 2023" }
+      ];
+
+      selectedSkills = new Set([
+        "PowerPoint", "Google Docs", "Public Speaking", "Teamwork",
+        "Leadership", "Organization", "Research", "Problem Solving"
+      ]);
+
+      renderExperiences();
+      renderSkills();
+      save();
+
+      alert("Example resume loaded! Students can modify it to make it their own.");
+    });
+
+    // -----------------
+    // Admin: Export All as ZIP
+    // -----------------
+    exportAllBtn.addEventListener("click", () => {
+      if (!isAdminMode) return;
+      
+      // In a real implementation, this would gather all student resumes
+      // For demo, we'll just export the current one
+      alert("ADMIN MODE: In a real classroom setting, this would collect all student resumes from a database and package them into a ZIP file for download.\n\nFor this demo, we'll export the current resume.");
+      downloadPDF();
+    });
+
+    // -----------------
+    // PDF Export (using canvas)
+    // -----------------
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
+      const words = (text || "").split(/\s+/).filter(Boolean);
+      let line = "";
+      let lines = 0;
+
+      for (let i=0; i<words.length; i++){
+        const test = line ? (line + " " + words[i]) : words[i];
+        const w = ctx.measureText(test).width;
+
+        if (w > maxWidth && line){
+          ctx.fillText(line, x, y);
+          y += lineHeight;
+          line = words[i];
+          lines++;
+          if (maxLines && lines >= maxLines) return y;
+        } else {
+          line = test;
+        }
+      }
+      if (line){
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+      }
+      return y;
+    }
+
+    function drawGreenBar(ctx, x, y, w){
+      const accent = "#14b854";
+      const accent2 = "#eadb2f";
+      const g = ctx.createLinearGradient(x, y, x+w, y);
+      g.addColorStop(0, accent);
+      g.addColorStop(1, accent2);
+      ctx.fillStyle = g;
+      ctx.fillRect(x, y, w, 8);
+    }
+
+    function drawBearIcon(ctx, x, y, size){
+      ctx.save();
+      ctx.translate(x, y);
+
+      ctx.fillStyle = "#8B5A2B";
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 3;
+
+      const earR = size * 0.18;
+      ctx.beginPath();
+      ctx.arc(size*0.28, size*0.22, earR, 0, Math.PI*2);
+      ctx.arc(size*0.72, size*0.22, earR, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(size*0.5, size*0.52, size*0.35, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#D2A679";
+      ctx.beginPath();
+      ctx.ellipse(size*0.5, size*0.62, size*0.20, size*0.15, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#111";
+      ctx.beginPath();
+      ctx.arc(size*0.5, size*0.60, size*0.06, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(size*0.40, size*0.50, size*0.035, 0, Math.PI*2);
+      ctx.arc(size*0.60, size*0.50, size*0.035, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function buildResumePDF(){
+      const W = 1700;
+      const H = 2200;
+      const pad = 70;
+
+      const c = document.createElement("canvas");
+      c.width = W;
+      c.height = H;
+      const ctx = c.getContext("2d");
+
+      // Background
+      const bg = "#f6f0e6";
+      const bg2 = "#fff8ef";
+      const g = ctx.createLinearGradient(0,0,W,H);
+      g.addColorStop(0, bg2);
+      g.addColorStop(1, bg);
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,W,H);
+
+      // Always set text to black
+      ctx.fillStyle = "#111111";
+
+      // Header
+      ctx.font = "900 72px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      const name = fields.fullName.value.trim() || "Your Name";
+      ctx.fillText(name, pad, 100);
+
+      drawBearIcon(ctx, W - pad - 90, 40, 90);
+
+      // Contact
+      ctx.fillStyle = "#111111";
+      ctx.font = "600 26px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      const contact = [fields.email.value, fields.phone.value].filter(Boolean).join(" • ");
+      if (contact) ctx.fillText(contact, pad, 145);
+
+      let yPos = 210;
+
+      // Objective
+      if (fields.objective.value.trim()){
+        drawGreenBar(ctx, pad, yPos, W - pad*2);
+        yPos += 35;
+        ctx.fillStyle = "#111111";
+        ctx.font = "900 32px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        ctx.fillText("CAREER OBJECTIVE", pad, yPos);
+        yPos += 40;
+        ctx.fillStyle = "#111111";
+        ctx.font = "600 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        yPos = wrapText(ctx, fields.objective.value.trim(), pad, yPos, W - pad*2, 32, 6);
+        yPos += 40;
+      }
+
+      // Education
+      drawGreenBar(ctx, pad, yPos, W - pad*2);
+      yPos += 35;
+      ctx.fillStyle = "#111111";
+      ctx.font = "900 32px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("EDUCATION", pad, yPos);
+      yPos += 40;
+      ctx.fillStyle = "#111111";
+      ctx.font = "700 26px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      const school = fields.schoolName.value.trim() || "School Name";
+      ctx.fillText(school, pad, yPos);
+      yPos += 35;
+      ctx.fillStyle = "#111111";
+      ctx.font = "600 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      const gradInfo = [
+        fields.gradYear.value.trim() ? `Expected Graduation: ${fields.gradYear.value.trim()}` : "",
+        fields.gpa.value.trim() ? `GPA: ${fields.gpa.value.trim()}` : ""
+      ].filter(Boolean).join(" • ");
+      if (gradInfo) {
+        ctx.fillText(gradInfo, pad, yPos);
+        yPos += 35;
+      }
+      if (fields.honors.value.trim()){
+        ctx.fillStyle = "#111111";
+        yPos = wrapText(ctx, fields.honors.value.trim(), pad, yPos, W - pad*2, 30, 4);
+        yPos += 10;
+      }
+      yPos += 40;
+
+      // Experience
+      if (experiences.length > 0){
+        drawGreenBar(ctx, pad, yPos, W - pad*2);
+        yPos += 35;
+        ctx.fillStyle = "#111111";
+        ctx.font = "900 32px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        ctx.fillText("EXPERIENCE", pad, yPos);
+        yPos += 40;
+
+        experiences.forEach(exp => {
+          ctx.fillStyle = "#111111";
+          ctx.font = "700 26px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+          ctx.fillText(exp.title || "Position", pad, yPos);
+          yPos += 32;
+          ctx.fillStyle = "#111111";
+          ctx.font = "600 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+          const expInfo = [exp.place, exp.dates].filter(Boolean).join(" • ");
+          if (expInfo){
+            ctx.fillText(expInfo, pad, yPos);
+            yPos += 35;
+          }
+        });
+        yPos += 30;
+      }
+
+      // Skills
+      if (selectedSkills.size > 0){
+        drawGreenBar(ctx, pad, yPos, W - pad*2);
+        yPos += 35;
+        ctx.fillStyle = "#111111";
+        ctx.font = "900 32px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        ctx.fillText("SKILLS", pad, yPos);
+        yPos += 40;
+        ctx.fillStyle = "#111111";
+        ctx.font = "600 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        const skillsText = Array.from(selectedSkills).join(" • ");
+        yPos = wrapText(ctx, skillsText, pad, yPos, W - pad*2, 30, 8);
+        yPos += 40;
+      }
+
+      // Activities
+      if (fields.activities.value.trim()){
+        drawGreenBar(ctx, pad, yPos, W - pad*2);
+        yPos += 35;
+        ctx.fillStyle = "#111111";
+        ctx.font = "900 32px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        ctx.fillText("ACTIVITIES & INTERESTS", pad, yPos);
+        yPos += 40;
+        ctx.fillStyle = "#111111";
+        ctx.font = "600 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        yPos = wrapText(ctx, fields.activities.value.trim(), pad, yPos, W - pad*2, 30, 6);
+      }
+
+      // Footer
+      ctx.fillStyle = "#666666";
+      ctx.font = "600 20px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillText("Created with My First Resume 🐻", pad, H - 40);
+
+      return c;
+    }
+
+    function downloadPDF(){
+      const canvas = buildResumePDF();
+      const dataURL = canvas.toDataURL("image/jpeg", 0.92);
+
+      const name = (fields.fullName.value.trim() || "Resume").replace(/[^\w\-]+/g,"_");
+      const fileName = `${name}_Resume_${Date.now()}.jpg`;
+
+      const a = document.createElement("a");
+      a.href = dataURL;
+      a.download = fileName;
+      a.click();
+    }
+
+    savePdfBtn.addEventListener("click", downloadPDF);
+
+    // Boot
+    load();
+    renderExperiences();
+    renderSkills();
+  </script>
+</body>
+</html>
