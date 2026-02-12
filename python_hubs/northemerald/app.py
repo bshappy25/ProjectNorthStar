@@ -1,6 +1,6 @@
 """
 ╔══════════════════════════════════════════════════════════════╗
-║              NORTHEMERAID HUB - Python Edition               ║
+║              NORTHEMERAID HUB - Main Application             ║
 ║                    Navigate North • Go NE                    ║
 ╚══════════════════════════════════════════════════════════════╝
 """
@@ -10,13 +10,18 @@ from pathlib import Path
 import hashlib
 import time
 
+# Import MyApp modules
+try:
+    import myapp1
+    import myapp2
+except ImportError as e:
+    st.error(f"⚠️ Error importing apps: {e}")
+
 # ═══════════════════════════════════════════════════════════════
 # CONFIGURATION & SECURITY
 # ═══════════════════════════════════════════════════════════════
 
 ADMIN_CODE_HASH = hashlib.sha256("Bshapp".encode()).hexdigest()
-APPS_DIR = Path("ne_apps")
-APPS_DIR.mkdir(exist_ok=True)
 
 # ═══════════════════════════════════════════════════════════════
 # SESSION STATE INITIALIZATION
@@ -30,8 +35,6 @@ if "admin_unlocked" not in st.session_state:
     st.session_state.admin_unlocked = False
 if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
-if "current_app" not in st.session_state:
-    st.session_state.current_app = None
 
 # ═══════════════════════════════════════════════════════════════
 # STYLING - EMERALD NORTHERN AESTHETIC
@@ -120,22 +123,6 @@ st.markdown("""
         margin-top: 1rem;
     }
     
-    .success-box {
-        background: rgba(95, 179, 130, 0.2);
-        border-left: 4px solid #5fb382;
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 1rem 0;
-    }
-    
-    .error-box {
-        background: rgba(220, 53, 69, 0.2);
-        border-left: 4px solid #dc3545;
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 1rem 0;
-    }
-    
     div[data-testid="stTextInput"] input {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(95, 179, 130, 0.3);
@@ -154,15 +141,6 @@ def verify_admin_code(code):
     """Securely verify admin code using hash comparison"""
     code_hash = hashlib.sha256(code.encode()).hexdigest()
     return code_hash == ADMIN_CODE_HASH
-
-def delete_app_safely(app_name):
-    """Delete app HTML file safely"""
-    app_path = APPS_DIR / f"{app_name}.html"
-    if app_path.exists():
-        app_path.unlink()
-        st.session_state.current_app = None
-        return True
-    return False
 
 # ═══════════════════════════════════════════════════════════════
 # HEADER WITH PALM ID
@@ -228,7 +206,7 @@ if st.session_state.current_page != "home":
         st.rerun()
 
 # ═══════════════════════════════════════════════════════════════
-# HOME PAGE
+# ROUTING TO APPS
 # ═══════════════════════════════════════════════════════════════
 
 if st.session_state.current_page == "home":
@@ -252,7 +230,6 @@ if st.session_state.current_page == "home":
         """, unsafe_allow_html=True)
         if st.button("Launch MyApp One", key="app1"):
             st.session_state.current_page = "app1"
-            st.session_state.current_app = "app1"
             st.rerun()
     
     with col2:
@@ -264,88 +241,13 @@ if st.session_state.current_page == "home":
         """, unsafe_allow_html=True)
         if st.button("Launch MyApp Two", key="app2"):
             st.session_state.current_page = "app2"
-            st.session_state.current_app = "app2"
             st.rerun()
 
-# ═══════════════════════════════════════════════════════════════
-# MYAPP ONE PAGE
-# ═══════════════════════════════════════════════════════════════
-
 elif st.session_state.current_page == "app1":
-    st.markdown("## ◆ MyApp One")
-    
-    st.markdown("""
-        <div class="app-card">
-            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">
-                Experience the power of streamlined productivity. MyApp One brings you cutting-edge 
-                features designed for the modern user.
-            </p>
-            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8; margin-top: 1rem;">
-                Built with precision and care, this application embodies the NorthEmerald philosophy 
-                of excellence and simplicity.
-            </p>
-            
-            <h4 style="color: #5fb382; margin-top: 2rem; margin-bottom: 1rem;">Key Features:</h4>
-            <ul style="color: rgba(255, 255, 255, 0.7); line-height: 2;">
-                <li>✨ Intuitive user interface with emerald aesthetics</li>
-                <li>⚡ Lightning-fast performance optimization</li>
-                <li>🔗 Seamless integration with NE ecosystem</li>
-                <li>🎨 Advanced customization options</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Admin delete tool
-    if st.session_state.admin_unlocked and st.session_state.current_app:
-        st.markdown("---")
-        col_delete_a, col_delete_b = st.columns([0.85, 0.15])
-        with col_delete_b:
-            if st.button("❌", help="Delete tool"):
-                if delete_app_safely(st.session_state.current_app):
-                    st.success(f"🗑️ {st.session_state.current_app} deleted.")
-                    time.sleep(1)
-                    st.session_state.current_page = "home"
-                    st.rerun()
-
-# ═══════════════════════════════════════════════════════════════
-# MYAPP TWO PAGE
-# ═══════════════════════════════════════════════════════════════
+    myapp1.render(st.session_state.admin_unlocked)
 
 elif st.session_state.current_page == "app2":
-    st.markdown("## ◆ MyApp Two")
-    
-    st.markdown("""
-        <div class="app-card">
-            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">
-                Unlock new possibilities with MyApp Two. Your companion for enhanced workflow 
-                and creative exploration.
-            </p>
-            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8; margin-top: 1rem;">
-                Crafted with attention to detail, this tool represents the pinnacle of 
-                NorthEmerald innovation.
-            </p>
-            
-            <h4 style="color: #5fb382; margin-top: 2rem; margin-bottom: 1rem;">Key Features:</h4>
-            <ul style="color: rgba(255, 255, 255, 0.7); line-height: 2;">
-                <li>🎭 Elegant design with northern-inspired themes</li>
-                <li>🤝 Powerful collaboration features</li>
-                <li>🤖 Smart automation capabilities</li>
-                <li>☁️ Cloud-synced for seamless access</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Admin delete tool
-    if st.session_state.admin_unlocked and st.session_state.current_app:
-        st.markdown("---")
-        col_delete_a, col_delete_b = st.columns([0.85, 0.15])
-        with col_delete_b:
-            if st.button("❌", help="Delete tool"):
-                if delete_app_safely(st.session_state.current_app):
-                    st.success(f"🗑️ {st.session_state.current_app} deleted.")
-                    time.sleep(1)
-                    st.session_state.current_page = "home"
-                    st.rerun()
+    myapp2.render(st.session_state.admin_unlocked)
 
 # ═══════════════════════════════════════════════════════════════
 # FOOTER
