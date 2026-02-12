@@ -100,7 +100,7 @@
       color:#1b1023;
     }
 
-    /* Signet button (3 taps can reveal tray later, optional) */
+    /* Signet button */
     .adminRow{
       margin-top:10px;
       display:flex;
@@ -151,7 +151,7 @@
     .ray.tr{ right:-14px; top:-2px; transform:rotate(-45deg); }
     .ray.br{ right:-10px; bottom:-4px; transform:rotate(70deg); }
 
-    /* SECRET TRAY (kept, but you can delete later) */
+    /* SECRET TRAY */
     .secretTray{
       display:none;
       margin-top:10px;
@@ -210,7 +210,7 @@
       position:relative;
     }
 
-    /* Accent bar (light purple) */
+    /* Accent bar */
     .card::before{
       content:"";
       position:absolute;
@@ -335,7 +335,6 @@
       to{ transform: translateY(0px) scale(1); opacity:1; }
     }
 
-    /* ripple layer */
     .modal::before{
       content:"";
       position:absolute;
@@ -373,6 +372,7 @@
       padding:12px;
       line-height:1.5;
       font-weight:700;
+      white-space:pre-wrap;
     }
     .mFoot{
       padding:0 14px 14px;
@@ -383,7 +383,7 @@
       justify-content:flex-end;
     }
 
-    /* PRINT: keep output clean, hide UI buttons + modal */
+    /* PRINT */
     @media print{
       .barBtns, .adminRow, .secretTray, .overlay{ display:none !important; }
       body{ padding:0; background:#fff; }
@@ -402,7 +402,6 @@
 
 <body>
   <div class="app">
-
     <div class="topbar">
       <div class="brand">
         <h1>SLDConnect Creator Intake <span aria-hidden="true">✦</span></h1>
@@ -411,7 +410,6 @@
           Fill the fields → generate output → copy or email it back.
         </p>
 
-        <!-- Signet button exists but NO helper text -->
         <div class="adminRow">
           <button class="iconBtn" id="signetBtn" title="Signet">
             <span class="sigMark" aria-hidden="true">
@@ -422,7 +420,6 @@
           </button>
         </div>
 
-        <!-- SECRET TRAY placeholder (optional; keep for later) -->
         <div class="secretTray" id="secretTray">
           <div class="secretBlock">
             <h3>OUTPUT RULES <span aria-hidden="true">🧾</span></h3>
@@ -442,8 +439,6 @@
     </div>
 
     <div class="grid">
-
-      <!-- CONTACT -->
       <section class="card">
         <h2>📝 Contact Info</h2>
         <label for="fullName">Creator Name</label>
@@ -456,35 +451,30 @@
         <input id="phone" type="tel" placeholder="(555) 987-6543" maxlength="22" />
       </section>
 
-      <!-- LINE 1 -->
       <section class="card">
         <h2>🎯 Line 1 — Objective / Intention</h2>
         <label for="objective">One clear sentence.</label>
         <textarea id="objective" placeholder="Example: I create multimedia stories that help people understand the world."></textarea>
       </section>
 
-      <!-- LINE 2 -->
       <section class="card big">
         <h2>📚 Line 2 — Knowledge Base</h2>
         <div class="muted">What foundations do you know? (topics, workflows, tools, theory)</div>
         <textarea id="knowledge" placeholder="Example: Story structure, interviewing, research, editing workflow, fact-checking..."></textarea>
       </section>
 
-      <!-- LINE 3 -->
       <section class="card big">
         <h2>💼 Line 3 — Experience</h2>
         <div class="muted">Summarize your real experience (roles, projects, internships, episodes, channels).</div>
         <textarea id="experience" placeholder="Example: Student reporter, podcast producer, internship at local station..."></textarea>
       </section>
 
-      <!-- LINE 4 -->
       <section class="card big">
         <h2>⭐ Line 4 — Skills (Media Creation)</h2>
         <div class="muted">Keep it media-focused. (editing, audio, camera, writing, design)</div>
         <textarea id="skills" placeholder="Example: Premiere/Final Cut, photography, scripting, AP style, social media..."></textarea>
       </section>
 
-      <!-- LINE 5 + PORTAL -->
       <section class="card big">
         <h2>🧩 Line 5 — Abilities to Contribute</h2>
         <div class="muted">What can you do for the network? (collab, build, QA, produce, mentor)</div>
@@ -529,11 +519,10 @@
         </div>
       </section>
 
-      <!-- OUTPUT -->
       <section class="card big">
         <h2>🧾 OUTPUT (Printer Friendly)</h2>
         <div class="muted">This is what they copy/email back to you.</div>
-        <textarea id="output" class="outputBox" placeholder="Press Generate Output (coming in Step 2/3)..." spellcheck="false"></textarea>
+        <textarea id="output" class="outputBox" placeholder="Press Generate Output..." spellcheck="false"></textarea>
 
         <div class="adminRow" style="margin-top:10px;">
           <button class="btn primary" id="genBtn" type="button">✨ Generate Output</button>
@@ -566,112 +555,90 @@
   </div>
 
   <script>
-  // =========================
-  // SLDConnect Creator Intake — Step 2/3 (JS)
-  // - Exact 5-line "profile resume" output
-  // - Portal chips open spring modal w/ soft ripple
-  // - Append/Replace portal text into OUTPUT
-  // - Copy / Print / Email (mailto; inject your email later)
-  // - Signet: 1 click focuses first field; 3 taps toggles secret tray
-  // =========================
+    // =========================
+    // SLDConnect Creator Intake — Step 2/3 (JS)
+    // =========================
+    const $ = (id) => document.getElementById(id);
 
-  const $ = (id) => document.getElementById(id);
+    const fullName   = $("fullName");
+    const email      = $("email");
+    const phone      = $("phone");
+    const objective  = $("objective");
+    const knowledge  = $("knowledge");
+    const experience = $("experience");
+    const skills     = $("skills");
+    const contribute = $("contribute");
+    const interest   = $("interest");
 
-  // Fields
-  const fullName   = $("fullName");
-  const email      = $("email");
-  const phone      = $("phone");
-  const objective  = $("objective");
-  const knowledge  = $("knowledge");
-  const experience = $("experience");
-  const skills     = $("skills");
-  const contribute = $("contribute");
-  const interest   = $("interest");
+    const output   = $("output");
+    const genBtn   = $("genBtn");
+    const clearBtn = $("clearBtn");
+    const copyBtn  = $("copyBtn");
+    const emailBtn = $("emailBtn");
+    const printBtn = $("printBtn");
 
-  // Output + buttons
-  const output   = $("output");
-  const genBtn   = $("genBtn");
-  const clearBtn = $("clearBtn");
-  const copyBtn  = $("copyBtn");
-  const emailBtn = $("emailBtn");
-  const printBtn = $("printBtn");
+    const signetBtn  = $("signetBtn");
+    const secretTray = $("secretTray");
 
-  // Signet + secret tray
-  const signetBtn  = $("signetBtn");
-  const secretTray = $("secretTray");
+    const portalRow = $("portalRow");
 
-  // Portal chips
-  const portalRow = $("portalRow");
+    const overlay  = $("overlay");
+    const modal    = $("modal");
+    const mTitle   = $("mTitle");
+    const mSub     = $("mSub");
+    const mText    = $("mText");
+    const mClose   = $("mClose");
+    const mAppend  = $("mAppend");
+    const mReplace = $("mReplace");
 
-  // Modal
-  const overlay  = $("overlay");
-  const modal    = $("modal");
-  const mTitle   = $("mTitle");
-  const mSub     = $("mSub");
-  const mText    = $("mText");
-  const mClose   = $("mClose");
-  const mAppend  = $("mAppend");
-  const mReplace = $("mReplace");
+    let activePortalKey = "Emerald";
+    let lastFocus = null;
 
-  let activePortalKey = "Emerald";
-  let lastFocus = null;
-
-  // ---------- Portal Descriptions (text-only) ----------
-  const PORTALS = {
-    Emerald: {
-      sub: "Engagement + Games",
-      text:
+    const PORTALS = {
+      Emerald: {
+        sub: "Engagement + Games",
+        text:
 `Emerald is the engagement engine.
 It turns participation into momentum:
 • missions • streaks • achievements • challenges
 Emerald routes signals into CareOn through positive progress.`
-    },
-    Amethyst: {
-      sub: "Creative Studio",
-      text:
+      },
+      Amethyst: {
+        sub: "Creative Studio",
+        text:
 `Amethyst is the creation studio.
 Teachers & creators build secure HTML mini-apps, templates, and classroom-ready experiences.
 Fast iteration, high safety, clean publishing.`
-    },
-    Onyx: {
-      sub: "Security Vault",
-      text:
+      },
+      Onyx: {
+        sub: "Security Vault",
+        text:
 `Onyx is the trust vault.
 It protects identities, access codes, and sensitive assets using roles + audit trails.
 Onyx keeps Starlight safe and keeps admin power accountable.`
-    },
-    Ruby: {
-      sub: "Task Completion Network",
-      text:
+      },
+      Ruby: {
+        sub: "Task Completion Network",
+        text:
 `Ruby is the collaboration engine.
 Creators complete tasks for projects:
 • micro-jobs • creative support • QA • builds
 Work is tracked, validated, and rewarded through CareOn.`
-    },
-    Sapphire: {
-      sub: "Economy Hub",
-      text:
+      },
+      Sapphire: {
+        sub: "Economy Hub",
+        text:
 `Sapphire is the economy window.
 It visualizes projects, investments, and ecosystem flows.
 Sapphire grows Northstar without breaking ledger integrity.`
-    }
-  };
+      }
+    };
 
-  // ---------- Output Builder (PRINTER FRIENDLY) ----------
-  function valOrBlank(v){ return (v || "").trim() || "(blank)"; }
+    function valOrBlank(v){ return (v || "").trim() || "(blank)"; }
 
-  function buildOutput(){
-    const name = (fullName.value || "").trim() || "Creator Name";
-
-    // EXACT STRUCTURE requested:
-    // Line 1 intention/objective
-    // Line 2 knowledge base
-    // Line 3 experience
-    // Line 4 skills media
-    // Line 5 abilities to contribute
-    // Bottom: most interested portal
-    // Footer: Property of SLDConnect 2023
-    return (
+    function buildOutput(){
+      const name = (fullName.value || "").trim() || "Creator Name";
+      return (
 `${name}
 
 1) Intention / Objective:
@@ -691,150 +658,124 @@ ${valOrBlank(contribute.value)}
 
 Most Interested Portal: ${interest.value}
 Property of SLDConnect 2023`
-    );
-  }
+      );
+    }
 
-  // ---------- Generate / Clear ----------
-  genBtn.addEventListener("click", () => {
-    output.value = buildOutput();
-    output.focus();
-  });
-
-  clearBtn.addEventListener("click", () => {
-    // Keep contact optional — but clear all for a clean restart
-    fullName.value = "";
-    email.value = "";
-    phone.value = "";
-    objective.value = "";
-    knowledge.value = "";
-    experience.value = "";
-    skills.value = "";
-    contribute.value = "";
-    interest.value = "Emerald";
-    output.value = "";
-    objective.focus();
-  });
-
-  // ---------- Copy ----------
-  copyBtn.addEventListener("click", async () => {
-    const txt = output.value || "";
-    try{
-      await navigator.clipboard.writeText(txt);
-      copyBtn.textContent = "✅ Copied";
-      setTimeout(()=> copyBtn.textContent = "📋 Copy Output", 900);
-    }catch{
+    genBtn.addEventListener("click", () => {
+      output.value = buildOutput();
       output.focus();
-      output.select();
-      document.execCommand("copy");
+    });
+
+    clearBtn.addEventListener("click", () => {
+      fullName.value = "";
+      email.value = "";
+      phone.value = "";
+      objective.value = "";
+      knowledge.value = "";
+      experience.value = "";
+      skills.value = "";
+      contribute.value = "";
+      interest.value = "Emerald";
+      output.value = "";
+      objective.focus();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      const txt = output.value || "";
+      try{
+        await navigator.clipboard.writeText(txt);
+        copyBtn.textContent = "✅ Copied";
+        setTimeout(()=> copyBtn.textContent = "📋 Copy Output", 900);
+      }catch{
+        output.focus();
+        output.select();
+        document.execCommand("copy");
+      }
+    });
+
+    printBtn.addEventListener("click", () => window.print());
+
+    emailBtn.addEventListener("click", () => {
+      const to = ""; // <-- inject your email later
+      const subject = encodeURIComponent("SLDConnect Creator Profile Output");
+      const body = encodeURIComponent(output.value || buildOutput());
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    // Signet: focus + hidden 3-tap tray
+    const tapState = { taps: 0, timer: null };
+    signetBtn.addEventListener("click", () => {
+      objective.focus();
+      tapState.taps++;
+      if (tapState.timer) clearTimeout(tapState.timer);
+      tapState.timer = setTimeout(() => tapState.taps = 0, 1200);
+      if (tapState.taps >= 3){
+        tapState.taps = 0;
+        secretTray.classList.toggle("active");
+      }
+    });
+
+    function openModal(key, rx=50, ry=30){
+      activePortalKey = key;
+      const p = PORTALS[key];
+      modal.style.setProperty("--rx", rx + "%");
+      modal.style.setProperty("--ry", ry + "%");
+      mTitle.textContent = `${key} Portal`;
+      mSub.textContent = p.sub;
+      mText.textContent = p.text;
+      overlay.dataset.open = "true";
+      lastFocus = document.activeElement;
+      mClose.focus();
     }
-  });
 
-  // ---------- Print / Save PDF ----------
-  printBtn.addEventListener("click", () => window.print());
-
-  // ---------- Email Draft (inject your email later) ----------
-  emailBtn.addEventListener("click", () => {
-    const to = ""; // <-- inject your email later
-    const subject = encodeURIComponent("SLDConnect Creator Profile Output");
-    const body = encodeURIComponent(output.value || buildOutput());
-    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-  });
-
-  // ---------- Signet Behavior ----------
-  // 1 click: focus first field + gentle “not intimidating”
-  signetBtn.addEventListener("click", () => {
-    objective.focus();
-  });
-
-  // 3 taps: toggle secret tray (matches your reference pattern)
-  const tapState = { taps: 0, timer: null };
-  signetBtn.addEventListener("click", () => {
-    tapState.taps++;
-    if (tapState.timer) clearTimeout(tapState.timer);
-    tapState.timer = setTimeout(() => tapState.taps = 0, 1200);
-    if (tapState.taps >= 3){
-      tapState.taps = 0;
-      secretTray.classList.toggle("active");
+    function closeModal(){
+      overlay.dataset.open = "false";
+      if (lastFocus) lastFocus.focus();
     }
-  });
 
-  // ---------- Modal (spring + ripple) ----------
-  function openModal(key, rx=50, ry=30){
-    activePortalKey = key;
-    const p = PORTALS[key];
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModal();
+    });
+    mClose.addEventListener("click", closeModal);
 
-    // set ripple origin
-    modal.style.setProperty("--rx", rx + "%");
-    modal.style.setProperty("--ry", ry + "%");
+    document.addEventListener("keydown", (e) => {
+      if (overlay.dataset.open === "true" && e.key === "Escape") closeModal();
+    });
 
-    mTitle.textContent = `${key} Portal`;
-    mSub.textContent = p.sub;
-    mText.textContent = p.text;
+    portalRow.addEventListener("click", (e) => {
+      const chip = e.target.closest(".portalChip");
+      if (!chip) return;
+      const key = chip.dataset.portal;
 
-    overlay.dataset.open = "true";
-    lastFocus = document.activeElement;
-    mClose.focus();
-  }
+      const rect = chip.getBoundingClientRect();
+      const cx = ((e.clientX - rect.left) / rect.width) * 100;
+      const cy = ((e.clientY - rect.top) / rect.height) * 100;
 
-  function closeModal(){
-    overlay.dataset.open = "false";
-    if (lastFocus) lastFocus.focus();
-  }
+      openModal(key, Math.max(5, Math.min(95, cx)), Math.max(5, Math.min(95, cy)));
+    });
 
-  // click outside closes
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeModal();
-  });
-  mClose.addEventListener("click", closeModal);
+    mReplace.addEventListener("click", () => {
+      output.value = PORTALS[activePortalKey].text.trim();
+      closeModal();
+      output.focus();
+    });
 
-  // ESC closes
-  document.addEventListener("keydown", (e) => {
-    if (overlay.dataset.open === "true" && e.key === "Escape") closeModal();
-  });
+    mAppend.addEventListener("click", () => {
+      const chunk = PORTALS[activePortalKey].text.trim();
+      output.value = output.value.trim()
+        ? output.value.trimEnd() + "\n\n" + chunk
+        : chunk;
+      closeModal();
+      output.focus();
+    });
 
-  // Portal chip click → open modal with ripple from click point
-  portalRow.addEventListener("click", (e) => {
-    const chip = e.target.closest(".portalChip");
-    if (!chip) return;
-    const key = chip.dataset.portal;
-
-    const rect = chip.getBoundingClientRect();
-    const cx = ((e.clientX - rect.left) / rect.width) * 100;
-    const cy = ((e.clientY - rect.top) / rect.height) * 100;
-
-    openModal(key, Math.max(5, Math.min(95, cx)), Math.max(5, Math.min(95, cy)));
-  });
-
-  // Append / Replace modal text into output (optional, but useful for testers)
-  mReplace.addEventListener("click", () => {
-    output.value = PORTALS[activePortalKey].text.trim();
-    closeModal();
-    output.focus();
-  });
-
-  mAppend.addEventListener("click", () => {
-    const chunk = PORTALS[activePortalKey].text.trim();
-    if (!output.value.trim()){
-      output.value = chunk;
-    } else {
-      output.value = output.value.trimEnd() + "\n\n" + chunk;
-    }
-    closeModal();
-    output.focus();
-  });
-
-  // ---------- Optional: autosync output when interest changes (non-intrusive) ----------
-  // If output already exists, update the bottom portal line only.
-  interest.addEventListener("change", () => {
-    if (!output.value.trim()) return;
-    const lines = output.value.split("\n");
-    const idx = lines.findIndex(l => l.startsWith("Most Interested Portal:"));
-    if (idx >= 0) lines[idx] = `Most Interested Portal: ${interest.value}`;
-    output.value = lines.join("\n");
-  });
-</script>
-  <script>
-    // JS goes in Step 2/3
+    interest.addEventListener("change", () => {
+      if (!output.value.trim()) return;
+      const lines = output.value.split("\n");
+      const idx = lines.findIndex(l => l.startsWith("Most Interested Portal:"));
+      if (idx >= 0) lines[idx] = `Most Interested Portal: ${interest.value}`;
+      output.value = lines.join("\n");
+    });
   </script>
 </body>
 </html>
