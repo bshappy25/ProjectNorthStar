@@ -14,6 +14,7 @@ import time
 try:
     import myapp1
     import myapp2
+    import teacher_tools
 except ImportError as e:
     st.error(f"⚠️ Error importing apps: {e}")
 
@@ -242,12 +243,26 @@ if st.session_state.current_page == "home":
         if st.button("Launch MyApp Two", key="app2"):
             st.session_state.current_page = "app2"
             st.rerun()
+    
+    # Teacher Tools - Full width card
+    st.markdown("""
+        <div class="app-card">
+            <h3 style="color: #5fb382;">📺 Teacher Tools - VIP TV Mode</h3>
+            <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">HTML teaching tools with futuristic TV interface</p>
+        </div>
+    """, unsafe_allow_html=True)
+    if st.button("Launch Teacher Tools Hub", key="teacher_tools", use_container_width=True):
+        st.session_state.current_page = "teacher_tools"
+        st.rerun()
 
 elif st.session_state.current_page == "app1":
     myapp1.render(st.session_state.admin_unlocked)
 
 elif st.session_state.current_page == "app2":
     myapp2.render(st.session_state.admin_unlocked)
+
+elif st.session_state.current_page == "teacher_tools":
+    teacher_tools.render(st.session_state.admin_unlocked)
 
 # ═══════════════════════════════════════════════════════════════
 # FOOTER
