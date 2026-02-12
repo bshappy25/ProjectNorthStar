@@ -1,305 +1,200 @@
-```python
 from __future__ import annotations
 
 import streamlit as st
 
 # ============================================================
-# MS. PILUSO SCIENCE PAGE (Priority #2)
+# DEV FORGE LAUNCHER
+# Routes to existing apps in priority order
 # ============================================================
 
-st.title("🔬 Ms. Piluso Science - NGSS Lesson Builder")
-st.markdown("### New Visions Curriculum Integration + 5E Framework")
+st.set_page_config(
+    page_title="DevForge - Developer Hub",
+    page_icon="🔧",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 # ============================================================
 # SESSION STATE INITIALIZATION
 # ============================================================
 
-if "ngss_standard" not in st.session_state:
-    st.session_state["ngss_standard"] = ""
-if "lesson_title" not in st.session_state:
-    st.session_state["lesson_title"] = ""
-if "grade_level" not in st.session_state:
-    st.session_state["grade_level"] = "6th Grade"
-if "engage" not in st.session_state:
-    st.session_state["engage"] = ""
-if "explore" not in st.session_state:
-    st.session_state["explore"] = ""
-if "explain" not in st.session_state:
-    st.session_state["explain"] = ""
-if "elaborate" not in st.session_state:
-    st.session_state["elaborate"] = ""
-if "evaluate" not in st.session_state:
-    st.session_state["evaluate"] = ""
-if "materials" not in st.session_state:
-    st.session_state["materials"] = ""
-if "accommodations" not in st.session_state:
-    st.session_state["accommodations"] = ""
-if "teacher_notes" not in st.session_state:
-    st.session_state["teacher_notes"] = ""
+if "palm_taps" not in st.session_state:
+    st.session_state["palm_taps"] = 0
+if "show_admin_box" not in st.session_state:
+    st.session_state["show_admin_box"] = False
+if "admin_unlocked" not in st.session_state:
+    st.session_state["admin_unlocked"] = False
+
+ADMIN_CODE = "Bshapp"
 
 # ============================================================
-# NGSS STANDARDS DATABASE (MS = Middle School)
-# ============================================================
-
-NGSS_STANDARDS = {
-    "MS-PS1-1": "Develop models to describe atomic composition of simple molecules and extended structures",
-    "MS-PS1-2": "Analyze and interpret data on properties of substances before and after interaction",
-    "MS-PS1-3": "Gather and make sense of information to describe synthetic materials",
-    "MS-PS1-4": "Develop a model that predicts and describes changes in particle motion",
-    "MS-PS2-1": "Apply Newton's Third Law to design a solution to a problem",
-    "MS-PS2-2": "Plan an investigation to provide evidence that the change in motion depends on forces",
-    "MS-PS3-1": "Construct and interpret graphical displays of data to describe relationships of kinetic energy",
-    "MS-PS3-2": "Develop a model to describe that when arrangement of objects changes, energy changes",
-    "MS-LS1-1": "Conduct an investigation to provide evidence that living things are made of cells",
-    "MS-LS1-2": "Develop and use a model to describe the function of a cell as a whole",
-    "MS-LS1-3": "Use argument supported by evidence for how the body is a system of interacting subsystems",
-    "MS-LS2-1": "Analyze and interpret data to provide evidence for effects of resource availability",
-    "MS-LS2-2": "Construct an explanation that predicts patterns of interactions among organisms",
-    "MS-ESS1-1": "Develop and use a model of the Earth-sun-moon system",
-    "MS-ESS1-2": "Develop and use a model to describe the role of gravity in the motions within galaxies",
-    "MS-ESS2-1": "Develop a model to describe the cycling of Earth's materials",
-    "MS-ESS3-1": "Construct a scientific explanation based on evidence for how unequal heating of Earth",
-}
-
-# ============================================================
-# TOP SECTION: LESSON BASICS
+# GLOBAL CSS
 # ============================================================
 
 st.markdown(
     """
-<div class='dev-card animate-fade'>
-<div class='kicker'>STEP 1</div>
-<h3>📋 Lesson Basics</h3>
-</div>
+<style>
+    .main {
+        background: linear-gradient(135deg, #0a0e27 0%, #050818 100%);
+    }
+    .dev-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        backdrop-filter: blur(10px);
+    }
+    .dev-card h3 {
+        color: #00d4aa;
+        margin-top: 0;
+    }
+    .glow-hover {
+        transition: all 0.3s ease;
+    }
+    .glow-hover:hover {
+        border-color: #00d4aa;
+        box-shadow: 0 0 20px rgba(0,212,170,0.3);
+        transform: translateY(-2px);
+    }
+    .kicker {
+        color: #ff6b9d;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    .hr {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #00d4aa, transparent);
+        margin: 2rem 0;
+    }
+    [data-testid="stSidebar"] {
+        background: rgba(10,14,39,0.95);
+        border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .stButton>button {
+        background: linear-gradient(135deg, #00d4aa, #0099ff);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+    }
+</style>
 """,
     unsafe_allow_html=True,
 )
 
-col1, col2 = st.columns([0.65, 0.35])
+# ============================================================
+# PALM ID (Admin Gate)
+# ============================================================
 
-with col1:
-    st.session_state["lesson_title"] = st.text_input(
-        "Lesson Title", 
-        value=st.session_state["lesson_title"],
-        placeholder="e.g., Chemical Reactions and Energy Transfer"
-    )
+left, right = st.columns([0.88, 0.12], vertical_alignment="center")
 
-with col2:
-    st.session_state["grade_level"] = st.selectbox(
-        "Grade Level",
-        ["6th Grade", "7th Grade", "8th Grade"],
-        index=["6th Grade", "7th Grade", "8th Grade"].index(st.session_state["grade_level"])
-    )
+with left:
+    st.title("🔧 DevForge")
 
-# NGSS Standard Selection
-ngss_options = [""] + list(NGSS_STANDARDS.keys())
-current_index = 0
-if st.session_state["ngss_standard"] in ngss_options:
-    current_index = ngss_options.index(st.session_state["ngss_standard"])
+with right:
+    if st.button("🤚", help="Palm ID (tap 3x)"):
+        st.session_state["palm_taps"] += 1
+        if st.session_state["palm_taps"] >= 3:
+            st.session_state["show_admin_box"] = True
 
-st.session_state["ngss_standard"] = st.selectbox(
-    "NGSS Standard",
-    ngss_options,
-    index=current_index,
-    format_func=lambda x: f"{x} - {NGSS_STANDARDS.get(x, 'Select a standard')}" if x else "Select a standard"
-)
+# Gate UI
+if st.session_state["show_admin_box"] and not st.session_state["admin_unlocked"]:
+    st.markdown("**✨Palm ID:** enter admin code")
+    code_try = st.text_input("Admin Code", type="password", placeholder="Enter code...")
+    
+    colA, colB = st.columns([0.6, 0.4])
+    with colA:
+        if st.button("Unlock"):
+            if code_try == ADMIN_CODE:
+                st.session_state["admin_unlocked"] = True
+                st.success("Admin override unlocked.")
+                st.rerun()
+            else:
+                st.error("Incorrect code.")
+    with colB:
+        if st.button("Reset"):
+            st.session_state["palm_taps"] = 0
+            st.session_state["show_admin_box"] = False
+            st.rerun()
+
+if st.session_state["admin_unlocked"]:
+    st.caption("🤚 Palm ID: unlocked")
 
 st.markdown("<div class='hr'></div>", unsafe_allow_html=True)
 
 # ============================================================
-# 5E FRAMEWORK BUILDER
+# SIDEBAR NAVIGATION
 # ============================================================
 
-st.markdown(
-    """
-<div class='dev-card'>
-<div class='kicker'>STEP 2</div>
-<h3>🎯 5E Framework</h3>
-<p class='muted'>Engage → Explore → Explain → Elaborate → Evaluate</p>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎪 Engage", "🔍 Explore", "💡 Explain", "🚀 Elaborate", "✅ Evaluate"])
-
-with tab1:
-    st.markdown("**Hook students' attention and assess prior knowledge**")
-    st.session_state["engage"] = st.text_area(
-        "Engage Activities",
-        value=st.session_state["engage"],
-        height=150,
-        placeholder="e.g., Show video of chemical reaction, ask students what they observe...",
+with st.sidebar:
+    st.markdown("## 🧭 Navigation")
+    
+    page = st.radio(
+        "Select Page:",
+        [
+            "🏠 Home",
+            "🔬 Ms. Piluso Science",
+            "🧪 Nacli App",
+            "📚 Code Library",
+            "⚡ ABC Generator",
+            "🎨 My App 1",
+            "🎪 My App 2",
+            "🧰 Teacher Tools",
+        ],
         label_visibility="collapsed"
     )
-
-with tab2:
-    st.markdown("**Students investigate and gather data**")
-    st.session_state["explore"] = st.text_area(
-        "Explore Activities",
-        value=st.session_state["explore"],
-        height=150,
-        placeholder="e.g., Lab activity: students mix baking soda and vinegar, measure temperature change...",
-        label_visibility="collapsed"
-    )
-
-with tab3:
-    st.markdown("**Introduce formal terms, definitions, and explanations**")
-    st.session_state["explain"] = st.text_area(
-        "Explain Activities",
-        value=st.session_state["explain"],
-        height=150,
-        placeholder="e.g., Direct instruction on endothermic vs exothermic reactions, energy diagrams...",
-        label_visibility="collapsed"
-    )
-
-with tab4:
-    st.markdown("**Students apply concepts in new situations**")
-    st.session_state["elaborate"] = st.text_area(
-        "Elaborate Activities",
-        value=st.session_state["elaborate"],
-        height=150,
-        placeholder="e.g., Design experiment to test hand warmers or cold packs...",
-        label_visibility="collapsed"
-    )
-
-with tab5:
-    st.markdown("**Assess student understanding**")
-    st.session_state["evaluate"] = st.text_area(
-        "Evaluate Activities",
-        value=st.session_state["evaluate"],
-        height=150,
-        placeholder="e.g., Exit ticket: Explain why ice melting is endothermic...",
-        label_visibility="collapsed"
-    )
-
-st.markdown("<div class='hr'></div>", unsafe_allow_html=True)
+    
+    # Admin-gated options
+    if st.session_state["admin_unlocked"]:
+        st.markdown("---")
+        st.markdown("### 🔒 Admin Only")
+        admin_page = st.radio(
+            "Admin Pages:",
+            [
+                "None",
+                "💅 CSS Editor",
+                "🔬 NGSS Research Vault",
+            ],
+            label_visibility="collapsed"
+        )
+        
+        if admin_page != "None":
+            page = admin_page
 
 # ============================================================
-# MATERIALS & ACCOMMODATIONS
+# PAGE ROUTING
 # ============================================================
 
-st.markdown(
-    """
-<div class='dev-card'>
-<div class='kicker'>STEP 3</div>
-<h3>📦 Materials & Accommodations</h3>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-colA, colB = st.columns(2)
-
-with colA:
-    st.markdown("**Materials List**")
-    st.session_state["materials"] = st.text_area(
-        "Materials",
-        value=st.session_state["materials"],
-        height=200,
-        placeholder="• Baking soda\n• Vinegar\n• Thermometers\n• Beakers...",
-        label_visibility="collapsed"
-    )
-
-with colB:
-    st.markdown("**Accommodations & Differentiation**")
-    st.session_state["accommodations"] = st.text_area(
-        "Accommodations",
-        value=st.session_state["accommodations"],
-        height=200,
-        placeholder="• ELL: Provide vocabulary cards with visuals\n• IEP: Extended time for lab write-up\n• Advanced: Research real-world applications...",
-        label_visibility="collapsed"
-    )
-
-st.markdown("<div class='hr'></div>", unsafe_allow_html=True)
-
-# ============================================================
-# TEACHER NOTES
-# ============================================================
-
-st.markdown(
-    """
-<div class='dev-card'>
-<h3>📝 Teacher Notes</h3>
-<p class='muted'>Planning notes, timing, common misconceptions, etc.</p>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-st.session_state["teacher_notes"] = st.text_area(
-    "Teacher Notes",
-    value=st.session_state["teacher_notes"],
-    height=120,
-    placeholder="e.g., Allow 15 min for Explore. Watch for safety with vinegar. Common mistake: students confuse temp change with heat...",
-    label_visibility="collapsed"
-)
-
-st.markdown("<div class='hr'></div>", unsafe_allow_html=True)
-
-# ============================================================
-# EXPORT & PREVIEW
-# ============================================================
-
-st.markdown("## 📄 Export & Preview")
-
-cX, cY = st.columns([0.5, 0.5])
-
-with cX:
-    if st.button("📋 Copy Lesson Plan to Clipboard", use_container_width=True):
-        lesson_text = f"""
-MS. PILUSO SCIENCE - LESSON PLAN
-{'='*50}
-
-LESSON TITLE: {st.session_state['lesson_title']}
-GRADE LEVEL: {st.session_state['grade_level']}
-NGSS STANDARD: {st.session_state['ngss_standard']}
-{NGSS_STANDARDS.get(st.session_state['ngss_standard'], '')}
-
-{'='*50}
-5E FRAMEWORK
-{'='*50}
-
-ENGAGE:
-{st.session_state['engage']}
-
-EXPLORE:
-{st.session_state['explore']}
-
-EXPLAIN:
-{st.session_state['explain']}
-
-ELABORATE:
-{st.session_state['elaborate']}
-
-EVALUATE:
-{st.session_state['evaluate']}
-
-{'='*50}
-MATERIALS:
-{st.session_state['materials']}
-
-ACCOMMODATIONS:
-{st.session_state['accommodations']}
-
-TEACHER NOTES:
-{st.session_state['teacher_notes']}
-"""
-        st.code(lesson_text, language=None)
-        st.success("✅ Lesson plan ready! Copy from box above.")
-
-with cY:
-    if st.button("🔄 Clear All Fields", use_container_width=True):
-        st.session_state["lesson_title"] = ""
-        st.session_state["ngss_standard"] = ""
-        st.session_state["engage"] = ""
-        st.session_state["explore"] = ""
-        st.session_state["explain"] = ""
-        st.session_state["elaborate"] = ""
-        st.session_state["evaluate"] = ""
-        st.session_state["materials"] = ""
-        st.session_state["accommodations"] = ""
-        st.session_state["teacher_notes"] = ""
-        st.rerun()
-
-st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
+if page == "🏠 Home":
+    exec(open("python_hubs/Dev_Forge/home.py").read())
+    
+elif page == "🔬 Ms. Piluso Science":
+    exec(open("python_hubs/Dev_Forge/Ms_Piluso_Science.py").read())
+    
+elif page == "🧪 Nacli App":
+    exec(open("python_hubs/Dev_Forge/Nacli_app.py").read())
+    
+elif page == "📚 Code Library":
+    exec(open("python_hubs/Dev_Forge/Code_Library.py").read())
+    
+elif page == "⚡ ABC Generator":
+    exec(open("python_hubs/Dev_Forge/ABC_Generator.py").read())
+    
+elif page == "🎨 My App 1":
+    exec(open("python_hubs/Dev_Forge/my_app1.py").read())
+    
+elif page == "🎪 My App 2":
+    exec(open("python_hubs/Dev_Forge/my_app2.py").read())
+    
+elif page == "🧰 Teacher Tools":
+    exec(open("python_hubs/Dev_Forge/Teacher_Tools.py").read())
+    
+elif page == "💅 CSS Editor":
+    exec(open("python_hubs/Dev_Forge/CSS_Editor.py").read())
+    
+elif page == "🔬 NGSS Research Vault":
+    exec(open("python_hubs/Dev_Forge/ngss_ms_research_vault_app.py").read())
