@@ -72,6 +72,89 @@
       font-size:.85em;
     }
 
+    /* Promo Envelope (Mr. Benji × Adobe Express) */
+    .promo-envelope{ margin:26px auto 22px; max-width:860px; }
+    .promo-card{
+      position:relative;
+      background:linear-gradient(135deg,#f0f4ff 0%,#ffffff 100%);
+      border:3px dashed rgba(102,126,234,.9);
+      border-radius:18px;
+      padding:22px 22px 18px;
+      text-align:left;
+      box-shadow:0 14px 34px rgba(102,126,234,.18);
+      overflow:hidden;
+    }
+    .promo-stamp{
+      position:absolute; right:14px; top:14px;
+      background:#667eea; color:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:900;
+      box-shadow:0 10px 22px rgba(102,126,234,.25);
+      transform:rotate(6deg);
+      user-select:none;
+      font-size:.9em;
+      letter-spacing:.5px;
+    }
+    .promo-title{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .promo-title h3{
+      margin:0;
+      font-size:1.55em;
+      color:#445;
+    }
+    .promo-badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      background:#fff;
+      border:1px solid rgba(102,126,234,.25);
+      color:#667eea;
+      font-weight:900;
+      font-size:.88em;
+      user-select:none;
+    }
+    .promo-card p{
+      margin:0 0 14px;
+      color:#444;
+      font-size:1.05em;
+      line-height:1.4;
+    }
+    .promo-actions{
+      display:flex; gap:10px; flex-wrap:wrap;
+      align-items:center;
+    }
+    .promo-btn{
+      display:inline-block;
+      background:linear-gradient(135deg,#ff6b6b 0%,#f06595 100%);
+      color:#fff;
+      padding:12px 18px;
+      border-radius:999px;
+      text-decoration:none;
+      font-weight:900;
+      font-size:1.05em;
+      transition:transform .2s, box-shadow .2s;
+    }
+    .promo-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 10px 24px rgba(240,101,149,.35);
+    }
+    .promo-btn.secondary{
+      background:#fff;
+      color:#445;
+      border:2px solid rgba(102,126,234,.35);
+    }
+    .promo-btn.secondary:hover{
+      box-shadow:0 10px 24px rgba(102,126,234,.18);
+    }
+    .promo-mini{
+      margin-top:10px;
+      font-size:.88em;
+      color:#667;
+      line-height:1.35;
+    }
+
     /* Modal */
     .modal{
       position:fixed;inset:0;display:none;place-items:center;z-index:9999;
@@ -98,6 +181,9 @@
     @media (max-width:968px){
       .hub-title{font-size:2em}
       .image-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+      .promo-card{ text-align:center; }
+      .promo-title{ justify-content:center; }
+      .promo-actions{ justify-content:center; }
     }
   </style>
 </head>
@@ -174,6 +260,37 @@
         </div>
       </div>
 
+      <!-- Mr. Benji × Adobe Express promo envelope -->
+      <div class="promo-envelope">
+        <div class="promo-card">
+          <div class="promo-stamp">BENJI MAIL ✉️</div>
+
+          <div class="promo-title">
+            <h3>✨ Mr. Benji × Adobe Express</h3>
+            <span class="promo-badge">Quick Tool</span>
+          </div>
+
+          <p>
+            Need a transparent PNG fast (for idols, stickers, or coloring pages)?
+            Use Adobe Express’s background remover in seconds.
+          </p>
+
+          <div class="promo-actions">
+            <a class="promo-btn" target="_blank" rel="noopener"
+               href="https://www.adobe.com/express/feature/image/remove-background">
+              Launch Background Remover 🚀
+            </a>
+            <button class="promo-btn secondary" id="promoInfoBtn" type="button">
+              What is this?
+            </button>
+          </div>
+
+          <div class="promo-mini">
+            Opens Adobe Express in a new tab. This is a curated shortcut inside the Benji Studio shell.
+          </div>
+        </div>
+      </div>
+
       <button class="cta" id="comingSoonBtn">Coming Soon ✨</button>
       <div class="mini">This is a lightweight shell build. The full studio tools will return in the next release.</div>
     </div>
@@ -193,16 +310,44 @@
     </div>
   </div>
 
+  <div class="modal" id="promoModal">
+    <div class="modal-card">
+      <h2>✨ Mr. Benji × Adobe Express</h2>
+      <p>
+        This button is a fast “power tool” shortcut. Adobe Express does the heavy lifting
+        for background removal while Benji Studio stays focused on the fun creative flow.
+      </p>
+      <div class="modal-actions">
+        <a class="btn primary" target="_blank" rel="noopener"
+           href="https://www.adobe.com/express/feature/image/remove-background">
+          Open Tool 🚀
+        </a>
+        <button class="btn secondary" id="promoCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const modal = document.getElementById("modal");
-    const open = () => modal.classList.add("active");
-    const close = () => modal.classList.remove("active");
+    const openMain = () => modal.classList.add("active");
+    const closeMain = () => modal.classList.remove("active");
 
-    document.getElementById("comingSoonBtn").addEventListener("click", open);
-    document.getElementById("okBtn").addEventListener("click", close);
-    document.getElementById("closeBtn").addEventListener("click", close);
-    modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
-    window.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+    document.getElementById("comingSoonBtn").addEventListener("click", openMain);
+    document.getElementById("okBtn").addEventListener("click", closeMain);
+    document.getElementById("closeBtn").addEventListener("click", closeMain);
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeMain(); });
+
+    const promoModal = document.getElementById("promoModal");
+    const openPromo = () => promoModal.classList.add("active");
+    const closePromo = () => promoModal.classList.remove("active");
+
+    document.getElementById("promoInfoBtn").addEventListener("click", openPromo);
+    document.getElementById("promoCloseBtn").addEventListener("click", closePromo);
+    promoModal.addEventListener("click", (e) => { if (e.target === promoModal) closePromo(); });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { closeMain(); closePromo(); }
+    });
   </script>
 </body>
 </html>
