@@ -16,6 +16,7 @@
       --muted:#4b4b4b;        /* readable muted */
       --accent:#14b854;       /* green */
       --accent2:#eadb2f;      /* yellow */
+      --danger:#b00020;
     }
 
     *{ box-sizing:border-box; margin:0; padding:0; }
@@ -90,12 +91,12 @@
       color:#0a1a12;
     }
 
-    /* Palm + Auto download helper */
+    /* Palm button (secret trigger only; no hint text) */
     .adminRow{
+      margin-top:10px;
       display:flex;
       align-items:center;
       gap:10px;
-      margin-top:10px;
     }
     .iconBtn{
       width:46px; height:46px;
@@ -113,6 +114,90 @@
       transition: transform .12s ease;
     }
     .iconBtn:hover{ transform:translateY(-2px); }
+
+    /* SECRET TRAY (hidden until 3 taps) */
+    .secretTray{
+      display:none;
+      margin-top:10px;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:stretch;
+    }
+    .secretTray.active{ display:flex; }
+
+    .secretBlock{
+      flex: 1 1 280px;
+      background: rgba(255,255,255,.92);
+      border:2px solid rgba(17,17,17,.14);
+      border-radius:16px;
+      padding:12px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      position:relative;
+    }
+    .secretBlock::before{
+      content:"";
+      position:absolute;
+      left:12px; right:12px; top:12px;
+      height:6px;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity:.9;
+    }
+    .secretBlock h3{
+      margin-top:16px;
+      font-size:1rem;
+      font-weight:1000;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .secretHint{
+      margin-top:8px;
+      color: var(--muted);
+      font-weight:700;
+      font-size:.92rem;
+      line-height:1.3;
+    }
+    .codeRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    .codeInput{
+      flex:1 1 220px;
+      border-radius:12px;
+      border:2px solid rgba(201,193,181,.95);
+      padding:10px 12px;
+      font-size:1rem;
+      font-weight:800;
+      outline:none;
+    }
+    .codeInput:focus{
+      border-color: rgba(20,184,84,.75);
+      box-shadow: 0 0 0 4px rgba(20,184,84,.14);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:2px solid rgba(17,17,17,.12);
+      font-weight:950;
+      background:#fff;
+    }
+    .pill.locked{ color: var(--danger); border-color: rgba(176,0,32,.25); background: rgba(176,0,32,.06); }
+    .pill.ok{ color: #0a1a12; border-color: rgba(20,184,84,.25); background: rgba(20,184,84,.10); }
+
+    .dangerNote{
+      margin-top:10px;
+      color: var(--danger);
+      font-weight:900;
+      display:none;
+    }
+    .dangerNote.active{ display:block; }
 
     /* Grid */
     .grid{
@@ -222,19 +307,6 @@
       margin-top:10px;
     }
 
-    .miniNote{
-      font-weight:900;
-      color:#0a1a12;
-      background: rgba(20,184,84,.12);
-      border:2px solid rgba(20,184,84,.22);
-      padding:8px 12px;
-      border-radius:12px;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      margin-top:10px;
-    }
-
     @media (max-width: 980px){
       .grid{ grid-template-columns:1fr; }
       .split{ grid-template-columns:1fr; }
@@ -250,10 +322,38 @@
         <h1>Species Diary <span aria-hidden="true">🐻</span></h1>
         <p>Bear research + story + biodiversity reflection (printer-friendly). Sentence starters stay visible.</p>
 
+        <!-- Palm button exists but NO helper text -->
         <div class="adminRow">
-          <button class="iconBtn" id="palmBtn" title="Teacher Cheat: tap 3x">🖐️</button>
-          <div class="miniNote">Teacher Cheat: tap 🖐️ 3x → auto-fill + auto-download JPEG</div>
+          <button class="iconBtn" id="palmBtn" title="🖐️">🖐️</button>
         </div>
+
+        <!-- SECRET TRAY (appears only after 3 taps) -->
+        <div class="secretTray" id="secretTray">
+          <!-- Block 1: ADMIN -->
+          <div class="secretBlock">
+            <h3>ADMIN — ME <span aria-hidden="true">🌴</span></h3>
+            <div class="secretHint">Enter admin code to unlock teacher tools.</div>
+
+            <div class="codeRow">
+              <input class="codeInput" id="adminCode" type="password" placeholder="Code..." autocomplete="off" />
+              <button class="btn" id="unlockBtn" type="button">Unlock</button>
+              <span class="pill locked" id="adminStatus">Locked</span>
+            </div>
+            <div class="dangerNote" id="adminErr">Incorrect code.</div>
+          </div>
+
+          <!-- Block 2: Teacher Cheat -->
+          <div class="secretBlock">
+            <h3>Make Spicy <span aria-hidden="true">🌶️</span></h3>
+            <div class="secretHint">Teacher cheat: auto-fill + auto-download JPEG.</div>
+
+            <div class="codeRow">
+              <button class="btn primary" id="teacherCheatBtn" type="button">🌶️ Auto-Fill + Save JPEG</button>
+              <span class="pill locked" id="cheatStatus">Admin Required</span>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div class="barBtns">
@@ -319,7 +419,7 @@
       <section class="card big">
         <h2>5) Make it Spicy 🌶️ (Quote)</h2>
         <div class="row">
-          <div class="muted" style="margin:0;">Click for a random conservation quote (stable — no flashing).</div>
+          <div class="muted" style="margin:0;">Click for a random conservation quote.</div>
           <button class="btn primary" id="nextQuoteBtn" type="button">🎲 New Quote</button>
         </div>
         <div class="quote" id="quoteBox" style="margin-top:10px;">🌍 Click “New Quote” for a message about saving the planet.</div>
@@ -329,10 +429,11 @@
 
   <script>
     // =========================
-    // Species Diary (Print Friendly) — Teacher Cheat (3 taps)
+    // Species Diary (Print Friendly) — Student-facing w/ secret admin + teacher tools
     // =========================
 
-    const STORAGE_KEY = "speciesDiary_print_v1";
+    const STORAGE_KEY = "speciesDiary_print_v2";
+    const ADMIN_CODE = "Bshapp";
 
     const QUOTES = [
       "Every species is a chapter in Earth’s story—don’t let the pages disappear.",
@@ -380,6 +481,7 @@
     const ACTIONS = ["forages for berries","searches for fish","builds a safe den","travels to new ice","follows the river","avoids danger near roads"];
 
     const $ = (id) => document.getElementById(id);
+    const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
     const fields = {
       bearName: $("bearName"),
@@ -392,9 +494,18 @@
     const spicyQuoteBtn = $("spicyQuoteBtn");
     const nextQuoteBtn = $("nextQuoteBtn");
     const saveJpegBtn = $("saveJpegBtn");
-    const palmBtn = $("palmBtn");
 
-    function rand(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+    // Secret / Admin
+    const palmBtn = $("palmBtn");
+    const secretTray = $("secretTray");
+    const adminCodeInput = $("adminCode");
+    const unlockBtn = $("unlockBtn");
+    const adminStatus = $("adminStatus");
+    const adminErr = $("adminErr");
+    const teacherCheatBtn = $("teacherCheatBtn");
+    const cheatStatus = $("cheatStatus");
+
+    let isAdminUnlocked = false;
 
     // -----------------
     // Autosave
@@ -405,7 +516,8 @@
         bearTitle: fields.bearTitle.value,
         bearStory: fields.bearStory.value,
         biodiversityBox: fields.biodiversityBox.value,
-        quote: quoteBox.textContent
+        quote: quoteBox.textContent,
+        adminUnlocked: isAdminUnlocked ? 1 : 0
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
@@ -420,6 +532,14 @@
         if (data.bearStory != null) fields.bearStory.value = data.bearStory;
         if (data.biodiversityBox != null) fields.biodiversityBox.value = data.biodiversityBox;
         if (data.quote) quoteBox.textContent = data.quote;
+
+        // optional: persist admin unlocked state for teacher convenience
+        if (data.adminUnlocked === 1) {
+          isAdminUnlocked = true;
+          setAdminUI(true);
+        } else {
+          setAdminUI(false);
+        }
       }catch(e){
         console.warn("Load failed:", e);
       }
@@ -438,7 +558,67 @@
     nextQuoteBtn.addEventListener("click", setQuote);
 
     // -----------------
-    // Teacher cheat: autofill everything
+    // Secret: Palm tap logic (3 taps reveals tray)
+    // -----------------
+    const tapState = { taps:0, timer:null };
+
+    palmBtn.addEventListener("click", () => {
+      tapState.taps++;
+      if (tapState.timer) clearTimeout(tapState.timer);
+      tapState.timer = setTimeout(() => tapState.taps = 0, 1500);
+
+      if (tapState.taps >= 3){
+        tapState.taps = 0;
+        secretTray.classList.toggle("active");
+      }
+    });
+
+    // -----------------
+    // Admin unlock
+    // -----------------
+    function setAdminUI(unlocked){
+      isAdminUnlocked = !!unlocked;
+
+      adminErr.classList.remove("active");
+      if (isAdminUnlocked){
+        adminStatus.textContent = "Unlocked";
+        adminStatus.classList.remove("locked");
+        adminStatus.classList.add("ok");
+
+        cheatStatus.textContent = "Ready";
+        cheatStatus.classList.remove("locked");
+        cheatStatus.classList.add("ok");
+      } else {
+        adminStatus.textContent = "Locked";
+        adminStatus.classList.add("locked");
+        adminStatus.classList.remove("ok");
+
+        cheatStatus.textContent = "Admin Required";
+        cheatStatus.classList.add("locked");
+        cheatStatus.classList.remove("ok");
+      }
+
+      save();
+    }
+
+    unlockBtn.addEventListener("click", () => {
+      const code = (adminCodeInput.value || "").trim();
+      if (code === ADMIN_CODE){
+        setAdminUI(true);
+        adminCodeInput.value = "";
+      } else {
+        adminErr.classList.add("active");
+        setAdminUI(false);
+        setTimeout(() => adminErr.classList.remove("active"), 1200);
+      }
+    });
+
+    adminCodeInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") unlockBtn.click();
+    });
+
+    // -----------------
+    // Teacher cheat: autofill + auto-download (ADMIN ONLY)
     // -----------------
     function autoFillAll(){
       const n = rand(BEAR_NAMES);
@@ -470,21 +650,10 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
       save();
     }
 
-    // -----------------
-    // Palm tap logic: 3 taps = autofill + auto-download
-    // -----------------
-    const tapState = { taps:0, timer:null };
-
-    palmBtn.addEventListener("click", () => {
-      tapState.taps++;
-      if (tapState.timer) clearTimeout(tapState.timer);
-      tapState.timer = setTimeout(() => tapState.taps = 0, 1500);
-
-      if (tapState.taps >= 3){
-        tapState.taps = 0;
-        autoFillAll();
-        downloadJPEG(); // auto-download immediately
-      }
+    teacherCheatBtn.addEventListener("click", () => {
+      if (!isAdminUnlocked) return; // silently ignore for students
+      autoFillAll();
+      downloadJPEG();
     });
 
     // -----------------
@@ -492,7 +661,7 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
     // - Light background, white boxes, black text, green bars
     // - Small bear icon included
     // - Signature is a simple line: STUDENT: ________
-    // - Sentence starters included on the export page (never leave)
+    // - Sentence starters included on export (never leave)
     // -----------------
     function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
       const words = (text || "").split(/\s+/).filter(Boolean);
@@ -531,17 +700,13 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
     }
 
     function drawBearIcon(ctx, x, y, size){
-      // Simple vector bear head (print-friendly)
-      // x,y are top-left of icon box
       ctx.save();
       ctx.translate(x, y);
 
-      // colors
-      ctx.fillStyle = "#8B5A2B"; // bear brown
+      ctx.fillStyle = "#8B5A2B";
       ctx.strokeStyle = "#111";
       ctx.lineWidth = 3;
 
-      // ears
       const earR = size * 0.18;
       ctx.beginPath();
       ctx.arc(size*0.28, size*0.22, earR, 0, Math.PI*2);
@@ -549,26 +714,22 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
       ctx.fill();
       ctx.stroke();
 
-      // head
       ctx.beginPath();
       ctx.arc(size*0.5, size*0.52, size*0.35, 0, Math.PI*2);
       ctx.fill();
       ctx.stroke();
 
-      // snout
       ctx.fillStyle = "#D2A679";
       ctx.beginPath();
       ctx.ellipse(size*0.5, size*0.62, size*0.20, size*0.15, 0, 0, Math.PI*2);
       ctx.fill();
       ctx.stroke();
 
-      // nose
       ctx.fillStyle = "#111";
       ctx.beginPath();
       ctx.arc(size*0.5, size*0.60, size*0.06, 0, Math.PI*2);
       ctx.fill();
 
-      // eyes
       ctx.beginPath();
       ctx.arc(size*0.40, size*0.50, size*0.035, 0, Math.PI*2);
       ctx.arc(size*0.60, size*0.50, size*0.035, 0, Math.PI*2);
@@ -578,7 +739,6 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
     }
 
     function buildDiaryJPEG(){
-      // Sized for printing
       const W = 1700;
       const H = 2200;
       const pad = 70;
@@ -588,31 +748,26 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
       c.height = H;
       const ctx = c.getContext("2d");
 
-      // theme vars
       const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#f6f0e6";
       const bg2 = getComputedStyle(document.documentElement).getPropertyValue("--bg2").trim() || "#fff8ef";
       const border = getComputedStyle(document.documentElement).getPropertyValue("--border").trim() || "#c9c1b5";
       const text = getComputedStyle(document.documentElement).getPropertyValue("--text").trim() || "#111";
 
-      // background (light)
       const g = ctx.createLinearGradient(0,0,W,H);
       g.addColorStop(0, bg2);
       g.addColorStop(1, bg);
       ctx.fillStyle = g;
       ctx.fillRect(0,0,W,H);
 
-      // header
       ctx.fillStyle = text;
       ctx.font = "900 66px system-ui, -apple-system, Segoe UI, Roboto, Arial";
       ctx.fillText("Species Diary", pad, 120);
 
-      // bear icon near title
       drawBearIcon(ctx, pad + 430, 60, 90);
 
       ctx.font = "700 28px system-ui, -apple-system, Segoe UI, Roboto, Arial";
       ctx.fillText("Bear research + story + biodiversity reflection", pad, 165);
 
-      // helper: box
       function box(x,y,w,h,title){
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(x,y,w,h);
@@ -631,7 +786,6 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
       const colGap = 26;
       const boxW = (W - pad*2 - colGap) / 2;
 
-      // boxes
       box(pad, 210, boxW, 160, "1) Bear Name");
       box(pad + boxW + colGap, 210, boxW, 160, "2) Bear Title");
 
@@ -644,7 +798,6 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
       ctx.font = "600 26px system-ui, -apple-system, Segoe UI, Roboto, Arial";
       wrapText(ctx, fields.bearStory.value.trim() || "(Story not written yet.)", pad+22, 395+110, (W-pad*2)-44, 36, 13);
 
-      // Sentence starters printed (never leave)
       ctx.font = "800 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
       ctx.fillText("Sentence Starters:", pad+22, 395+560);
       ctx.font = "600 22px system-ui, -apple-system, Segoe UI, Roboto, Arial";
@@ -668,7 +821,6 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
       ctx.font = "800 30px system-ui, -apple-system, Segoe UI, Roboto, Arial";
       wrapText(ctx, quoteBox.textContent || "🌍 (No quote yet.)", pad+22, 1545+130, (W-pad*2)-44, 40, 4);
 
-      // Student line (signature area)
       ctx.strokeStyle = "#111";
       ctx.lineWidth = 2;
       ctx.font = "900 28px system-ui, -apple-system, Segoe UI, Roboto, Arial";
@@ -679,7 +831,6 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
       ctx.lineTo(W - pad, H - 92);
       ctx.stroke();
 
-      // footer
       ctx.fillStyle = "#333";
       ctx.font = "600 20px system-ui, -apple-system, Segoe UI, Roboto, Arial";
       ctx.fillText("Species Diary • exported as JPEG", pad, H - 45);
@@ -708,3 +859,4 @@ Protecting bears protects biodiversity, balanced ecosystems, and healthy habitat
   </script>
 </body>
 </html>
+
