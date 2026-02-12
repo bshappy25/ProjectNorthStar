@@ -704,22 +704,7 @@
             </g>
             <text x="500" y="660" text-anchor="middle" font-size="34" font-family="Comic Sans MS, cursive" fill="#111">Grizzly Bear</text>
           </svg>
-        `)
-      }
-    ];
-
-    // Load images from localStorage if available
-    const savedImages = localStorage.getItem("coloringImages");
-    if (savedImages) {
-      try {
-        const parsed = JSON.parse(savedImages);
-        if (Array.isArray(parsed) && parsed.length > 0) coloringImages = parsed;
-      } catch (e) {
-        console.log("Using default images");
-      }
-    }
-
-      ,
+            ,
       {
         title: "Ancient Egypt - Pyramid + Sphinx",
         data: svgData(`
@@ -778,7 +763,6 @@
               Ancient Egypt
             </text>
           </svg>
-        `)
       },
       {
         title: "Desert Oasis - Palm Trees + Sailboat",
@@ -831,8 +815,21 @@
               Desert Oasis
             </text>
           </svg>
-        `)
+        
+            }
+        ];
+
+
+    // Load images from localStorage if available
+    const savedImages = localStorage.getItem("coloringImages");
+    if (savedImages) {
+      try {
+        const parsed = JSON.parse(savedImages);
+        if (Array.isArray(parsed) && parsed.length > 0) coloringImages = parsed;
+      } catch (e) {
+        console.log("Using default images");
       }
+    }
 
     /* =========================================================================
        STATE
