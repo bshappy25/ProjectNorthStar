@@ -236,11 +236,11 @@ if st.session_state.current_page == "home":
     with col2:
         st.markdown("""
             <div class="app-card">
-                <h3 style="color: #5fb382;">◆ MyApp Two</h3>
-                <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">Explore tools</p>
+                <h3 style="color: #5fb382;">🪟 Universal Gallery</h3>
+                <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">Super glossy viewer</p>
             </div>
         """, unsafe_allow_html=True)
-        if st.button("Launch MyApp Two", key="app2"):
+        if st.button("Launch Universal Gallery", key="app2"):
             st.session_state.current_page = "app2"
             st.rerun()
     
