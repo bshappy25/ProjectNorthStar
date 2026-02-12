@@ -68,54 +68,40 @@ st.markdown("""
     
     .main-header {
         text-align: center;
-        padding: 2.5rem 1.5rem;
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(20px);
-        border-radius: 25px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 8px 32px rgba(118, 75, 162, 0.3),
-                    inset 0 0 30px rgba(255, 255, 255, 0.1);
-        margin-bottom: 2rem;
+        padding: 4rem 2rem;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(30px);
+        border-radius: 30px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 40px rgba(118, 75, 162, 0.2);
+        margin-bottom: 3rem;
         position: relative;
         z-index: 1;
     }
     
     .amethyst-logo {
-        font-size: 4.5rem;
-        background: linear-gradient(135deg, #f093fb 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        filter: drop-shadow(0 0 25px rgba(240, 147, 251, 0.6));
-        margin-bottom: 0.5rem;
-        animation: glow 3s ease-in-out infinite;
-    }
-    
-    @keyframes glow {
-        0%, 100% { filter: drop-shadow(0 0 25px rgba(240, 147, 251, 0.6)); }
-        50% { filter: drop-shadow(0 0 35px rgba(240, 147, 251, 0.9)); }
+        font-size: 5rem;
+        color: rgba(240, 147, 251, 0.6);
+        margin-bottom: 1.5rem;
+        filter: drop-shadow(0 0 20px rgba(240, 147, 251, 0.4));
     }
     
     .amethyst-title {
-        font-size: 2.8rem;
-        font-weight: 700;
+        font-size: 4rem;
+        font-weight: 400;
         font-family: 'Comfortaa', cursive;
-        background: linear-gradient(135deg, #ffffff 0%, #f093fb 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        letter-spacing: 6px;
-        margin-bottom: 0.5rem;
-        text-shadow: 0 2px 15px rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.95);
+        letter-spacing: 18px;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 2px 20px rgba(255, 255, 255, 0.2);
     }
     
     .amethyst-subtitle {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 1rem;
-        letter-spacing: 4px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.1rem;
+        letter-spacing: 6px;
         text-transform: uppercase;
         font-weight: 300;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
     
     .stButton>button {
@@ -333,18 +319,6 @@ if st.session_state.current_page != "home":
 # ═══════════════════════════════════════════════════════════════
 
 if st.session_state.current_page == "home":
-    st.markdown("""
-        <div class="welcome-card">
-            <h2 style="color: #ffffff; margin-bottom: 0.5rem; text-shadow: 0 2px 15px rgba(240, 147, 251, 0.6);">
-                ✨ Welcome to Amethyst Hub
-            </h2>
-            <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.05rem; line-height: 1.6;">
-                Your gateway to creative excellence. Explore beautifully crafted applications designed 
-                for students, teachers, and creators.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-    
     # Teacher Tools Card
     st.markdown("""
         <div class="app-card">
@@ -386,6 +360,18 @@ if st.session_state.current_page == "home":
         if st.button("Launch SUPER VIP", key="super_vip"):
             st.session_state.current_page = "myapp3"
             st.rerun()
+    
+    # Coming Soon Section
+    st.markdown("---")
+    st.markdown("""
+        <div class="app-card" style="text-align: center; background: rgba(255, 255, 255, 0.08); 
+                    border: 2px dashed rgba(255, 255, 255, 0.2);">
+            <h3 style="color: rgba(255, 255, 255, 0.7);">✨ New Apps Coming Soon</h3>
+            <p style="color: rgba(255, 255, 255, 0.6); font-size: 1rem; margin-top: 0.5rem;">
+                Stay tuned for more amazing tools and experiences
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
 
 elif st.session_state.current_page == "teacher_tools":
     teacher_tools.render(st.session_state.admin_unlocked)
