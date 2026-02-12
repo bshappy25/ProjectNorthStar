@@ -719,6 +719,121 @@
       }
     }
 
+      ,
+      {
+        title: "Ancient Egypt - Pyramid + Sphinx",
+        data: svgData(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
+            <rect width="100%" height="100%" fill="white"/>
+            <g stroke="#111" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round">
+
+              <!-- Desert ground -->
+              <path d="M80,560 C220,530 320,540 470,570 C620,600 740,600 920,560"/>
+
+              <!-- Sun -->
+              <circle cx="820" cy="150" r="55"/>
+              <path d="M780,150 C805,130 835,130 860,150"/>
+              <path d="M795,175 C820,160 840,160 865,175"/>
+
+              <!-- Big Pyramid -->
+              <path d="M250,550 L500,220 L750,550 Z"/>
+              <path d="M330,550 L500,310 L670,550 Z"/>
+              <path d="M500,220 L500,550"/>
+              <path d="M420,420 L500,340 L580,420"/>
+
+              <!-- Small Pyramid -->
+              <path d="M120,550 L240,350 L360,550 Z"/>
+
+              <!-- Sphinx (simple) -->
+              <!-- Body -->
+              <path d="M600,525 C640,485 720,485 770,515"/>
+              <path d="M600,525 L790,525"/>
+              <path d="M790,525 C810,525 830,540 830,560"/>
+              <path d="M600,525 C585,535 575,550 575,565"/>
+              <path d="M575,565 L830,565"/>
+
+              <!-- Legs -->
+              <path d="M640,565 L640,535"/>
+              <path d="M690,565 L690,535"/>
+              <path d="M740,565 L740,535"/>
+
+              <!-- Head -->
+              <path d="M585,515 C590,485 620,465 655,465 C690,465 720,485 725,515"/>
+              <path d="M585,515 C610,535 700,535 725,515"/>
+              <path d="M620,495 C640,485 670,485 690,495"/>
+              <circle cx="640" cy="508" r="6"/>
+              <circle cx="690" cy="508" r="6"/>
+              <path d="M660,520 C655,530 645,535 635,535"/>
+              <path d="M660,520 C665,530 675,535 685,535"/>
+
+              <!-- Decorative stripes -->
+              <path d="M610,475 L610,515"/>
+              <path d="M635,468 L635,525"/>
+              <path d="M660,465 L660,535"/>
+              <path d="M685,468 L685,525"/>
+              <path d="M710,475 L710,515"/>
+
+            </g>
+            <text x="500" y="660" text-anchor="middle" font-size="34" font-family="Comic Sans MS, cursive" fill="#111">
+              Ancient Egypt
+            </text>
+          </svg>
+        `)
+      },
+      {
+        title: "Desert Oasis - Palm Trees + Sailboat",
+        data: svgData(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
+            <rect width="100%" height="100%" fill="white"/>
+            <g stroke="#111" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round">
+
+              <!-- Sun -->
+              <circle cx="170" cy="150" r="55"/>
+              <path d="M130,150 C155,130 185,130 210,150"/>
+              <path d="M145,175 C170,160 190,160 215,175"/>
+
+              <!-- Dunes -->
+              <path d="M70,560 C200,510 320,515 450,560 C580,605 700,605 930,560"/>
+              <path d="M120,605 C260,565 350,575 470,605 C600,635 740,635 900,605"/>
+
+              <!-- Oasis water -->
+              <path d="M300,520 C340,480 420,470 500,490 C580,510 650,505 690,470"/>
+              <path d="M300,520 C330,560 410,585 500,575 C590,565 660,540 690,470"/>
+              <path d="M360,525 C420,505 480,505 540,525"/>
+              <path d="M380,545 C440,525 500,525 560,545"/>
+
+              <!-- Left Palm -->
+              <path d="M260,520 C240,460 240,400 265,330"/>
+              <path d="M265,330 C235,320 210,300 190,270"/>
+              <path d="M265,330 C295,305 330,295 375,300"/>
+              <path d="M265,330 C260,290 270,255 300,225"/>
+              <path d="M250,360 C225,385 205,415 195,450"/>
+              <path d="M275,350 C300,370 330,400 350,435"/>
+
+              <!-- Right Palm -->
+              <path d="M760,525 C740,465 745,405 770,340"/>
+              <path d="M770,340 C740,330 715,305 695,275"/>
+              <path d="M770,340 C805,315 845,305 890,310"/>
+              <path d="M770,340 C765,295 775,260 805,235"/>
+              <path d="M750,375 C725,400 705,430 695,465"/>
+              <path d="M780,365 C805,385 835,415 855,450"/>
+
+              <!-- Sailboat on oasis -->
+              <path d="M505,520 L505,440"/>
+              <path d="M505,440 L565,500"/>
+              <path d="M505,440 L450,500"/>
+              <path d="M430,520 C470,545 540,545 585,520"/>
+              <path d="M440,520 L575,520"/>
+              <path d="M455,535 C490,555 525,555 560,535"/>
+
+            </g>
+            <text x="500" y="660" text-anchor="middle" font-size="34" font-family="Comic Sans MS, cursive" fill="#111">
+              Desert Oasis
+            </text>
+          </svg>
+        `)
+      }
+
     /* =========================================================================
        STATE
     ========================================================================= */
