@@ -4,6 +4,10 @@ a beautiful and secure Python version of your NorthEmerald hub with the Palm ID 
 
 **Navigate North • Go NE**
 
+# 🌲 NorthEmerald Hub
+
+**Navigate North • Go NE**
+
 A modular Streamlit hub application with secure admin features and aesthetic northern/emerald theming.
 
 ---
@@ -12,10 +16,13 @@ A modular Streamlit hub application with secure admin features and aesthetic nor
 
 ```
 northemeraid/
-├── app.py          # Main hub application
-├── myapp1.py       # MyApp One module
-├── myapp2.py       # MyApp Two module
-└── readme.md       # This file
+├── app.py                  # Main hub application
+├── myapp1.py               # MyApp One module
+├── myapp2.py               # Universal Gallery module
+├── teacher_tools.py        # Teacher Tools VIP TV module
+├── teacher_tools/          # HTML tool storage (auto-created)
+├── universal_gallery/      # Gallery HTML storage (auto-created)
+└── readme.md               # This file
 ```
 
 ---
@@ -63,10 +70,26 @@ The code is stored as a SHA-256 hash for security.
 - Interactive demo with text input and slider
 - Admin delete capability
 
-### MyApp Two  
-- Creative tools and collaboration
-- Color picker and multi-select tools
-- Admin delete capability
+### MyApp Two - Universal Gallery
+- **Super glossy viewer** with universal gray aesthetic
+- **7 UI Tints**: Universal Gray, Water, Fire, Fairy, Grass, Electric, Emerald
+- **Connected to Teacher Tools**: View HTML from both galleries
+- **Source Switching**: Toggle between Gallery and Teacher Tools libraries
+- **Random Picker**: Discover random entries
+- **Adjustable Preview**: Height slider for optimal viewing
+- **Download & Delete**: Full file management (delete requires admin)
+- **Apple-like Design**: Glassmorphism with blur effects
+
+### Teacher Tools - VIP TV Mode
+- **Futuristic TV interface** for HTML teaching tools
+- **Browse & Search**: Filter through your tool library
+- **Favorites**: Star your most-used tools
+- **Add/Paste**: Create tools by pasting HTML code
+- **Upload**: Admin-only file upload (.html)
+- **Preview**: VIP TV console with scan lines and glow effects
+- **Manage**: View source code, download backups, delete tools
+- **25 Tool Limit**: Prevents repository chaos
+- **Safe naming**: Auto-sanitizes filenames, no overwrites
 
 ### Admin Tools
 - **Delete Tool**: Remove individual app modules (❌ button)
@@ -112,6 +135,10 @@ def render(admin_unlocked=False):
 **Import Errors**: Ensure all `.py` files are in the same directory  
 **Admin Access**: Remember to tap palm icon 3 times before entering code  
 **Delete Not Working**: Must be admin unlocked first
+
+---
+
+**Navigate North with NorthEmerald! 🌲✨**
 
 ---
 
