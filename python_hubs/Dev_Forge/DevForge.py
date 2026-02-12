@@ -1,4 +1,4 @@
-from __future__ import annotations
+dfrom __future__ import annotations
 
 import streamlit as st
 
@@ -170,8 +170,79 @@ with st.sidebar:
 # ============================================================
 
 if page == "🏠 Home":
-    exec(open("python_hubs/Dev_Forge/home.py").read())
+    # Inline home page - crash proof, no external dependencies
+    st.markdown("### Your Streamlit Development Assistant")
     
+    st.markdown(
+        """
+<div class='dev-card'>
+<div class='kicker'>SYSTEM OVERVIEW</div>
+<h3>🎯 Quick Start</h3>
+<p>DevForge helps you build Streamlit apps faster with ready-to-use tools.</p>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown(
+            """
+<div class='dev-card glow-hover'>
+<h3>🔬 Science Tools</h3>
+<p>NGSS lesson planning</p>
+<p>5E framework builder</p>
+<p>New Visions integration</p>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+    
+    with col2:
+        st.markdown(
+            """
+<div class='dev-card glow-hover'>
+<h3>📚 Code Library</h3>
+<p>UI components</p>
+<p>Copy/paste patterns</p>
+<p>Session state examples</p>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+    
+    with col3:
+        st.markdown(
+            """
+<div class='dev-card glow-hover'>
+<h3>⚡ ABC Generator</h3>
+<p>Architecture decisions</p>
+<p>Build patterns</p>
+<p>Code scaffolding</p>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+    
+    st.markdown("<div class='hr'></div>", unsafe_allow_html=True)
+    
+    st.markdown("## 🚀 Priority Apps")
+    st.markdown(
+        """
+<div class='dev-card'>
+<ol>
+<li><strong>Ms. Piluso Science</strong> - Production lesson builder</li>
+<li><strong>Nacli App</strong> - Special science tool</li>
+<li><strong>Code Library</strong> - Snippet repository</li>
+<li><strong>ABC Generator</strong> - Architecture helper</li>
+<li><strong>My App 1 & 2</strong> - Sandbox areas</li>
+</ol>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+
 elif page == "🔬 Ms. Piluso Science":
     exec(open("python_hubs/Dev_Forge/Ms_Piluso_Science.py").read())
     
