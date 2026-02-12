@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mr. Benji's Coloring Studio — Coming Soon</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Comic Sans MS','Chalkboard SE','Comic Neue',cursive,sans-serif;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;
+      color:#222;
+    }
+    .container{max-width:1400px;width:100%}
+    .shell{
+      background:#fff;border-radius:20px;padding:40px;
+      box-shadow:0 20px 60px rgba(0,0,0,.3);
+      text-align:center;animation:fadeIn .5s ease-out;
+    }
+    .hub-title{
+      font-size:3em;color:#667eea;margin-bottom:16px;
+      text-shadow:2px 2px 4px rgba(0,0,0,.1);
+      user-select:none;
+    }
+    .hub-subtitle{font-size:1.25em;color:#555;margin-bottom:34px}
+    .user-input-section{margin-bottom:34px}
+    .user-input-section label{display:block;font-size:1.15em;color:#333;margin-bottom:10px}
+    .user-input-section input{
+      padding:15px 20px;font-size:1.08em;border:3px solid #667eea;border-radius:10px;
+      width:100%;max-width:420px;font-family:inherit;outline:none;
+      box-shadow:0 6px 18px rgba(102,126,234,.12);
+    }
+
+    .image-selection{margin-bottom:26px}
+    .image-selection h3{font-size:1.5em;color:#333;margin-bottom:18px}
+    .image-grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:20px;max-width:900px;margin:0 auto;
+    }
+    .image-option{
+      border:4px solid #ddd;border-radius:15px;padding:10px;cursor:default;
+      transition:all .25s;background:#fff;
+    }
+    .image-option:hover{
+      border-color:#667eea;transform:translateY(-5px);
+      box-shadow:0 8px 20px rgba(102,126,234,.22);
+    }
+    .image-option.selected{
+      border-color:#667eea;background:#f0f4ff;
+      box-shadow:0 8px 20px rgba(102,126,234,.35);
+    }
+    .thumb{
+      width:100%;height:150px;border-radius:10px;background:#f8f9fa;
+      display:flex;align-items:center;justify-content:center;overflow:hidden;
+    }
+    .thumb svg{width:92%;height:92%}
+    .image-title{margin-top:10px;font-size:1.05em;color:#333;font-weight:bold}
+
+    .cta{
+      margin-top:10px;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      color:#fff;border:none;padding:18px 56px;font-size:1.45em;border-radius:50px;
+      cursor:pointer;transition:transform .25s,box-shadow .25s;
+      font-family:inherit;font-weight:bold;
+    }
+    .cta:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+    .mini{margin-top:14px;color:#666;font-size:.95em;line-height:1.35}
+    .pill{
+      display:inline-block;margin-left:8px;padding:6px 10px;border-radius:999px;
+      background:#f0f4ff;border:1px solid rgba(102,126,234,.25);color:#445;font-weight:900;
+      font-size:.85em;
+    }
+
+    /* Modal */
+    .modal{
+      position:fixed;inset:0;display:none;place-items:center;z-index:9999;
+      background:rgba(0,0,0,.65);padding:18px;
+    }
+    .modal.active{display:grid}
+    .modal-card{
+      width:min(560px,92vw);background:#fff;border-radius:20px;padding:26px;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center;
+    }
+    .modal-card h2{color:#667eea;font-size:2em;margin-bottom:10px}
+    .modal-card p{color:#555;font-size:1.1em;line-height:1.45}
+    .modal-actions{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .btn{
+      padding:12px 18px;border:none;border-radius:12px;font-size:1em;cursor:pointer;
+      font-family:inherit;font-weight:bold;transition:all .2s;
+    }
+    .btn.primary{background:#51cf66;color:#fff}
+    .btn.primary:hover{background:#40c057;transform:translateY(-2px)}
+    .btn.secondary{background:#868e96;color:#fff}
+    .btn.secondary:hover{background:#495057;transform:translateY(-2px)}
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:968px){
+      .hub-title{font-size:2em}
+      .image-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="shell">
+      <h1 class="hub-title">🎨 Welcome to Mr. Benji's Coloring Studio! 🌴 <span class="pill">V2</span></h1>
+      <p class="hub-subtitle">Draw, fill, and spice it up — now with true multi-touch fill!</p>
+
+      <div class="user-input-section">
+        <label for="userName">What's your name, artist?</label>
+        <input id="userName" type="text" placeholder="Enter your name here..." maxlength="30" />
+      </div>
+
+      <div class="image-selection">
+        <h3>Choose a coloring page:</h3>
+        <div class="image-grid">
+          <div class="image-option selected">
+            <div class="thumb">
+              <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100%" height="100%" fill="#fff"/>
+                <g stroke="#111" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M140,520 C190,420 230,350 270,280"/>
+                  <path d="M270,280 C230,260 200,240 170,210"/>
+                  <path d="M270,280 C300,250 340,235 390,235"/>
+                  <circle cx="520" cy="200" r="70"/>
+                  <path d="M70,600 C220,560 320,570 470,610 C620,650 740,650 930,600"/>
+                </g>
+              </svg>
+            </div>
+            <div class="image-title">Life Without Worries<br/>— Palm Scene</div>
+          </div>
+
+          <div class="image-option">
+            <div class="thumb">
+              <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100%" height="100%" fill="#fff"/>
+                <g stroke="#111" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M70,520 C140,470 220,470 290,520 C360,570 440,570 510,520 C580,470 660,470 730,520 C800,570 880,570 950,520"/>
+                  <path d="M500,450 C440,420 380,360 390,290 C400,220 470,180 500,170 C530,180 600,220 610,290 C620,360 560,420 500,450 Z"/>
+                </g>
+              </svg>
+            </div>
+            <div class="image-title">Ocean Adventure<br/>— Shell + Waves</div>
+          </div>
+
+          <div class="image-option">
+            <div class="thumb">
+              <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100%" height="100%" fill="#fff"/>
+                <g stroke="#111" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M500,150 C620,150 700,240 700,360 C700,520 610,590 500,590 C390,590 300,520 300,360 C300,240 380,150 500,150 Z"/>
+                  <circle cx="460" cy="378" r="10"/><circle cx="540" cy="378" r="10"/>
+                  <path d="M430,490 C470,465 530,465 570,490"/>
+                </g>
+              </svg>
+            </div>
+            <div class="image-title">Portrait<br/>— Friendly Man (Face)</div>
+          </div>
+
+          <div class="image-option">
+            <div class="thumb">
+              <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100%" height="100%" fill="#fff"/>
+                <g stroke="#111" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M280,360 C280,200 400,120 500,120 C600,120 720,200 720,360 C720,520 660,610 620,650 C590,680 560,690 500,690 C440,690 410,680 380,650 C340,610 280,520 280,360 Z"/>
+                  <circle cx="460" cy="378" r="10"/><circle cx="540" cy="378" r="10"/>
+                  <path d="M440,525 C480,555 520,555 560,525"/>
+                </g>
+              </svg>
+            </div>
+            <div class="image-title">Portrait<br/>— Friendly Woman (Face)</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="cta" id="comingSoonBtn">Coming Soon ✨</button>
+      <div class="mini">This is a lightweight shell build. The full studio tools will return in the next release.</div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <h2>🚧 Coming Soon</h2>
+      <p>
+        The Coloring Studio is getting a fresh upgrade (pages, tools, saving, and more).
+        For now, this version is just the aesthetic shell.
+      </p>
+      <div class="modal-actions">
+        <button class="btn primary" id="okBtn">Got it</button>
+        <button class="btn secondary" id="closeBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("modal");
+    const open = () => modal.classList.add("active");
+    const close = () => modal.classList.remove("active");
+
+    document.getElementById("comingSoonBtn").addEventListener("click", open);
+    document.getElementById("okBtn").addEventListener("click", close);
+    document.getElementById("closeBtn").addEventListener("click", close);
+    modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+  </script>
+</body>
+</html>
