@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -8,24 +9,27 @@
   <style>
     /* =============== PRINTESSA-FRIENDLY THEME (LIGHT) =============== */
     :root{
-      --bg: #f6f0e6;          /* vintage paper */
-      --bg2:#fff8ef;          /* soft cream */
-      --card:#ffffff;         /* white boxes */
-      --border:#c9c1b5;       /* warm gray */
-      --text:#111111;         /* black text */
-      --muted:#4b4b4b;        /* readable muted */
+      --bg: #f6f0e6;
+      --bg2:#fff8ef;
+      --card:#ffffff;
+      --border:#c9c1b5;
+      --text:#111111;
+      --muted:#4b4b4b;
 
-      /* Light purple accent (replaces blue) */
-      --accent:#c7a6ff;       /* light purple */
-      --accent2:#eddcff;      /* soft lilac */
+      --accent:#c7a6ff;
+      --accent2:#eddcff;
       --danger:#b00020;
+      --success:#00a86b;
 
-      /* Portal tint chips (subtle) */
       --emerald:#1ee3a8;
       --amethyst:#9b6bff;
       --onyx:#111111;
       --ruby:#ff4d6d;
       --sapphire:#1ea7ff;
+
+      /* Animation durations */
+      --spring: cubic-bezier(.18,1.35,.4,1);
+      --smooth: cubic-bezier(.4,0,.2,1);
     }
 
     *{ box-sizing:border-box; margin:0; padding:0; }
@@ -38,7 +42,6 @@
       justify-content:center;
       align-items:flex-start;
 
-      /* light vintage background */
       background:
         radial-gradient(1200px 800px at 10% 10%, rgba(199,166,255,.14), transparent 55%),
         radial-gradient(1000px 700px at 90% 15%, rgba(155,107,255,.10), transparent 55%),
@@ -87,12 +90,28 @@
       border-radius:999px;
       font-weight:900;
       cursor:pointer;
-      transition: transform .12s ease, box-shadow .12s ease;
+      transition: transform .12s var(--smooth), box-shadow .12s var(--smooth), background .12s ease;
       box-shadow: 0 10px 24px rgba(0,0,0,.08);
       user-select:none;
+      position: relative;
+      overflow: hidden;
     }
-    .btn:hover{ transform:translateY(-2px); }
+    .btn::before{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(199,166,255,.2), transparent 70%);
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .btn:hover::before{ opacity: 1; }
+    .btn:hover{ transform:translateY(-2px); box-shadow: 0 14px 32px rgba(0,0,0,.12); }
     .btn:active{ transform:translateY(0px); }
+    .btn:disabled{
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
 
     .btn.primary{
       border:0;
@@ -119,19 +138,22 @@
       align-items:center;
       justify-content:center;
       user-select:none;
-      transition: transform .12s ease;
+      transition: transform .12s var(--smooth);
       position:relative;
     }
-    .iconBtn:hover{ transform:translateY(-2px); }
+    .iconBtn:hover{ transform:translateY(-2px) rotate(5deg); }
+    .iconBtn:active{ transform: scale(.95); }
 
-    /* Sigillum mark inside the icon button */
+    /* Sigillum mark */
     .sigMark{
       width:26px; height:26px;
       position:relative;
       border-radius:50%;
       border:4px solid #111;
       background: transparent;
+      transition: transform .3s var(--spring);
     }
+    .iconBtn:hover .sigMark{ transform: rotate(180deg); }
     .sigMark::after{
       content:"";
       width:6px; height:6px;
@@ -146,10 +168,14 @@
       height:5px; width:16px;
       background:#111;
       border-radius:999px;
+      transition: all .3s var(--spring);
     }
     .ray.left{ left:-18px; top:50%; transform:translateY(-50%); }
     .ray.tr{ right:-14px; top:-2px; transform:rotate(-45deg); }
     .ray.br{ right:-10px; bottom:-4px; transform:rotate(70deg); }
+    .iconBtn:hover .ray.left{ left: -22px; }
+    .iconBtn:hover .ray.tr{ right: -18px; }
+    .iconBtn:hover .ray.br{ right: -14px; }
 
     /* SECRET TRAY */
     .secretTray{
@@ -158,8 +184,14 @@
       gap:10px;
       flex-wrap:wrap;
       align-items:stretch;
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: fadeSlideIn .4s var(--spring) forwards;
     }
     .secretTray.active{ display:flex; }
+    @keyframes fadeSlideIn{
+      to{ opacity: 1; transform: translateY(0); }
+    }
 
     .secretBlock{
       flex: 1 1 280px;
@@ -208,6 +240,11 @@
       padding:14px;
       box-shadow: 0 14px 40px rgba(0,0,0,.08);
       position:relative;
+      transition: transform .2s var(--smooth), box-shadow .2s var(--smooth);
+    }
+    .card:focus-within{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 48px rgba(0,0,0,.12);
     }
 
     /* Accent bar */
@@ -218,7 +255,9 @@
       height:6px;
       border-radius:999px;
       background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: height .2s var(--smooth);
     }
+    .card:focus-within::before{ height: 8px; }
 
     .card.big{ grid-column: 1 / -1; }
 
@@ -233,7 +272,12 @@
     }
     .muted{ color: var(--muted); font-size:.95rem; line-height:1.35; font-weight:650; }
 
-    label{ font-weight:900; font-size:.95rem; color: var(--text); }
+    label{ 
+      font-weight:900; 
+      font-size:.95rem; 
+      color: var(--text);
+      display: block;
+    }
     input[type="text"], input[type="email"], input[type="tel"], textarea, select{
       width:100%;
       margin-top:8px;
@@ -243,14 +287,31 @@
       color: var(--text);
       padding:12px;
       outline:none;
-      transition: border-color .12s ease, box-shadow .12s ease;
+      transition: border-color .12s ease, box-shadow .12s ease, background .12s ease;
       font-size:1rem;
+      font-family: inherit;
     }
     input:focus, textarea:focus, select:focus{
       border-color: rgba(199,166,255,.85);
       box-shadow: 0 0 0 4px rgba(199,166,255,.18);
+      background: #fffcfe;
     }
-    textarea{ min-height: 120px; resize: vertical; line-height:1.45; }
+    textarea{ 
+      min-height: 120px; 
+      resize: vertical; 
+      line-height:1.45;
+      font-family: inherit;
+    }
+
+    /* Character counter */
+    .charCount{
+      font-size: .85rem;
+      color: var(--muted);
+      margin-top: 4px;
+      text-align: right;
+      font-weight: 700;
+    }
+    .charCount.warning{ color: var(--danger); }
 
     .split{
       display:grid;
@@ -277,15 +338,25 @@
       display:flex;
       flex-direction:column;
       gap:6px;
-      transition: transform .12s ease;
+      transition: transform .12s var(--smooth), box-shadow .12s var(--smooth), border-color .12s ease;
       user-select:none;
+      position: relative;
     }
-    .portalChip:hover{ transform:translateY(-2px); }
+    .portalChip:hover{ 
+      transform:translateY(-2px); 
+      box-shadow: 0 8px 20px rgba(0,0,0,.12);
+    }
+    .portalChip:active{ transform: scale(.98); }
+    .portalChip.selected{
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(199,166,255,.2);
+    }
     .chipTag{ font-size:.82rem; font-weight:800; color:var(--muted); }
     .dot{
       width:10px;height:10px;border-radius:50%;
       display:inline-block; margin-right:8px;
       vertical-align:middle;
+      box-shadow: 0 2px 4px rgba(0,0,0,.2);
     }
 
     /* Output */
@@ -295,6 +366,46 @@
       font-size:14px;
       line-height:1.55;
       min-height:260px;
+    }
+
+    /* Toast notification */
+    .toast{
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(17,17,17,.95);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: .95rem;
+      box-shadow: 0 12px 32px rgba(0,0,0,.3);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform .3s var(--spring), opacity .3s ease;
+      z-index: 10000;
+      pointer-events: none;
+    }
+    .toast.show{
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .toast.success{ background: linear-gradient(135deg, var(--success), #00c97d); color: white; }
+
+    /* Progress indicator */
+    .progress{
+      height: 4px;
+      background: rgba(199,166,255,.2);
+      border-radius: 999px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+    .progressBar{
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 999px;
+      transition: width .3s var(--smooth);
+      width: 0%;
     }
 
     /* Footer */
@@ -316,8 +427,13 @@
       justify-content:center;
       padding:18px;
       z-index:9999;
+      opacity: 0;
+      transition: opacity .2s ease;
     }
-    .overlay[data-open="true"]{ display:flex; }
+    .overlay[data-open="true"]{ display:flex; animation: fadeIn .2s ease forwards; }
+    @keyframes fadeIn{
+      to{ opacity: 1; }
+    }
 
     .modal{
       width:min(720px,100%);
@@ -329,7 +445,7 @@
       position:relative;
       transform: translateY(10px) scale(.92);
       opacity:0;
-      animation: springIn .38s cubic-bezier(.18,1.35,.4,1) forwards;
+      animation: springIn .38s var(--spring) forwards;
     }
     @keyframes springIn{
       to{ transform: translateY(0px) scale(1); opacity:1; }
@@ -363,7 +479,9 @@
       cursor:pointer;
       font-weight:1000;
       font-size:18px;
+      transition: transform .12s var(--smooth), background .12s ease;
     }
+    .mClose:hover{ transform: rotate(90deg); background: rgba(255,235,235,.9); }
     .mBody{ padding:0 14px 14px; }
     .mText{
       background:#fff;
@@ -385,9 +503,9 @@
 
     /* PRINT */
     @media print{
-      .barBtns, .adminRow, .secretTray, .overlay{ display:none !important; }
+      .barBtns, .adminRow, .secretTray, .overlay, .toast, .progress{ display:none !important; }
       body{ padding:0; background:#fff; }
-      .card{ box-shadow:none; }
+      .card{ box-shadow:none; page-break-inside: avoid; }
       .footer{ margin-top:10px; }
     }
 
@@ -396,8 +514,33 @@
       .split{ grid-template-columns:1fr; }
       .barBtns{ justify-content:flex-start; }
       .portalRow{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .toast{ right: 12px; bottom: 12px; left: 12px; text-align: center; }
+    }
+
+    /* Auto-save indicator */
+    .saveIndicator{
+      font-size: .85rem;
+      color: var(--muted);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .saveIndicator.saving{ color: var(--accent); }
+    .saveIndicator.saved{ color: var(--success); }
+    .saveDot{
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%, 100%{ opacity: 1; }
+      50%{ opacity: .4; }
     }
   </style>
+
 </head>
 
 <body>
@@ -406,135 +549,156 @@
       <div class="brand">
         <h1>SLDConnect Creator Intake <span aria-hidden="true">✦</span></h1>
         <p>
-          This mini app collects a creator’s profile in a clean “resume output” format.
+          This mini app collects a creator's profile in a clean "resume output" format.
           Fill the fields → generate output → copy or email it back.
         </p>
 
-        <div class="adminRow">
-          <button class="iconBtn" id="signetBtn" title="Signet">
-            <span class="sigMark" aria-hidden="true">
-              <span class="ray left"></span>
-              <span class="ray tr"></span>
-              <span class="ray br"></span>
-            </span>
-          </button>
-        </div>
-
-        <div class="secretTray" id="secretTray">
-          <div class="secretBlock">
-            <h3>OUTPUT RULES <span aria-hidden="true">🧾</span></h3>
-            <div class="secretHint">
-              Output must be exactly: Objective, Knowledge Base, Experience, Skills (Media), Abilities to Contribute,
-              then “Most Interested Portal” and the footer line.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="barBtns">
-        <button class="btn" id="copyBtn" type="button">📋 Copy Output</button>
-        <button class="btn" id="emailBtn" type="button">✉️ Send Email</button>
-        <button class="btn primary" id="printBtn" type="button">🖨️ Print / Save PDF</button>
-      </div>
+```
+    <div class="adminRow">
+      <button class="iconBtn" id="signetBtn" title="Signet" aria-label="Open admin panel">
+        <span class="sigMark" aria-hidden="true">
+          <span class="ray left"></span>
+          <span class="ray tr"></span>
+          <span class="ray br"></span>
+        </span>
+      </button>
+      <span class="saveIndicator" id="saveIndicator">
+        <span class="saveDot"></span>
+        <span id="saveText">Auto-save ready</span>
+      </span>
     </div>
 
-    <div class="grid">
-      <section class="card">
-        <h2>📝 Contact Info</h2>
-        <label for="fullName">Creator Name</label>
-        <input id="fullName" type="text" placeholder="Maya Chen" maxlength="60" />
-
-        <label for="email" style="margin-top:10px;">Email (optional)</label>
-        <input id="email" type="email" placeholder="maya.chen@email.com" maxlength="70" />
-
-        <label for="phone" style="margin-top:10px;">Phone (optional)</label>
-        <input id="phone" type="tel" placeholder="(555) 987-6543" maxlength="22" />
-      </section>
-
-      <section class="card">
-        <h2>🎯 Line 1 — Objective / Intention</h2>
-        <label for="objective">One clear sentence.</label>
-        <textarea id="objective" placeholder="Example: I create multimedia stories that help people understand the world."></textarea>
-      </section>
-
-      <section class="card big">
-        <h2>📚 Line 2 — Knowledge Base</h2>
-        <div class="muted">What foundations do you know? (topics, workflows, tools, theory)</div>
-        <textarea id="knowledge" placeholder="Example: Story structure, interviewing, research, editing workflow, fact-checking..."></textarea>
-      </section>
-
-      <section class="card big">
-        <h2>💼 Line 3 — Experience</h2>
-        <div class="muted">Summarize your real experience (roles, projects, internships, episodes, channels).</div>
-        <textarea id="experience" placeholder="Example: Student reporter, podcast producer, internship at local station..."></textarea>
-      </section>
-
-      <section class="card big">
-        <h2>⭐ Line 4 — Skills (Media Creation)</h2>
-        <div class="muted">Keep it media-focused. (editing, audio, camera, writing, design)</div>
-        <textarea id="skills" placeholder="Example: Premiere/Final Cut, photography, scripting, AP style, social media..."></textarea>
-      </section>
-
-      <section class="card big">
-        <h2>🧩 Line 5 — Abilities to Contribute</h2>
-        <div class="muted">What can you do for the network? (collab, build, QA, produce, mentor)</div>
-        <textarea id="contribute" placeholder="Example: I can storyboard, edit weekly, help with QA, and collaborate on releases."></textarea>
-
-        <div class="split" style="margin-top:10px;">
-          <div>
-            <label for="interest">Most Interested Portal</label>
-            <select id="interest">
-              <option value="Emerald">Emerald</option>
-              <option value="Amethyst">Amethyst</option>
-              <option value="Onyx">Onyx</option>
-              <option value="Ruby">Ruby</option>
-              <option value="Sapphire">Sapphire</option>
-            </select>
-          </div>
-          <div>
-            <label>Portal Preview (tap)</label>
-            <div class="portalRow" id="portalRow">
-              <div class="portalChip" data-portal="Emerald">
-                <div><span class="dot" style="background:var(--emerald)"></span>Emerald</div>
-                <div class="chipTag">Engagement</div>
-              </div>
-              <div class="portalChip" data-portal="Amethyst">
-                <div><span class="dot" style="background:var(--amethyst)"></span>Amethyst</div>
-                <div class="chipTag">Studio</div>
-              </div>
-              <div class="portalChip" data-portal="Onyx">
-                <div><span class="dot" style="background:#111"></span>Onyx</div>
-                <div class="chipTag">Vault</div>
-              </div>
-              <div class="portalChip" data-portal="Ruby">
-                <div><span class="dot" style="background:var(--ruby)"></span>Ruby</div>
-                <div class="chipTag">Tasks</div>
-              </div>
-              <div class="portalChip" data-portal="Sapphire">
-                <div><span class="dot" style="background:var(--sapphire)"></span>Sapphire</div>
-                <div class="chipTag">Economy</div>
-              </div>
-            </div>
-          </div>
+    <div class="secretTray" id="secretTray">
+      <div class="secretBlock">
+        <h3>OUTPUT RULES <span aria-hidden="true">🧾</span></h3>
+        <div class="secretHint">
+          Output must be exactly: Objective, Knowledge Base, Experience, Skills (Media), Abilities to Contribute,
+          then "Most Interested Portal" and the footer line.
         </div>
-      </section>
-
-      <section class="card big">
-        <h2>🧾 OUTPUT (Printer Friendly)</h2>
-        <div class="muted">This is what they copy/email back to you.</div>
-        <textarea id="output" class="outputBox" placeholder="Press Generate Output..." spellcheck="false"></textarea>
-
-        <div class="adminRow" style="margin-top:10px;">
-          <button class="btn primary" id="genBtn" type="button">✨ Generate Output</button>
-          <button class="btn" id="clearBtn" type="button">🧽 Clear</button>
-        </div>
-
-        <div class="footer">Property of SLDConnect 2023</div>
-      </section>
+      </div>
     </div>
   </div>
 
+  <div class="barBtns">
+    <button class="btn" id="copyBtn" type="button">📋 Copy Output</button>
+    <button class="btn" id="emailBtn" type="button">✉️ Send Email</button>
+    <button class="btn primary" id="printBtn" type="button">🖨️ Print / Save PDF</button>
+  </div>
+</div>
+
+<div class="progress">
+  <div class="progressBar" id="progressBar"></div>
+</div>
+
+<div class="grid">
+  <section class="card">
+    <h2>📝 Contact Info</h2>
+    <label for="fullName">Creator Name</label>
+    <input id="fullName" type="text" placeholder="Maya Chen" maxlength="60" autocomplete="name" />
+
+    <label for="email" style="margin-top:10px;">Email (optional)</label>
+    <input id="email" type="email" placeholder="maya.chen@email.com" maxlength="70" autocomplete="email" />
+
+    <label for="phone" style="margin-top:10px;">Phone (optional)</label>
+    <input id="phone" type="tel" placeholder="(555) 987-6543" maxlength="22" autocomplete="tel" />
+  </section>
+
+  <section class="card">
+    <h2>🎯 Line 1 — Objective / Intention</h2>
+    <label for="objective">One clear sentence.</label>
+    <textarea id="objective" placeholder="Example: I create multimedia stories that help people understand the world." maxlength="500"></textarea>
+    <div class="charCount" id="objectiveCount">0 / 500</div>
+  </section>
+
+  <section class="card big">
+    <h2>📚 Line 2 — Knowledge Base</h2>
+    <div class="muted">What foundations do you know? (topics, workflows, tools, theory)</div>
+    <textarea id="knowledge" placeholder="Example: Story structure, interviewing, research, editing workflow, fact-checking..." maxlength="1000"></textarea>
+    <div class="charCount" id="knowledgeCount">0 / 1000</div>
+  </section>
+
+  <section class="card big">
+    <h2>💼 Line 3 — Experience</h2>
+    <div class="muted">Summarize your real experience (roles, projects, internships, episodes, channels).</div>
+    <textarea id="experience" placeholder="Example: Student reporter, podcast producer, internship at local station..." maxlength="1000"></textarea>
+    <div class="charCount" id="experienceCount">0 / 1000</div>
+  </section>
+
+  <section class="card big">
+    <h2>⭐ Line 4 — Skills (Media Creation)</h2>
+    <div class="muted">Keep it media-focused. (editing, audio, camera, writing, design)</div>
+    <textarea id="skills" placeholder="Example: Premiere/Final Cut, photography, scripting, AP style, social media..." maxlength="1000"></textarea>
+    <div class="charCount" id="skillsCount">0 / 1000</div>
+  </section>
+
+  <section class="card big">
+    <h2>🧩 Line 5 — Abilities to Contribute</h2>
+    <div class="muted">What can you do for the network? (collab, build, QA, produce, mentor)</div>
+    <textarea id="contribute" placeholder="Example: I can storyboard, edit weekly, help with QA, and collaborate on releases." maxlength="1000"></textarea>
+    <div class="charCount" id="contributeCount">0 / 1000</div>
+
+    <div class="split" style="margin-top:10px;">
+      <div>
+        <label for="interest">Most Interested Portal</label>
+        <select id="interest">
+          <option value="Emerald">Emerald</option>
+          <option value="Amethyst">Amethyst</option>
+          <option value="Onyx">Onyx</option>
+          <option value="Ruby">Ruby</option>
+          <option value="Sapphire">Sapphire</option>
+        </select>
+      </div>
+      <div>
+        <label>Portal Preview (tap)</label>
+        <div class="portalRow" id="portalRow" role="group" aria-label="Portal selection">
+          <button class="portalChip" data-portal="Emerald" type="button" aria-label="Emerald Portal - Engagement">
+            <div><span class="dot" style="background:var(--emerald)"></span>Emerald</div>
+            <div class="chipTag">Engagement</div>
+          </button>
+          <button class="portalChip" data-portal="Amethyst" type="button" aria-label="Amethyst Portal - Studio">
+            <div><span class="dot" style="background:var(--amethyst)"></span>Amethyst</div>
+            <div class="chipTag">Studio</div>
+          </button>
+          <button class="portalChip" data-portal="Onyx" type="button" aria-label="Onyx Portal - Vault">
+            <div><span class="dot" style="background:#111"></span>Onyx</div>
+            <div class="chipTag">Vault</div>
+          </button>
+          <button class="portalChip" data-portal="Ruby" type="button" aria-label="Ruby Portal - Tasks">
+            <div><span class="dot" style="background:var(--ruby)"></span>Ruby</div>
+            <div class="chipTag">Tasks</div>
+          </button>
+          <button class="portalChip" data-portal="Sapphire" type="button" aria-label="Sapphire Portal - Economy">
+            <div><span class="dot" style="background:var(--sapphire)"></span>Sapphire</div>
+            <div class="chipTag">Economy</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card big">
+    <h2>🧾 OUTPUT (Printer Friendly)</h2>
+    <div class="muted">This is what they copy/email back to you.</div>
+    <textarea id="output" class="outputBox" placeholder="Press Generate Output..." spellcheck="false" readonly></textarea>
+
+    <div class="adminRow" style="margin-top:10px;">
+      <button class="btn primary" id="genBtn" type="button">✨ Generate Output</button>
+      <button class="btn" id="clearBtn" type="button">🧽 Clear All</button>
+    </div>
+
+    <div class="footer">Property of SLDConnect 2023</div>
+  </section>
+</div>
+```
+
+  </div>
+
+  <!-- TOAST -->
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
   <!-- MODAL -->
+
   <div class="overlay" id="overlay" data-open="false" role="dialog" aria-modal="true" aria-labelledby="mTitle">
     <div class="modal" id="modal">
       <div class="mHead">
@@ -556,7 +720,7 @@
 
   <script>
     // =========================
-    // SLDConnect Creator Intake — Step 2/3 (JS)
+    // SLDConnect Creator Intake — ENHANCED
     // =========================
     const $ = (id) => document.getElementById(id);
 
@@ -579,6 +743,9 @@
 
     const signetBtn  = $("signetBtn");
     const secretTray = $("secretTray");
+    const saveIndicator = $("saveIndicator");
+    const saveText = $("saveText");
+    const progressBar = $("progressBar");
 
     const portalRow = $("portalRow");
 
@@ -591,8 +758,11 @@
     const mAppend  = $("mAppend");
     const mReplace = $("mReplace");
 
+    const toast = $("toast");
+
     let activePortalKey = "Emerald";
     let lastFocus = null;
+    let saveTimer = null;
 
     const PORTALS = {
       Emerald: {
@@ -634,8 +804,89 @@ Sapphire grows Northstar without breaking ledger integrity.`
       }
     };
 
+    // ===== UTILITIES =====
     function valOrBlank(v){ return (v || "").trim() || "(blank)"; }
 
+    function showToast(msg, success = false){
+      toast.textContent = msg;
+      toast.className = "toast show" + (success ? " success" : "");
+      setTimeout(() => toast.classList.remove("show"), 2500);
+    }
+
+    function updateCharCount(textarea, counter){
+      const len = textarea.value.length;
+      const max = textarea.maxLength;
+      counter.textContent = `${len} / ${max}`;
+      counter.classList.toggle("warning", len > max * 0.9);
+    }
+
+    function updateProgress(){
+      const fields = [fullName, objective, knowledge, experience, skills, contribute];
+      const filled = fields.filter(f => f.value.trim()).length;
+      const percent = (filled / fields.length) * 100;
+      progressBar.style.width = percent + "%";
+    }
+
+    // ===== AUTO-SAVE =====
+    function saveToLocalStorage(){
+      const data = {
+        fullName: fullName.value,
+        email: email.value,
+        phone: phone.value,
+        objective: objective.value,
+        knowledge: knowledge.value,
+        experience: experience.value,
+        skills: skills.value,
+        contribute: contribute.value,
+        interest: interest.value,
+        timestamp: Date.now()
+      };
+      localStorage.setItem("sldconnect_intake", JSON.stringify(data));
+      saveIndicator.className = "saveIndicator saved";
+      saveText.textContent = "Saved";
+      setTimeout(() => {
+        saveIndicator.className = "saveIndicator";
+        saveText.textContent = "Auto-save ready";
+      }, 2000);
+    }
+
+    function loadFromLocalStorage(){
+      try{
+        const saved = localStorage.getItem("sldconnect_intake");
+        if(!saved) return;
+        const data = JSON.parse(saved);
+        fullName.value = data.fullName || "";
+        email.value = data.email || "";
+        phone.value = data.phone || "";
+        objective.value = data.objective || "";
+        knowledge.value = data.knowledge || "";
+        experience.value = data.experience || "";
+        skills.value = data.skills || "";
+        contribute.value = data.contribute || "";
+        interest.value = data.interest || "Emerald";
+        
+        // Update all counters and progress
+        updateCharCount(objective, $("objectiveCount"));
+        updateCharCount(knowledge, $("knowledgeCount"));
+        updateCharCount(experience, $("experienceCount"));
+        updateCharCount(skills, $("skillsCount"));
+        updateCharCount(contribute, $("contributeCount"));
+        updateProgress();
+        
+        showToast("Draft restored", true);
+      }catch(e){
+        console.error("Load failed:", e);
+      }
+    }
+
+    function scheduleAutoSave(){
+      clearTimeout(saveTimer);
+      saveIndicator.className = "saveIndicator saving";
+      saveText.textContent = "Saving...";
+      saveTimer = setTimeout(saveToLocalStorage, 1000);
+    }
+
+    // ===== OUTPUT =====
     function buildOutput(){
       const name = (fullName.value || "").trim() || "Creator Name";
       return (
@@ -664,9 +915,12 @@ Property of SLDConnect 2023`
     genBtn.addEventListener("click", () => {
       output.value = buildOutput();
       output.focus();
+      showToast("Output generated!", true);
     });
 
     clearBtn.addEventListener("click", () => {
+      if(!confirm("Clear all fields? This will delete your draft.")) return;
+      
       fullName.value = "";
       email.value = "";
       phone.value = "";
@@ -677,32 +931,54 @@ Property of SLDConnect 2023`
       contribute.value = "";
       interest.value = "Emerald";
       output.value = "";
+      
+      // Clear localStorage
+      localStorage.removeItem("sldconnect_intake");
+      
+      // Update UI
+      updateCharCount(objective, $("objectiveCount"));
+      updateCharCount(knowledge, $("knowledgeCount"));
+      updateCharCount(experience, $("experienceCount"));
+      updateCharCount(skills, $("skillsCount"));
+      updateCharCount(contribute, $("contributeCount"));
+      updateProgress();
+      
       objective.focus();
+      showToast("All fields cleared");
     });
 
     copyBtn.addEventListener("click", async () => {
-      const txt = output.value || "";
+      const txt = output.value || buildOutput();
       try{
         await navigator.clipboard.writeText(txt);
-        copyBtn.textContent = "✅ Copied";
-        setTimeout(()=> copyBtn.textContent = "📋 Copy Output", 900);
+        showToast("Copied to clipboard!", true);
       }catch{
         output.focus();
         output.select();
-        document.execCommand("copy");
+        try{
+          document.execCommand("copy");
+          showToast("Copied to clipboard!", true);
+        }catch{
+          showToast("Copy failed - please select and copy manually");
+        }
       }
     });
 
-    printBtn.addEventListener("click", () => window.print());
+    printBtn.addEventListener("click", () => {
+      if(!output.value.trim()){
+        output.value = buildOutput();
+      }
+      window.print();
+    });
 
     emailBtn.addEventListener("click", () => {
-      const to = "bshap1@brockport.edu"; // <-- inject your email later
+      const to = "bshap1@brockport.edu";
       const subject = encodeURIComponent("SLDConnect Creator Profile Output");
       const body = encodeURIComponent(output.value || buildOutput());
       window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
     });
 
-    // Signet: focus + hidden 3-tap tray
+    // ===== SIGNET =====
     const tapState = { taps: 0, timer: null };
     signetBtn.addEventListener("click", () => {
       objective.focus();
@@ -712,9 +988,11 @@ Property of SLDConnect 2023`
       if (tapState.taps >= 3){
         tapState.taps = 0;
         secretTray.classList.toggle("active");
+        showToast(secretTray.classList.contains("active") ? "Admin panel opened" : "Admin panel closed");
       }
     });
 
+    // ===== MODAL =====
     function openModal(key, rx=50, ry=30){
       activePortalKey = key;
       const p = PORTALS[key];
@@ -758,6 +1036,7 @@ Property of SLDConnect 2023`
       output.value = PORTALS[activePortalKey].text.trim();
       closeModal();
       output.focus();
+      showToast("Output replaced");
     });
 
     mAppend.addEventListener("click", () => {
@@ -767,15 +1046,76 @@ Property of SLDConnect 2023`
         : chunk;
       closeModal();
       output.focus();
+      showToast("Portal info appended");
     });
 
+    // ===== INTEREST SELECT SYNC =====
     interest.addEventListener("change", () => {
+      // Update visual selection
+      document.querySelectorAll(".portalChip").forEach(chip => {
+        chip.classList.toggle("selected", chip.dataset.portal === interest.value);
+      });
+      
+      // Update output if it exists
       if (!output.value.trim()) return;
       const lines = output.value.split("\n");
       const idx = lines.findIndex(l => l.startsWith("Most Interested Portal:"));
-      if (idx >= 0) lines[idx] = `Most Interested Portal: ${interest.value}`;
-      output.value = lines.join("\n");
+      if (idx >= 0) {
+        lines[idx] = `Most Interested Portal: ${interest.value}`;
+        output.value = lines.join("\n");
+      }
+      
+      scheduleAutoSave();
     });
+
+    // ===== CHARACTER COUNTERS =====
+    const counters = [
+      [objective, $("objectiveCount")],
+      [knowledge, $("knowledgeCount")],
+      [experience, $("experienceCount")],
+      [skills, $("skillsCount")],
+      [contribute, $("contributeCount")]
+    ];
+
+    counters.forEach(([field, counter]) => {
+      field.addEventListener("input", () => {
+        updateCharCount(field, counter);
+        updateProgress();
+        scheduleAutoSave();
+      });
+    });
+
+    // ===== AUTO-SAVE FOR ALL FIELDS =====
+    [fullName, email, phone, interest].forEach(field => {
+      field.addEventListener("input", () => {
+        updateProgress();
+        scheduleAutoSave();
+      });
+    });
+
+    // ===== KEYBOARD SHORTCUTS =====
+    document.addEventListener("keydown", (e) => {
+      // Ctrl/Cmd + S to save
+      if ((e.ctrlKey || e.metaKey) && e.key === "s"){
+        e.preventDefault();
+        saveToLocalStorage();
+        showToast("Draft saved!", true);
+      }
+      
+      // Ctrl/Cmd + Enter to generate
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter"){
+        e.preventDefault();
+        genBtn.click();
+      }
+    });
+
+    // ===== INIT =====
+    loadFromLocalStorage();
+    updateProgress();
+    
+    // Set initial selected portal chip
+    document.querySelector(`.portalChip[data-portal="${interest.value}"]`)?.classList.add("selected");
   </script>
+
 </body>
 </html>
