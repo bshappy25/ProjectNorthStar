@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Valentine's Day L.E.A.Ders</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        background: linear-gradient(135deg, #1a0a1e 0%, #2d1b3d 50%, #1a0a1e 100%);
+        overflow: hidden;
+        font-family: 'Arial', sans-serif;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .hearts-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .heart {
+        position: absolute;
+        font-size: 2em;
+        opacity: 0.6;
+        animation: float-up linear infinite;
+        color: #ff69b4;
+        text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+    }
+
+    @keyframes float-up {
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.6;
+        }
+        50% {
+            opacity: 0.8;
+        }
+        100% {
+            transform: translateY(-100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    .main-content {
+        z-index: 10;
+        text-align: center;
+        padding: 40px;
+        position: relative;
+    }
+
+    .border-line {
+        width: 80vw;
+        max-width: 900px;
+        height: 3px;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            #ff1493 20%, 
+            #ff69b4 50%, 
+            #ff1493 80%, 
+            transparent 100%);
+        margin: 0 auto;
+        animation: pulse-border 2s ease-in-out infinite;
+        box-shadow: 0 0 20px rgba(255, 20, 147, 0.6);
+    }
+
+    @keyframes pulse-border {
+        0%, 100% {
+            opacity: 0.6;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.6);
+        }
+        50% {
+            opacity: 1;
+            box-shadow: 0 0 30px rgba(255, 20, 147, 0.9);
+        }
+    }
+
+    .title {
+        font-size: 4.5em;
+        font-weight: bold;
+        color: #ff1493;
+        text-shadow: 
+            0 0 20px rgba(255, 20, 147, 0.8),
+            0 0 40px rgba(255, 20, 147, 0.6),
+            0 0 60px rgba(255, 20, 147, 0.4);
+        margin: 30px 0;
+        animation: soft-pulse 3s ease-in-out infinite;
+        letter-spacing: 2px;
+    }
+
+    @keyframes soft-pulse {
+        0%, 100% {
+            text-shadow: 
+                0 0 20px rgba(255, 20, 147, 0.6),
+                0 0 40px rgba(255, 20, 147, 0.4),
+                0 0 60px rgba(255, 20, 147, 0.2);
+        }
+        50% {
+            text-shadow: 
+                0 0 30px rgba(255, 20, 147, 1),
+                0 0 60px rgba(255, 20, 147, 0.8),
+                0 0 90px rgba(255, 20, 147, 0.6);
+        }
+    }
+
+    .subtitle {
+        font-size: 2.5em;
+        color: #ff69b4;
+        text-shadow: 
+            0 0 15px rgba(255, 105, 180, 0.7),
+            0 0 30px rgba(255, 105, 180, 0.5);
+        margin: 20px 0;
+        animation: soft-pulse 3s ease-in-out infinite 0.5s;
+    }
+
+    .emoji {
+        font-size: 1.2em;
+        display: inline-block;
+        animation: bounce 1.5s ease-in-out infinite;
+    }
+
+    .emoji.lion {
+        animation-delay: 0.2s;
+    }
+
+    .emoji.heart {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0) scale(1);
+        }
+        50% {
+            transform: translateY(-10px) scale(1.1);
+        }
+    }
+
+    .yay {
+        font-size: 3em;
+        color: #ffd700;
+        text-shadow: 
+            0 0 20px rgba(255, 215, 0, 0.8),
+            0 0 40px rgba(255, 215, 0, 0.6);
+        margin-top: 20px;
+        animation: yay-shake 1s ease-in-out infinite;
+        font-weight: bold;
+    }
+
+    @keyframes yay-shake {
+        0%, 100% {
+            transform: rotate(-5deg) scale(1);
+        }
+        50% {
+            transform: rotate(5deg) scale(1.05);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .title {
+            font-size: 2.5em;
+        }
+        .subtitle {
+            font-size: 1.5em;
+        }
+        .yay {
+            font-size: 2em;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <div class="hearts-container" id="hearts"></div>
+
+```
+    <div class="main-content">
+        <div class="border-line"></div>
+        
+        <h1 class="title">
+            ♥ Happy Valentine's Day ♥
+        </h1>
+        
+        <h2 class="subtitle">
+            to our L.E.A.Ders 
+            <span class="emoji lion">🦁</span><span class="emoji heart">❤️</span>
+        </h2>
+        
+        <div class="yay">yay!</div>
+        
+        <div class="border-line" style="margin-top: 30px;"></div>
+    </div>
+</div>
+
+<script>
+    // Generate floating hearts
+    const heartsContainer = document.getElementById('hearts');
+    const heartSymbols = ['♥', '♡', '<3', '💕', '💖'];
+    
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+        
+        // Random horizontal position
+        heart.style.left = Math.random() * 100 + '%';
+        
+        // Random animation duration (slower = calmer)
+        const duration = 8 + Math.random() * 8; // 8-16 seconds
+        heart.style.animationDuration = duration + 's';
+        
+        // Random delay
+        heart.style.animationDelay = Math.random() * 5 + 's';
+        
+        // Random size variation
+        const scale = 0.5 + Math.random() * 1;
+        heart.style.transform = `scale(${scale})`;
+        
+        heartsContainer.appendChild(heart);
+        
+        // Remove heart after animation completes
+        setTimeout(() => {
+            heart.remove();
+        }, (duration + 5) * 1000);
+    }
+    
+    // Create initial hearts
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => createHeart(), i * 500);
+    }
+    
+    // Continuously add new hearts
+    setInterval(() => {
+        createHeart();
+    }, 2000);
+</script>
+```
+
+</body>
+</html>
