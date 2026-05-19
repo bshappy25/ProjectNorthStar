@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr. Benji's Book Creator · #readabook</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fef9f0;
+  --ink: #1e1410;
+  --card: #ffffff;
+  --muted: #8a7a6a;
+  --radius: 16px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.10);
+
+  /* tone colors - set dynamically */
+  --tone-bg: #fff0f0;
+  --tone-accent: #e63946;
+  --tone-dark: #9b1b26;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+/* ── HEADER ── */
+header {
+  text-align: center;
+  padding: 2rem 1rem 1.5rem;
+  background: white;
+  border-bottom: 3px solid #f0e8d8;
+}
+
+.header-lion { font-size: 2rem; margin-bottom: 0.3rem; }
+
+header h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  color: var(--ink);
+  line-height: 1;
+}
+
+header h1 em {
+  color: #e63946;
+  font-style: normal;
+}
+
+.header-tag {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── FORM ── */
+.form-wrap {
+  max-width: 620px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.step-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+  border: 2px solid #f0e8d8;
+}
+
+.step-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.step-question {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.2rem;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+
+/* Text inputs */
+.text-input {
+  width: 100%;
+  border: 2px solid #e8dfd0;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  background: #fef9f0;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.text-input:focus {
+  border-color: #e63946;
+  box-shadow: 0 0 0 3px rgba(230,57,70,0.12);
+}
+.text-input::placeholder { color: #c4b8a8; font-weight: 400; }
+
+/* Emoji genre picker */
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.6rem;
+}
+
+.emoji-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0.7rem 0.4rem;
+  border: 2.5px solid #e8dfd0;
+  border-radius: 12px;
+  background: #fef9f0;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Nunito', sans-serif;
+}
+
+.emoji-btn:hover { border-color: #c4b8a8; background: #fff; transform: translateY(-2px); }
+
+.emoji-btn.selected {
+  border-color: #e63946;
+  background: #fff0f1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(230,57,70,0.2);
+}
+
+.emoji-icon { font-size: 1.8rem; line-height: 1; }
+.emoji-label { font-size: 10px; font-weight: 700; color: var(--muted); text-align: center; }
+.emoji-btn.selected .emoji-label { color: #e63946; }
+
+/* Color tone picker */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+}
+
+.color-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 1rem 0.5rem 0.7rem;
+  border: 2.5px solid #e8dfd0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Nunito', sans-serif;
+}
+
+.color-btn:hover { transform: translateY(-2px); border-color: #c4b8a8; }
+
+.color-btn.selected { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+
+.color-swatch {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.6);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.color-word {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.color-vibe { font-size: 10px; color: var(--muted); font-weight: 600; }
+
+/* Scale slider */
+.scale-wrap { padding: 0.5rem 0; }
+
+.scale-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.scale-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #a8d8a8, #ffcc5c, #ff6b6b);
+  outline: none;
+  cursor: pointer;
+}
+
+.scale-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid #e63946;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  cursor: grab;
+  transition: transform 0.1s;
+}
+.scale-slider::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.15); }
+
+.scale-value {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.6rem;
+  color: #e63946;
+  min-width: 24px;
+  text-align: center;
+}
+
+.scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 0 2px;
+}
+
+/* ── CREATE BUTTON ── */
+.btn-create {
+  width: 100%;
+  padding: 1rem;
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.3rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 0 #9b1b26, 0 6px 16px rgba(230,57,70,0.3);
+  margin-top: 0.5rem;
+}
+.btn-create:hover { background: #c1121f; transform: translateY(-1px); }
+.btn-create:active { transform: translateY(2px); box-shadow: 0 2px 0 #9b1b26; }
+
+.error-msg {
+  background: #fff0f1;
+  border: 2px solid #ffa5ab;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  color: #c1121f;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 0.8rem;
+  display: none;
+}
+
+/* ── BOOK SCREEN ── */
+#book-screen { max-width: 680px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+.book-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.book-cover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.4rem 1rem;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+  background: var(--tone-bg);
+  color: var(--tone-dark);
+}
+
+.book-title-display {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+}
+
+.book-author-display {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.book-author-display span { color: var(--ink); font-weight: 800; }
+
+/* Page card */
+.page-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  border: 2px solid #f0e8d8;
+  margin-bottom: 1rem;
+  animation: fadeUp 0.3s ease-out;
+  border-top: 5px solid var(--tone-accent);
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chapter-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--tone-accent);
+}
+
+.page-num {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.chapter-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.3rem;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+
+.chapter-body {
+  font-family: 'Lora', serif;
+  font-size: 14.5px;
+  line-height: 1.85;
+  color: #2a1f14;
+  flex: 1;
+}
+
+.chapter-body p + p { margin-top: 0.8em; }
+
+.drop-cap::first-letter {
+  font-family: 'Fredoka One', cursive;
+  font-size: 3em;
+  float: left;
+  line-height: 0.78;
+  margin: 0.05em 0.08em 0 0;
+  color: var(--tone-accent);
+}
+
+.chapter-footer {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #f0e8d8;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #c4b8a8;
+}
+
+/* Nav */
+.book-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.nav-btn {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid #e8dfd0;
+  background: white;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.nav-btn:hover:not(:disabled) { border-color: var(--tone-accent); color: var(--tone-accent); transform: scale(1.05); }
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.nav-dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.nav-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #e8dfd0;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.nav-dot.active { background: var(--tone-accent); width: 20px; border-radius: 4px; }
+
+.book-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-top: 1.2rem;
+}
+
+.btn-action {
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  border: 2px solid #e8dfd0;
+  background: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-action:hover { border-color: var(--tone-accent); color: var(--tone-accent); }
+
+/* Placeholder page */
+.placeholder-banner {
+  background: #fff9e6;
+  border: 2px dashed #f0d080;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b08a00;
+  margin-top: 1rem;
+}
+
+/* Progress bar */
+.progress-bar-wrap {
+  height: 4px;
+  background: #f0e8d8;
+  border-radius: 2px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--tone-accent);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+@media print {
+  header, .book-nav, .book-actions, .progress-bar-wrap { display: none !important; }
+  .page-card { break-after: page; border: 1px solid #ddd; box-shadow: none; }
+}
+
+@media (max-width: 480px) {
+  .emoji-grid { grid-template-columns: repeat(5, 1fr); gap: 0.4rem; }
+  .emoji-icon { font-size: 1.4rem; }
+  .color-grid { grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <div class="header-lion">🦁</div>
+  <h1>Mr. Benji's <em>Book Creator</em></h1>
+  <span class="header-tag">#readabook</span>
+</header>
+
+<!-- ══ FORM SCREEN ══ -->
+<div id="form-screen" class="screen active">
+<div class="form-wrap">
+
+  <!-- Student name -->
+  <div class="step-card">
+    <p class="step-label">Step 1</p>
+    <p class="step-question">What's your name, author? ✍️</p>
+    <input class="text-input" id="student-name" type="text" placeholder="Your first name" maxlength="30">
+  </div>
+
+  <!-- Book title -->
+  <div class="step-card">
+    <p class="step-label">Step 2</p>
+    <p class="step-question">Give your book a cool title 📖</p>
+    <input class="text-input" id="book-title" type="text" placeholder="e.g. The Last Signal" maxlength="50">
+  </div>
+
+  <!-- Main character -->
+  <div class="step-card">
+    <p class="step-label">Step 3</p>
+    <p class="step-question">What's your main character's name? 🦸</p>
+    <input class="text-input" id="char-name" type="text" placeholder="e.g. Zara, Marcus, Leo..." maxlength="30">
+  </div>
+
+  <!-- Setting -->
+  <div class="step-card">
+    <p class="step-label">Step 4</p>
+    <p class="step-question">Where does your story happen? 🌍</p>
+    <input class="text-input" id="setting" type="text" placeholder="e.g. a floating city, a jungle school..." maxlength="60">
+  </div>
+
+  <!-- Genre (emoji) -->
+  <div class="step-card">
+    <p class="step-label">Step 5</p>
+    <p class="step-question">Pick a story world 👇</p>
+    <div class="emoji-grid">
+      <button class="emoji-btn" data-genre="sci-fi" onclick="pickGenre(this)">
+        <span class="emoji-icon">🚀</span>
+        <span class="emoji-label">Sci-Fi</span>
+      </button>
+      <button class="emoji-btn" data-genre="fantasy" onclick="pickGenre(this)">
+        <span class="emoji-icon">🔮</span>
+        <span class="emoji-label">Fantasy</span>
+      </button>
+      <button class="emoji-btn" data-genre="mystery" onclick="pickGenre(this)">
+        <span class="emoji-icon">🔍</span>
+        <span class="emoji-label">Mystery</span>
+      </button>
+      <button class="emoji-btn" data-genre="adventure" onclick="pickGenre(this)">
+        <span class="emoji-icon">🌊</span>
+        <span class="emoji-label">Adventure</span>
+      </button>
+      <button class="emoji-btn" data-genre="spooky" onclick="pickGenre(this)">
+        <span class="emoji-icon">👻</span>
+        <span class="emoji-label">Spooky</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tone (color) -->
+  <div class="step-card">
+    <p class="step-label">Step 6</p>
+    <p class="step-question">Pick a color that matches your story's vibe 🎨</p>
+    <div class="color-grid">
+      <button class="color-btn" data-tone="intense" onclick="pickTone(this)" style="border-color:#e8dfd0;">
+        <div class="color-swatch" style="background:#e63946;"></div>
+        <span class="color-word" style="color:#e63946;">Red</span>
+        <span class="color-vibe">Intense</span>
+      </button>
+      <button class="color-btn" data-tone="calm" onclick="pickTone(this)" style="border-color:#e8dfd0;">
+        <div class="color-swatch" style="background:#457b9d;"></div>
+        <span class="color-word" style="color:#457b9d;">Blue</span>
+        <span class="color-vibe">Calm</span>
+      </button>
+      <button class="color-btn" data-tone="funny" onclick="pickTone(this)" style="border-color:#e8dfd0;">
+        <div class="color-swatch" style="background:#f4a261;"></div>
+        <span class="color-word" style="color:#d4690a;">Yellow</span>
+        <span class="color-vibe">Funny</span>
+      </button>
+      <button class="color-btn" data-tone="mysterious" onclick="pickTone(this)" style="border-color:#e8dfd0;">
+        <div class="color-swatch" style="background:#7b2d8b;"></div>
+        <span class="color-word" style="color:#7b2d8b;">Purple</span>
+        <span class="color-vibe">Mysterious</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Conflict scale -->
+  <div class="step-card">
+    <p class="step-label">Step 7</p>
+    <p class="step-question">How much trouble does your character get into? ⚡</p>
+    <div class="scale-wrap">
+      <div class="scale-row">
+        <input class="scale-slider" type="range" id="conflict-scale" min="1" max="5" value="3"
+          oninput="updateScale(this.value)">
+        <span class="scale-value" id="scale-display">3</span>
+      </div>
+      <div class="scale-labels">
+        <span>😌 A little</span>
+        <span>😅 Some</span>
+        <span>😤 A lot</span>
+        <span>😱 SO much</span>
+        <span>🔥 EPIC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="error-msg" id="error-msg"></div>
+  <button class="btn-create" onclick="buildBook()">✨ Make My Book!</button>
+
+</div>
+</div>
+
+<!-- ══ BOOK SCREEN ══ -->
+<div id="book-screen" class="screen">
+  <div class="book-header">
+    <div class="book-cover-badge" id="book-badge">🚀 Sci-Fi · Intense</div>
+    <h2 class="book-title-display" id="book-title-display"></h2>
+    <p class="book-author-display">by <span id="book-author-display"></span></p>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:12.5%"></div>
+  </div>
+
+  <div id="page-container"></div>
+
+  <div class="book-nav">
+    <button class="nav-btn" id="prev-btn" onclick="navigate(-1)" disabled>‹</button>
+    <div class="nav-dots" id="nav-dots"></div>
+    <button class="nav-btn" id="next-btn" onclick="navigate(1)">›</button>
+  </div>
+
+  <div class="book-actions">
+    <button class="btn-action" onclick="showScreen('form-screen')">← Start over</button>
+    <button class="btn-action" onclick="window.print()">🖨 Print</button>
+  </div>
+</div>
+
+</div><!-- end app -->
+
+<script>
+// ── STATE ──
+let selectedGenre = null;
+let selectedTone = null;
+let currentPage = 0;
+let pages = [];
+
+// ── TONE COLORS ──
+const toneConfig = {
+  intense:    { accent: '#e63946', bg: '#fff0f1', dark: '#9b1b26', label: 'Intense 🔥' },
+  calm:       { accent: '#457b9d', bg: '#eef4f8', dark: '#2a5068', label: 'Calm 🌊' },
+  funny:      { accent: '#f4a261', bg: '#fff6ee', dark: '#9a4e0a', label: 'Funny 😂' },
+  mysterious: { accent: '#7b2d8b', bg: '#f5eef8', dark: '#4a1757', label: 'Mysterious 🔮' },
+};
+
+const genreEmoji = {
+  'sci-fi': '🚀', fantasy: '🔮', mystery: '🔍', adventure: '🌊', spooky: '👻'
+};
+const genreLabel = {
+  'sci-fi': 'Sci-Fi', fantasy: 'Fantasy', mystery: 'Mystery', adventure: 'Adventure', spooky: 'Spooky'
+};
+
+// ── INPUT HANDLERS ──
+function pickGenre(btn) {
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedGenre = btn.dataset.genre;
+}
+
+function pickTone(btn) {
+  document.querySelectorAll('.color-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.style.borderColor = '#e8dfd0';
+  });
+  btn.classList.add('selected');
+  selectedTone = btn.dataset.tone;
+  const cfg = toneConfig[selectedTone];
+  btn.style.borderColor = cfg.accent;
+}
+
+function updateScale(val) {
+  document.getElementById('scale-display').textContent = val;
+}
+
+// ── STORY DATABASE ──
+// Slot key: genre-tone  (e.g. "sci-fi-intense")
+// {char}, {setting}, {title} are replaced at render time
+
+const STORIES = {
+
+  /* ══ WRITTEN: 1 of 5 ══ Sci-Fi + Intense */
+  'sci-fi-intense': [
+    {
+      title: "The Signal",
+      text: `The day {char} discovered the signal, everything changed. It came through the old radio receiver in the corner of the lab — three short bursts, two long, then silence. Nobody else in {setting} had heard anything like it. {char} pressed the headphones tighter and held their breath.\n\nThe signal wasn't from Earth. The waveform on the screen proved it — no known satellite, no military frequency, nothing in any database. {char}'s hands were shaking as they began to record. Outside, the city hummed along as usual, unaware that one of its youngest residents had just made contact with something beyond the stars.\n\nThere was no one to call. No teacher would believe it. No parent would understand. So {char} did the only logical thing — they wrote back.`
+    },
+    {
+      title: "Don't Tell Anyone",
+      text: `The reply came in fourteen minutes. Fourteen minutes — not years, not decades like scientists always said it would take. Whatever was on the other end of that signal was close. Way too close.\n\nThe message decoded into a single sentence: WE HAVE BEEN WAITING FOR YOU, {char}.\n\nThey knew the name. {char} pushed back from the desk so hard the chair rolled into the wall. How? The receiver was offline, untraceable, just a hobby project built from junk parts. Nothing about it should have been traceable. And yet there it was, their name, glowing on the screen in green text like something out of a nightmare.\n\nOr maybe — just maybe — out of a dream.`
+    },
+    {
+      title: "First Contact",
+      text: `{char} typed back slowly: HOW DO YOU KNOW MY NAME?\n\nThe answer took thirty seconds this time. WE HAVE WATCHED {setting} FOR MANY YEARS. YOU ARE THE FIRST TO LISTEN.\n\nThat hit different. Not the first human — the first to listen. Which meant others had the equipment, others had the signal, and every single one of them had ignored it. {char} felt a strange mix of pride and terror settle in their stomach like a stone.\n\nWE NEED YOUR HELP, the screen flashed. THE ONES WHO HURT US ARE COMING. AND THEY KNOW WHERE YOU ARE TOO.\n\n{char} looked out the window at the familiar streets of {setting}. Nothing looked different. But everything had changed.`
+    },
+    {
+      title: "The Hunters",
+      text: `By morning, three black vehicles had parked at the end of the street. No markings, no plates. The drivers didn't move.\n\n{char} watched them from behind the curtain, barely breathing. The aliens had warned this would happen — not aliens exactly, they'd corrected, but "travelers without permission." And the people in those cars were the ones who kept them from being found. Government? Private? It didn't matter. What mattered was they were here.\n\nThe receiver buzzed: MOVE. NOW. TAKE THE DEVICE. DO NOT LET THEM SCAN IT.\n\n{char} grabbed the receiver, shoved it into a backpack, and climbed out the back window. The alley behind {setting} had never felt so long. The footsteps behind them started thirty seconds later.`
+    },
+    {
+      title: "Running",
+      text: `{char} ran until their lungs burned and the alley spilled out into the old warehouse district. The backpack felt like it weighed a thousand pounds. Every shadow looked like a threat.\n\nThe receiver crackled: LEFT. THEN THE ORANGE DOOR.\n\nThey followed it without thinking. The orange door was rusted, barely hanging on its hinges, and it opened into a room that smelled like motor oil and old wood. {char} slammed it shut and pressed against it, heart hammering.\n\nOn the floor, drawn in chalk, was a symbol. Exactly like the one the travelers had sent in their very first message. Someone had been here. Someone knew. And {char} had no idea whether that was good news or the worst news imaginable.`
+    },
+    {
+      title: "The Truth",
+      text: `Behind a false wall panel was a notebook, filled with the same waveform patterns {char} had been decoding for days. Someone else had made contact — years ago. The last entry was dated three years back and ended mid-sentence.\n\nThe traveler's voice came through clearly now, no longer in text: "The one before you got too close to those who hunt us. We lost them. We did not want to lose you too. That is why we waited — for someone careful. For someone like you, {char}."\n\n{char} sat down on the dusty floor of the warehouse in {setting} and stared at the notebook. A stranger had started this. They had continued it. Whatever happened next, they were not the first — and that meant they didn't have to be the last.`
+    },
+    {
+      title: "The Choice",
+      text: `The traveler laid it out plainly: help them transmit a signal that would reveal the hunters to every space-monitoring agency on Earth, and the chase would end. But it would also reveal that contact had been made. {setting} would never be the same. {char} would never be anonymous again.\n\nOr — say nothing. Shut down the receiver. Go back to normal life and pretend the orange door didn't exist.\n\n{char} opened the receiver's panel and looked at the wires inside. Their own hands. Their own choice. Outside, they could hear the vehicles rolling slowly down the street. Time was almost up.`
+    },
+    {
+      title: "After the Signal",
+      text: `{char} hit send.\n\nThe burst transmission lasted four seconds. In those four seconds, seventeen observatories worldwide registered an anomalous signal. Within the hour, the black vehicles were gone — not retreating, but summoned away to deal with something much bigger than one kid in {setting}.\n\nThe traveler's final message was simple: THANK YOU, {char}. WE WILL NOT FORGET.\n\nThe receiver went quiet after that. Not broken — just done. {char} walked home through streets that looked exactly the same and felt completely different. They didn't know what came next. Nobody did. But somewhere up past the clouds, past the satellites, past the dark between stars, someone was safe because {char} had chosen to listen.\n\nThat felt like enough.`
+    }
+  ],
+
+  /* ══ WRITTEN: 2 of 5 ══ Fantasy + Mysterious */
+  'fantasy-mysterious': [
+    {
+      title: "The Map That Wasn't There",
+      text: `{char} found the map inside a library book that had never been checked out. The date stamp on the back said 1887, which was impossible — the library in {setting} hadn't opened until 1994. But there it was, pressed between two ordinary pages like a secret held too long.\n\nThe map showed {setting} — or something that looked like it — but with buildings that didn't exist and a forest where the shopping center now stood. In the center of the map, someone had written a single word in faded red ink: REMEMBER.\n\n{char} stared at it for a long time. They didn't know what they were supposed to remember. But their hands were tingling like they did before a thunderstorm, and the edges of the map seemed to shift when they didn't look directly at them.`
+    },
+    {
+      title: "The Other Side",
+      text: `That night {char} dreamed of the forest on the map. They walked through silver trees that made no sound when the wind moved through them, and the path ahead always curved just out of sight. Something was following — not threatening, just present, like a word on the tip of your tongue.\n\nThey woke up with muddy shoes.\n\nIn {setting}, mud was everywhere after rain. But it hadn't rained in eleven days. {char} held one shoe up to the light and studied the soil. Dark red clay. The kind that only existed, according to every geography source they could find, in places that no longer appeared on any modern map.`
+    },
+    {
+      title: "The Guide",
+      text: `The figure appeared by the old oak at the edge of the school field — there one moment, unnoticed the next, the way something can be invisible until suddenly it isn't. They looked about the same age as {char} but their eyes were older than anything in {setting}.\n\n"You found the map," they said. Not a question.\n\n{char} didn't ask how they knew. It seemed beside the point. "What's REMEMBER supposed to mean?"\n\n"It means you've been here before," the figure said. "Not you exactly. But someone like you, every generation. The map chooses. It's been waiting in that book for someone who could see it." They glanced toward the tree line. "We should move before the hour turns. When the hour turns, the in-between closes.""`
+    },
+    {
+      title: "The In-Between",
+      text: `The in-between was not another world exactly. It was more like the pause between two notes in a song — the space that gives music its shape. {char} walked through it beside the guide and felt time move differently, slower and thicker, like wading through warm water.\n\nThe silver trees from the dream were real. Or real enough. Their roots disappeared into ground that glowed faintly blue, and the path curved the same way it had in sleep. {char} understood suddenly that the dream hadn't been a dream. It had been a preview.\n\n"Someone is taking things from here," the guide said quietly. "Pieces of the in-between. Every piece they take, something disappears from {setting}. A memory. A place. Eventually a person."\n\n{char} thought of the library. Of books with dates that couldn't be right. Of stories that felt like they'd been partially erased.`
+    },
+    {
+      title: "What Was Stolen",
+      text: `The thief had left tracks — not footprints but absences. Places where the ground held the shape of something that was no longer there. {char} followed them deeper into the in-between while the guide named what had been taken: the memory of {setting}'s original name, three songs no one could quite remember anymore, a year that had simply skipped in the town records.\n\nAt the center of the absence was a door made of compressed fog. Behind it, the stolen things waited in a jar made of stopped time — {char} could see them swirling, half-formed and dim. A year. Three melodies. A name.\n\nAnd standing between {char} and the jar was someone who looked exactly like them.`
+    },
+    {
+      title: "The Other {char}",
+      text: `"I'm not stealing," the other {char} said. "I'm keeping them. If they stay in {setting} they'll disappear on their own. Memories dissolve. Names get forgotten. At least here I can hold them."\n\nThe real {char} looked at the jar. The swirling things inside did look preserved — bright, even. But they were also unreachable. A memory no one could access wasn't a memory anymore. It was just a locked room.\n\n"You can't keep everything," {char} said slowly. "That's not saving it. That's just... hiding it."\n\nThe other {char} was quiet for a long moment. In the pause, the door of fog shifted. The guide touched {char}'s shoulder. The hour was turning.`
+    },
+    {
+      title: "Return",
+      text: `{char} didn't fight for the jar. They reached out their hand instead. "Give them back," they said. "I'll help you find a better way to keep things."\n\nThe other {char} looked at the hand for a long time. Then, slowly, they handed over the jar. It was warm, like something recently alive. When {char} opened it in the in-between, the stolen pieces rose like smoke and moved back toward the boundary between worlds.\n\nThe year snapped back into the {setting} town records. The three songs returned to the back of people's minds, half-remembered and hummed at odd moments. The original name of the town — Ellmore — began appearing in conversations, as if it had never left.`
+    },
+    {
+      title: "What Remains",
+      text: `The map was blank when {char} returned it to the library book. Not missing — just done. Its job was finished. {char} slid it back between the same two pages and put the book back on the shelf where it would wait, probably, for the next person who needed to remember.\n\n{setting} felt different and exactly the same, the way it always does after something significant that nobody else witnessed. {char} walked home through streets that had a name again — Ellmore, under the newer one, the way old paint shows through.\n\nSomewhere in the in-between, the other {char} was still there. But they were looking for a different way now. And {char} had the feeling that, if they ever went back, they'd find them doing something much more like preserving than hiding.\n\nThat felt like the beginning of something good.`
+    }
+  ],
+
+  /* ══ WRITTEN: 3 of 5 ══ Mystery + Calm */
+  'mystery-calm': [
+    {
+      title: "The Missing Hours",
+      text: `{char} noticed it first on a Tuesday. The clock in the kitchen read 7:15, the bus came at 7:40, and yet by the time {char} reached the corner of {setting}, it was somehow already 8:30. Not one minute off — seventy-five minutes, gone.\n\nIt happened again on Thursday. Then Friday. Exactly seventy-five minutes, always in the morning, always between home and the same corner. {char} started writing it down in a small notebook — not because they were frightened exactly, but because unexplained things have a way of demanding to be examined.\n\nNo one else in {setting} seemed to notice. Which meant either the missing time was happening only to {char}, or everyone else had simply chosen not to look.`
+    },
+    {
+      title: "The Logbook",
+      text: `{char} found the second logbook by accident, tucked behind a loose brick in the wall near the corner where the time went wrong. It was old — maybe thirty years, maybe more — filled with neat, careful handwriting and a running list of dates and durations.\n\nThe missing time had been happening in {setting} for decades. And the person who'd kept the log had documented it with the same calm precision {char} had been using: no panic, just facts. Dates. Durations. Weather conditions. What they'd been thinking about.\n\nThe last entry was dated eleven years ago. Then nothing. {char} turned to a fresh page and added today's date. If someone had stopped recording, that was a problem. But problems, in {char}'s experience, were just questions that hadn't been answered yet.`
+    },
+    {
+      title: "The Watcher",
+      text: `{char} set an alarm for 7:10 and positioned themselves at the corner with a watch, a phone, and the logbook. If the time was going to disappear, they were going to watch it happen.\n\nAt 7:14, a woman stopped beside them. She looked at the logbook and nodded, the way people nod at something they recognize. "You found Marcus's book," she said.\n\nShe wasn't threatening. She was just very, very tired. She told {char} she'd watched the corner for years after Marcus stopped, trying to understand what he'd started to figure out. She'd never managed it. "He got close," she said. "Then he left {setting}. He didn't say why."\n\nAt 7:15, the light changed. At 8:30, they both looked at their watches at the same time.`
+    },
+    {
+      title: "The Pattern",
+      text: `With two observers, the data got better. The woman's name was Dr. Osei, and she thought in patterns the way {char} thought in questions. Together they mapped eleven years of logs against weather data, traffic records, and lunar cycles.\n\nThe missing time only happened when three things overlapped: early morning, clear sky, and a certain angle of light hitting the old water tower at the edge of {setting}. Not a supernatural force — a physical one. Something about the geometry of that corner, the reflection off the tower, and the particular frequency of morning light created a gap in ordinary perception.\n\n{char} stared at the map they'd drawn. "So Marcus figured this out?" "We think so," Dr. Osei said. "But there's a part we haven't solved." She pointed to the last page of the logbook. Marcus had written one final note: IT'S NOT THE LIGHT. IT'S WHAT'S IN THE LIGHT.`
+    },
+    {
+      title: "What's in the Light",
+      text: `{char} brought a prism the next morning. It was a small experiment — simple physics, the kind they'd done in seventh grade. Hold the prism in the angled light and see what it split into.\n\nWhat came out the other side wasn't a rainbow.\n\nIt was a frequency — a vibration that Dr. Osei measured on her phone's spectrometer and went very quiet for a moment before saying, "This matches the resonant frequency of human short-term memory consolidation." She said it calmly, the way people say difficult things when they've decided to be honest. "During those seventy-five minutes, the brain isn't losing time. It's processing something it can't normally process. Something in that light is communicating with us."\n\n{char} looked at the water tower. At the light. At the town of {setting} going about its morning. "Communicating what?" they asked.`
+    },
+    {
+      title: "The Message",
+      text: `It took a week to decode it. The frequency, run through Dr. Osei's equipment, resolved into something that wasn't language but behaved like it — repeating patterns, variations, emphasis. {char} spent hours with the notebook until suddenly, on a Wednesday afternoon, it clicked.\n\nThe message was a record. Something — not alien, just old, older than the town — had been documenting {setting} since before anyone had named it. Every seventy-five-minute gap was an entry. A log, not of human time, but of something else's careful observation.\n\nThey weren't losing time. They were being included in a record that had been running for longer than anyone in {setting} had been alive. {char} read that back to Dr. Osei and she sat with it for a long moment.\n\n"Marcus must have realized," she said finally. "That's why he left. He didn't know what to do with it."`
+    },
+    {
+      title: "The Response",
+      text: `{char} decided to respond.\n\nUsing the prism, the spectrometer, and Dr. Osei's equipment, they built something that could send back a signal at the same frequency. Not a translation — they didn't have one. Just acknowledgment. A pattern that said: we know you're here, we know you're watching, we're watching too.\n\nThey sent it at 7:15 on a clear Friday morning.\n\nThe next day, for the first time in recorded history — Marcus's logbook and all — the missing time lasted only one minute. Just enough to say something. {char} added the data to the book in careful handwriting and felt, for the first time since this started, completely calm.`
+    },
+    {
+      title: "The Long Record",
+      text: `{char} mailed a copy of the logbook to Marcus. Dr. Osei had his address — he'd gone to live somewhere quieter, she said, but he'd want to know.\n\nHe wrote back two weeks later. Just a postcard. On one side was a photo of mountains. On the other: I figured out it was listening. I didn't know you could write back. Well done.\n\n{char} pinned the postcard above the desk at home in {setting} and continued the logbook. The entries were different now — shorter, because there was less missing time, and more careful, because {char} understood that they were adding to something enormous and patient and old.\n\nSome mysteries, they'd learned, don't end when you solve them. They just open into something larger and quieter and worth the rest of a lifetime to understand.`
+    }
+  ],
+
+  /* ══ WRITTEN: 4 of 5 ══ Adventure + Funny */
+  'adventure-funny': [
+    {
+      title: "The Absolutely Terrible Plan",
+      text: `{char} had many excellent qualities. Planning was not one of them.\n\nThe idea started simply enough: {setting} had a legend about a hidden waterfall somewhere past the old reservoir, and {char} had a free Saturday, a backpack full of slightly expired granola bars, and a level of confidence that was — in retrospect — not supported by any evidence.\n\n"I'll be back by lunch," {char} told the family dog. The dog looked skeptical. The dog was right.\n\nBy 10am, {char} had taken three wrong turns, walked through a spider web face-first (twice — they went back to check if it was really there), and accidentally scared a deer so badly it tripped over its own legs. The adventure had begun.`
+    },
+    {
+      title: "An Unexpected Sidekick",
+      text: `The kid at the trailhead had a map. A real one, on actual paper, with contour lines and everything. Their name was printed on their backpack tag: FELIX. Felix looked at {char}'s phone (no signal), {char}'s granola bars (expired October), and {char}'s shoes (sandals) and shook their head slowly.\n\n"You're going to the waterfall," Felix said. It wasn't a question.\n\n"Obviously," said {char}, with great confidence.\n\n"I've been trying to find it for three weekends," Felix said. They held up the map. "I have a system."\n\n{char} looked at the map. Then at {setting}'s trail disappearing into the trees. Then back at the map. "Is your system working?"\n\n"...Not yet," Felix admitted. They fell into step beside {char} anyway. Some adventures, apparently, are a package deal.`
+    },
+    {
+      title: "The Wrong Trail",
+      text: `Felix's system involved cardinal directions, which was great in theory and less great when, as it turned out, his compass had been magnetized by the speakers in his bag and was pointing enthusiastically toward the nearest Bluetooth device.\n\nThey ended up at a picnic area full of a family reunion. Forty-seven people. A large banner that said GOMEZ FAMILY GAMES. And a woman who handed {char} a plate of food before anyone could explain they weren't actually a Gomez.\n\nThe food was incredible. {char} ate two helpings. Felix won the three-legged race. They didn't find the waterfall. They did, however, leave with a hand-drawn map from Abuela Gomez, who had found the waterfall in 1987 and been going back every summer since.\n\n"Why didn't you just show people?" {char} asked.\n\nAbuela Gomez smiled. "Nobody asked.""`
+    },
+    {
+      title: "Uphill Both Ways",
+      text: `Abuela's map was detailed and accurate and required climbing a hill that appeared completely reasonable from a distance and was, in reality, basically vertical.\n\n{char} stopped at least six times. Felix stopped four times but was very supportive during {char}'s stops, offering granola bars and philosophical observations about effort and reward. {char} told Felix to please stop being encouraging for a moment so they could just suffer in peace.\n\nAt the top of the hill, a squirrel ran across the path and knocked Felix's map out of his hand. The map traveled approximately forty feet downhill in two seconds.\n\n"We both saw that happen," {char} said.\n\n"We did," Felix confirmed.\n\nThey looked at each other. Then they looked at the map, far below.\n\n"Abuela would know," {char} said. "Let's just go from memory." Felix's expression made it very clear he thought this was a terrible idea. They went from memory anyway.`
+    },
+    {
+      title: "Lost (Officially)",
+      text: `Being officially lost was, {char} decided, actually quite peaceful once you accepted it. The woods in {setting} were nice. Birds were doing bird things. Sunlight came through the trees at nice angles. There were worse places to have no idea where you were.\n\nFelix was handling it slightly less calmly. He was doing what he called "orienteering" and what {char} recognized as "walking in purposeful-looking circles." After the third circle, {char} sat down on a log.\n\nThat's when they heard it. Not the waterfall — not yet. Something better, actually. The distant sound of the Gomez family reunion, specifically the very loud argument about whether Cousin Diego had cheated at the relay race.\n\n"We're not that far," {char} said.\n\n"We've been walking for two hours," Felix said.\n\n"We walk fast when we're lost," {char} said, already moving toward the sound.`
+    },
+    {
+      title: "Actual Progress",
+      text: `Cousin Diego had, as it turned out, definitely cheated. But more importantly, Abuela Gomez looked at {char} and Felix, looked at the direction they'd come from, and pointed slightly to the left.\n\n"You passed it," she said. "By about fifty meters."\n\nThere was a very long silence.\n\n"How long ago?" {char} asked.\n\n"When you were complaining about the hill," said Felix, very quietly.\n\n{char} considered this information. "Okay," they said. "Okay. That's fine. Fifty meters. We can do fifty meters."\n\nAbuela Gomez packed them extra food for the walk back. The Gomez family cheered them off with a lot of enthusiasm that felt, to {char}, slightly more celebratory than the situation warranted. But also kind of great.`
+    },
+    {
+      title: "The Waterfall",
+      text: `It was fifty-three meters, technically. But it was also worth every single one of them.\n\nThe waterfall in {setting} was not the massive dramatic cascade {char} had imagined. It was modest — maybe twelve feet tall — falling into a pool so clear you could see every stone at the bottom. Ferns grew on every surface. The sound was the best sound {char} had heard all year: just water doing exactly what water is supposed to do, in a place that felt like it had been waiting quietly for someone to show up and notice.\n\n{char} and Felix sat beside it for a long time without saying anything, which was unusual for both of them.\n\n"Good plan," Felix said finally.\n\n{char} smiled. "Told you."`
+    },
+    {
+      title: "Home Before Dinner (Almost)",
+      text: `They got back to {setting} at 6:47pm. Lunch had been the Gomez family food, which meant technically {char} had been back "by lunch" in the sense that lunch was a meal that had occurred during the day.\n\n{char}'s family was not convinced by this argument. The dog, however, greeted {char} like a hero.\n\nFelix texted that night: same time next Saturday? I found another legend. There's supposedly an old stone tower past the eastern ridge.\n\n{char} looked at their sandals, still damp. Their empty granola bar wrappers. Their notes on the day that were mostly just the word "wow" written several times and a drawing of the waterfall that was not, artistically speaking, very accurate.\n\nThey texted back: I'll get better shoes.\n\nFelix sent back a thumbs up and what {char} suspected was a relieved emoji.\n\nThe next adventure was already beginning.`
+    }
+  ],
+
+  /* ══ WRITTEN: 5 of 5 ══ Spooky + Intense */
+  'spooky-intense': [
+    {
+      title: "Lights Off",
+      text: `Every light in {setting} went out at exactly 11:11pm. Not a blackout — a choice. {char} watched from the window as the streetlights died one by one in a perfect line, like something was walking down the road turning them off by hand.\n\nThe power was fine. {char} checked the breaker. The phone had full signal. But every light source — lamps, screens, the digital clock on the microwave — had simply stopped working. Not flickering. Stopped.\n\nOutside, in the total dark, something was moving at the edge of the yard. Not fast. Not threatening. But patient, the way things are patient when they have nowhere else to be and all the time in the world.`
+    },
+    {
+      title: "The Sound",
+      text: `{char} had heard the sound before. Not recently — years ago, young enough that it had blurred into the category of "probably a dream." But standing in the dark in {setting}, it came back with horrible precision: three low notes, descending, the kind of sound that doesn't bounce off walls but seems to come from inside them.\n\nThe notes stopped. The thing at the edge of the yard was closer.\n\n{char} grabbed a flashlight from the emergency drawer — the hand-crank kind, no electricity needed. It worked. The beam cut through the dark and landed, for just a moment, on something that was mostly shadow but had eyes. Not threatening eyes. Watching eyes.\n\nThen the beam went out too.`
+    },
+    {
+      title: "What It Wants",
+      text: `{char} didn't run. Running felt wrong — like it would change something about what was happening, tip a balance that was currently, barely, in their favor.\n\nInstead they spoke. "What do you want?"\n\nThe answer didn't come in words. It came in the air pressure changing, in a feeling behind the eyes that resolved into something like an image: a door. Old wood. A brass handle. A door that {char} recognized immediately — it was in the basement of the oldest building in {setting}, the one that had been boarded up for fifteen years.\n\nThe thing wasn't threatening. It was asking.\n\n{char} stood in the dark for thirty seconds that felt like thirty years. Then they found their coat and their keys and stepped outside. The thing moved ahead of them like a guide, just barely visible, just enough to follow.`
+    },
+    {
+      title: "The Basement",
+      text: `The boarded-up building in {setting} had a loose panel around the back — {char} had known about it since middle school but never used it. Now they pulled it open and descended into a dark that was different from the night outside. Older. More settled.\n\nThe door from the vision was real. Exactly as shown: old wood, brass handle, set into the basement wall behind a collapsed shelving unit. {char} moved the shelves aside slowly, carefully, making as little noise as possible not because they were afraid of being heard but because the situation seemed to require quiet.\n\nThe handle was warm. That was wrong — it should have been cold. {char} turned it anyway.\n\nBehind the door was a room the size of a large closet, and in the room was a box, and around the box was the same shadow-thing that had walked {char} here, thinner now, as if it had spent itself making the journey.`
+    },
+    {
+      title: "What's in the Box",
+      text: `{char} opened the box.\n\nInside were photographs. Dozens of them, black and white, of {setting} at different points in time. And in every single photograph, in the background, at the edge of the frame — the same shape. Not threatening in any of them. Present.\n\nThe thing had been here a long time. Longer than anyone currently alive in {setting}. And what it had been doing, {char} understood suddenly with the specific clarity that comes at 2am in a dark basement — what it had been doing, all this time, was watching over.\n\nNot haunting. Guarding.\n\n"What are you guarding against?" {char} whispered.\n\nThe pressure changed again. This time the image was of the box itself. The photographs. What would happen if they were lost.\n\nSomething about {setting}'s history was in this box. And something had been making sure it stayed.`
+    },
+    {
+      title: "The Threat",
+      text: `{char} found the newspaper clippings at the bottom of the box. A development company had filed permits to demolish the old building — not in fifteen years, not eventually. In four days.\n\nThat was why the lights had gone out tonight. That was why the thing had come. Four days left to move what had been kept here, to make sure the record of {setting}'s history didn't get bulldozed into a parking structure.\n\n{char} looked at the shadow in the corner. It was barely visible now, a thickness in the air more than anything else. It had spent a long time holding this vigil. It was tired. And it had chosen {char} — the one person in {setting} who had asked what it wanted instead of running from what it was.\n\n"I'll take the box," {char} said. "I'll make sure people know."`
+    },
+    {
+      title: "Moving History",
+      text: `{char} made seven trips between the basement and home before dawn. The box, three wrapped bundles of older documents, and something at the very back of the room that turned out to be a hand-painted mural on canvas, rolled carefully and tied with twine.\n\nWith each trip, the thing in the basement grew lighter — not disappearing, but releasing. By the fifth trip {char} could barely feel it. By the seventh, the basement felt like just a basement again: old concrete, water smell, nothing watching.\n\nAt dawn, the lights in {setting} came back on.\n\n{char} sat at the kitchen table surrounded by a hundred years of photographs and felt the specific exhaustion of having done something necessary and hard and entirely without anyone's help or permission. The good kind of exhaustion.`
+    },
+    {
+      title: "What Remains",
+      text: `The historical society took three hours to respond to {char}'s email. Then they took twelve minutes to arrive.\n\nThe photographs, the documents, and the canvas mural went into proper archival storage. Two of the photographs turned out to be the only known images of {setting}'s founding. A professor came from a university two towns over. There were, eventually, articles.\n\n{char} didn't mention the thing in the basement. Some parts of a story aren't for everyone, and besides — it had kept the secret for a century. It had earned the right to remain one.\n\nThe building was granted a preservation order three days later. The demolition permit was revoked.\n\nThat night, {char} looked out the window at {setting} under the streetlights and waited a moment. Nothing moved at the edge of the yard. Nothing needed to.\n\nSomething old had finally been allowed to rest.`
+    }
+  ],
+
+};
+
+// ── CONFLICT INTENSITY MODIFIERS ──
+// These tweak the opening feel of chapter 1 based on scale 1-5
+const intensityOpeners = {
+  1: "It was a quiet kind of day — the sort where nothing seemed likely to happen, until it did.",
+  2: "Something felt slightly off that morning — small enough to ignore, big enough to notice.",
+  3: "Things were about to change in {setting}, though {char} didn't know it yet.",
+  4: "The kind of morning that looks normal but isn't — {char} could feel it before anything happened.",
+  5: "Everything in {setting} was about to fall apart. {char} was the only one who could stop it."
+};
+
+// ── PLACEHOLDER STORY ──
+function placeholderStory(genre, tone) {
+  const g = genreLabel[genre] || genre;
+  const t = tone.charAt(0).toUpperCase() + tone.slice(1);
+  return Array.from({length: 8}, (_, i) => ({
+    title: `Chapter ${i+1}`,
+    text: `This is a placeholder for the ${g} + ${t} story combination.\n\n[Mr. Benji: swap this chapter with your own writing here!]\n\nCharacter: {char} · Setting: {setting}`,
+    placeholder: true
+  }));
+}
+
+// ── BUILD BOOK ──
+function buildBook() {
+  const studentName = document.getElementById('student-name').value.trim();
+  const bookTitle   = document.getElementById('book-title').value.trim();
+  const charName    = document.getElementById('char-name').value.trim();
+  const setting     = document.getElementById('setting').value.trim();
+  const scale       = document.getElementById('conflict-scale').value;
+
+  const err = document.getElementById('error-msg');
+
+  if (!studentName) return showErr('What\'s your name? ✍️');
+  if (!bookTitle)   return showErr('Give your book a title! 📖');
+  if (!charName)    return showErr('Your character needs a name! 🦸');
+  if (!setting)     return showErr('Where does your story happen? 🌍');
+  if (!selectedGenre) return showErr('Pick a story world! (the emojis above)');
+  if (!selectedTone)  return showErr('Pick a vibe color! 🎨');
+
+  err.style.display = 'none';
+
+  const key = `${selectedGenre}-${selectedTone}`;
+  const toneConf = toneConfig[selectedTone];
+
+  // Set CSS tone variables
+  document.documentElement.style.setProperty('--tone-accent', toneConf.accent);
+  document.documentElement.style.setProperty('--tone-bg', toneConf.bg);
+  document.documentElement.style.setProperty('--tone-dark', toneConf.dark);
+
+  // Get story (written or placeholder)
+  let rawPages = STORIES[key] || placeholderStory(selectedGenre, selectedTone);
+
+  // Apply intensity opener to page 1
+  const opener = intensityOpeners[scale] || intensityOpeners[3];
+
+  pages = rawPages.map((ch, idx) => {
+    let text = ch.text;
+    // Inject intensity opener as first line of chapter 1
+    if (idx === 0) text = opener + '\n\n' + text;
+    // Replace tokens
+    text = text.replace(/\{char\}/g, charName).replace(/\{setting\}/g, setting);
+    const title = ch.title.replace(/\{char\}/g, charName).replace(/\{setting\}/g, setting);
+    return { ...ch, title, text };
+  });
+
+  // Set book header
+  document.getElementById('book-badge').textContent =
+    `${genreEmoji[selectedGenre]} ${genreLabel[selectedGenre]} · ${toneConf.label}`;
+  document.getElementById('book-title-display').textContent = bookTitle;
+  document.getElementById('book-author-display').textContent = studentName;
+
+  // Build nav dots
+  const dotsEl = document.getElementById('nav-dots');
+  dotsEl.innerHTML = pages.map((_, i) =>
+    `<div class="nav-dot${i===0?' active':''}" onclick="goToPage(${i})"></div>`
+  ).join('');
+
+  currentPage = 0;
+  renderPage(0);
+  showScreen('book-screen');
+}
+
+function renderPage(idx) {
+  const ch = pages[idx];
+  const paras = ch.text.split('\n').filter(p => p.trim());
+  const parasHtml = paras.map((p, i) => {
+    const safe = p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return i === 0 ? `<p class="drop-cap">${safe}</p>` : `<p>${safe}</p>`;
+  }).join('');
+
+  const isPlaceholder = ch.placeholder;
+
+  document.getElementById('page-container').innerHTML = `
+    <div class="page-card">
+      <div class="page-meta">
+        <span class="chapter-tag">Chapter ${idx+1} of 8</span>
+        <span class="page-num">${idx+1} / 8</span>
+      </div>
+      <h2 class="chapter-title">${ch.title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</h2>
+      <div class="chapter-body">${parasHtml}</div>
+      <div class="chapter-footer">
+        <span>#readabook</span>
+        <span>Mr. Benji's L.E.A.Ders Studio</span>
+      </div>
+      ${isPlaceholder ? '<div class="placeholder-banner">🛠 Placeholder — Mr. Benji can swap in a story here!</div>' : ''}
+    </div>`;
+
+  // Progress bar
+  document.getElementById('progress-fill').style.width = `${((idx+1)/8)*100}%`;
+
+  // Nav buttons
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('next-btn').disabled = idx === pages.length - 1;
+
+  // Dots
+  document.querySelectorAll('.nav-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+
+  currentPage = idx;
+}
+
+function navigate(dir) {
+  const next = currentPage + dir;
+  if (next >= 0 && next < pages.length) renderPage(next);
+}
+
+function goToPage(idx) { renderPage(idx); }
+
+function showErr(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (document.getElementById('book-screen').classList.contains('active')) {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft') navigate(-1);
+  }
+});
+</script>
+</body>
+</html>
