@@ -113,21 +113,120 @@ def init_state() -> None:
 def style() -> None:
     st.markdown("""
     <style>
-    :root{--bg:#06171d;--panel:rgba(9,35,45,.86);--border:rgba(119,242,222,.3);--text:#eafffb;--accent:#70f0d0;--muted:#a4c8c6}
-    div[data-testid="stAppViewContainer"]{background:radial-gradient(circle at 10% 0%,rgba(31,91,120,.3),transparent 35%),linear-gradient(180deg,#05131a,var(--bg))}
-    section[data-testid="stSidebar"]{background:rgba(3,15,20,.9);border-right:1px solid var(--border)}
+    :root{
+        --bg:#b8b8b8;
+        --panel:#cfcfcf;
+        --panel-2:#dedede;
+        --border:#606060;
+        --text:#000000;
+        --accent:#4a4a4a;
+        --muted:#222222;
+    }
+
+    html,body,[class*="css"],div[data-testid="stAppViewContainer"]{
+        background:#b8b8b8!important;
+        color:#000000!important;
+    }
+
+    div[data-testid="stAppViewContainer"]{
+        background:#b8b8b8!important;
+    }
+
+    section[data-testid="stSidebar"]{
+        background:#a9a9a9!important;
+        border-right:1px solid #606060!important;
+    }
+
     .block-container{padding-top:1.1rem;max-width:1500px}
-    h1,h2,h3,h4,p,label,span,div{color:var(--text)}
-    .card{border:1px solid var(--border);background:var(--panel);border-radius:14px;padding:1rem;margin:.5rem 0 1rem;box-shadow:0 10px 30px rgba(0,0,0,.18)}
-    .kicker{color:var(--accent);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem}
-    .muted{color:var(--muted)}
-    .screen{position:relative;margin:0 auto;background:#04131c;border:3px solid #5ba8d8;box-shadow:0 0 0 3px #0b3752,0 0 24px rgba(80,182,255,.25);overflow:hidden;image-rendering:pixelated}
+
+    h1,h2,h3,h4,h5,h6,p,label,span,div,small,li,a,button,textarea,input,select{
+        color:#000000!important;
+    }
+
+    .card{
+        border:1px solid #606060;
+        background:#cfcfcf;
+        border-radius:12px;
+        padding:1rem;
+        margin:.5rem 0 1rem;
+        box-shadow:none;
+    }
+
+    .kicker,.muted{color:#000000!important}
+    .kicker{font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem}
+
+    div[data-baseweb="input"]>div,
+    div[data-baseweb="textarea"]>div,
+    div[data-baseweb="select"]>div,
+    div[data-baseweb="base-input"]{
+        background:#eeeeee!important;
+        color:#000000!important;
+        border-color:#606060!important;
+    }
+
+    input,textarea{
+        background:#eeeeee!important;
+        color:#000000!important;
+        caret-color:#000000!important;
+    }
+
+    input::placeholder,textarea::placeholder{color:#444444!important;opacity:1!important}
+
+    button,div[data-testid="stButton"] button,div[data-testid="stDownloadButton"] button{
+        background:#dcdcdc!important;
+        color:#000000!important;
+        border:1px solid #555555!important;
+        box-shadow:none!important;
+    }
+
+    button:hover,div[data-testid="stButton"] button:hover,div[data-testid="stDownloadButton"] button:hover{
+        background:#c5c5c5!important;
+        color:#000000!important;
+    }
+
+    div[data-testid="stExpander"]{
+        border:1px solid #606060!important;
+        background:#c9c9c9!important;
+        border-radius:10px;
+    }
+
+    div[data-testid="stAlert"]{
+        background:#d8d8d8!important;
+        color:#000000!important;
+        border-color:#666666!important;
+    }
+
+    code,pre,.stCodeBlock,div[data-testid="stCodeBlock"]{
+        background:#e5e5e5!important;
+        color:#000000!important;
+    }
+
+    .screen{
+        position:relative;
+        margin:0 auto;
+        background:#d6d6d6;
+        border:3px solid #555555;
+        box-shadow:none;
+        overflow:hidden;
+        image-rendering:pixelated;
+    }
     .screen img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-    .copy{position:absolute;inset:0;padding:7%;display:flex;flex-direction:column;justify-content:flex-end;text-shadow:0 2px #000;background:linear-gradient(transparent 35%,rgba(0,12,20,.72))}
-    .screen-title{color:#b7fff0;font-weight:900;letter-spacing:.08em;margin-bottom:.35rem}
+    .copy{
+        position:absolute;inset:0;padding:7%;display:flex;flex-direction:column;justify-content:flex-end;
+        text-shadow:none;
+        background:linear-gradient(transparent 35%,rgba(210,210,210,.90));
+    }
+    .screen-title,.screen-body{color:#000000!important}
+    .screen-title{font-weight:900;letter-spacing:.08em;margin-bottom:.35rem}
     .screen-body{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;line-height:1.25}
-    button[kind="primary"]{border-color:var(--accent)!important}
-    div[data-testid="stExpander"]{border:1px solid var(--border);background:rgba(255,255,255,.025);border-radius:12px}
+
+    [data-testid="stFileUploaderDropzone"]{
+        background:#d4d4d4!important;
+        color:#000000!important;
+        border-color:#666666!important;
+    }
+
+    hr{border-color:#777777!important}
     </style>
     """, unsafe_allow_html=True)
 
@@ -427,7 +526,7 @@ def html_runtime(project: dict[str, Any]) -> str:
     data = json.dumps(project, ensure_ascii=False)
     title = project["meta"].get("title", "NorthStar Game")
     width, height = project["meta"].get("screen_width", 240), project["meta"].get("screen_height", 160)
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><style>*{{box-sizing:border-box}}body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#031219;color:#eafffb;font-family:monospace}}#app{{width:min(96vw,900px)}}#screen{{position:relative;width:100%;aspect-ratio:{width}/{height};overflow:hidden;border:4px solid #65b4df;background:#061b25;image-rendering:pixelated}}#bg{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}}#copy{{position:absolute;inset:0;padding:7%;display:flex;flex-direction:column;justify-content:flex-end;text-shadow:0 2px #000;background:linear-gradient(transparent 35%,rgba(0,10,18,.8))}}#title{{color:#aaffea;font-weight:900;letter-spacing:.09em}}#body{{white-space:pre-wrap;margin-top:.5rem}}#choices{{display:grid;gap:.6rem;margin-top:1rem}}button{{padding:.8rem;color:#eafffb;background:#0b3040;border:1px solid #66e4c9;font:inherit;cursor:pointer}}#vars{{opacity:.7;font-size:.8rem;margin-top:1rem}}</style></head><body><div id="app"><div id="screen"><img id="bg" alt=""><div id="copy"><div id="title"></div><div id="body"></div></div></div><div id="choices"></div><div id="vars"></div></div><script>const project={data};const state={{scene:project.meta.start_scene,variables:Object.fromEntries(Object.entries(project.variables||{{}}).map(([k,v])=>[k,v.default]))}};const $=s=>document.querySelector(s);function go(t){{if(project.scenes[t]){{state.scene=t;render()}}}}function cmp(a,o,b){{return o==='=='?a===b:o==='!='?a!==b:o==='>'?a>b:o==='>='?a>=b:o==='<'?a<b:o==='<='?a<=b:false}}function run(a){{if(a.type==='goto')go(a.target);else if(a.type==='set_variable'){{state.variables[a.variable]=a.value;a.next?go(a.next):render()}}else if(a.type==='condition')go(cmp(state.variables[a.variable],a.operator||'==',a.value)?a.then:a.else);else if(a.type==='dialogue'){{if(a.text)alert(a.text);if(a.next)go(a.next)}}else if(a.type==='end')alert(a.message||'THE END')}}function render(){{const s=project.scenes[state.scene];$('#title').textContent=s.name||state.scene;$('#body').textContent=s.body||'';const bg=$('#bg');if(s.background){{bg.src=s.background;bg.style.display='block'}}else{{bg.style.display='none'}}const c=$('#choices');c.innerHTML='';(s.choices||[]).forEach(ch=>{{const b=document.createElement('button');b.textContent=ch.label;b.onclick=()=>run(ch.action||{{}});c.appendChild(b)}});$('#vars').textContent=JSON.stringify(state.variables)}}render();</script></body></html>'''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><style>*{{box-sizing:border-box}}body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#b8b8b8;color:#000;font-family:monospace}}#app{{width:min(96vw,900px)}}#screen{{position:relative;width:100%;aspect-ratio:{width}/{height};overflow:hidden;border:4px solid #555;background:#d6d6d6;image-rendering:pixelated}}#bg{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}}#copy{{position:absolute;inset:0;padding:7%;display:flex;flex-direction:column;justify-content:flex-end;text-shadow:none;background:linear-gradient(transparent 35%,rgba(210,210,210,.9))}}#title{{color:#000;font-weight:900;letter-spacing:.09em}}#body{{color:#000;white-space:pre-wrap;margin-top:.5rem}}#choices{{display:grid;gap:.6rem;margin-top:1rem}}button{{padding:.8rem;color:#000;background:#ddd;border:1px solid #555;font:inherit;cursor:pointer}}button:hover,button:focus{{background:#c5c5c5}}#vars{{color:#000;opacity:.8;font-size:.8rem;margin-top:1rem}}</style></head><body><div id="app"><div id="screen"><img id="bg" alt=""><div id="copy"><div id="title"></div><div id="body"></div></div></div><div id="choices"></div><div id="vars"></div></div><script>const project={data};const state={{scene:project.meta.start_scene,variables:Object.fromEntries(Object.entries(project.variables||{{}}).map(([k,v])=>[k,v.default]))}};const $=s=>document.querySelector(s);function go(t){{if(project.scenes[t]){{state.scene=t;render()}}}}function cmp(a,o,b){{return o==='=='?a===b:o==='!='?a!==b:o==='>'?a>b:o==='>='?a>=b:o==='<'?a<b:o==='<='?a<=b:false}}function run(a){{if(a.type==='goto')go(a.target);else if(a.type==='set_variable'){{state.variables[a.variable]=a.value;a.next?go(a.next):render()}}else if(a.type==='condition')go(cmp(state.variables[a.variable],a.operator||'==',a.value)?a.then:a.else);else if(a.type==='dialogue'){{if(a.text)alert(a.text);if(a.next)go(a.next)}}else if(a.type==='end')alert(a.message||'THE END')}}function render(){{const s=project.scenes[state.scene];$('#title').textContent=s.name||state.scene;$('#body').textContent=s.body||'';const bg=$('#bg');if(s.background){{bg.src=s.background;bg.style.display='block'}}else{{bg.style.display='none'}}const c=$('#choices');c.innerHTML='';(s.choices||[]).forEach(ch=>{{const b=document.createElement('button');b.textContent=ch.label;b.onclick=()=>run(ch.action||{{}});c.appendChild(b)}});$('#vars').textContent=JSON.stringify(state.variables)}}render();</script></body></html>'''
 
 
 def cpp_header(project: dict[str, Any]) -> str:
